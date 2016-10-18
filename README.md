@@ -1,5 +1,9 @@
 # Terminus-Engine
 
+## What is it?
+
+An Open Source, Cross Platform Game Engine with Rendering backends for OpenGL and Direct3D.
+
 ## License
 
 ```
