@@ -78,9 +78,11 @@ namespace Input
 
     void ProcessKeyboardInput(int _Key, int _Action)
     {
-        // For each Player
+        if(m_PlayerContextList.size() != 0)
+        {
+            // For each Player
             InputContext* context = m_PlayerContextList[0].m_ActiveContext;
-
+            
             // Check if State
             if(context->m_KeyboardStateMap.find(_Key) != context->m_KeyboardStateMap.end() && _Action == GLFW_PRESS)
             {
@@ -88,12 +90,12 @@ namespace Input
                 // Fire Event
                 return;
             }
-
+            
             // Check if State
             if(context->m_KeyboardActionMap.find(_Key) != context->m_KeyboardActionMap.end())
             {
                 std::string action = context->m_KeyboardStateMap[_Key];
-
+                
                 if(_Action == GLFW_PRESS)
                 {
                     // Fire Pressed Event
@@ -105,7 +107,7 @@ namespace Input
                     return;
                 }
             }
-
+            
             // Check if Positive Axis
             if(_Action == GLFW_PRESS)
             {
@@ -114,15 +116,15 @@ namespace Input
                     std::string axis = context->m_KeyboardAxisPositiveMap[_Key];
                     // Fire Axis Positive Event
                     return;
-                } 
+                }
                 if(context->m_KeyboardAxisNegativeMap.find(_Key) != context->m_KeyboardAxisNegativeMap.end())
                 {
                     std::string axis = context->m_KeyboardAxisNegativeMap[_Key];
                     // Fire Axis Negative Event
                     return;
-                }  
+                }
             }
-
+            
             // Check if Negative Axis
             if(_Action == GLFW_RELEASE)
             {
@@ -131,7 +133,7 @@ namespace Input
                     std::string axis = context->m_KeyboardAxisPositiveMap[_Key];
                     // Fire Axis Positive Event
                     return;
-                } 
+                }
                 if(context->m_KeyboardAxisNegativeMap.find(_Key) != context->m_KeyboardAxisNegativeMap.end())
                 {
                     std::string axis = context->m_KeyboardAxisNegativeMap[_Key];
@@ -139,52 +141,59 @@ namespace Input
                     return;
                 }
             }
+        }
     }
     
     void ProcessMouseButtonInput(int _Key, int _Action)
     {
-        // For each Player
-        InputContext* context = m_PlayerContextList[0].m_ActiveContext;
-    
-        // Check if State
-        if(context->m_MouseStateMap.find((uint8)_Key) != context->m_MouseStateMap.end() && _Action == GLFW_PRESS)
+        if(m_PlayerContextList.size() != 0)
         {
-            std::string state = context->m_MouseStateMap[_Key];
-            // Fire Event
-            return;
-        }
-
-        // Check if Action
-        if(context->m_MouseActionMap.find((uint8)_Key) != context->m_MouseActionMap.end())
-        {
-            std::string action = context->m_MouseActionMap[_Key];
-
-            if(_Action == GLFW_PRESS)
+            // For each Player
+            InputContext* context = m_PlayerContextList[0].m_ActiveContext;
+            
+            // Check if State
+            if(context->m_MouseStateMap.find((uint8)_Key) != context->m_MouseStateMap.end() && _Action == GLFW_PRESS)
             {
-                // Fire Pressed Event
+                std::string state = context->m_MouseStateMap[_Key];
+                // Fire Event
                 return;
             }
-            if(_Action == GLFW_RELEASE)
+            
+            // Check if Action
+            if(context->m_MouseActionMap.find((uint8)_Key) != context->m_MouseActionMap.end())
             {
-                // Fire Released Event
-                return;
+                std::string action = context->m_MouseActionMap[_Key];
+                
+                if(_Action == GLFW_PRESS)
+                {
+                    // Fire Pressed Event
+                    return;
+                }
+                if(_Action == GLFW_RELEASE)
+                {
+                    // Fire Released Event
+                    return;
+                }
             }
         }
     }
     
     void ProcessCursorInput(double _Xpos, int _Ypos)
     {
-        InputContext* context = m_PlayerContextList[0].m_ActiveContext;
-
-        for (auto it : context->m_MouseAxisMap)
+        if(m_PlayerContextList.size() != 0)
         {
-            if(it.first == MOUSE_AXIS_X)
+            InputContext* context = m_PlayerContextList[0].m_ActiveContext;
+            
+            for (auto it : context->m_MouseAxisMap)
             {
-                // Fire Mouse Axis Event
-            }
-            if(it.first == MOUSE_AXIS_Y)
-            {
-                // Fire Mouse Axis Event
+                if(it.first == MOUSE_AXIS_X)
+                {
+                    // Fire Mouse Axis Event
+                }
+                if(it.first == MOUSE_AXIS_Y)
+                {
+                    // Fire Mouse Axis Event
+                }
             }
         }
     }

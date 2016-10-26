@@ -9,6 +9,7 @@
 #include "Memory/StackAllocator.h"
 #include "GlobalMemory.h"
 #include "IO/FileSystem.h"
+#include "IO/FileWatcher.h"
 #include "Resource/StbLoader.h"
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
@@ -18,8 +19,10 @@ int main(void)
 {
     Terminus::Memory::Initialize();
 
-    filesystem::add_directory("Assets");
+    FileSystem::AddDirectory("Assets");
 	
+    FileWatcher::AddDirectory("Assets");
+    
     if(!PlatformBackend::Initialize(800, 600))
         return -1;
     
@@ -39,6 +42,7 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 		imgui_backend::new_frame();
         PlatformBackend::Update();
+        FileWatcher::Update();
 
 		bool open = true;
 

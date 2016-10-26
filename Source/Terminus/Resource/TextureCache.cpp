@@ -22,7 +22,7 @@ Texture2D* TextureCache::Load(std::string _ID)
 	{
 		std::cout << "Asset not in Cache. Loading Asset." << std::endl;
 
-		std::string extension = filesystem::GetFileExtention(_ID);
+		std::string extension = FileSystem::GetFileExtention(_ID);
 
 		if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 		{
