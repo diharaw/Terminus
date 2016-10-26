@@ -1,13 +1,11 @@
-//
-//  FileWatcher.h
-//  Terminus
-//
-//  Created by Fidenz on 10/25/16.
-//
-//
+#include "../Types.h"
+#include <string>
 
-#ifndef FileWatcher_h
-#define FileWatcher_h
-
-
-#endif /* FileWatcher_h */
+namespace FileWatcher
+{
+    void Initialize();
+    void SetTicksPerUpdate(uint8 _ticks);
+    uint8 GetTicksPerUpdate();
+    void AddDirectory(std::string _directory);
+    void Update();
+}

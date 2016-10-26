@@ -9,6 +9,7 @@
 #include "Memory/StackAllocator.h"
 #include "GlobalMemory.h"
 #include "IO/FileSystem.h"
+#include "IO/FileWatcher.h"
 #include "Resource/StbLoader.h"
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
@@ -18,7 +19,7 @@ int main(void)
 {
     Terminus::Memory::Initialize();
 
-    filesystem::add_directory("Assets");
+    FileSystem::AddDirectory("Assets");
 	
     if(!PlatformBackend::Initialize(800, 600))
         return -1;

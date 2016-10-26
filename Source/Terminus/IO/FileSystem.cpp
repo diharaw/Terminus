@@ -14,13 +14,13 @@
 #include <mach-o/dyld.h>
 #endif
 
-namespace filesystem
+namespace FileSystem
 {
     std::vector<std::string> m_directory_list;
     std::vector<std::string> m_archive_list;
 	FILE* m_CurrentWriteTarget;
     
-    bool find_directory(std::string _path)
+    bool FindDirectory(std::string _path)
     {
         {
             for (int i = 0; i < m_directory_list.size(); i++)
@@ -33,7 +33,7 @@ namespace filesystem
         }
     }
     
-    bool find_archive(std::string _path)
+    bool FindArchive(std::string _path)
     {
         {
             for (int i = 0; i < m_archive_list.size(); i++)
@@ -46,31 +46,31 @@ namespace filesystem
         }
     }
     
-    void add_directory(std::string _path)
+    void AddDirectory(std::string _path)
     {
-        if (!find_directory(_path))
+        if (!FindDirectory(_path))
             m_directory_list.push_back(_path);
     }
     
-    void add_archive(std::string _path)
+    void AddArchive(std::string _path)
     {
-        if (!find_archive(_path))
+        if (!FindArchive(_path))
             m_archive_list.push_back(_path);
     }
     
-    FILE * open_file_from_directory(std::string _path)
+    FILE * OpenFileFromDirectory(std::string _path)
     {
         const char* name = _path.c_str();
         FILE *f = fopen(name, "rb");
         return f;
     }
     
-    void close_file_from_directory(FILE * _file)
+    void CloseFileFromDirectory(FILE * _file)
     {
         fclose(_file);
     }
     
-    FileHandle read_file(std::string _path, bool _text)
+    FileHandle ReadFile(std::string _path, bool _text)
     {
         FileHandle file;
         
@@ -90,7 +90,7 @@ namespace filesystem
             currentDirectory += m_directory_list[i] + "/";
             currentDirectory += _path;
             
-            FILE* currentFile = open_file_from_directory(currentDirectory);
+            FILE* currentFile = OpenFileFromDirectory(currentDirectory);
             
             std::cout << GetCurrentWorkingDirectory() << std::endl;
             
@@ -105,7 +105,7 @@ namespace filesystem
                 if (_text)
                     buffer[fsize] = '\0';
                 
-                close_file_from_directory(currentFile);
+                CloseFileFromDirectory(currentFile);
             
                 file.buffer = buffer;
                 file.size = fsize;
@@ -114,7 +114,7 @@ namespace filesystem
             }
             
             // If file does not exist, the FILE handle should be NULL, so i should be able to remove the following line.
-            close_file_from_directory(currentFile);
+            CloseFileFromDirectory(currentFile);
         }
         
         return file;

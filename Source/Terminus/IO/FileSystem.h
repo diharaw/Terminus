@@ -11,11 +11,11 @@ struct FileHandle
     size_t size;
 };
 
-namespace filesystem
+namespace FileSystem
 {
-    extern FileHandle read_file(std::string _path, bool _text = false);
-    extern void add_directory(std::string _path);
-    extern void add_archive(std::string _path);
+    extern FileHandle ReadFile(std::string _path, bool _text = false);
+    extern void AddDirectory(std::string _path);
+    extern void AddArchive(std::string _path);
 	extern std::string GetFileExtention(const std::string& _fileName);
 	extern std::string GetFilename(const std::string& _fileName);
 	extern std::string GetFileNameAndExtention(const std::string& _filePath);

@@ -16,7 +16,7 @@ AssimpMeshLoader::~AssimpMeshLoader()
 
 void* AssimpMeshLoader::Load(std::string _id)
 {
-	FileHandle handle = filesystem::read_file(_id);
+	FileHandle handle = FileSystem::ReadFile(_id);
 
 	if (handle.buffer)
 	{
