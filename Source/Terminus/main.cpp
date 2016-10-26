@@ -21,6 +21,8 @@ int main(void)
 
     FileSystem::AddDirectory("Assets");
 	
+    FileWatcher::AddDirectory("Assets");
+    
     if(!PlatformBackend::Initialize(800, 600))
         return -1;
     
@@ -40,6 +42,7 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 		imgui_backend::new_frame();
         PlatformBackend::Update();
+        FileWatcher::Update();
 
 		bool open = true;
 

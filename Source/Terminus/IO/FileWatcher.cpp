@@ -1,4 +1,6 @@
 #include "FileWatcher.h"
+#include "FileSystem.h"
+#include <iostream>
 #include <include/FileWatcher/FileWatcher.h>
 
 namespace FileWatcher
@@ -11,18 +13,21 @@ namespace FileWatcher
                               FW::Action action)
         {
             // Fire event
+            if(action == FW::Actions::Add)
+            {
+                std::cout << "File " << filename << " Added" << std::endl;
+            }
+            else if(action == FW::Actions::Modified)
+            {
+                std::cout << "File " << filename << " Modified" << std::endl;
+            }
         }
     };
     
-    uint8 m_TicksSinceLastUpdate = 0;
+    uint8 m_TicksSinceLastUpdate = 1;
     uint8 m_TicksPerUpdate = 1;
     FW::FileWatcher m_Watcher;
-    
-    void Initialize()
-    {
         
-    }
-    
     void SetTicksPerUpdate(uint8 _ticks)
     {
         m_TicksPerUpdate = _ticks;
@@ -35,7 +40,14 @@ namespace FileWatcher
     
     void AddDirectory(std::string _directory)
     {
+#ifdef __APPLE__
+        std::string cwd = FileSystem::GetCurrentWorkingDirectory();
+        cwd += "/";
+        std::string dir = cwd + _directory;
+        m_Watcher.addWatch(dir, new UpdateListener(), true);
+#else
         m_Watcher.addWatch(_directory, new UpdateListener(), true);
+#endif
     }
     
     void Update()
@@ -43,7 +55,7 @@ namespace FileWatcher
         if(m_TicksSinceLastUpdate == m_TicksPerUpdate)
         {
             m_Watcher.update();
-            m_TicksSinceLastUpdate = 0;
+            m_TicksSinceLastUpdate = 1;
         }
         else
             m_TicksSinceLastUpdate++;
