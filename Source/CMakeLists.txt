@@ -16,11 +16,12 @@ include_directories("Third Party/glm")
 include_directories("Third Party/Libzip/lib")
 include_directories("Third Party/simplefilewatcher")
 include_directories("Third Party/stb")
+include_directories("Third Party/FastDelegate")
+include_directories("Third Party/Bullet 3/src")
 
 find_package(OpenGL REQUIRED)
 
 add_executable(Terminus ${TERMINUS_SOURCE})
-
 
 set_target_properties( Terminus
     PROPERTIES
@@ -37,3 +38,22 @@ target_link_libraries(Terminus zipstatic)
 target_link_libraries(Terminus angelscript)
 target_link_libraries(Terminus simplefilewatcher)
 target_link_libraries(Terminus ${OPENGL_LIBRARIES})
+target_link_libraries(Terminus Bullet2FileLoader)
+target_link_libraries(Terminus Bullet3Collision)
+target_link_libraries(Terminus Bullet3Common)
+target_link_libraries(Terminus Bullet3Dynamics)
+target_link_libraries(Terminus Bullet3Geometry)
+target_link_libraries(Terminus Bullet3OpenCL_clew)
+target_link_libraries(Terminus BulletCollision)
+target_link_libraries(Terminus BulletDynamics)
+target_link_libraries(Terminus BulletSoftBody)
+target_link_libraries(Terminus BulletInverseDynamics)
+target_link_libraries(Terminus LinearMath)
+target_link_libraries(Terminus nfd)
+target_link_libraries(Terminus Boxer)
+
+IF(NOT WIN32)
+    target_link_libraries(Terminus openal)
+ELSE()
+    target_link_libraries(Terminus OpenAL32)
+ENDIF()
