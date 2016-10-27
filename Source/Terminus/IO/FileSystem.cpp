@@ -20,7 +20,7 @@ namespace FileSystem
     std::vector<std::string> m_archive_list;
 	FILE* m_CurrentWriteTarget;
     
-    bool FindDirectory(std::string _path)
+    bool find_directory(std::string _path)
     {
         {
             for (int i = 0; i < m_directory_list.size(); i++)
@@ -33,7 +33,7 @@ namespace FileSystem
         }
     }
     
-    bool FindArchive(std::string _path)
+    bool find_archive(std::string _path)
     {
         {
             for (int i = 0; i < m_archive_list.size(); i++)
@@ -46,38 +46,38 @@ namespace FileSystem
         }
     }
     
-    void AddDirectory(std::string _path)
+    void add_directory(std::string _path)
     {
-        if (!FindDirectory(_path))
+        if (!find_directory(_path))
             m_directory_list.push_back(_path);
     }
     
-    void AddArchive(std::string _path)
+    void add_archive(std::string _path)
     {
-        if (!FindArchive(_path))
+        if (!find_archive(_path))
             m_archive_list.push_back(_path);
     }
     
-    FILE * OpenFileFromDirectory(std::string _path)
+    FILE * open_file_from_directory(std::string _path)
     {
         const char* name = _path.c_str();
         FILE *f = fopen(name, "rb");
         return f;
     }
     
-    void CloseFileFromDirectory(FILE * _file)
+    void close_file_from_directory(FILE * _file)
     {
         fclose(_file);
     }
     
-    FileHandle ReadFile(std::string _path, bool _text)
+    FileHandle read_file(std::string _path, bool _text)
     {
         FileHandle file;
         
         char* buffer;
         
 #ifdef __APPLE__
-        std::string cwd = GetCurrentWorkingDirectory();
+        std::string cwd = get_current_working_directory();
 #endif
         
         for (int i = 0; i < m_directory_list.size(); i++)
@@ -90,9 +90,9 @@ namespace FileSystem
             currentDirectory += m_directory_list[i] + "/";
             currentDirectory += _path;
             
-            FILE* currentFile = OpenFileFromDirectory(currentDirectory);
+            FILE* currentFile = open_file_from_directory(currentDirectory);
             
-            std::cout << GetCurrentWorkingDirectory() << std::endl;
+            std::cout << get_current_working_directory() << std::endl;
             
             if (currentFile)
             {
@@ -105,7 +105,7 @@ namespace FileSystem
                 if (_text)
                     buffer[fsize] = '\0';
                 
-                CloseFileFromDirectory(currentFile);
+                close_file_from_directory(currentFile);
             
                 file.buffer = buffer;
                 file.size = fsize;
@@ -114,14 +114,14 @@ namespace FileSystem
             }
             
             // If file does not exist, the FILE handle should be NULL, so i should be able to remove the following line.
-            CloseFileFromDirectory(currentFile);
+            close_file_from_directory(currentFile);
         }
         
         return file;
     }
 
 
-	std::string GetFileExtention(const std::string& _fileName)
+	std::string get_file_extention(const std::string& _fileName)
 	{
 
 		size_t i = _fileName.rfind('.', _fileName.length());
@@ -131,7 +131,7 @@ namespace FileSystem
 		return("");
 	}
 
-	std::string GetFilename(const std::string& _fileName)
+	std::string get_filename(const std::string& _fileName)
 	{
 		size_t start = _fileName.find_last_of("/");
 		size_t startAlt = _fileName.find_last_of("\\");
@@ -144,7 +144,7 @@ namespace FileSystem
 		return _fileName.substr(start + 1, (end - start) - 1);
 	}
 
-	std::string GetFileNameAndExtention(const std::string& _filePath)
+	std::string get_file_name_and_extention(const std::string& _filePath)
 	{
 		size_t start = _filePath.find_last_of("/");
 		size_t startAlt = _filePath.find_last_of("\\");
@@ -155,7 +155,7 @@ namespace FileSystem
 		return _filePath.substr(start + 1, _filePath.length());
 	}
 
-    std::string GetCurrentWorkingDirectory()
+    std::string get_current_working_directory()
     {
 #ifdef __APPLE__
         char pathbuf[PATH_MAX + 1];
@@ -174,7 +174,7 @@ namespace FileSystem
     }
 
 #ifdef WIN32
-	size_t GetFileSize(const std::string& _fileName)
+	size_t get_file_size(const std::string& _fileName)
 	{
 		struct stat st;
 		if (stat(_fileName.c_str(), &st) != 0) {
@@ -183,7 +183,7 @@ namespace FileSystem
 		return st.st_size;
 	}
 
-	bool DoesDirectoryExist(const std::string& _name)
+	bool does_directory_exist(const std::string& _name)
 	{
 		struct stat st;
 		if (stat(_name.c_str(), &st) == 0)
@@ -192,7 +192,7 @@ namespace FileSystem
 	}
 #endif
     
-	bool WriteBegin(std::string _path)
+	bool write_begin(std::string _path)
 	{
 		const char* path = _path.c_str();
 		m_CurrentWriteTarget = fopen(path, "wb");
@@ -202,7 +202,7 @@ namespace FileSystem
 		return true;
 	}
 
-	void Write(void* _Buffer, size_t _Size, size_t _Count, long _Offset)
+	void write(void* _Buffer, size_t _Size, size_t _Count, long _Offset)
 	{
 		if (m_CurrentWriteTarget)
 		{
@@ -211,7 +211,7 @@ namespace FileSystem
 		}
 	}
 
-	void WriteEnd()
+	void write_end()
 	{
 		if (m_CurrentWriteTarget)
 		{

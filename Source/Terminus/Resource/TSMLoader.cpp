@@ -14,7 +14,7 @@ TSMLoader::~TSMLoader()
 
 void* TSMLoader::Load(std::string _id)
 {
-	FileHandle handle = FileSystem::ReadFile(_id);
+	FileHandle handle = FileSystem::read_file(_id);
 
 	if (handle.buffer)
 	{

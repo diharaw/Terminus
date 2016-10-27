@@ -7,7 +7,8 @@ typedef unsigned ID;
 #define INDEX_MASK 0xffff
 #define NEW_OBJECT_ID_ADD 0x10000
 
-struct Index {
+struct Index
+{
     ID id;
     unsigned short index;
     unsigned short next;

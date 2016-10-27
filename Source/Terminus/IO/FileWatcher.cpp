@@ -28,20 +28,20 @@ namespace FileWatcher
     uint8 m_TicksPerUpdate = 1;
     FW::FileWatcher m_Watcher;
         
-    void SetTicksPerUpdate(uint8 _ticks)
+    void set_ticks_per_update(uint8 _ticks)
     {
         m_TicksPerUpdate = _ticks;
     }
     
-    uint8 GetTicksPerUpdate()
+    uint8 get_ticks_per_update()
     {
         return m_TicksPerUpdate;
     }
     
-    void AddDirectory(std::string _directory)
+    void add_directory(std::string _directory)
     {
 #ifdef __APPLE__
-        std::string cwd = FileSystem::GetCurrentWorkingDirectory();
+        std::string cwd = FileSystem::get_current_working_directory();
         cwd += "/";
         std::string dir = cwd + _directory;
         m_Watcher.addWatch(dir, new UpdateListener(), true);
@@ -50,7 +50,7 @@ namespace FileWatcher
 #endif
     }
     
-    void Update()
+    void update()
     {
         if(m_TicksSinceLastUpdate == m_TicksPerUpdate)
         {
