@@ -10,6 +10,7 @@
 #include <gtx/transform.hpp>
 #include <gtc/quaternion.hpp>
 #include <gtx/quaternion.hpp>
+#include <atomic>
 
 #define T_SAFE_DELETE(x) if(x){ delete x; x = nullptr; }
 #define T_SAFE_DELETE_ARRAY(x) if(x) { delete[] x; x = nullptr; }
@@ -33,9 +34,14 @@ using Matrix3 = glm::mat3;
 using Matrix4 = glm::mat4;
 using Quaternion = glm::quat;
 
+namespace Atomic
+{
+    using Int = std::atomic_int;
+}
+
 class TypeID
 {
-	static size_t counter;
+    static Atomic::Int counter;
 
 public:
 	template<typename T>

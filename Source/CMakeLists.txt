@@ -17,6 +17,7 @@ include_directories("Third Party/Libzip/lib")
 include_directories("Third Party/simplefilewatcher")
 include_directories("Third Party/stb")
 include_directories("Third Party/FastDelegate")
+include_directories("Third Party/Delegates11”)
 include_directories("Third Party/Bullet 3/src")
 
 find_package(OpenGL REQUIRED)

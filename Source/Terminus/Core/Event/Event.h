@@ -6,68 +6,137 @@
 #include <string>
 
 class Actor;
+class Entity;
 typedef unsigned long EventType;
 
 class Event
 {
 public:
-	virtual ~Event();
+    virtual ~Event() {}
 	virtual EventType GetType() = 0;
 	virtual std::string GetName() = 0;
 };
 
-class Event_ActorCreated : public Event
+enum EntityEventType
 {
-private:
-	static const EventType sk_Type;
-	Actor* m_Actor;
-
-public:
-	Event_ActorCreated(Actor* _Actor);
-	virtual EventType GetType();
-	virtual std::string GetName();
-	Actor* GetActor();
+    ENTITY_CREATED = 0,
+    ENTITY_DESTROYED
 };
 
-class Event_ActorDestroyed : public Event
+class EntityEvent : public Event
 {
 private:
-	static const EventType sk_Type;
-	Actor* m_Actor;
-
+    static const EventType sk_Type;
+    Entity*                m_entity;
+    EntityEventType        m_event_type;
+    
 public:
-	Event_ActorDestroyed(Actor* _Actor);
-	virtual EventType GetType();
-	virtual std::string GetName();
-	Actor* GetActor();
+    EntityEvent(Entity* _entity) : m_entity(_entity) {}
+    virtual ~EntityEvent() {}
+    inline virtual EventType GetType()               { return sk_Type; }
+    inline virtual std::string GetName()             { return "Entity Event"; }
+    inline Entity* GetEntity()                       { return m_entity; }
+    inline EntityEventType GetEntityEventType()      { return m_event_type; }
 };
 
-class Event_FullscreenToggle : public Event
-{
-private:
-	static const EventType sk_Type;
-	bool m_isFullscreen;
 
-public:
-	inline Event_FullscreenToggle(bool _isFullscreen) { m_isFullscreen = _isFullscreen; }
-	inline virtual EventType GetType() { return sk_Type; }
-	inline virtual std::string GetName() { return "Event - FullscreenToggle"; }
-	inline bool isFullscreen() { return m_isFullscreen; }
+enum TriggerEventType
+{
+    TRIGGER_ENTERED = 0,
+    TRIGGER_EXITED
 };
 
-class Event_WindowResolution : public Event
+class TriggerEvent : public Event
+{
+public:
+    static const EventType sk_Type;
+    
+private:
+    TriggerEventType       m_event_type;
+    
+public:
+    TriggerEvent(TriggerEventType _type) : m_event_type(_type) {}
+    virtual ~TriggerEvent() {}
+    inline virtual EventType GetType()                         { return sk_Type; }
+    inline virtual std::string GetName()                       { return "Entity Event"; }
+    inline TriggerEventType GetTriggerEventType()              { return m_event_type; }
+};
+
+
+class InputStateEvent : public Event
+{
+public:
+    static const EventType sk_Type;
+    
+private:
+    std::string            m_state;
+    
+public:
+    InputStateEvent(std::string _state) : m_state(_state) {}
+    virtual ~InputStateEvent() {}
+    inline virtual EventType GetType()                    { return sk_Type; }
+    inline virtual std::string GetName()                  { return "Input State Event"; }
+    inline std::string GetState()                         { return m_state; }
+};
+
+class InputActionEvent : public Event
+{
+public:
+    static const EventType sk_Type;
+    
+private:
+    std::string            m_action;
+    int                    m_value;
+    
+public:
+    InputActionEvent(std::string _action, int _value) : m_action(_action), m_value(_value) {}
+    virtual ~InputActionEvent() {}
+    inline virtual EventType GetType()                    { return sk_Type; }
+    inline virtual std::string GetName()                  { return "Input Action Event"; }
+    inline std::string GetAction()                        { return m_action; }
+    inline int GetValue()                                 { return m_value; }
+};
+
+class InputAxisEvent : public Event
+{
+public:
+    static const EventType sk_Type;
+    
+private:
+    std::string            m_axis;
+    double                 m_value;
+    double                 m_delta;
+    
+public:
+    InputAxisEvent(std::string _axis, double _value, double _delta) : m_axis(_axis), m_value(_value), m_delta(_delta) {}
+    virtual ~InputAxisEvent() {}
+    inline virtual EventType GetType()                    { return sk_Type; }
+    inline virtual std::string GetName()                  { return "Input State Event"; }
+    inline std::string GetAxis()                          { return m_axis; }
+    inline double GetValue()                              { return m_value; }
+    inline double GetDelta()                              { return m_delta; }
+};
+
+enum FileWatcherEventType
+{
+    FILE_ADDED = 0,
+    FILE_UPDATED
+};
+
+class FileWatcherEvent : public Event
 {
 private:
-	static const EventType sk_Type;
-	int m_height;
-	int m_width;
-
+    static const EventType sk_Type;
+    std::string            m_filename;
+    FileWatcherEventType   m_event_type;
+    
 public:
-	inline Event_WindowResolution(int _width, int _height) { m_width = _width; m_height = _height; }
-	inline virtual EventType GetType() { return sk_Type; }
-	inline virtual std::string GetName() { return "Event - WindowResolution"; }
-	inline int getWidth() { return m_width; }
-	inline int getHeight() { return m_height; }
+    FileWatcherEvent(std::string _filename, FileWatcherEventType _type) : m_filename(_filename), m_event_type(_type) {}
+    virtual ~FileWatcherEvent() {}
+    inline virtual EventType GetType()                    { return sk_Type; }
+    inline virtual std::string GetName()                  { return "Input State Event"; }
+    inline std::string GetFilename()                      { return m_filename; }
+    inline FileWatcherEventType GetEventType()            { return m_event_type; }
 };
 
 #endif

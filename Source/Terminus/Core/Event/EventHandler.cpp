@@ -1,4 +1,5 @@
 #include "EventHandler.h"
+#include <iostream>
 
 namespace Terminus
 {
@@ -28,12 +29,20 @@ namespace Terminus
     
     void EventHandler::Update()
     {
-        for (int i = 0; i < m_EventQueue.size(); i++)
+        std::vector<Event*>::iterator it = m_EventQueue.begin();
+        while (it != m_EventQueue.end())
         {
-            EventType currentType = m_EventQueue[i]->GetType();
+            Event* event = *it;
             
-            for (int j = 0; j < m_CallbackMap[currentType].size(); j++)
-                m_CallbackMap[currentType][j](m_EventQueue[i]);
+            EventCallbackMap::iterator callbackItr = m_CallbackMap.find(event->GetType());
+            
+            if(callbackItr != m_CallbackMap.end())
+            {
+                for (auto callback : callbackItr->second)
+                    callback(event);
+            }
+            
+            it = m_EventQueue.erase(it);
         }
     }
     

@@ -10,11 +10,52 @@
 #include "GlobalMemory.h"
 #include "IO/FileSystem.h"
 #include "IO/FileWatcher.h"
+#include "Input/Input.h"
+#include "Input/InputContext.h"
 #include "Core/Event/EventHandler.h"
 #include "Resource/StbLoader.h"
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
 #include <iostream>
+
+class Test
+{
+public:
+    Test()
+    {
+        Terminus::EventHandler::RegisterListener(InputStateEvent::sk_Type,  fastdelegate::MakeDelegate(this, &Test::OnStateInput));
+        Terminus::EventHandler::RegisterListener(InputActionEvent::sk_Type, fastdelegate::MakeDelegate(this, &Test::OnActionInput));
+        Terminus::EventHandler::RegisterListener(InputAxisEvent::sk_Type,   fastdelegate::MakeDelegate(this, &Test::OnAxisInput));
+    }
+    
+    void OnStateInput(Event* _event)
+    {
+        InputStateEvent* event = (InputStateEvent*)_event;
+        
+        std::cout << event->GetName() << " "  <<  event->GetState() << std::endl;
+    }
+    
+    void OnActionInput(Event* _event)
+    {
+        InputActionEvent* event = (InputActionEvent*)_event;
+        
+        std::string action;
+        
+        if(event->GetValue() == 0)
+            action = "Released";
+        else
+            action = "Pressed";
+        
+        std::cout << event->GetName() << " "  << action << std::endl;
+
+    }
+    
+    void OnAxisInput(Event* _event)
+    {
+        InputAxisEvent* event = (InputAxisEvent*)_event;
+        std::cout << event->GetName() << " Axis : "  << event->GetAxis() << ", Value : " << event->GetValue() << " , Delta : " << event->GetDelta() << std::endl;
+    }
+};
 
 int main(void)
 {
@@ -27,9 +68,24 @@ int main(void)
     if(!PlatformBackend::Initialize(800, 600))
         return -1;
     
+    Input::Initialize();
+    
     RenderBackend::Initialize();
 	imgui_backend::initialize();
+    
+    InputContext* context = Input::CreateContext();
+    context->m_ContextName = "Test";
+    context->m_KeyboardStateMap[GLFW_KEY_E] = "HELLO WORLD";
+    
+    context->m_KeyboardActionMap[GLFW_KEY_Q] = "Fire";
+    
+    context->m_KeyboardAxisPositiveMap[GLFW_KEY_W] = "Forward";
+    context->m_KeyboardAxisNegativeMap[GLFW_KEY_S] = "Forward";
 
+    Input::SetActiveContext("Test");
+    
+    Test test;
+    
 	TextureCache cache;
 
 	cache.RegisterLoader<StbLoader>();
@@ -44,7 +100,8 @@ int main(void)
 		imgui_backend::new_frame();
         PlatformBackend::Update();
         FileWatcher::update();
-
+        Terminus::EventHandler::Update();
+        
 		bool open = true;
 
 		ImGui::ShowTestWindow(&open);

@@ -87,6 +87,12 @@ namespace PlatformBackend
         glfwSetKeyCallback(m_Window, KeyCallback);
         glfwSetCursorPosCallback(m_Window, CursorPositionCallback);
         glfwSetCharCallback(m_Window, CharCallback);
+        
+        // Poll input once to set initial mouse position
+        glfwPollEvents();
+        
+        Input::MouseDevice* device = Input::GetMouseDevice();
+        glfwGetCursorPos(m_Window, &device->x_position, &device->y_position);
 
         return true;
     }

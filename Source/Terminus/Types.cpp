@@ -1,4 +1,4 @@
 #include <iostream>
 #include "Types.h"
 
-size_t TypeID::counter = 0;
+Atomic::Int TypeID::counter{0};
