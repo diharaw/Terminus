@@ -19,6 +19,8 @@ include_directories("Third Party/stb")
 include_directories("Third Party/FastDelegate")
 include_directories("Third Party/Delegates11”)
 include_directories("Third Party/Bullet 3/src")
+include_directories(“Libs/lua/src”)
+include_directories(“Libs/Selene/include”)
 
 find_package(OpenGL REQUIRED)
 
