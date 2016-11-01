@@ -23,9 +23,15 @@ class Test
 public:
     Test()
     {
-        Terminus::EventHandler::RegisterListener(InputStateEvent::sk_Type,  fastdelegate::MakeDelegate(this, &Test::OnStateInput));
-        Terminus::EventHandler::RegisterListener(InputActionEvent::sk_Type, fastdelegate::MakeDelegate(this, &Test::OnActionInput));
-        Terminus::EventHandler::RegisterListener(InputAxisEvent::sk_Type,   fastdelegate::MakeDelegate(this, &Test::OnAxisInput));
+        EventCallback callback;
+        callback.Bind<Test, &Test::OnStateInput>(this);
+        Terminus::EventHandler::RegisterListener(InputStateEvent::sk_Type,  callback);
+        
+        callback.Bind<Test, &Test::OnActionInput>(this);
+        Terminus::EventHandler::RegisterListener(InputActionEvent::sk_Type, callback);
+        
+        callback.Bind<Test, &Test::OnAxisInput>(this);
+        Terminus::EventHandler::RegisterListener(InputAxisEvent::sk_Type, callback);
     }
     
     void OnStateInput(Event* _event)

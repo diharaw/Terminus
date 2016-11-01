@@ -24,7 +24,7 @@ namespace Terminus
     void EventHandler::FireEvent(Event* _Event)
     {
         for (int i = 0; i < m_CallbackMap[_Event->GetType()].size(); i++)
-            m_CallbackMap[_Event->GetType()][i](_Event);
+            m_CallbackMap[_Event->GetType()][i].Invoke(_Event);
     }
     
     void EventHandler::Update()
@@ -39,7 +39,7 @@ namespace Terminus
             if(callbackItr != m_CallbackMap.end())
             {
                 for (auto callback : callbackItr->second)
-                    callback(event);
+                    callback.Invoke(event);
             }
             
             it = m_EventQueue.erase(it);

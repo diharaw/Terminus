@@ -4,11 +4,11 @@
 #define EVENTHANDLER_H
 
 #include "Event.h"
-#include "FastDelegate.h"
+#include "Delegate11.h"
 #include <vector>
 #include <map>
 
-typedef fastdelegate::FastDelegate1<Event*> EventCallback;
+typedef Delegate<void(Event*)> EventCallback;
 typedef std::vector<EventCallback> CallbackList;
 typedef std::map<EventType, CallbackList> EventCallbackMap;
 
