@@ -134,7 +134,7 @@ namespace RenderBackend
 	void BindSamplerState(ResourceHandle _SamplerState, int _Slot)
 	{
 		glActiveTexture(GL_TEXTURE0 + _Slot);
-		glBindSampler(_Slot, m_SamplerStatePool.lookup(_Slot)->m_id);
+		glBindSampler(_Slot, m_SamplerStatePool.lookup(_Slot).m_id);
 	}
 
 	void UnbindSamplerState(int _Slot)
@@ -145,7 +145,7 @@ namespace RenderBackend
 
 	void BindTexture2D(ResourceHandle _Texture2D)
 	{
-		glBindTexture(GL_TEXTURE_2D, m_Texture2DPool.lookup(_Texture2D)->m_id);
+		glBindTexture(GL_TEXTURE_2D, m_Texture2DPool.lookup(_Texture2D).m_id);
 	}
 
 	void UnbindTexture2D()
@@ -165,7 +165,7 @@ namespace RenderBackend
 
 	void BindVertexArray(ResourceHandle _VertexArray)
 	{
-		glBindVertexArray(m_VertexArrayPool.lookup(_VertexArray)->m_id);
+		glBindVertexArray(m_VertexArrayPool.lookup(_VertexArray).m_id);
 	}
 
 	void UnbindVertexArray()
@@ -175,17 +175,17 @@ namespace RenderBackend
 
 	void BindUniformBuffer(ResourceHandle _UniformBuffer)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, m_UniformBufferPool.lookup(_UniformBuffer)->m_id);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_UniformBufferPool.lookup(_UniformBuffer).m_id);
 	}
 
 	void BindVertexBuffer(ResourceHandle _VertexBuffer)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferPool.lookup(_VertexBuffer)->m_id);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferPool.lookup(_VertexBuffer).m_id);
 	}
 
 	void BindIndexBuffer(ResourceHandle _IndexBuffer)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferPool.lookup(_IndexBuffer)->m_id);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferPool.lookup(_IndexBuffer).m_id);
 	}
 
 	void UnbindUniformBuffer()
@@ -205,7 +205,7 @@ namespace RenderBackend
 
 	void BindFramebuffer(ResourceHandle _Framebuffer)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferPool.lookup(_Framebuffer)->m_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferPool.lookup(_Framebuffer).m_id);
 	}
 
 	void UnbindFramebuffer()
@@ -251,19 +251,19 @@ namespace RenderBackend
     ResourceHandle CreateTexture2D(uint16_t _Width, uint16_t _Height, void* _Data, bool _MipMaps)
 	{
         ResourceHandle handle = m_Texture2DPool.add();
-		Texture2D* texture = m_Texture2DPool.lookup(handle);
-		texture->m_Width = _Width;
-		texture->m_Height = _Height;
-		glGenTextures(1, &texture->m_id);
+		Texture2D& texture = m_Texture2DPool.lookup(handle);
+		texture.m_Width = _Width;
+		texture.m_Height = _Height;
+		glGenTextures(1, &texture.m_id);
 		
 		if (_MipMaps)
 		{
-			glBindTexture(GL_TEXTURE_2D, texture->m_id);
+			glBindTexture(GL_TEXTURE_2D, texture.m_id);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		glBindTexture(GL_TEXTURE_2D, texture->m_id);
+		glBindTexture(GL_TEXTURE_2D, texture.m_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _Width, _Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -283,24 +283,24 @@ namespace RenderBackend
 	ResourceHandle CreateFramebuffer(ResourceHandle* _RenderTargets, int _Count, ResourceHandle _DepthTarget)
 	{
         ResourceHandle handle = m_FramebufferPool.add();
-		Framebuffer* framebuffer = m_FramebufferPool.lookup(handle);
-		glGenFramebuffers(1, &framebuffer->m_id);
+		Framebuffer& framebuffer = m_FramebufferPool.lookup(handle);
+		glGenFramebuffers(1, &framebuffer.m_id);
         
 		BindFramebuffer(handle);
 
 		for (int i = 0; i < _Count; i++)
 		{
-            Texture2D* texture = m_Texture2DPool.lookup(_RenderTargets[i]);
+            Texture2D& texture = m_Texture2DPool.lookup(_RenderTargets[i]);
             
 			BindTexture2D(_RenderTargets[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture->m_id, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture.m_id, 0);
 			UnbindTexture2D();
 		}
 
-        Texture2D* depth = m_Texture2DPool.lookup(_DepthTarget);
+        Texture2D& depth = m_Texture2DPool.lookup(_DepthTarget);
         
 		BindTexture2D(_DepthTarget);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth->m_id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.m_id, 0);
 		UnbindTexture2D();
 
 		std::vector<GLuint> drawBuffers;
@@ -318,8 +318,8 @@ namespace RenderBackend
 	{
         ResourceHandle handle = m_VertexBufferPool.add();
         
-		VertexBuffer* buffer = m_VertexBufferPool.lookup(handle);
-		glGenBuffers(1, &buffer->m_id);
+		VertexBuffer& buffer = m_VertexBufferPool.lookup(handle);
+		glGenBuffers(1, &buffer.m_id);
 
 		GLenum usageType;
 
@@ -343,8 +343,8 @@ namespace RenderBackend
 	{
         ResourceHandle handle = m_IndexBufferPool.add();
         
-		IndexBuffer* buffer = m_IndexBufferPool.lookup(handle);
-		glGenBuffers(1, &buffer->m_id);
+		IndexBuffer& buffer = m_IndexBufferPool.lookup(handle);
+		glGenBuffers(1, &buffer.m_id);
 
 		GLenum usageType;
 
@@ -357,9 +357,9 @@ namespace RenderBackend
 			usageType = GL_DYNAMIC_DRAW;
 		}
 
-		buffer->Data = _Data;
-		buffer->Size = _Size;
-		buffer->UsageType = usageType;
+		buffer.Data = _Data;
+		buffer.Size = _Size;
+		buffer.UsageType = usageType;
 
         return handle;
 	}
@@ -368,8 +368,8 @@ namespace RenderBackend
 	{
         ResourceHandle handle = m_UniformBufferPool.add();
         
-		UniformBuffer* buffer = m_UniformBufferPool.lookup(handle);
-		glGenBuffers(1, &buffer->m_id);
+		UniformBuffer& buffer = m_UniformBufferPool.lookup(handle);
+		glGenBuffers(1, &buffer.m_id);
 
 		GLenum usageType;
 
@@ -396,21 +396,21 @@ namespace RenderBackend
 	{
         ResourceHandle handle = m_VertexArrayPool.add();
         
-		VertexArray* vertexArray = m_VertexArrayPool.lookup(handle);
+		VertexArray& vertexArray = m_VertexArrayPool.lookup(handle);
 
-		glGenVertexArrays(1, &vertexArray->m_id);
-		glBindVertexArray(vertexArray->m_id);
+		glGenVertexArrays(1, &vertexArray.m_id);
+		glBindVertexArray(vertexArray.m_id);
 
-        VertexBuffer* vertexBuffer = m_VertexBufferPool.lookup(_vertexBuffer);
+        VertexBuffer& vertexBuffer = m_VertexBufferPool.lookup(_vertexBuffer);
         
 		BindVertexBuffer(_vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertexBuffer->Size, vertexBuffer->Data, vertexBuffer->UsageType);
+		glBufferData(GL_ARRAY_BUFFER, vertexBuffer.Size, vertexBuffer.Data, vertexBuffer.UsageType);
 		UnbindVertexBuffer();
         
-        IndexBuffer* indexBuffer = m_IndexBufferPool.lookup(_indexBuffer);
+        IndexBuffer& indexBuffer = m_IndexBufferPool.lookup(_indexBuffer);
 
 		BindIndexBuffer(_indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->Size, indexBuffer->Data, indexBuffer->UsageType);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.Size, indexBuffer.Data, indexBuffer.UsageType);
 		UnbindIndexBuffer();
 
 		if (_layoutType == LAYOUT_STANDARD_VERTEX)
@@ -497,21 +497,21 @@ namespace RenderBackend
     {
         ResourceHandle handle = m_ShaderPool.add();
         
-        Shader* shader = m_ShaderPool.lookup(handle);
-        shader->m_id = glCreateShader(_shaderType);
+        Shader& shader = m_ShaderPool.lookup(handle);
+        shader.m_id = glCreateShader(_shaderType);
         
         GLint success;
         GLchar infoLog[512];
         
         const GLchar* source = (GLchar*)_Data;
         
-        glShaderSource(shader->m_id, 1, &source, NULL);
-        glCompileShader(shader->m_id);
-        glGetShaderiv(shader->m_id, GL_COMPILE_STATUS, &success);
+        glShaderSource(shader.m_id, 1, &source, NULL);
+        glCompileShader(shader.m_id);
+        glGetShaderiv(shader.m_id, GL_COMPILE_STATUS, &success);
         
         if (success == GL_FALSE)
         {
-            glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog);
+            glGetShaderInfoLog(shader.m_id, 512, NULL, infoLog);
             return USHRT_MAX;
         }
         else
@@ -556,40 +556,33 @@ namespace RenderBackend
         
         ResourceHandle handle = m_ShaderProgramPool.add();
         
-        Shader* shader;
-        ShaderProgram* program = m_ShaderProgramPool.lookup(handle);
+        ShaderProgram& program = m_ShaderProgramPool.lookup(handle);
         
-        shader = m_ShaderPool.lookup(_Vertex);
-        glAttachShader(program->m_id, shader->m_id);
-        
-        shader = m_ShaderPool.lookup(_Pixel);
-        glAttachShader(program->m_id, shader->m_id);
+        glAttachShader(program.m_id, m_ShaderPool.lookup(_Vertex).m_id);
+        glAttachShader(program.m_id, m_ShaderPool.lookup(_Pixel).m_id);
         
         if(_Geometry != USHRT_MAX)
         {
-            shader = m_ShaderPool.lookup(_Geometry);
-            glAttachShader(program->m_id, shader->m_id);
+            glAttachShader(program.m_id, m_ShaderPool.lookup(_Geometry).m_id);
         }
         if(_TessellationControl != USHRT_MAX)
         {
-            shader = m_ShaderPool.lookup(_TessellationControl);
-            glAttachShader(program->m_id, shader->m_id);
+            glAttachShader(program.m_id, m_ShaderPool.lookup(_TessellationControl).m_id);
         }
         if(_TessellationEvalution != USHRT_MAX)
         {
-            shader = m_ShaderPool.lookup(_TessellationEvalution);
-            glAttachShader(program->m_id, shader->m_id);
+            glAttachShader(program.m_id, m_ShaderPool.lookup(_TessellationEvalution).m_id);
         }
         
-        glLinkProgram(program->m_id);
+        glLinkProgram(program.m_id);
         
         GLint success;
         char infoLog[512];
         
-        glGetProgramiv(program->m_id, GL_LINK_STATUS, &success);
+        glGetProgramiv(program.m_id, GL_LINK_STATUS, &success);
         if (!success)
         {
-            glGetProgramInfoLog(program->m_id, 512, NULL, infoLog);
+            glGetProgramInfoLog(program.m_id, 512, NULL, infoLog);
             return USHRT_MAX;
         }
 
@@ -600,10 +593,10 @@ namespace RenderBackend
 	{
         assert(_Texture2D != USHRT_MAX);
         
-        Texture2D* texture = m_Texture2DPool.lookup(_Texture2D);
+        Texture2D& texture = m_Texture2DPool.lookup(_Texture2D);
         
-		glBindTexture(GL_TEXTURE_2D, texture->m_id);
-		glTexImage2D(GL_TEXTURE_2D, _Level, GL_RGBA, texture->m_Width, texture->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
+		glBindTexture(GL_TEXTURE_2D, texture.m_id);
+		glTexImage2D(GL_TEXTURE_2D, _Level, GL_RGBA, texture.m_Width, texture.m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -611,8 +604,8 @@ namespace RenderBackend
 	{
         assert(_TextureCube != USHRT_MAX);
         
-        TextureCube* texture = m_TextureCubePool.lookup(_TextureCube);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texture->m_id);
+        TextureCube& texture = m_TextureCubePool.lookup(_TextureCube);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture.m_id);
 		//glTexImage2D(GL_TEXTURE_CUBE_MAP, _Level, GL_RGBA, _TextureCube->m_Width, m_Texture2DPool[_Handle].m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}

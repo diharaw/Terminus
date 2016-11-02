@@ -41,9 +41,9 @@ struct SlotMap
         return in.id == id && in.index != USHRT_MAX;
     }
     
-    inline T* lookup(ID id)
+    inline T& lookup(ID id)
     {
-        return &_objects[_indices[id & INDEX_MASK].index];
+        return _objects[_indices[id & INDEX_MASK].index];
     }
     
     inline ID add()
