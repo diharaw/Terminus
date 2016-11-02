@@ -3,6 +3,7 @@
 #include "RenderBackend.h"
 #include "../Resource/AssetCommon.h"
 #include "CommandList.h"
+#include "../Utility/SlotMap.h"
 
 struct SamplerState
 {
@@ -71,16 +72,16 @@ struct ShaderProgram
 namespace RenderBackend
 {
 	// Resource Pools
-	std::vector<Texture2D>	   m_Texture2DPool;
-	std::vector<TextureCube>   m_TextureCubePool;
-	std::vector<Framebuffer>   m_FramebufferPool;
-	std::vector<VertexArray>   m_VertexArrayPool;
-	std::vector<VertexBuffer>  m_VertexBufferPool;
-	std::vector<UniformBuffer> m_UniformBufferPool;
-	std::vector<IndexBuffer>   m_IndexBufferPool;
-	std::vector<ShaderProgram> m_ShaderProgramPool;
-	std::vector<Shader>		   m_ShaderPool;
-	std::vector<SamplerState>  m_SamplerStatePool;
+	SlotMap<Texture2D,     MAX_TEXTURE_2D>	   m_Texture2DPool;
+	SlotMap<TextureCube,   MAX_TEXTURE_CUBE>   m_TextureCubePool;
+	SlotMap<Framebuffer,   MAX_FRAMEBUFFER>    m_FramebufferPool;
+	SlotMap<VertexArray,   MAX_VERTEX_ARRAY>   m_VertexArrayPool;
+	SlotMap<VertexBuffer,  MAX_VERTEX_BUFFER>  m_VertexBufferPool;
+	SlotMap<UniformBuffer, MAX_UNIFORM_BUFFER> m_UniformBufferPool;
+	SlotMap<IndexBuffer,   MAX_INDEX_BUFFER>   m_IndexBufferPool;
+	SlotMap<ShaderProgram, MAX_SHADER_PROGRAM> m_ShaderProgramPool;
+	SlotMap<Shader,        MAX_SHADER>		   m_ShaderPool;
+	SlotMap<SamplerState,  MAX_SAMPLER_STATE>  m_SamplerStatePool;
     
     // GLFW Window
     GLFWwindow* m_Window;
@@ -130,10 +131,10 @@ namespace RenderBackend
 		}
 	}
 
-	void BindSamplerState(SamplerState* _SamplerState, int _Slot)
+	void BindSamplerState(ResourceHandle _SamplerState, int _Slot)
 	{
 		glActiveTexture(GL_TEXTURE0 + _Slot);
-		glBindSampler(_Slot, _SamplerState->m_id);
+		glBindSampler(_Slot, m_SamplerStatePool.lookup(_Slot)->m_id);
 	}
 
 	void UnbindSamplerState(int _Slot)
@@ -142,9 +143,9 @@ namespace RenderBackend
 		glBindSampler(_Slot, 0);
 	}
 
-	void BindTexture2D(Texture2D* _Texture2D)
+	void BindTexture2D(ResourceHandle _Texture2D)
 	{
-		glBindTexture(GL_TEXTURE_2D, _Texture2D->m_id);
+		glBindTexture(GL_TEXTURE_2D, m_Texture2DPool.lookup(_Texture2D)->m_id);
 	}
 
 	void UnbindTexture2D()
@@ -152,19 +153,19 @@ namespace RenderBackend
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void BindTextureCube(TextureCube* _TextureCube)
+	void BindTextureCube(ResourceHandle _TextureCube)
 	{
 
 	}
 
-	void BindShaderProgram(ShaderProgram* _ShaderProgram)
+	void BindShaderProgram(ResourceHandle _ShaderProgram)
 	{
 
 	}
 
-	void BindVertexArray(VertexArray* _VertexArray)
+	void BindVertexArray(ResourceHandle _VertexArray)
 	{
-		glBindVertexArray(_VertexArray->m_id);
+		glBindVertexArray(m_VertexArrayPool.lookup(_VertexArray)->m_id);
 	}
 
 	void UnbindVertexArray()
@@ -172,19 +173,19 @@ namespace RenderBackend
 		glBindVertexArray(0);
 	}
 
-	void BindUniformBuffer(UniformBuffer* _UniformBuffer)
+	void BindUniformBuffer(ResourceHandle _UniformBuffer)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, _UniformBuffer->m_id);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_UniformBufferPool.lookup(_UniformBuffer)->m_id);
 	}
 
-	void BindVertexBuffer(VertexBuffer* _VertexBuffer)
+	void BindVertexBuffer(ResourceHandle _VertexBuffer)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, _VertexBuffer->m_id);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferPool.lookup(_VertexBuffer)->m_id);
 	}
 
-	void BindIndexBuffer(IndexBuffer* _IndexBuffer)
+	void BindIndexBuffer(ResourceHandle _IndexBuffer)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IndexBuffer->m_id);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferPool.lookup(_IndexBuffer)->m_id);
 	}
 
 	void UnbindUniformBuffer()
@@ -202,9 +203,9 @@ namespace RenderBackend
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	void BindFramebuffer(Framebuffer* _Framebuffer)
+	void BindFramebuffer(ResourceHandle _Framebuffer)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _Framebuffer->m_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferPool.lookup(_Framebuffer)->m_id);
 	}
 
 	void UnbindFramebuffer()
@@ -212,7 +213,7 @@ namespace RenderBackend
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void* MapUniformBuffer(UniformBuffer* _UniformBuffer, BufferMapType _Type)
+	void* MapUniformBuffer(ResourceHandle _UniformBuffer, BufferMapType _Type)
 	{
 		BindUniformBuffer(_UniformBuffer);
 
@@ -247,54 +248,59 @@ namespace RenderBackend
 		UnbindUniformBuffer();
 	}
 
-    Texture2D* CreateTexture2D(uint16_t _Width, uint16_t _Height, void* _Data, bool _MipMaps)
+    ResourceHandle CreateTexture2D(uint16_t _Width, uint16_t _Height, void* _Data, bool _MipMaps)
 	{
-		Texture2D texture;
-		texture.m_Width = _Width;
-		texture.m_Height = _Height;
-		glGenTextures(1, &texture.m_id);
+        ResourceHandle handle = m_Texture2DPool.add();
+		Texture2D* texture = m_Texture2DPool.lookup(handle);
+		texture->m_Width = _Width;
+		texture->m_Height = _Height;
+		glGenTextures(1, &texture->m_id);
 		
 		if (_MipMaps)
 		{
-			glBindTexture(GL_TEXTURE_2D, texture.m_id);
+			glBindTexture(GL_TEXTURE_2D, texture->m_id);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		glBindTexture(GL_TEXTURE_2D, texture.m_id);
+		glBindTexture(GL_TEXTURE_2D, texture->m_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _Width, _Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_Texture2DPool.push_back(texture);
-
-		return &texture;
+		return handle;
 	}
 
-	TextureCube* CreateTextureCube()
+	ResourceHandle CreateTextureCube()
 	{
         return 0;
 	}
 
-	TextureCube* CreateTextureCubeIndividual()
+	ResourceHandle CreateTextureCubeIndividual()
 	{
         return 0;
     }
 
-	Framebuffer* CreateFramebuffer(Texture2D* _RenderTargets, int _Count, Texture2D* _DepthTarget)
+	ResourceHandle CreateFramebuffer(ResourceHandle* _RenderTargets, int _Count, ResourceHandle _DepthTarget)
 	{
-		Framebuffer framebuffer;
-		glGenFramebuffers(1, &framebuffer.m_id);
-		BindFramebuffer(&framebuffer);
+        ResourceHandle handle = m_FramebufferPool.add();
+		Framebuffer* framebuffer = m_FramebufferPool.lookup(handle);
+		glGenFramebuffers(1, &framebuffer->m_id);
+        
+		BindFramebuffer(handle);
 
 		for (int i = 0; i < _Count; i++)
 		{
-			BindTexture2D(&_RenderTargets[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, _RenderTargets[i].m_id, 0);
+            Texture2D* texture = m_Texture2DPool.lookup(_RenderTargets[i]);
+            
+			BindTexture2D(_RenderTargets[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture->m_id, 0);
 			UnbindTexture2D();
 		}
 
+        Texture2D* depth = m_Texture2DPool.lookup(_DepthTarget);
+        
 		BindTexture2D(_DepthTarget);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _DepthTarget->m_id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth->m_id, 0);
 		UnbindTexture2D();
 
 		std::vector<GLuint> drawBuffers;
@@ -305,40 +311,15 @@ namespace RenderBackend
 		glDrawBuffers(_Count, &drawBuffers[0]);
 		UnbindTexture2D();
 
-		m_FramebufferPool.push_back(framebuffer);
-
-		return &framebuffer;
+		return handle;
 	}
 
-	VertexBuffer* CreateVertexBuffer(void* _Data, unsigned int _Size, BufferUsageType _UsageType)
+	ResourceHandle CreateVertexBuffer(void* _Data, unsigned int _Size, BufferUsageType _UsageType)
 	{
-		VertexBuffer buffer;
-		glGenBuffers(1, &buffer.m_id);
-
-		GLenum usageType;
-
-		switch (_UsageType)
-		{
-		case USAGE_STATIC:
-			usageType = GL_STATIC_DRAW;
-
-		case USAGE_DYNAMIC:
-			usageType = GL_DYNAMIC_DRAW;
-		}
-
-		BindVertexBuffer(&buffer);
-		glBufferData(GL_ARRAY_BUFFER, _Size, _Data, usageType);
-		UnbindVertexBuffer();
-
-		m_VertexBufferPool.push_back(buffer);
+        ResourceHandle handle = m_VertexBufferPool.add();
         
-        return &buffer;
-	}
-
-	IndexBuffer* CreateIndexBuffer(void* _Data, unsigned int _Size, BufferUsageType _UsageType)
-	{
-		IndexBuffer buffer;
-		glGenBuffers(1, &buffer.m_id);
+		VertexBuffer* buffer = m_VertexBufferPool.lookup(handle);
+		glGenBuffers(1, &buffer->m_id);
 
 		GLenum usageType;
 
@@ -351,17 +332,19 @@ namespace RenderBackend
 			usageType = GL_DYNAMIC_DRAW;
 		}
 
-		buffer.Data = _Data;
-		buffer.Size = _Size;
-		buffer.UsageType = usageType;
-
-        return &buffer;
+		BindVertexBuffer(handle);
+		glBufferData(GL_ARRAY_BUFFER, _Size, _Data, usageType);
+        UnbindVertexBuffer();
+        
+        return handle;
 	}
 
-	UniformBuffer* CreateUniformBuffer(void* _Data, unsigned int _Size, BufferUsageType _UsageType)
+	ResourceHandle CreateIndexBuffer(void* _Data, unsigned int _Size, BufferUsageType _UsageType)
 	{
-		UniformBuffer buffer;
-		glGenBuffers(1, &buffer.m_id);
+        ResourceHandle handle = m_IndexBufferPool.add();
+        
+		IndexBuffer* buffer = m_IndexBufferPool.lookup(handle);
+		glGenBuffers(1, &buffer->m_id);
 
 		GLenum usageType;
 
@@ -374,28 +357,60 @@ namespace RenderBackend
 			usageType = GL_DYNAMIC_DRAW;
 		}
 
-		BindUniformBuffer(&buffer);
+		buffer->Data = _Data;
+		buffer->Size = _Size;
+		buffer->UsageType = usageType;
+
+        return handle;
+	}
+
+	ResourceHandle CreateUniformBuffer(void* _Data, unsigned int _Size, BufferUsageType _UsageType)
+	{
+        ResourceHandle handle = m_UniformBufferPool.add();
+        
+		UniformBuffer* buffer = m_UniformBufferPool.lookup(handle);
+		glGenBuffers(1, &buffer->m_id);
+
+		GLenum usageType;
+
+		switch (_UsageType)
+		{
+		case USAGE_STATIC:
+			usageType = GL_STATIC_DRAW;
+
+		case USAGE_DYNAMIC:
+			usageType = GL_DYNAMIC_DRAW;
+		}
+
+		BindUniformBuffer(handle);
 		glBufferData(GL_UNIFORM_BUFFER, _Size, _Data, usageType);
 		UnbindUniformBuffer();
-        
-		m_UniformBufferPool.push_back(buffer);
 
-        return &buffer;
+        return handle;
 	}
 
-	VertexArray* CreateVertexArray(VertexBuffer* _vertexBuffer, IndexBuffer* _indexBuffer, InputLayoutType _layoutType, InputLayout* _layout)
+	ResourceHandle CreateVertexArray(ResourceHandle _vertexBuffer,
+                                     ResourceHandle _indexBuffer,
+                                     InputLayoutType _layoutType,
+                                     InputLayout* _layout)
 	{
-		VertexArray vertexArray;
+        ResourceHandle handle = m_VertexArrayPool.add();
+        
+		VertexArray* vertexArray = m_VertexArrayPool.lookup(handle);
 
-		glGenVertexArrays(1, &vertexArray.m_id);
-		glBindVertexArray(vertexArray.m_id);
+		glGenVertexArrays(1, &vertexArray->m_id);
+		glBindVertexArray(vertexArray->m_id);
 
+        VertexBuffer* vertexBuffer = m_VertexBufferPool.lookup(_vertexBuffer);
+        
 		BindVertexBuffer(_vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, _vertexBuffer->Size, _vertexBuffer->Data, _vertexBuffer->UsageType);
+		glBufferData(GL_ARRAY_BUFFER, vertexBuffer->Size, vertexBuffer->Data, vertexBuffer->UsageType);
 		UnbindVertexBuffer();
+        
+        IndexBuffer* indexBuffer = m_IndexBufferPool.lookup(_indexBuffer);
 
 		BindIndexBuffer(_indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer->Size, _indexBuffer->Data, _indexBuffer->UsageType);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->Size, indexBuffer->Data, indexBuffer->UsageType);
 		UnbindIndexBuffer();
 
 		if (_layoutType == LAYOUT_STANDARD_VERTEX)
@@ -474,192 +489,130 @@ namespace RenderBackend
 				glVertexAttribPointer(i, _layout->m_Elements[i].m_numSubElements, dataType, _layout->m_Elements[i].m_isNormalized, _layout->m_vertexSize, (GLvoid*)0);
 			}
 		}
-
-		m_VertexArrayPool.push_back(vertexArray);
 		
-		return &vertexArray;
+        return handle;
 	}
-
-	Shader* CreateVertexShader(char* _Data)
-	{
-		Shader shader;
-		shader.m_id = glCreateShader(GL_VERTEX_SHADER);
-
-		GLint success;
-		GLchar infoLog[512];
-
-		const GLchar* source = (GLchar*)_Data;
-
-		glShaderSource(shader.m_id, 1, &source, NULL);
-		glCompileShader(shader.m_id);
-		glGetShaderiv(shader.m_id, GL_COMPILE_STATUS, &success);
-
-		if (success == GL_FALSE)
-		{
-			glGetShaderInfoLog(shader.m_id, 512, NULL, infoLog);
-			return nullptr;
-		}
-		else
-		{
-			m_ShaderPool.push_back(shader);
-			return &shader;
-		}
-	}
-
-	Shader* CreateGeometryShader(char* _Data)
-	{
-		Shader shader;
-		shader.m_id = glCreateShader(GL_GEOMETRY_SHADER);
-
-		GLint success;
-		GLchar infoLog[512];
-
-		const GLchar* source = (GLchar*)_Data;
-
-		glShaderSource(shader.m_id, 1, &source, NULL);
-		glCompileShader(shader.m_id);
-		glGetShaderiv(shader.m_id, GL_COMPILE_STATUS, &success);
-
-		if (success == GL_FALSE)
-		{
-			glGetShaderInfoLog(shader.m_id, 512, NULL, infoLog);
-			return nullptr;
-		}
-		else
-		{
-			m_ShaderPool.push_back(shader);
-			return &shader;
-		}
-	}
-
-	Shader* CreateControlShader(char* _Data)
-	{
-		Shader shader;
-		shader.m_id = glCreateShader(GL_TESS_CONTROL_SHADER);
-
-		GLint success;
-		GLchar infoLog[512];
-
-		const GLchar* source = (GLchar*)_Data;
-
-		glShaderSource(shader.m_id, 1, &source, NULL);
-		glCompileShader(shader.m_id);
-		glGetShaderiv(shader.m_id, GL_COMPILE_STATUS, &success);
-
-		if (success == GL_FALSE)
-		{
-			glGetShaderInfoLog(shader.m_id, 512, NULL, infoLog);
-			return nullptr;
-		}
-		else
-		{
-			m_ShaderPool.push_back(shader);
-			return &shader;
-		}
-	}
-
-	Shader* CreateEvaluationShader(char* _Data)
-	{
-		Shader shader;
-		shader.m_id = glCreateShader(GL_TESS_EVALUATION_SHADER);
-
-		GLint success;
-		GLchar infoLog[512];
-
-		const GLchar* source = (GLchar*)_Data;
-
-		glShaderSource(shader.m_id, 1, &source, NULL);
-		glCompileShader(shader.m_id);
-		glGetShaderiv(shader.m_id, GL_COMPILE_STATUS, &success);
-
-		if (success == GL_FALSE)
-		{
-			glGetShaderInfoLog(shader.m_id, 512, NULL, infoLog);
-			return nullptr;
-		}
-		else
-		{
-			m_ShaderPool.push_back(shader);
-			return &shader;
-		}
-	}
-
-	Shader* CreatePixelShader(char* _Data)
-	{
-		Shader shader;
-		shader.m_id = glCreateShader(GL_FRAGMENT_SHADER);
-
-		GLint success;
-		GLchar infoLog[512];
-
-		const GLchar* source = (GLchar*)_Data;
-
-		glShaderSource(shader.m_id, 1, &source, NULL);
-		glCompileShader(shader.m_id);
-		glGetShaderiv(shader.m_id, GL_COMPILE_STATUS, &success);
-
-		if (success == GL_FALSE)
-		{
-			glGetShaderInfoLog(shader.m_id, 512, NULL, infoLog);
-			return nullptr;
-		}
-		else
-		{
-			m_ShaderPool.push_back(shader);
-			return &shader;
-		}
-	}
-
-	ShaderProgram* CreateShaderProgram(Shader* _Vertex,
-									   Shader* _Geometry,
-									   Shader* _TessellationControl,
-									   Shader* _TessellationEvalution,
-									   Shader* _Pixel)
-	{
-        assert(_Vertex != nullptr);
-        assert(_Pixel != nullptr);
+    
+    ResourceHandle CreateShaderBase(char* _Data, GLenum _shaderType)
+    {
+        ResourceHandle handle = m_ShaderPool.add();
         
-        ShaderProgram program;
+        Shader* shader = m_ShaderPool.lookup(handle);
+        shader->m_id = glCreateShader(_shaderType);
         
-        glAttachShader(program.m_id, _Vertex->m_id);
-        glAttachShader(program.m_id, _Pixel->m_id);
+        GLint success;
+        GLchar infoLog[512];
         
-        if(_Geometry)
-            glAttachShader(program.m_id, _Geometry->m_id);
-        if(_TessellationControl)
-            glAttachShader(program.m_id, _TessellationControl->m_id);
-        if(_TessellationEvalution)
-            glAttachShader(program.m_id, _TessellationEvalution->m_id);
+        const GLchar* source = (GLchar*)_Data;
         
-        glLinkProgram(program.m_id);
+        glShaderSource(shader->m_id, 1, &source, NULL);
+        glCompileShader(shader->m_id);
+        glGetShaderiv(shader->m_id, GL_COMPILE_STATUS, &success);
+        
+        if (success == GL_FALSE)
+        {
+            glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog);
+            return USHRT_MAX;
+        }
+        else
+        {
+            return handle;
+        }
+    }
+    
+    ResourceHandle CreateVertexShader(char* _Data)
+	{
+        return CreateShaderBase(_Data, GL_VERTEX_SHADER);
+	}
+
+	ResourceHandle CreateGeometryShader(char* _Data)
+	{
+        return CreateShaderBase(_Data, GL_GEOMETRY_SHADER);
+	}
+
+	ResourceHandle CreateControlShader(char* _Data)
+	{
+        return CreateShaderBase(_Data, GL_TESS_CONTROL_SHADER);
+	}
+
+	ResourceHandle CreateEvaluationShader(char* _Data)
+	{
+        return CreateShaderBase(_Data, GL_TESS_EVALUATION_SHADER);
+	}
+
+	ResourceHandle CreatePixelShader(char* _Data)
+	{
+		return CreateShaderBase(_Data, GL_FRAGMENT_SHADER);
+	}
+
+	ResourceHandle CreateShaderProgram(ResourceHandle _Vertex,
+									   ResourceHandle _Geometry,
+									   ResourceHandle _TessellationControl,
+									   ResourceHandle _TessellationEvalution,
+									   ResourceHandle _Pixel)
+	{
+        assert(_Vertex != USHRT_MAX);
+        assert(_Pixel != USHRT_MAX);
+        
+        ResourceHandle handle = m_ShaderProgramPool.add();
+        
+        Shader* shader;
+        ShaderProgram* program = m_ShaderProgramPool.lookup(handle);
+        
+        shader = m_ShaderPool.lookup(_Vertex);
+        glAttachShader(program->m_id, shader->m_id);
+        
+        shader = m_ShaderPool.lookup(_Pixel);
+        glAttachShader(program->m_id, shader->m_id);
+        
+        if(_Geometry != USHRT_MAX)
+        {
+            shader = m_ShaderPool.lookup(_Geometry);
+            glAttachShader(program->m_id, shader->m_id);
+        }
+        if(_TessellationControl != USHRT_MAX)
+        {
+            shader = m_ShaderPool.lookup(_TessellationControl);
+            glAttachShader(program->m_id, shader->m_id);
+        }
+        if(_TessellationEvalution != USHRT_MAX)
+        {
+            shader = m_ShaderPool.lookup(_TessellationEvalution);
+            glAttachShader(program->m_id, shader->m_id);
+        }
+        
+        glLinkProgram(program->m_id);
         
         GLint success;
         char infoLog[512];
         
-        glGetProgramiv(program.m_id, GL_LINK_STATUS, &success);
+        glGetProgramiv(program->m_id, GL_LINK_STATUS, &success);
         if (!success)
         {
-            glGetProgramInfoLog(program.m_id, 512, NULL, infoLog);
-            return nullptr;
+            glGetProgramInfoLog(program->m_id, 512, NULL, infoLog);
+            return USHRT_MAX;
         }
-        
-		m_ShaderProgramPool.push_back(program);
 
-        return &program;
+        return handle;
 	}
 
-	void SetTexture2DMipmap(Texture2D* _Texture2D, int _Level, void* _Data)
+	void SetTexture2DMipmap(ResourceHandle _Texture2D, int _Level, void* _Data)
 	{
-        assert(_Texture2D != nullptr);
-		glBindTexture(GL_TEXTURE_2D, _Texture2D->m_id);
-		glTexImage2D(GL_TEXTURE_2D, _Level, GL_RGBA, _Texture2D->m_Width, _Texture2D->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
+        assert(_Texture2D != USHRT_MAX);
+        
+        Texture2D* texture = m_Texture2DPool.lookup(_Texture2D);
+        
+		glBindTexture(GL_TEXTURE_2D, texture->m_id);
+		glTexImage2D(GL_TEXTURE_2D, _Level, GL_RGBA, texture->m_Width, texture->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void SetTextureCubeMipmap(TextureCube* _TextureCube, int _Level, void* _Data)
+	void SetTextureCubeMipmap(ResourceHandle _TextureCube, int _Level, void* _Data)
 	{
-        assert(_TextureCube != nullptr);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureCube->m_id);
+        assert(_TextureCube != USHRT_MAX);
+        
+        TextureCube* texture = m_TextureCubePool.lookup(_TextureCube);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture->m_id);
 		//glTexImage2D(GL_TEXTURE_CUBE_MAP, _Level, GL_RGBA, _TextureCube->m_Width, m_Texture2DPool[_Handle].m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _Data);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}

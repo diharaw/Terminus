@@ -33,6 +33,7 @@ using iVector4 = glm::ivec4;
 using Matrix3 = glm::mat3;
 using Matrix4 = glm::mat4;
 using Quaternion = glm::quat;
+using ResourceHandle = unsigned;
 
 namespace Atomic
 {

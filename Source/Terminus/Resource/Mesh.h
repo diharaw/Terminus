@@ -23,7 +23,7 @@ struct Mesh
 	bool IsSkeletal;
 	uint MeshCount;
 	SubMesh* SubMeshes;
-	VertexArray* VAOHandle;
+	ResourceHandle VAOHandle;
 };
 
 #endif

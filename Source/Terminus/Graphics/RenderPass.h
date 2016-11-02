@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include "../Types.h"
 #include "RenderCommon.h"
 
 using TextureHandle = uint16_t;

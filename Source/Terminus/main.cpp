@@ -96,7 +96,7 @@ int main(void)
 
 	cache.RegisterLoader<StbLoader>();
 
-	Texture2D* handle = cache.Load("Test.png");
+	ResourceHandle handle = cache.Load("Test.png");
 	handle = cache.Load("Test.png");
 
     while(!PlatformBackend::IsShutdownRequested())

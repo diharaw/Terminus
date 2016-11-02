@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-using ResourceHandle = int16_t;
-
 enum GeometryType
 {
 	GEOMETRY_SCENE = 0,

@@ -69,7 +69,7 @@ namespace CommandData
 
 	struct UniformBufferCopy
 	{
-		UniformBuffer* Buffer;
+		ResourceHandle Buffer;
 		void*		   Data;
 		size_t		   Size;
 		BufferMapType  MapType;

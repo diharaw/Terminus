@@ -14,25 +14,25 @@ struct Index
     unsigned short next;
 };
 
-template<class T>
+template<class T, size_t N>
 struct SlotMap
 {
     unsigned _num_objects;
-    T _objects[MAX_OBJECTS];
-    Index _indices[MAX_OBJECTS];
+    T _objects[N];
+    Index _indices[N];
     unsigned short _freelist_enqueue;
     unsigned short _freelist_dequeue;
     
     SlotMap()
     {
         _num_objects = 0;
-        for (unsigned i=0; i<MAX_OBJECTS; ++i)
+        for (unsigned i=0; i<N; ++i)
         {
             _indices[i].id = i;
             _indices[i].next = i+1;
         }
         _freelist_dequeue = 0;
-        _freelist_enqueue = MAX_OBJECTS-1;
+        _freelist_enqueue = N-1;
     }
     
     inline bool has(ID id)

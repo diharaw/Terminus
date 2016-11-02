@@ -16,7 +16,7 @@ TextureCache::~TextureCache()
 	}
 }
 
-Texture2D* TextureCache::Load(std::string _ID)
+ResourceHandle TextureCache::Load(std::string _ID)
 {
 	if (m_AssetMap.find(_ID) == m_AssetMap.end())
 	{
@@ -26,13 +26,13 @@ Texture2D* TextureCache::Load(std::string _ID)
 
 		if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 		{
-			return nullptr;
+			return USHRT_MAX;
 		}
 		else
 		{
 			asset_common::ImageLoadData* data = static_cast<asset_common::ImageLoadData*>(m_LoaderMap[extension]->Load(_ID));
 
-			Texture2D* texture = m_Factory.Create(data);
+			ResourceHandle texture = m_Factory.Create(data);
 			m_AssetMap[_ID] = texture;
 
 			free(data->bytes);
@@ -50,7 +50,7 @@ Texture2D* TextureCache::Load(std::string _ID)
 	}	
 }
 
-void TextureCache::Unload(Texture2D* _Handle)
+void TextureCache::Unload(ResourceHandle _Handle)
 {
 
 }

@@ -14,7 +14,7 @@ public:
 	TextureFactory();
 	~TextureFactory();
 
-	Texture2D* Create(asset_common::ImageLoadData* _data);
+	ResourceHandle Create(asset_common::ImageLoadData* _data);
 };
 
 #endif

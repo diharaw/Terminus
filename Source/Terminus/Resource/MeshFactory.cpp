@@ -13,8 +13,8 @@ MeshFactory::~MeshFactory()
 
 Mesh* MeshFactory::Create(asset_common::MeshLoadData* _Data)
 {
-	IndexBuffer* indexBuffer = RenderBackend::CreateIndexBuffer(&_Data->indices[0], sizeof(uint) * _Data->header.m_IndexCount, USAGE_STATIC);
-	VertexBuffer* vertexBuffer;
+	ResourceHandle indexBuffer = RenderBackend::CreateIndexBuffer(&_Data->indices[0], sizeof(uint) * _Data->header.m_IndexCount, USAGE_STATIC);
+	ResourceHandle vertexBuffer;
 
 	Mesh* mesh = new Mesh();
 

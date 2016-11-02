@@ -10,14 +10,14 @@
 class TextureCache : public IAssetCache<TextureFactory>
 {
 private:
-	std::unordered_map<std::string, Texture2D*> m_AssetMap;
+	std::unordered_map<std::string, ResourceHandle> m_AssetMap;
 
 public:
 	TextureCache();
 	~TextureCache();
 
-	Texture2D* Load(std::string _ID);
-	void Unload(Texture2D* _Handle);
+	ResourceHandle Load(std::string _ID);
+	void Unload(ResourceHandle _Handle);
 };
 
 #endif
