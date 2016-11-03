@@ -114,7 +114,7 @@ enum BufferUsageType
     USAGE_DYNAMIC
 };
 
-enum BufferMapType
+enum class BufferMapType
 {
     MAP_READ = 0,
     MAP_WRITE,
@@ -159,7 +159,7 @@ struct InputLayout
 
 // Texture Common
 
-enum FramebufferClearTarget
+enum class FramebufferClearTarget
 {
     FB_TARGET_COLOR = 1,
     FB_TARGET_DEPTH = 2,

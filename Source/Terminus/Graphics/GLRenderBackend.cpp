@@ -121,11 +121,11 @@ namespace RenderBackend
 
 		switch (_Target)
 		{
-		case FB_TARGET_DEPTH:
+            case FramebufferClearTarget::FB_TARGET_DEPTH:
 			glClear(GL_DEPTH_BUFFER_BIT);
 			break;
 
-		case FB_TARGET_ALL:
+            case FramebufferClearTarget::FB_TARGET_ALL:
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			break;
 		}
@@ -222,15 +222,15 @@ namespace RenderBackend
 		switch (_Type)
 		{
 
-		case MAP_READ:
+        case BufferMapType::MAP_READ:
 			bufferPointer = glMapBuffer(GL_UNIFORM_BUFFER, GL_READ_ONLY);
 			break;
 
-		case MAP_WRITE:
+		case BufferMapType::MAP_WRITE:
 			bufferPointer = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
 			break;
 
-		case MAP_READ_WRITE:
+		case BufferMapType::MAP_READ_WRITE:
 			bufferPointer = glMapBuffer(GL_UNIFORM_BUFFER, GL_READ_WRITE);
 			break;
 

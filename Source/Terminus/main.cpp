@@ -63,8 +63,38 @@ public:
     }
 };
 
+// Global Data
+
+Vertex* verticesList;
+unsigned int* indicesList;
+
+Matrix4 model;
+Matrix4 view;
+Matrix4 projection;
+
+ResourceHandle vertexBuffer;
+ResourceHandle indexBuffer;
+ResourceHandle uniformBuffer;
+ResourceHandle vertexArray;
+ResourceHandle vertexShader;
+ResourceHandle pixelShader;
+ResourceHandle shaderProgram;
+
+CommandData::DrawIndexed indexedDrawCmdData;
+CommandData::UniformBufferCopy copyCmdData;
+CommandData::ClearRenderTarget clearRenderTargetData;
+
+// Init method declarations
+
+void SetupCube();
+void SetupMatrices();
+void SetupGraphicsResources();
+void DrawScene();
+
 int main(void)
 {
+    // Engine init
+
     Terminus::Memory::Initialize();
 
     FileSystem::add_directory("Assets");
@@ -79,6 +109,10 @@ int main(void)
     RenderBackend::Initialize();
 	imgui_backend::initialize();
     
+    SetupCube();
+    SetupMatrices();
+    SetupGraphicsResources();
+
     InputContext* context = Input::CreateContext();
     context->m_ContextName = "Test";
     context->m_KeyboardStateMap[GLFW_KEY_E] = "HELLO WORLD";
@@ -111,7 +145,7 @@ int main(void)
 		bool open = true;
 
 		ImGui::ShowTestWindow(&open);
-		render_config_ui::render_pipeline();
+
 		imgui_backend::render();
 		RenderBackend::SwapBuffers();
     }
@@ -122,4 +156,134 @@ int main(void)
     Terminus::Memory::Shutdown();
     
     return 0;
+}
+
+
+void SetupCube()
+{
+    // Cube Vertex data
+    
+    verticesList = new Vertex[8];
+    indicesList = new unsigned int[36];
+    
+    verticesList[0].m_Position = Vector3(-1.0f, -1.0f, 1.0f); // Front Bottom Left
+    verticesList[0].m_TexCoord = Vector2(0.0f, 1.0f);
+    
+    verticesList[1].m_Position = Vector3(-1.0f, 1.0f, 1.0f);  // Front Top Left
+    verticesList[1].m_TexCoord = Vector2(0.0f, 0.0f);
+    
+    verticesList[2].m_Position = Vector3(1.0f, -1.0f, 1.0f);  // Front Bottom Right
+    verticesList[2].m_TexCoord = Vector2(1.0f, 1.0f);
+    
+    verticesList[3].m_Position = Vector3(1.0f, 1.0f, 1.0f);   // Front Top Right
+    verticesList[3].m_TexCoord = Vector2(1.0f, 0.0f);
+    
+    verticesList[4].m_Position = Vector3(-1.0f, -1.0f, -1.0f); // Back Bottom Left
+    verticesList[4].m_TexCoord = Vector2(0.0f, 1.0f);
+    
+    verticesList[5].m_Position = Vector3(-1.0f, 1.0f, -1.0f);  // Back Top Left
+    verticesList[5].m_TexCoord = Vector2(0.0f, 0.0f);
+    
+    verticesList[6].m_Position = Vector3(1.0f, -1.0f, -1.0f);  // Back Bottom Right
+    verticesList[6].m_TexCoord = Vector2(1.0f, 1.0f);
+    
+    verticesList[7].m_Position = Vector3(1.0f, 1.0f, -1.0f);   // Back Top Right
+    verticesList[7].m_TexCoord = Vector2(1.0f, 0.0f);
+    
+    indicesList[0] = 0; // Front
+    indicesList[1] = 2;
+    indicesList[2] = 1;
+    indicesList[3] = 2;
+    indicesList[4] = 3;
+    indicesList[5] = 1;
+    
+    indicesList[6] = 0;  // Left
+    indicesList[7] = 5;
+    indicesList[8] = 4;
+    indicesList[9] = 0;
+    indicesList[10] = 1;
+    indicesList[11] = 5;
+    
+    indicesList[12] = 3; // Right
+    indicesList[13] = 2;
+    indicesList[14] = 7;
+    indicesList[15] = 7;
+    indicesList[16] = 2;
+    indicesList[17] = 6;
+    
+    indicesList[18] = 5; // Up
+    indicesList[19] = 1;
+    indicesList[20] = 7;
+    indicesList[21] = 7;
+    indicesList[22] = 1;
+    indicesList[23] = 3;
+    
+    indicesList[24] = 0; // Down
+    indicesList[25] = 4;
+    indicesList[26] = 6;
+    indicesList[27] = 6;
+    indicesList[28] = 2;
+    indicesList[29] = 0;
+    
+    indicesList[30] = 7; // Back
+    indicesList[31] = 6;
+    indicesList[32] = 4;
+    indicesList[33] = 4;
+    indicesList[34] = 5;
+    indicesList[35] = 7;
+}
+
+void SetupMatrices()
+{
+    // Matrices
+    float aspectRatio = static_cast<float>(PlatformBackend::GetWidth()) / static_cast<float>(PlatformBackend::GetHeight());
+    
+    model = Matrix4();
+    
+    view = glm::lookAtRH(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+    projection = glm::perspectiveRH(45.0f , aspectRatio, 0.1f, 1000.0f);
+}
+
+void SetupGraphicsResources()
+{
+    // Setup graphics resources
+    
+    vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
+    indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
+    vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
+    uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
+    vertexShader  = RenderBackend::CreateVertexShader(NULL);
+    pixelShader   = RenderBackend::CreatePixelShader(NULL);
+    
+    indexedDrawCmdData.IndexCount = 36;
+    
+    char* ptr = (char*)malloc(sizeof(Matrix4) * 3);
+    
+    memcpy(ptr, &model, sizeof(glm::mat4));
+    memcpy(ptr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
+    memcpy(ptr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
+    
+    clearRenderTargetData.ClearColor = Vector4(1.0f, 0.0, 0.0f, 1.0f);
+    clearRenderTargetData.Target = FramebufferClearTarget::FB_TARGET_ALL;
+    
+    copyCmdData.Data = (void*)ptr;
+    copyCmdData.Buffer = uniformBuffer;
+    copyCmdData.Size = sizeof(Matrix4) * 3;
+    copyCmdData.MapType = BufferMapType::MAP_WRITE;
+    
+    GPUCommand::UniformBufferCopy(&copyCmdData);
+}
+
+void DrawScene()
+{
+    GPUCommand::ClearRenderTarget(&clearRenderTargetData);
+    
+    // Bind Shader Program
+    
+    // Bind Uniform Buffe
+    
+    // Bind Vertex Array
+    
+    GPUCommand::UniformBufferCopy(&copyCmdData);
+    GPUCommand::DrawIndexed(&indexedDrawCmdData);
 }
