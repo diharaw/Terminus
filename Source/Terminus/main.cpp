@@ -114,9 +114,9 @@ int main(void)
     RenderBackend::Initialize();
 	imgui_backend::initialize();
     
-    //SetupCube();
-    //SetupMatrices();
-    //SetupGraphicsResources();
+    SetupCube();
+    SetupMatrices();
+    SetupGraphicsResources();
 
     InputContext* context = Input::CreateContext();
     context->m_ContextName = "Test";
@@ -140,20 +140,19 @@ int main(void)
 
     while(!PlatformBackend::IsShutdownRequested())
     {
-		glClearColor(0.5, 0.5, 0.5, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		imgui_backend::new_frame();
+        //glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT);
+        
         PlatformBackend::Update();
         FileWatcher::update();
         Terminus::EventHandler::Update();
+
+        DrawScene();
         
-		bool open = true;
-
-		ImGui::ShowTestWindow(&open);
-
-		imgui_backend::render();
 		RenderBackend::SwapBuffers();
     }
+    
+    CleanUpGraphicsResources();
     
 	imgui_backend::shutdown();
     PlatformBackend::Shutdown();
@@ -276,7 +275,7 @@ void SetupGraphicsResources()
     memcpy(ptr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
     
-    clearRenderTargetData.ClearColor = Vector4(0.3f, 0.3, 0.3f, 1.0f);
+    clearRenderTargetData.ClearColor = Vector4(0.3f, 1.0, 0.3f, 1.0f);
     clearRenderTargetData.Target = FramebufferClearTarget::FB_TARGET_ALL;
     
     copyCmdData.Data = (void*)ptr;
@@ -285,20 +284,39 @@ void SetupGraphicsResources()
     copyCmdData.MapType = BufferMapType::MAP_WRITE;
     
     GPUCommand::UniformBufferCopy(&copyCmdData);
+    
+    GLenum err (glGetError());
+    
+    while(err!=GL_NO_ERROR)
+    {
+        std::string error;
+        
+        switch(err)
+        {
+            case GL_INVALID_OPERATION:      error="INVALID_OPERATION";      break;
+            case GL_INVALID_ENUM:           error="INVALID_ENUM";           break;
+            case GL_INVALID_VALUE:          error="INVALID_VALUE";          break;
+            case GL_OUT_OF_MEMORY:          error="OUT_OF_MEMORY";          break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:  error="INVALID_FRAMEBUFFER_OPERATION";  break;
+        }
+        
+        std::cerr << "GL_" << error.c_str() <<" - " << std::endl;
+        err=glGetError();
+    }
 }
 
 void DrawScene()
 {
     RenderBackend::BindFramebuffer();
+    RenderBackend::SetViewport(PlatformBackend::GetWidth(), PlatformBackend::GetHeight(), 0, 0);
     
     GPUCommand::ClearRenderTarget(&clearRenderTargetData);
     
     // Bind Shader Program
     RenderBackend::BindShaderProgram(shaderProgram);
     // Bind Uniform Buffer
-    RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);
-    
     GPUCommand::UniformBufferCopy(&copyCmdData);
+    RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);
     
     // Bind Vertex Array
     RenderBackend::BindVertexArray(vertexArray);
@@ -311,5 +329,6 @@ void CleanUpGraphicsResources()
     RenderBackend::DestroyIndexBuffer(indexBuffer);
     RenderBackend::DestroyVertexBuffer(vertexBuffer);
     RenderBackend::DestroyVertexArray(vertexArray);
+    RenderBackend::DestroyUniformBuffer(uniformBuffer);
     RenderBackend::DestroyShaderProgram(shaderProgram);
 }

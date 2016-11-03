@@ -104,7 +104,7 @@ ResourceHandle ShaderCache::Load(const char* _vertexID,
                 geometry = m_ShaderMap[id];
         }
         else
-            return USHRT_MAX;
+            geometry = USHRT_MAX;
     }
     
     // load tessellation evaluation shader
@@ -133,7 +133,7 @@ ResourceHandle ShaderCache::Load(const char* _vertexID,
                 tess_eval = m_ShaderMap[id];
         }
         else
-            return USHRT_MAX;
+            tess_eval = USHRT_MAX;
     }
     
     // load tessellation control shader
@@ -162,7 +162,7 @@ ResourceHandle ShaderCache::Load(const char* _vertexID,
                 tess_control = m_ShaderMap[id];
         }
         else
-            return USHRT_MAX;
+            tess_control = USHRT_MAX;
     }
     
     ResourceHandle program = RenderBackend::CreateShaderProgram(vertex, geometry, tess_control, tess_eval, pixel);

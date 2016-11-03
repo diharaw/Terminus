@@ -58,10 +58,16 @@ namespace FileSystem
             m_archive_list.push_back(_path);
     }
     
-    FILE * open_file_from_directory(std::string _path)
+    FILE * open_file_from_directory(std::string _path, bool _text)
     {
         const char* name = _path.c_str();
-        FILE *f = fopen(name, "rb");
+        FILE *f;
+        
+        if(_text)
+            f = fopen(name, "r");
+        else
+            f = fopen(name, "rb");
+        
         return f;
     }
     
@@ -90,7 +96,7 @@ namespace FileSystem
             currentDirectory += m_directory_list[i] + "/";
             currentDirectory += _path;
             
-            FILE* currentFile = open_file_from_directory(currentDirectory);
+            FILE* currentFile = open_file_from_directory(currentDirectory, _text);
             
             std::cout << get_current_working_directory() << std::endl;
             

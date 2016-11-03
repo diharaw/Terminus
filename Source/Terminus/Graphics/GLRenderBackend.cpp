@@ -6,6 +6,7 @@
 #include "../Utility/SlotMap.h"
 #include "../Utility/StringUtility.h"
 #include <unordered_map>
+#include <iostream>
 
 using BindingMap = std::unordered_map<GLuint, GLuint>;
 
@@ -1318,6 +1319,8 @@ namespace RenderBackend
         
         ShaderProgram& program = m_ShaderProgramPool.lookup(handle);
         
+        program.m_id = glCreateProgram();
+        
         glAttachShader(program.m_id, m_ShaderPool.lookup(_Vertex).m_id);
         glAttachShader(program.m_id, m_ShaderPool.lookup(_Pixel).m_id);
         
@@ -1343,6 +1346,9 @@ namespace RenderBackend
         if (!success)
         {
             glGetProgramInfoLog(program.m_id, 512, NULL, infoLog);
+            
+            std::cout << infoLog << std::endl;
+            
             return USHRT_MAX;
         }
         
