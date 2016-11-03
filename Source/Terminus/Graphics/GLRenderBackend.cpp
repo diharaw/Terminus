@@ -573,10 +573,15 @@ namespace RenderBackend
 		glGenVertexArrays(1, &vertexArray.m_id);
 		glBindVertexArray(vertexArray.m_id);
 
+        
+        
         VertexBuffer& vertexBuffer = m_VertexBufferPool.lookup(_vertexBuffer);
         
 		BindVertexBuffer(_vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertexBuffer.Size, vertexBuffer.Data, vertexBuffer.UsageType);
+		glBufferData(GL_ARRAY_BUFFER, vertexBuffer.Size, vertexBuffer.Data, GL_STATIC_DRAW);
+        
+        
+        
 		UnbindVertexBuffer();
         
         IndexBuffer& indexBuffer = m_IndexBufferPool.lookup(_indexBuffer);
@@ -584,6 +589,8 @@ namespace RenderBackend
 		BindIndexBuffer(_indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.Size, indexBuffer.Data, indexBuffer.UsageType);
 		UnbindIndexBuffer();
+        
+        
 
 		if (_layoutType == LAYOUT_STANDARD_VERTEX)
 		{

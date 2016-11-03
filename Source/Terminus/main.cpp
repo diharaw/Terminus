@@ -255,9 +255,19 @@ void SetupGraphicsResources()
     // Setup graphics resources
     
     vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
+    
+    
+    
     indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
+    
+    
+    
     vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
+    
+
     uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
+    
+    
     
     depthStencilState = RenderBackend::CreateDepthStencilState();
     rasterizerState = RenderBackend::CreateRasterizerState();
