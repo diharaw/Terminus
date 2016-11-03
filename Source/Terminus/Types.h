@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <glm.hpp>
+#include <string>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtx/transform.hpp>
@@ -14,6 +15,7 @@
 
 #define T_SAFE_DELETE(x) if(x){ delete x; x = nullptr; }
 #define T_SAFE_DELETE_ARRAY(x) if(x) { delete[] x; x = nullptr; }
+#define HANDLE_VALID(x) x != USHRT_MAX
 
 using uint = unsigned int;
 using uint8 = uint8_t;
@@ -34,6 +36,7 @@ using Matrix3 = glm::mat3;
 using Matrix4 = glm::mat4;
 using Quaternion = glm::quat;
 using ResourceHandle = unsigned;
+using String = std::string;
 
 namespace Atomic
 {

@@ -2,7 +2,35 @@
 #define PlatformBackend_h
 
 #include "../../Third Party/glew/include/GL/glew.h"
+#include "../Types.h"
 #include <GLFW/glfw3.h>
+#include <nfd.h>
+#include <boxer/boxer.h>
+
+enum class Selection
+{
+    OK,
+    Cancel,
+    Yes,
+    No,
+    None,
+    Error
+};
+
+enum class Buttons
+{
+    OK,
+    OKCancel,
+    YesNo
+};
+
+enum class Style
+{
+    Info,
+    Warning,
+    Error,
+    Question
+};
 
 namespace PlatformBackend
 {
@@ -50,6 +78,38 @@ namespace PlatformBackend
      * @return int Window Height
      */
 	extern int GetHeight();
+    
+    inline Selection show_message_box(String _Message, String _Title, Style _Style = Style::Info, Buttons _Buttons = Buttons::OK)
+    {
+        Selection result = (Selection)boxer::show(_Message.c_str(), _Title.c_str(), (boxer::Style)_Style, (boxer::Buttons)_Buttons);
+        return result;
+    }
+    
+    inline String* open_file_dialog(String _Extensions, String _DefaultPath = "")
+    {
+        char* openPath = NULL;
+        nfdresult_t result = NFD_OpenDialog(_Extensions.c_str(), _DefaultPath.c_str(), &openPath);
+        if (result == NFD_OKAY)
+        {
+            String* openPathStr = new String(openPath);
+            return openPathStr;
+        }
+        else
+            return nullptr;
+    }
+    
+    inline String* save_file_dialog(String _Extensions, String _DefaultPath = "")
+    {
+        char* savePath = NULL;
+        nfdresult_t result = NFD_SaveDialog(_Extensions.c_str(), _DefaultPath.c_str(), &savePath);
+        if (result == NFD_OKAY)
+        {
+            String* savePathStr = new String(savePath);
+            return savePathStr;
+        }
+        else
+            return nullptr;
+    }
 }
 
 #endif 

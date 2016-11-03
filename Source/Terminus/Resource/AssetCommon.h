@@ -2,6 +2,7 @@
 #define AssetCommon_h
 
 #include "../Types.h"
+#include "../Graphics/RenderCommon.h"
 
 struct Vertex
 {
@@ -118,9 +119,10 @@ namespace asset_common
         int bpp;
     };
     
-    struct ScriptLoadData
+    struct TextLoadData
     {
-        
+        char* buffer;
+        ShaderType shader_type; // Optional
     };
     
     struct AudioLoadData

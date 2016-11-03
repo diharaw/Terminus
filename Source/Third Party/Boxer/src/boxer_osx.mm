@@ -13,15 +13,15 @@ NSString* const kNoStr = @"No";
 NSAlertStyle getAlertStyle(Style style) {
    switch (style) {
       case Style::Info:
-         return NSInformationalAlertStyle;
+         return NSAlertStyleInformational;
       case Style::Warning:
-         return NSWarningAlertStyle;
+         return NSAlertStyleWarning;
       case Style::Error:
-         return NSCriticalAlertStyle;
+         return NSAlertStyleCritical;
       case Style::Question:
-         return NSWarningAlertStyle;
+         return NSAlertStyleWarning;
       default:
-         return NSInformationalAlertStyle;
+         return NSAlertStyleInformational;
    }
 }
 
@@ -82,8 +82,8 @@ Selection show(const char *message, const char *title, Style style, Buttons butt
    setButtons(alert, buttons);
 
    // Force the alert to appear on top of any other windows
-   ProcessSerialNumber psn = { 0, kCurrentProcess };
-   TransformProcessType(&psn, kProcessTransformToUIElementApplication);
+   //ProcessSerialNumber psn = { 0, kCurrentProcess };
+   //TransformProcessType(&psn, kProcessTransformToUIElementApplication);
    [[alert window] makeKeyWindow];
 
    Selection selection = getSelection([alert runModal], buttons);

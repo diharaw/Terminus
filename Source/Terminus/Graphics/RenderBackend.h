@@ -19,6 +19,8 @@
 #define MAX_SHADER_PROGRAM 256
 #define MAX_SHADER 256
 #define MAX_SAMPLER_STATE 256
+#define MAX_RASTERIZER_STATE 16
+#define MAX_DEPTH_STENCIL_STATE 16
 
 struct Texture2D;
 struct TextureCube;
@@ -75,7 +77,7 @@ namespace RenderBackend
      * @param _DepthTarget ResourceHandle to Texture to be used as Depth Target
      * @return ResourceHandle to created Resource
      */
-	extern ResourceHandle CreateFramebuffer(Texture2D* _RenderTargets, int _Count, Texture2D* _DepthTarget);
+	extern ResourceHandle CreateFramebuffer(ResourceHandle* _RenderTargets, int _Count, ResourceHandle* _DepthTarget);
     /**
      * Creates a Framebuffer with one or more Texture Handles as RenderTargets and one optional Texture Handle as a Depth Target.
      * @param _RenderTargets Array of Texture Resource Handles
@@ -147,11 +149,11 @@ namespace RenderBackend
      * @param _DepthTarget ResourceHandle to Texture to be used as Depth Target
      * @return ResourceHandle to created Resource
      */
-	extern ResourceHandle CreateShaderProgram(Shader* _Vertex,
-											  Shader* _Geometry,
-											  Shader* _TessellationControl,
-											  Shader* _TessellationEvalution,
-											  Shader* _Pixel);
+	extern ResourceHandle CreateShaderProgram(ResourceHandle _Vertex,
+											  ResourceHandle _Geometry,
+											  ResourceHandle _TessellationControl,
+											  ResourceHandle _TessellationEvalution,
+											  ResourceHandle _Pixel);
     /**
      * Creates a Framebuffer with one or more Texture Handles as RenderTargets and one optional Texture Handle as a Depth Target.
      * @param _RenderTargets Array of Texture Resource Handles
@@ -167,7 +169,99 @@ namespace RenderBackend
      * @param _DepthTarget ResourceHandle to Texture to be used as Depth Target
      * @return ResourceHandle to created Resource
      */
-	extern ResourceHandle CreateVertexArray(ResourceHandle _vertexBuffer, ResourceHandle _indexBuffer, InputLayoutType _layoutType = LAYOUT_STANDARD_VERTEX, InputLayout* _layout = nullptr);
+	extern ResourceHandle CreateVertexArray(ResourceHandle _vertexBuffer,
+                                            ResourceHandle _indexBuffer,
+                                            InputLayoutType _layoutType = LAYOUT_STANDARD_VERTEX,
+                                            InputLayout* _layout = nullptr);
+
+    extern ResourceHandle CreateRasterizerState(CullMode _cullMode,
+                                                FillMode _fillMode,
+                                                bool _frontWindingCCW,
+                                                bool _multisample,
+                                                bool _scissor);
+    
+    extern ResourceHandle CreateDepthStencilState(bool _enableDepthTest,
+                                                  bool _enableStencilTest,
+                                                  bool _depthMask,
+                                                  ComparisonFunction _depthComparisonFunction,
+                                                  StencilOperation _frontStencilFail,
+                                                  StencilOperation _frontStencilPassDepthFail,
+                                                  StencilOperation _frontStencilPassDepthPass,
+                                                  ComparisonFunction _frontStencilComparisonFunction,
+                                                  StencilOperation _backStencilFail,
+                                                  StencilOperation _backStencilPassDepthFail,
+                                                  StencilOperation _backStencilPassDepthPass,
+                                                  ComparisonFunction _backStencilComparisonFunction,
+                                                  unsigned int _stencilMask);
+    
+    extern ResourceHandle CreateSamplerState(TextureFilteringMode _minFilter,
+                                             TextureFilteringMode _magFilter,
+                                             TextureWrapMode _wrapModeU,
+                                             TextureWrapMode _wrapModeV,
+                                             TextureWrapMode _wrapModeW,
+                                             float _maxAnisotropy = 1.0f,
+                                             float _borderRed = 0.0f,
+                                             float _borderGreen = 0.0f,
+                                             float _borderBlue = 0.0f,
+                                             float _borderAlpha = 0.0f);
+    
+    extern void Draw(int _firstIndex, int _count);
+    
+    extern void DrawIndexed(int _indexCount);
+    
+    extern void DrawIndexedBaseVertex(int _indexCount, unsigned int _baseIndex, unsigned int _baseVertex);
+    
+    extern void ClearRenderTarget(Vector4 _ClearColor, FramebufferClearTarget _Target);
+    
+    extern void BindSamplerState(ResourceHandle _SamplerState, int _Slot);
+    
+    extern void UnbindSamplerState(int _Slot);
+    
+    extern void BindTexture2D(ResourceHandle _Texture2D);
+    
+    extern void UnbindTexture2D();
+    
+    extern void BindTextureCube(ResourceHandle _TextureCube);
+    
+    extern void BindShaderProgram(ResourceHandle _ShaderProgram);
+    
+    extern void BindVertexArray(ResourceHandle _VertexArray);
+    
+    extern void UnbindVertexArray();
+    
+    extern void BindUniformBuffer(ResourceHandle _uniformBuffer, ShaderType _shaderStage, unsigned int _bufferSlot);
+    
+    extern void BindVertexBuffer(ResourceHandle _VertexBuffer);
+    
+    extern void BindIndexBuffer(ResourceHandle _IndexBuffer);
+    
+    extern void UnbindUniformBuffer();
+    
+    extern void UnbindVertexBuffer();
+    
+    extern void UnbindIndexBuffer();
+    
+    extern void BindFramebuffer(ResourceHandle _Framebuffer);
+    
+    extern void UnbindFramebuffer();
+    
+    extern void* MapUniformBuffer(ResourceHandle _UniformBuffer, BufferMapType _Type);
+    
+    extern void UnmapUniformBuffer();
+    
+    extern void DestroyVertexBuffer(ResourceHandle _Handle);
+    
+    extern void DestroyIndexBuffer(ResourceHandle _Handle);
+    
+    extern void DestroyUniformBuffer(ResourceHandle _Handle);
+    
+    extern void DestroyVertexArray(ResourceHandle _Handle);
+    
+    extern void DestroyShader(ResourceHandle _Handle);
+    
+    extern void DestroyShaderProgram(ResourceHandle _Handle);
+    
+    extern void DestroySamplerState(ResourceHandle _Handle);
 }
 
 #endif

@@ -4,6 +4,10 @@
 #include "../Resource/AssetCommon.h"
 #include "CommandList.h"
 #include "../Utility/SlotMap.h"
+#include "../Utility/StringUtility.h"
+#include <unordered_map>
+
+using BindingMap = std::unordered_map<GLuint, GLuint>;
 
 struct SamplerState
 {
@@ -29,6 +33,37 @@ struct TextureCube : public ITexture
 struct Framebuffer
 {
 	GLuint m_id;
+};
+
+struct RasterizerState
+{
+    GLenum m_cullFace;
+    GLenum m_polygonMode;
+    bool m_enableCullFace;
+    bool m_enableMultisample;
+    bool m_enableFrontFaceCCW;
+    bool m_enableScissor;
+};
+
+struct DepthStencilState
+{
+    bool m_enableDepth;
+    bool m_enableStencil;
+    
+    GLenum m_depthFunc;
+    bool m_depthMask;
+    
+    GLenum m_frontStencilComparison;
+    GLenum m_backStencilComparison;
+    GLuint m_stencilMask;
+    
+    GLenum m_frontStencilFail;
+    GLenum m_frontStencilPassDepthFail;
+    GLenum m_frontStencilPassDepthPass;
+    
+    GLenum m_backStencilFail;
+    GLenum m_backStencilPassDepthFail;
+    GLenum m_backStencilPassDepthPass;
 };
 
 struct IBuffer
@@ -62,6 +97,8 @@ struct UniformBuffer : public IBuffer
 struct Shader
 {
 	GLuint m_id;
+    BindingMap m_sampler_bindings;
+    std::string m_source;
 };
 
 struct ShaderProgram
@@ -72,16 +109,18 @@ struct ShaderProgram
 namespace RenderBackend
 {
 	// Resource Pools
-	SlotMap<Texture2D,     MAX_TEXTURE_2D>	   m_Texture2DPool;
-	SlotMap<TextureCube,   MAX_TEXTURE_CUBE>   m_TextureCubePool;
-	SlotMap<Framebuffer,   MAX_FRAMEBUFFER>    m_FramebufferPool;
-	SlotMap<VertexArray,   MAX_VERTEX_ARRAY>   m_VertexArrayPool;
-	SlotMap<VertexBuffer,  MAX_VERTEX_BUFFER>  m_VertexBufferPool;
-	SlotMap<UniformBuffer, MAX_UNIFORM_BUFFER> m_UniformBufferPool;
-	SlotMap<IndexBuffer,   MAX_INDEX_BUFFER>   m_IndexBufferPool;
-	SlotMap<ShaderProgram, MAX_SHADER_PROGRAM> m_ShaderProgramPool;
-	SlotMap<Shader,        MAX_SHADER>		   m_ShaderPool;
-	SlotMap<SamplerState,  MAX_SAMPLER_STATE>  m_SamplerStatePool;
+	SlotMap<Texture2D,       MAX_TEXTURE_2D>	   m_Texture2DPool;
+	SlotMap<TextureCube,     MAX_TEXTURE_CUBE>     m_TextureCubePool;
+	SlotMap<Framebuffer,     MAX_FRAMEBUFFER>      m_FramebufferPool;
+	SlotMap<VertexArray,     MAX_VERTEX_ARRAY>     m_VertexArrayPool;
+	SlotMap<VertexBuffer,    MAX_VERTEX_BUFFER>    m_VertexBufferPool;
+	SlotMap<UniformBuffer,   MAX_UNIFORM_BUFFER>   m_UniformBufferPool;
+	SlotMap<IndexBuffer,     MAX_INDEX_BUFFER>     m_IndexBufferPool;
+	SlotMap<ShaderProgram,   MAX_SHADER_PROGRAM>   m_ShaderProgramPool;
+	SlotMap<Shader,          MAX_SHADER>		   m_ShaderPool;
+	SlotMap<SamplerState,    MAX_SAMPLER_STATE>    m_SamplerStatePool;
+    SlotMap<RasterizerState, MAX_RASTERIZER_STATE> m_RasterizerStatePool;
+    SlotMap<DepthStencilState, MAX_DEPTH_STENCIL_STATE> m_DepthStencilStatePool;
     
     // GLFW Window
     GLFWwindow* m_Window;
@@ -122,12 +161,18 @@ namespace RenderBackend
 		switch (_Target)
 		{
             case FramebufferClearTarget::FB_TARGET_DEPTH:
-			glClear(GL_DEPTH_BUFFER_BIT);
-			break;
+                glClear(GL_DEPTH_BUFFER_BIT);
+                break;
 
             case FramebufferClearTarget::FB_TARGET_ALL:
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			break;
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                break;
+                
+            case FramebufferClearTarget::FB_TARGET_COLOR:
+                break;
+                
+            case FramebufferClearTarget::FB_TARGET_STENCIL:
+                break;
 		}
 	}
 
@@ -160,7 +205,7 @@ namespace RenderBackend
 
 	void BindShaderProgram(ResourceHandle _ShaderProgram)
 	{
-
+        glUseProgram(m_ShaderProgramPool.lookup(_ShaderProgram).m_id);
 	}
 
 	void BindVertexArray(ResourceHandle _VertexArray)
@@ -177,6 +222,11 @@ namespace RenderBackend
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, m_UniformBufferPool.lookup(_UniformBuffer).m_id);
 	}
+    
+    void BindUniformBuffer(ResourceHandle _uniformBuffer, ShaderType _shaderStage, unsigned int _bufferSlot)
+    {
+        glBindBufferBase(GL_UNIFORM_BUFFER, _bufferSlot, m_UniformBufferPool.lookup(_uniformBuffer).m_id);
+    }
 
 	void BindVertexBuffer(ResourceHandle _VertexBuffer)
 	{
@@ -247,6 +297,48 @@ namespace RenderBackend
 		glUnmapBuffer(GL_UNIFORM_BUFFER);
 		UnbindUniformBuffer();
 	}
+    
+    void DestroyVertexBuffer(ResourceHandle _Handle)
+    {
+        glDeleteBuffers(1, &m_VertexBufferPool.lookup(_Handle).m_id);
+        m_VertexBufferPool.remove(_Handle);
+    }
+    
+    void DestroyIndexBuffer(ResourceHandle _Handle)
+    {
+        glDeleteBuffers(1, &m_IndexBufferPool.lookup(_Handle).m_id);
+        m_IndexBufferPool.remove(_Handle);
+    }
+    
+    void DestroyUniformBuffer(ResourceHandle _Handle)
+    {
+        glDeleteBuffers(1, &m_UniformBufferPool.lookup(_Handle).m_id);
+        m_UniformBufferPool.remove(_Handle);
+    }
+    
+    void DestroyVertexArray(ResourceHandle _Handle)
+    {
+        glDeleteVertexArrays(1, &m_VertexArrayPool.lookup(_Handle).m_id);
+        m_VertexArrayPool.remove(_Handle);
+    }
+    
+    void DestroyShader(ResourceHandle _Handle)
+    {
+        glDeleteShader(m_ShaderPool.lookup(_Handle).m_id);
+        m_ShaderPool.remove(_Handle);
+    }
+    
+    void DestroyShaderProgram(ResourceHandle _Handle)
+    {
+        glDeleteProgram(m_ShaderProgramPool.lookup(_Handle).m_id);
+        m_ShaderProgramPool.remove(_Handle);
+    }
+    
+    void DestroySamplerState(ResourceHandle _Handle)
+    {
+        glDeleteSamplers(1, &m_SamplerStatePool.lookup(_Handle).m_id);
+        m_SamplerStatePool.remove(_Handle);
+    }
 
     ResourceHandle CreateTexture2D(uint16_t _Width, uint16_t _Height, void* _Data, bool _MipMaps)
 	{
@@ -473,17 +565,20 @@ namespace RenderBackend
 			{
 				glEnableVertexAttribArray(i);
 
-				GLenum dataType;
+				GLenum dataType = 0;
 
 				switch (_layout->m_Elements[i].m_type)
 				{
-				case BUFFER_FLOAT:
-					dataType = GL_FLOAT;
-					break;
+                    case BUFFER_FLOAT:
+                        dataType = GL_FLOAT;
+                        break;
 
-				case BUFFER_INT:
-					dataType = GL_INT;
-					break;
+                    case BUFFER_INT:
+                        dataType = GL_INT;
+                        break;
+                        
+                    case BUFFER_UINT:
+                        break;
 				}
 
 				glVertexAttribPointer(i, _layout->m_Elements[i].m_numSubElements, dataType, _layout->m_Elements[i].m_isNormalized, _layout->m_vertexSize, (GLvoid*)0);
@@ -493,12 +588,598 @@ namespace RenderBackend
         return handle;
 	}
     
+    ResourceHandle CreateRasterizerState(CullMode _cullMode,
+                                                           FillMode _fillMode,
+                                                           bool _frontWindingCCW,
+                                                           bool _multisample,
+                                                           bool _scissor)
+    {
+        ResourceHandle handle = m_RasterizerStatePool.add();
+        RasterizerState& rasterizerState = m_RasterizerStatePool.lookup(handle);
+        
+        switch (_cullMode)
+        {
+            case CULL_FRONT:
+                rasterizerState.m_cullFace = GL_FRONT;
+                rasterizerState.m_enableCullFace = true;
+                break;
+                
+            case CULL_BACK:
+                rasterizerState.m_cullFace = GL_BACK;
+                rasterizerState.m_enableCullFace = true;
+                break;
+                
+            case CULL_NONE:
+                rasterizerState.m_cullFace = GL_BACK;
+                rasterizerState.m_enableCullFace = false;
+                break;
+                
+            default:
+                rasterizerState.m_cullFace = GL_BACK;
+                rasterizerState.m_enableCullFace = true;
+                break;
+        }
+        
+        switch (_fillMode)
+        {
+            case FILL_SOLID:
+                rasterizerState.m_polygonMode = GL_FILL;
+                break;
+                
+            case FILL_WIREFRAME:
+                rasterizerState.m_polygonMode = GL_LINE;
+                break;
+                
+            default:
+                rasterizerState.m_polygonMode = GL_FILL;
+                break;
+        }
+        
+        if (_multisample)
+            rasterizerState.m_enableMultisample = true;
+        else
+            rasterizerState.m_enableMultisample = false;
+        
+        if (_scissor)
+            rasterizerState.m_enableScissor = true;
+        else
+            rasterizerState.m_enableScissor = false;
+        
+        if (_frontWindingCCW)
+            rasterizerState.m_enableFrontFaceCCW = true;
+        else
+            rasterizerState.m_enableFrontFaceCCW = false;
+        
+        return handle;
+    }
+    
+    ResourceHandle CreateDepthStencilState(bool _enableDepthTest,
+                                           bool _enableStencilTest,
+                                           bool _depthMask,
+                                           ComparisonFunction _depthComparisonFunction,
+                                           StencilOperation _frontStencilFail,
+                                           StencilOperation _frontStencilPassDepthFail,
+                                           StencilOperation _frontStencilPassDepthPass,
+                                           ComparisonFunction _frontStencilComparisonFunction,
+                                           StencilOperation _backStencilFail,
+                                           StencilOperation _backStencilPassDepthFail,
+                                           StencilOperation _backStencilPassDepthPass,
+                                           ComparisonFunction _backStencilComparisonFunction,
+                                           unsigned int _stencilMask)
+    {
+        ResourceHandle handle = m_DepthStencilStatePool.add();
+        DepthStencilState* depthStencilState = &m_DepthStencilStatePool.lookup(handle);
+        
+        // Set Depth Options
+        
+        if (_enableDepthTest)
+            depthStencilState->m_enableDepth = true;
+        else
+            depthStencilState->m_enableDepth = false;
+        
+        switch (_depthComparisonFunction)
+        {
+            case FUNC_NEVER:
+                depthStencilState->m_depthFunc = GL_NEVER;
+                break;
+                
+            case FUNC_LESS:
+                depthStencilState->m_depthFunc = GL_LESS;
+                break;
+                
+            case FUNC_EQUAL:
+                depthStencilState->m_depthFunc = GL_EQUAL;
+                break;
+                
+            case FUNC_LESS_EQUAL:
+                depthStencilState->m_depthFunc = GL_LEQUAL;
+                break;
+                
+            case FUNC_GREATER:
+                depthStencilState->m_depthFunc = GL_GREATER;
+                break;
+                
+            case FUNC_NOT_EQUAL:
+                depthStencilState->m_depthFunc = GL_NOTEQUAL;
+                break;
+                
+            case FUNC_GREATER_EQUAL:
+                depthStencilState->m_depthFunc = GL_GEQUAL;
+                break;
+                
+            case FUNC_ALWAYS:
+                depthStencilState->m_depthFunc = GL_ALWAYS;
+                break;
+                
+            default:
+                break;
+        }
+        
+        depthStencilState->m_depthMask = (_depthMask) ? GL_TRUE : GL_FALSE;
+        
+        
+        // Set Stencil Options
+        
+        if (_enableStencilTest)
+            depthStencilState->m_enableStencil = true;
+        else
+            depthStencilState->m_enableStencil = false;
+        
+        switch (_frontStencilComparisonFunction)
+        {
+            case FUNC_NEVER:
+                depthStencilState->m_frontStencilComparison = GL_NEVER;
+                break;
+                
+            case FUNC_LESS:
+                depthStencilState->m_frontStencilComparison = GL_LESS;
+                break;
+                
+            case FUNC_EQUAL:
+                depthStencilState->m_frontStencilComparison = GL_EQUAL;
+                break;
+                
+            case FUNC_LESS_EQUAL:
+                depthStencilState->m_frontStencilComparison = GL_LEQUAL;
+                break;
+                
+            case FUNC_GREATER:
+                depthStencilState->m_frontStencilComparison = GL_GREATER;
+                break;
+                
+            case FUNC_NOT_EQUAL:
+                depthStencilState->m_frontStencilComparison = GL_NOTEQUAL;
+                break;
+                
+            case FUNC_GREATER_EQUAL:
+                depthStencilState->m_frontStencilComparison = GL_GEQUAL;
+                break;
+                
+            case FUNC_ALWAYS:
+                depthStencilState->m_frontStencilComparison = GL_ALWAYS;
+                break;
+                
+            default:
+                depthStencilState->m_frontStencilComparison = GL_LESS;
+                break;
+        }
+        
+        switch (_backStencilComparisonFunction)
+        {
+            case FUNC_NEVER:
+                depthStencilState->m_backStencilComparison = GL_NEVER;
+                break;
+                
+            case FUNC_LESS:
+                depthStencilState->m_backStencilComparison = GL_LESS;
+                break;
+                
+            case FUNC_EQUAL:
+                depthStencilState->m_backStencilComparison = GL_EQUAL;
+                break;
+                
+            case FUNC_LESS_EQUAL:
+                depthStencilState->m_backStencilComparison = GL_LEQUAL;
+                break;
+                
+            case FUNC_GREATER:
+                depthStencilState->m_backStencilComparison = GL_GREATER;
+                break;
+                
+            case FUNC_NOT_EQUAL:
+                depthStencilState->m_backStencilComparison = GL_NOTEQUAL;
+                break;
+                
+            case FUNC_GREATER_EQUAL:
+                depthStencilState->m_backStencilComparison = GL_GEQUAL;
+                break;
+                
+            case FUNC_ALWAYS:
+                depthStencilState->m_backStencilComparison = GL_ALWAYS;
+                break;
+                
+            default:
+                depthStencilState->m_backStencilComparison = GL_LESS;
+                break;
+        }
+        
+        // Front Stencil Operation
+        
+        switch (_frontStencilFail)
+        {
+            case STENCIL_OP_KEEP:
+                depthStencilState->m_frontStencilFail = GL_KEEP;
+                break;
+                
+            case STENCIL_OP_ZERO:
+                depthStencilState->m_frontStencilFail = GL_ZERO;
+                break;
+                
+            case STENCIL_OP_REPLACE:
+                depthStencilState->m_frontStencilFail = GL_REPLACE;
+                break;
+                
+            case STENCIL_OP_INCR_SAT:
+                depthStencilState->m_frontStencilFail = GL_INCR;
+                break;
+                
+            case STENCIL_OP_DECR_SAT:
+                depthStencilState->m_frontStencilFail = GL_DECR;
+                break;
+                
+            case STENCIL_OP_INVERT:
+                depthStencilState->m_frontStencilFail = GL_INVERT;
+                break;
+                
+            case STENCIL_OP_INCR:
+                depthStencilState->m_frontStencilFail = GL_INCR_WRAP;
+                break;
+                
+            case STENCIL_OP_DECR:
+                depthStencilState->m_frontStencilFail = GL_DECR_WRAP;
+                break;
+                
+            default:
+                depthStencilState->m_frontStencilFail = GL_KEEP;
+                break;
+        }
+        
+        switch (_frontStencilPassDepthPass)
+        {
+            case STENCIL_OP_KEEP:
+                depthStencilState->m_frontStencilPassDepthPass = GL_KEEP;
+                break;
+                
+            case STENCIL_OP_ZERO:
+                depthStencilState->m_frontStencilPassDepthPass = GL_ZERO;
+                break;
+                
+            case STENCIL_OP_REPLACE:
+                depthStencilState->m_frontStencilPassDepthPass = GL_REPLACE;
+                break;
+                
+            case STENCIL_OP_INCR_SAT:
+                depthStencilState->m_frontStencilPassDepthPass = GL_INCR;
+                break;
+                
+            case STENCIL_OP_DECR_SAT:
+                depthStencilState->m_frontStencilPassDepthPass = GL_DECR;
+                break;
+                
+            case STENCIL_OP_INVERT:
+                depthStencilState->m_frontStencilPassDepthPass = GL_INVERT;
+                break;
+                
+            case STENCIL_OP_INCR:
+                depthStencilState->m_frontStencilPassDepthPass = GL_INCR_WRAP;
+                break;
+                
+            case STENCIL_OP_DECR:
+                depthStencilState->m_frontStencilPassDepthPass = GL_DECR_WRAP;
+                break;
+                
+            default:
+                depthStencilState->m_frontStencilPassDepthPass = GL_KEEP;
+                break;
+        }
+        
+        switch (_frontStencilPassDepthFail)
+        {
+            case STENCIL_OP_KEEP:
+                depthStencilState->m_frontStencilPassDepthFail = GL_KEEP;
+                break;
+                
+            case STENCIL_OP_ZERO:
+                depthStencilState->m_frontStencilPassDepthFail = GL_ZERO;
+                break;
+                
+            case STENCIL_OP_REPLACE:
+                depthStencilState->m_frontStencilPassDepthFail = GL_REPLACE;
+                break;
+                
+            case STENCIL_OP_INCR_SAT:
+                depthStencilState->m_frontStencilPassDepthFail = GL_INCR;
+                break;
+                
+            case STENCIL_OP_DECR_SAT:
+                depthStencilState->m_frontStencilPassDepthFail = GL_DECR;
+                break;
+                
+            case STENCIL_OP_INVERT:
+                depthStencilState->m_frontStencilPassDepthFail = GL_INVERT;
+                break;
+                
+            case STENCIL_OP_INCR:
+                depthStencilState->m_frontStencilPassDepthFail = GL_INCR_WRAP;
+                break;
+                
+            case STENCIL_OP_DECR:
+                depthStencilState->m_frontStencilPassDepthFail = GL_DECR_WRAP;
+                break;
+                
+            default:
+                depthStencilState->m_frontStencilPassDepthFail = GL_KEEP;
+                break;
+        }
+        
+        // Back Stencil Operation
+        
+        switch (_backStencilFail)
+        {
+            case STENCIL_OP_KEEP:
+                depthStencilState->m_backStencilFail = GL_KEEP;
+                break;
+                
+            case STENCIL_OP_ZERO:
+                depthStencilState->m_backStencilFail = GL_ZERO;
+                break;
+                
+            case STENCIL_OP_REPLACE:
+                depthStencilState->m_backStencilFail = GL_REPLACE;
+                break;
+                
+            case STENCIL_OP_INCR_SAT:
+                depthStencilState->m_backStencilFail = GL_INCR;
+                break;
+                
+            case STENCIL_OP_DECR_SAT:
+                depthStencilState->m_backStencilFail = GL_DECR;
+                break;
+                
+            case STENCIL_OP_INVERT:
+                depthStencilState->m_backStencilFail = GL_INVERT;
+                break;
+                
+            case STENCIL_OP_INCR:
+                depthStencilState->m_backStencilFail = GL_INCR_WRAP;
+                break;
+                
+            case STENCIL_OP_DECR:
+                depthStencilState->m_backStencilFail = GL_DECR_WRAP;
+                break;
+                
+            default:
+                depthStencilState->m_backStencilFail = GL_KEEP;
+                break;
+        }
+        
+        switch (_backStencilPassDepthPass)
+        {
+            case STENCIL_OP_KEEP:
+                depthStencilState->m_backStencilPassDepthPass = GL_KEEP;
+                break;
+                
+            case STENCIL_OP_ZERO:
+                depthStencilState->m_backStencilPassDepthPass = GL_ZERO;
+                break;
+                
+            case STENCIL_OP_REPLACE:
+                depthStencilState->m_backStencilPassDepthPass = GL_REPLACE;
+                break;
+                
+            case STENCIL_OP_INCR_SAT:
+                depthStencilState->m_backStencilPassDepthPass = GL_INCR;
+                break;
+                
+            case STENCIL_OP_DECR_SAT:
+                depthStencilState->m_backStencilPassDepthPass = GL_DECR;
+                break;
+                
+            case STENCIL_OP_INVERT:
+                depthStencilState->m_backStencilPassDepthPass = GL_INVERT;
+                break;
+                
+            case STENCIL_OP_INCR:
+                depthStencilState->m_backStencilPassDepthPass = GL_INCR_WRAP;
+                break;
+                
+            case STENCIL_OP_DECR:
+                depthStencilState->m_backStencilPassDepthPass = GL_DECR_WRAP;
+                break;
+                
+            default:
+                depthStencilState->m_backStencilPassDepthPass = GL_KEEP;
+                break;
+        }
+        
+        switch (_backStencilPassDepthFail)
+        {
+            case STENCIL_OP_KEEP:
+                depthStencilState->m_backStencilPassDepthFail = GL_KEEP;
+                break;
+                
+            case STENCIL_OP_ZERO:
+                depthStencilState->m_backStencilPassDepthFail = GL_ZERO;
+                break;
+                
+            case STENCIL_OP_REPLACE:
+                depthStencilState->m_backStencilPassDepthFail = GL_REPLACE;
+                break;
+                
+            case STENCIL_OP_INCR_SAT:
+                depthStencilState->m_backStencilPassDepthFail = GL_INCR;
+                break;
+                
+            case STENCIL_OP_DECR_SAT:
+                depthStencilState->m_backStencilPassDepthFail = GL_DECR;
+                break;
+                
+            case STENCIL_OP_INVERT:
+                depthStencilState->m_backStencilPassDepthFail = GL_INVERT;
+                break;
+                
+            case STENCIL_OP_INCR:
+                depthStencilState->m_backStencilPassDepthFail = GL_INCR_WRAP;
+                break;
+                
+            case STENCIL_OP_DECR:
+                depthStencilState->m_backStencilPassDepthFail = GL_DECR_WRAP;
+                break;
+                
+            default:
+                depthStencilState->m_backStencilPassDepthFail = GL_KEEP;
+                break;
+        }
+        
+        return handle;
+    }
+    
+    ResourceHandle CreateSamplerState(TextureFilteringMode _minFilter,
+                                      TextureFilteringMode _magFilter,
+                                      TextureWrapMode _wrapModeU,
+                                      TextureWrapMode _wrapModeV,
+                                      TextureWrapMode _wrapModeW,
+                                      float _maxAnisotropy,
+                                      float _borderRed,
+                                      float _borderGreen,
+                                      float _borderBlue,
+                                      float _borderAlpha)
+    {
+        ResourceHandle handle = m_SamplerStatePool.add();
+        SamplerState& samplerState = m_SamplerStatePool.lookup(handle);
+        
+        glGenSamplers(1, &samplerState.m_id);
+        
+        switch(_wrapModeU)
+        {
+            case REPEAT:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                break;
+                
+            case MIRRORED_REPEAT:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+                break;
+                
+            case CLAMP_TO_EDGE:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                break;
+                
+            case CLAMP_TO_BORDER:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+                GLfloat borderColor[] = { _borderRed, _borderGreen, _borderBlue, _borderAlpha };
+                glSamplerParameterfv(samplerState.m_id, GL_TEXTURE_BORDER_COLOR, borderColor);
+                break;
+        }
+        
+        switch(_wrapModeV)
+        {
+            case REPEAT:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                break;
+                
+            case MIRRORED_REPEAT:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+                break;
+                
+            case CLAMP_TO_EDGE:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                break;
+                
+            case CLAMP_TO_BORDER:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+                GLfloat borderColor[] = { _borderRed, _borderGreen, _borderBlue, _borderAlpha };
+                glSamplerParameterfv(samplerState.m_id, GL_TEXTURE_BORDER_COLOR, borderColor);
+                break;
+        }
+        
+        switch(_wrapModeW)
+        {
+            case REPEAT:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_R, GL_REPEAT);
+                break;
+                
+            case MIRRORED_REPEAT:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+                break;
+                
+            case CLAMP_TO_EDGE:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                break;
+                
+            case CLAMP_TO_BORDER:
+                glSamplerParameteri(samplerState.m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+                GLfloat borderColor[] = { _borderRed, _borderGreen, _borderBlue, _borderAlpha };
+                glSamplerParameterfv(samplerState.m_id, GL_TEXTURE_BORDER_COLOR, borderColor);
+                break;
+        }
+        
+        if(_minFilter == LINEAR_ALL && _magFilter == LINEAR_ALL)
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        }
+        else if(_minFilter == LINEAR_ALL && _magFilter == NEAREST_ALL)
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        }
+        else if(_minFilter == NEAREST_ALL && _magFilter == LINEAR_ALL)
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        }
+        else if(_minFilter == NEAREST_ALL && _magFilter == NEAREST_ALL)
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        }
+        else if(_minFilter == LINEAR_MIPMAP_NEAREST && _magFilter == LINEAR_MIPMAP_NEAREST)
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        }
+        else if(_minFilter == NEAREST_MIPMAP_LINEAR && _magFilter == NEAREST_MIPMAP_LINEAR)
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        }
+        else
+        {
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glSamplerParameteri(samplerState.m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        }
+        
+        if(GLEW_EXT_texture_filter_anisotropic)
+        {
+            GLfloat maxAnisotropy;
+            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
+            
+            if (_maxAnisotropy <= maxAnisotropy)
+                glSamplerParameterf(samplerState.m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, _maxAnisotropy);
+            else
+                glSamplerParameterf(samplerState.m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+        }
+        
+        return handle;
+    }
+    
     ResourceHandle CreateShaderBase(char* _Data, GLenum _shaderType)
     {
         ResourceHandle handle = m_ShaderPool.add();
         
         Shader& shader = m_ShaderPool.lookup(handle);
         shader.m_id = glCreateShader(_shaderType);
+        shader.m_source = std::string(_Data);
         
         GLint success;
         GLchar infoLog[512];
@@ -585,7 +1266,71 @@ namespace RenderBackend
             glGetProgramInfoLog(program.m_id, 512, NULL, infoLog);
             return USHRT_MAX;
         }
+        
+        Shader* shader_list[5];
+        int count = 0;
+        
+        if(HANDLE_VALID(_Vertex))
+        {
+            shader_list[count] = &m_ShaderPool.lookup(_Vertex);
+            count++;
+        }
+        if(HANDLE_VALID(_Pixel))
+        {
+            shader_list[count] = &m_ShaderPool.lookup(_Pixel);
+            count++;
+        }
+        if(HANDLE_VALID(_Geometry))
+        {
+            shader_list[count] = &m_ShaderPool.lookup(_Geometry);
+            count++;
+        }
+        if(HANDLE_VALID(_TessellationControl))
+        {
+            shader_list[count] = &m_ShaderPool.lookup(_TessellationControl);
+            count++;
+        }
+        if(HANDLE_VALID(_TessellationEvalution))
+        {
+            shader_list[count] = &m_ShaderPool.lookup(_TessellationEvalution);
+            count++;
+        }
 
+        // Bind Uniform Buffers
+        for (int i = 0; i < count; i++)
+        {
+            Terminus::StringVector uboList = Terminus::StringUtility::find_line("#binding", shader_list[i]->m_source);
+            
+            for (int i = 0; i < uboList.size(); i++)
+            {
+                Terminus::StringVector tokens = Terminus::StringUtility::delimit(" ", uboList[i]);
+                std::string uniformName = tokens[3];
+                GLuint binding = (GLuint)atoi(tokens[5].c_str());
+                const GLchar* uniformNameChar = uniformName.c_str();
+               
+                GLuint uboIndex = glGetUniformBlockIndex(program.m_id, uniformNameChar);
+                glUniformBlockBinding(program.m_id, uboIndex, binding);
+            }
+        }
+        
+        // Bind Uniform Samplers
+        for (int i = 0; i < count; i++)
+        {
+            Terminus::StringVector samplerList = Terminus::StringUtility::find_line("uniform sampler", shader_list[i]->m_source);
+            
+            for (int i = 0; i < samplerList.size(); i++)
+            {
+                Terminus::StringVector tokens = Terminus::StringUtility::delimit(" ", samplerList[i]);
+                std::string uniformName = tokens[2];
+                uniformName.erase(uniformName.end() - 1, uniformName.end());
+                
+                GLuint binding = (GLuint)atoi(tokens[4].c_str());
+                const GLchar* uniformNameChar = uniformName.c_str();
+                GLuint location = glGetUniformLocation(program.m_id, uniformNameChar);
+                shader_list[i]->m_sampler_bindings[binding] = location;
+            }
+        }
+        
         return handle;
 	}
 

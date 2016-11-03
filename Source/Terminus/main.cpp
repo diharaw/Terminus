@@ -13,6 +13,8 @@
 #include "Input/Input.h"
 #include "Input/InputContext.h"
 #include "Core/Event/EventHandler.h"
+#include "Resource/ShaderCache.h"
+#include "Resource/TextLoader.h"
 #include "Resource/StbLoader.h"
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
@@ -76,25 +78,26 @@ ResourceHandle vertexBuffer;
 ResourceHandle indexBuffer;
 ResourceHandle uniformBuffer;
 ResourceHandle vertexArray;
-ResourceHandle vertexShader;
-ResourceHandle pixelShader;
 ResourceHandle shaderProgram;
 
 CommandData::DrawIndexed indexedDrawCmdData;
 CommandData::UniformBufferCopy copyCmdData;
 CommandData::ClearRenderTarget clearRenderTargetData;
 
+ShaderCache shaderCache;
+
 // Init method declarations
 
 void SetupCube();
 void SetupMatrices();
 void SetupGraphicsResources();
+void CleanUpGraphicsResources();
 void DrawScene();
 
 int main(void)
 {
     // Engine init
-
+    
     Terminus::Memory::Initialize();
 
     FileSystem::add_directory("Assets");
@@ -109,9 +112,9 @@ int main(void)
     RenderBackend::Initialize();
 	imgui_backend::initialize();
     
-    SetupCube();
-    SetupMatrices();
-    SetupGraphicsResources();
+    //SetupCube();
+    //SetupMatrices();
+    //SetupGraphicsResources();
 
     InputContext* context = Input::CreateContext();
     context->m_ContextName = "Test";
@@ -246,14 +249,16 @@ void SetupMatrices()
 
 void SetupGraphicsResources()
 {
+    shaderCache.RegisterLoader<TextLoader>();
+    
     // Setup graphics resources
     
     vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
     indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
     vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
     uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
-    vertexShader  = RenderBackend::CreateVertexShader(NULL);
-    pixelShader   = RenderBackend::CreatePixelShader(NULL);
+    
+    shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
     
     indexedDrawCmdData.IndexCount = 36;
     
@@ -279,11 +284,21 @@ void DrawScene()
     GPUCommand::ClearRenderTarget(&clearRenderTargetData);
     
     // Bind Shader Program
-    
-    // Bind Uniform Buffe
-    
-    // Bind Vertex Array
+    RenderBackend::BindShaderProgram(shaderProgram);
+    // Bind Uniform Buffer
+    RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);
     
     GPUCommand::UniformBufferCopy(&copyCmdData);
+    
+    // Bind Vertex Array
+    RenderBackend::BindVertexArray(vertexArray);
+    
     GPUCommand::DrawIndexed(&indexedDrawCmdData);
+}
+
+void CleanUpGraphicsResources()
+{
+    RenderBackend::DestroyIndexBuffer(indexBuffer);
+    RenderBackend::DestroyVertexBuffer(vertexBuffer);
+    RenderBackend::DestroyVertexArray(vertexArray);
 }
