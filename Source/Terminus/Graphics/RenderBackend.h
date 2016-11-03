@@ -174,25 +174,25 @@ namespace RenderBackend
                                             InputLayoutType _layoutType = LAYOUT_STANDARD_VERTEX,
                                             InputLayout* _layout = nullptr);
 
-    extern ResourceHandle CreateRasterizerState(CullMode _cullMode,
-                                                FillMode _fillMode,
-                                                bool _frontWindingCCW,
-                                                bool _multisample,
-                                                bool _scissor);
+    extern ResourceHandle CreateRasterizerState(CullMode _cullMode = CULL_BACK,
+                                                FillMode _fillMode = FILL_SOLID,
+                                                bool _frontWindingCCW = true,
+                                                bool _multisample = false,
+                                                bool _scissor = false);
     
-    extern ResourceHandle CreateDepthStencilState(bool _enableDepthTest,
-                                                  bool _enableStencilTest,
-                                                  bool _depthMask,
-                                                  ComparisonFunction _depthComparisonFunction,
-                                                  StencilOperation _frontStencilFail,
-                                                  StencilOperation _frontStencilPassDepthFail,
-                                                  StencilOperation _frontStencilPassDepthPass,
-                                                  ComparisonFunction _frontStencilComparisonFunction,
-                                                  StencilOperation _backStencilFail,
-                                                  StencilOperation _backStencilPassDepthFail,
-                                                  StencilOperation _backStencilPassDepthPass,
-                                                  ComparisonFunction _backStencilComparisonFunction,
-                                                  unsigned int _stencilMask);
+    extern ResourceHandle CreateDepthStencilState(bool _enableDepthTest = true,
+                                                  bool _enableStencilTest = false,
+                                                  bool _depthMask = true,
+                                                  ComparisonFunction _depthComparisonFunction = FUNC_LESS,
+                                                  StencilOperation _frontStencilFail = STENCIL_OP_REPLACE,
+                                                  StencilOperation _frontStencilPassDepthFail = STENCIL_OP_REPLACE,
+                                                  StencilOperation _frontStencilPassDepthPass = STENCIL_OP_REPLACE,
+                                                  ComparisonFunction _frontStencilComparisonFunction = FUNC_LESS,
+                                                  StencilOperation _backStencilFail = STENCIL_OP_REPLACE,
+                                                  StencilOperation _backStencilPassDepthFail = STENCIL_OP_REPLACE,
+                                                  StencilOperation _backStencilPassDepthPass = STENCIL_OP_REPLACE,
+                                                  ComparisonFunction _backStencilComparisonFunction = FUNC_LESS,
+                                                  unsigned int _stencilMask = 0xFF);
     
     extern ResourceHandle CreateSamplerState(TextureFilteringMode _minFilter,
                                              TextureFilteringMode _magFilter,
@@ -204,6 +204,12 @@ namespace RenderBackend
                                              float _borderGreen = 0.0f,
                                              float _borderBlue = 0.0f,
                                              float _borderAlpha = 0.0f);
+    
+    extern void SetDepthStencilState(ResourceHandle _depthStencilState);
+    
+    extern void SetRasterizerState(ResourceHandle _rasterizerState);
+    
+    extern void SetViewport(int _width, int _height, int _topLeftX, int _topLeftY);
     
     extern void Draw(int _firstIndex, int _count);
     
@@ -241,7 +247,7 @@ namespace RenderBackend
     
     extern void UnbindIndexBuffer();
     
-    extern void BindFramebuffer(ResourceHandle _Framebuffer);
+    extern void BindFramebuffer(ResourceHandle _Framebuffer = USHRT_MAX);
     
     extern void UnbindFramebuffer();
     

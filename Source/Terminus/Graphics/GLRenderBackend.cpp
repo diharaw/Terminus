@@ -104,6 +104,8 @@ struct Shader
 struct ShaderProgram
 {
     GLuint m_id;
+    ResourceHandle m_shaders[5];
+    int m_shader_count;
 };
 
 namespace RenderBackend
@@ -137,6 +139,73 @@ namespace RenderBackend
     void SwapBuffers()
     {
         glfwSwapBuffers(m_Window);
+    }
+    
+    void SetDepthStencilState(ResourceHandle _depthStencilState)
+    {
+        DepthStencilState& dss = m_DepthStencilStatePool.lookup(_depthStencilState);
+        
+        // Set Depth Options
+        
+        if (dss.m_enableDepth)
+            glEnable(GL_DEPTH_TEST);
+        else
+            glDisable(GL_DEPTH_TEST);
+        
+        glDepthFunc(dss.m_depthFunc);
+        glDepthMask((dss.m_depthMask) ? GL_TRUE : GL_FALSE);
+        
+        // Set Stencil Options
+        
+        if (dss.m_enableStencil)
+            glEnable(GL_STENCIL_TEST);
+        else
+            glDisable(GL_STENCIL_TEST);
+        
+        glStencilFuncSeparate(GL_FRONT, dss.m_frontStencilComparison, 1, dss.m_stencilMask);
+        glStencilFuncSeparate(GL_FRONT, dss.m_backStencilComparison, 1, dss.m_stencilMask);
+        
+        // Front Stencil Operation
+        
+        glStencilOpSeparate(GL_FRONT, dss.m_frontStencilFail, dss.m_frontStencilPassDepthFail, dss.m_frontStencilPassDepthPass);
+        glStencilOpSeparate(GL_BACK, dss.m_backStencilFail, dss.m_backStencilPassDepthFail, dss.m_backStencilPassDepthPass);
+    }
+    
+    void SetRasterizerState(ResourceHandle _rasterizerState)
+    {
+        RasterizerState& rs = m_RasterizerStatePool.lookup(_rasterizerState);
+        
+        if(rs.m_enableCullFace)
+            glEnable(GL_CULL_FACE);
+        else
+            glDisable(GL_CULL_FACE);
+        
+        glCullFace(rs.m_cullFace);
+        
+        glPolygonMode(GL_FRONT_AND_BACK, rs.m_polygonMode);
+        
+        if (rs.m_enableMultisample)
+            glEnable(GL_MULTISAMPLE);
+        else
+            glDisable(GL_MULTISAMPLE);
+        
+        if (rs.m_enableScissor)
+            glEnable(GL_SCISSOR_TEST);
+        else
+            glDisable(GL_SCISSOR_TEST);
+        
+        if (rs.m_enableFrontFaceCCW)
+            glFrontFace(GL_CCW);
+        else
+            glFrontFace(GL_CW);
+    }
+    
+    void SetViewport(int _width, int _height, int _topLeftX, int _topLeftY)
+    {
+        glViewport(_topLeftX,
+                   (PlatformBackend::GetHeight() - (_height + _topLeftY)),
+                   _width,
+                   _height);
     }
 
 	void Draw(int _firstIndex, int _count)
@@ -255,7 +324,10 @@ namespace RenderBackend
 
 	void BindFramebuffer(ResourceHandle _Framebuffer)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferPool.lookup(_Framebuffer).m_id);
+        if(HANDLE_VALID(_Framebuffer))
+            glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferPool.lookup(_Framebuffer).m_id);
+        else
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void UnbindFramebuffer()
@@ -330,7 +402,14 @@ namespace RenderBackend
     
     void DestroyShaderProgram(ResourceHandle _Handle)
     {
-        glDeleteProgram(m_ShaderProgramPool.lookup(_Handle).m_id);
+        ShaderProgram& program = m_ShaderProgramPool.lookup(_Handle);
+        
+        for (int i = 0; i < program.m_shader_count; i++)
+        {
+            DestroyShader(program.m_shaders[i]);
+        }
+        
+        glDeleteProgram(program.m_id);
         m_ShaderProgramPool.remove(_Handle);
     }
     
@@ -1270,30 +1349,47 @@ namespace RenderBackend
         Shader* shader_list[5];
         int count = 0;
         
+        program.m_shader_count = -1;
+        
         if(HANDLE_VALID(_Vertex))
         {
             shader_list[count] = &m_ShaderPool.lookup(_Vertex);
             count++;
+            
+            program.m_shader_count++;
+            program.m_shaders[program.m_shader_count] = _Vertex;
         }
         if(HANDLE_VALID(_Pixel))
         {
             shader_list[count] = &m_ShaderPool.lookup(_Pixel);
             count++;
+            
+            program.m_shader_count++;
+            program.m_shaders[program.m_shader_count] = _Pixel;
         }
         if(HANDLE_VALID(_Geometry))
         {
             shader_list[count] = &m_ShaderPool.lookup(_Geometry);
             count++;
+            
+            program.m_shader_count++;
+            program.m_shaders[program.m_shader_count] = _Geometry;
         }
         if(HANDLE_VALID(_TessellationControl))
         {
             shader_list[count] = &m_ShaderPool.lookup(_TessellationControl);
             count++;
+            
+            program.m_shader_count++;
+            program.m_shaders[program.m_shader_count] = _TessellationControl;
         }
         if(HANDLE_VALID(_TessellationEvalution))
         {
             shader_list[count] = &m_ShaderPool.lookup(_TessellationEvalution);
             count++;
+            
+            program.m_shader_count++;
+            program.m_shaders[program.m_shader_count] = _TessellationEvalution;
         }
 
         // Bind Uniform Buffers

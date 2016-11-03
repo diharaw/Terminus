@@ -79,6 +79,8 @@ ResourceHandle indexBuffer;
 ResourceHandle uniformBuffer;
 ResourceHandle vertexArray;
 ResourceHandle shaderProgram;
+ResourceHandle depthStencilState;
+ResourceHandle rasterizerState;
 
 CommandData::DrawIndexed indexedDrawCmdData;
 CommandData::UniformBufferCopy copyCmdData;
@@ -258,6 +260,12 @@ void SetupGraphicsResources()
     vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
     uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
     
+    depthStencilState = RenderBackend::CreateDepthStencilState();
+    rasterizerState = RenderBackend::CreateRasterizerState();
+    
+    RenderBackend::SetDepthStencilState(depthStencilState);
+    RenderBackend::SetRasterizerState(rasterizerState);
+    
     shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
     
     indexedDrawCmdData.IndexCount = 36;
@@ -268,7 +276,7 @@ void SetupGraphicsResources()
     memcpy(ptr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
     
-    clearRenderTargetData.ClearColor = Vector4(1.0f, 0.0, 0.0f, 1.0f);
+    clearRenderTargetData.ClearColor = Vector4(0.3f, 0.3, 0.3f, 1.0f);
     clearRenderTargetData.Target = FramebufferClearTarget::FB_TARGET_ALL;
     
     copyCmdData.Data = (void*)ptr;
@@ -281,6 +289,8 @@ void SetupGraphicsResources()
 
 void DrawScene()
 {
+    RenderBackend::BindFramebuffer();
+    
     GPUCommand::ClearRenderTarget(&clearRenderTargetData);
     
     // Bind Shader Program
@@ -301,4 +311,5 @@ void CleanUpGraphicsResources()
     RenderBackend::DestroyIndexBuffer(indexBuffer);
     RenderBackend::DestroyVertexBuffer(vertexBuffer);
     RenderBackend::DestroyVertexArray(vertexArray);
+    RenderBackend::DestroyShaderProgram(shaderProgram);
 }
