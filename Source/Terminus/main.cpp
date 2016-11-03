@@ -135,9 +135,6 @@ int main(void)
 
 	cache.RegisterLoader<StbLoader>();
 
-	ResourceHandle handle = cache.Load("Test.png");
-	handle = cache.Load("Test.png");
-
     while(!PlatformBackend::IsShutdownRequested())
     {
         //glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -254,28 +251,18 @@ void SetupGraphicsResources()
     
     // Setup graphics resources
     
-    vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
-    
-    
-    
-    indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
-    
-    
-    
-    vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
-    
+	vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
+	indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
+	vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
+	uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
 
-    uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
-    
-    
-    
     depthStencilState = RenderBackend::CreateDepthStencilState();
-    rasterizerState = RenderBackend::CreateRasterizerState();
+	rasterizerState = RenderBackend::CreateRasterizerState();
     
     RenderBackend::SetDepthStencilState(depthStencilState);
-    RenderBackend::SetRasterizerState(rasterizerState);
+	RenderBackend::SetRasterizerState(rasterizerState);
     
-    shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
+	shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
     
     indexedDrawCmdData.IndexCount = 36;
     
@@ -285,52 +272,43 @@ void SetupGraphicsResources()
     memcpy(ptr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
     
-    clearRenderTargetData.ClearColor = Vector4(0.3f, 1.0, 0.3f, 1.0f);
+    clearRenderTargetData.ClearColor = Vector4(0.3f, 0.3f, 0.3f, 1.0f);
     clearRenderTargetData.Target = FramebufferClearTarget::FB_TARGET_ALL;
     
     copyCmdData.Data = (void*)ptr;
     copyCmdData.Buffer = uniformBuffer;
     copyCmdData.Size = sizeof(Matrix4) * 3;
-    copyCmdData.MapType = BufferMapType::MAP_WRITE;
+	copyCmdData.MapType = BufferMapType::MAP_WRITE;
     
-    GPUCommand::UniformBufferCopy(&copyCmdData);
-    
-    GLenum err (glGetError());
-    
-    while(err!=GL_NO_ERROR)
-    {
-        std::string error;
-        
-        switch(err)
-        {
-            case GL_INVALID_OPERATION:      error="INVALID_OPERATION";      break;
-            case GL_INVALID_ENUM:           error="INVALID_ENUM";           break;
-            case GL_INVALID_VALUE:          error="INVALID_VALUE";          break;
-            case GL_OUT_OF_MEMORY:          error="OUT_OF_MEMORY";          break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:  error="INVALID_FRAMEBUFFER_OPERATION";  break;
-        }
-        
-        std::cerr << "GL_" << error.c_str() <<" - " << std::endl;
-        err=glGetError();
-    }
+	GPUCommand::UniformBufferCopy(&copyCmdData);
 }
 
 void DrawScene()
 {
-    RenderBackend::BindFramebuffer();
-    RenderBackend::SetViewport(PlatformBackend::GetWidth(), PlatformBackend::GetHeight(), 0, 0);
+	float seconds = glfwGetTime();
+
+	model = glm::rotate(glm::radians(seconds * 25.0f), Vector3(0.0f, 1.0f, 1.0f));
+
+	char* memPtr = (char*)copyCmdData.Data;
+
+	memcpy(memPtr, &model, sizeof(glm::mat4));
+	memcpy(memPtr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
+	memcpy(memPtr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
+
+	RenderBackend::BindFramebuffer();
+	RenderBackend::SetViewport(PlatformBackend::GetWidth(), PlatformBackend::GetHeight(), 0, 0);
     
-    GPUCommand::ClearRenderTarget(&clearRenderTargetData);
+	GPUCommand::ClearRenderTarget(&clearRenderTargetData);
     
     // Bind Shader Program
-    RenderBackend::BindShaderProgram(shaderProgram);
+	RenderBackend::BindShaderProgram(shaderProgram);
     // Bind Uniform Buffer
-    GPUCommand::UniformBufferCopy(&copyCmdData);
-    RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);
+	GPUCommand::UniformBufferCopy(&copyCmdData);
+	RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);
     
     // Bind Vertex Array
-    RenderBackend::BindVertexArray(vertexArray);
-    
+	RenderBackend::BindVertexArray(vertexArray);
+
     GPUCommand::DrawIndexed(&indexedDrawCmdData);
 }
 
@@ -338,7 +316,7 @@ void CleanUpGraphicsResources()
 {
     RenderBackend::DestroyIndexBuffer(indexBuffer);
     RenderBackend::DestroyVertexBuffer(vertexBuffer);
-    RenderBackend::DestroyVertexArray(vertexArray);
+	RenderBackend::DestroyVertexArray(vertexArray);
     RenderBackend::DestroyUniformBuffer(uniformBuffer);
-    RenderBackend::DestroyShaderProgram(shaderProgram);
+	RenderBackend::DestroyShaderProgram(shaderProgram);
 }

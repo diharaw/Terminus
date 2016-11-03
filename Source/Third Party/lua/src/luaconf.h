@@ -50,10 +50,12 @@
 /* #undef LUA_USE_WINDOWS */
 
 /* #undef LUA_DL_DLL */
+
+#ifndef WIN32
 #define LUA_USE_POSIX
 #define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
 #define LUA_USE_READLINE	/* needs some extra libraries */
-
+#endif
 /*
 @@ LUA_C89_NUMBERS ensures that Lua uses the largest types available for
 ** C89 ('long' and 'double'); Windows always has '__int64', so it does

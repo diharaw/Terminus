@@ -61,13 +61,17 @@ namespace FileSystem
     FILE * open_file_from_directory(std::string _path, bool _text)
     {
         const char* name = _path.c_str();
+
+#ifdef __APPLE__
         FILE *f;
         
         if(_text)
             f = fopen(name, "r");
         else
             f = fopen(name, "rb");
-        
+#else
+		FILE *f = fopen(name, "rb");
+#endif
         return f;
     }
     

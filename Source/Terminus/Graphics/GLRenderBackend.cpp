@@ -112,17 +112,17 @@ struct ShaderProgram
 namespace RenderBackend
 {
 	// Resource Pools
-	SlotMap<Texture2D,       MAX_TEXTURE_2D>	   m_Texture2DPool;
-	SlotMap<TextureCube,     MAX_TEXTURE_CUBE>     m_TextureCubePool;
-	SlotMap<Framebuffer,     MAX_FRAMEBUFFER>      m_FramebufferPool;
-	SlotMap<VertexArray,     MAX_VERTEX_ARRAY>     m_VertexArrayPool;
-	SlotMap<VertexBuffer,    MAX_VERTEX_BUFFER>    m_VertexBufferPool;
-	SlotMap<UniformBuffer,   MAX_UNIFORM_BUFFER>   m_UniformBufferPool;
-	SlotMap<IndexBuffer,     MAX_INDEX_BUFFER>     m_IndexBufferPool;
-	SlotMap<ShaderProgram,   MAX_SHADER_PROGRAM>   m_ShaderProgramPool;
-	SlotMap<Shader,          MAX_SHADER>		   m_ShaderPool;
-	SlotMap<SamplerState,    MAX_SAMPLER_STATE>    m_SamplerStatePool;
-    SlotMap<RasterizerState, MAX_RASTERIZER_STATE> m_RasterizerStatePool;
+	SlotMap<Texture2D,		   MAX_TEXTURE_2D>			m_Texture2DPool;
+	SlotMap<TextureCube,	   MAX_TEXTURE_CUBE>		m_TextureCubePool;
+	SlotMap<Framebuffer,	   MAX_FRAMEBUFFER>			m_FramebufferPool;
+	SlotMap<VertexArray,	   MAX_VERTEX_ARRAY>		m_VertexArrayPool;
+	SlotMap<VertexBuffer,	   MAX_VERTEX_BUFFER>		m_VertexBufferPool;
+	SlotMap<UniformBuffer,	   MAX_UNIFORM_BUFFER>		m_UniformBufferPool;
+	SlotMap<IndexBuffer,	   MAX_INDEX_BUFFER>		m_IndexBufferPool;
+	SlotMap<ShaderProgram,	   MAX_SHADER_PROGRAM>		m_ShaderProgramPool;
+	SlotMap<Shader,			   MAX_SHADER>				m_ShaderPool;
+	SlotMap<SamplerState,	   MAX_SAMPLER_STATE>		m_SamplerStatePool;
+    SlotMap<RasterizerState,   MAX_RASTERIZER_STATE>	m_RasterizerStatePool;
     SlotMap<DepthStencilState, MAX_DEPTH_STENCIL_STATE> m_DepthStencilStatePool;
     
     // GLFW Window
@@ -134,7 +134,10 @@ namespace RenderBackend
         glfwMakeContextCurrent(m_Window);
 
 		glewExperimental = GL_TRUE;
-		glewInit();
+		if (glewInit() != GLEW_OK)
+		{
+			std::cout << "ERROR" << std::endl;
+		}
     }
     
     void SwapBuffers()
@@ -504,10 +507,10 @@ namespace RenderBackend
 			usageType = GL_DYNAMIC_DRAW;
 		}
 
-		BindVertexBuffer(handle);
-		glBufferData(GL_ARRAY_BUFFER, _Size, _Data, usageType);
-        UnbindVertexBuffer();
-        
+		buffer.Data = _Data;
+		buffer.Size = _Size;
+		buffer.UsageType = usageType;
+
         return handle;
 	}
 
@@ -558,6 +561,10 @@ namespace RenderBackend
 		glBufferData(GL_UNIFORM_BUFFER, _Size, _Data, usageType);
 		UnbindUniformBuffer();
 
+		buffer.Data = _Data;
+		buffer.Size = _Size;
+		buffer.UsageType = usageType;
+
         return handle;
 	}
 
@@ -573,25 +580,14 @@ namespace RenderBackend
 		glGenVertexArrays(1, &vertexArray.m_id);
 		glBindVertexArray(vertexArray.m_id);
 
-        
-        
         VertexBuffer& vertexBuffer = m_VertexBufferPool.lookup(_vertexBuffer);
-        
 		BindVertexBuffer(_vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertexBuffer.Size, vertexBuffer.Data, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertexBuffer.Size, vertexBuffer.Data, vertexBuffer.UsageType);
         
-        
-        
-		UnbindVertexBuffer();
-        
-        IndexBuffer& indexBuffer = m_IndexBufferPool.lookup(_indexBuffer);
-
+		IndexBuffer& indexBuffer = m_IndexBufferPool.lookup(_indexBuffer);
 		BindIndexBuffer(_indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.Size, indexBuffer.Data, indexBuffer.UsageType);
-		UnbindIndexBuffer();
         
-        
-
 		if (_layoutType == LAYOUT_STANDARD_VERTEX)
 		{
 			// Vertices
@@ -671,7 +667,11 @@ namespace RenderBackend
 				glVertexAttribPointer(i, _layout->m_Elements[i].m_numSubElements, dataType, _layout->m_Elements[i].m_isNormalized, _layout->m_vertexSize, (GLvoid*)0);
 			}
 		}
-		
+
+		UnbindVertexArray();
+		UnbindVertexBuffer();
+		UnbindIndexBuffer();
+	
         return handle;
 	}
     
