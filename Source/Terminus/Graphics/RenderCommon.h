@@ -4,63 +4,63 @@
 #include <string>
 #include <vector>
 
-enum GeometryType
+enum class GeometryType
 {
-	GEOMETRY_SCENE = 0,
-	GEOMETRY_QUAD = 1
+	SCENE = 0,
+	QUAD = 1
 };
 
-enum DepthTest
+enum class DepthTest
 {
-	DEPTH_DISABLE = 0,
-	DEPTH_ENABLE = 1
+	DISABLE = 0,
+	ENABLE = 1
 };
 
-enum DrawPrimitive
+enum class DrawPrimitive
 {
-    PRIMITIVE_POINTS = 0,
-    PRIMITIVE_TRIANGLES,
-    PRIMITIVE_TRIANGLE_STRIP,
-    PRIMITIVE_LINES,
-    PRIMITIVE_LINE_STRIP
+    POINTS = 0,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    LINES,
+    LINE_STRIP
 };
 
-enum CullMode
+enum class CullMode
 {
-    CULL_FRONT = 0,
-    CULL_BACK = 1,
-    CULL_NONE = 2,
-	CULL_FRONT_BACK = 3
+    FRONT = 0,
+    BACK = 1,
+    NONE = 2,
+	FRONT_BACK = 3
 };
 
-enum FillMode
+enum class FillMode
 {
-    FILL_SOLID = 0,
-    FILL_WIREFRAME
+    SOLID = 0,
+    WIREFRAME
 };
 
-enum StencilOperation
+enum class StencilOperation
 {
-    STENCIL_OP_KEEP = 0,
-    STENCIL_OP_ZERO,
-    STENCIL_OP_REPLACE,
-    STENCIL_OP_INCR_SAT,
-    STENCIL_OP_DECR_SAT,
-    STENCIL_OP_INVERT,
-    STENCIL_OP_INCR,
-    STENCIL_OP_DECR
+    KEEP = 0,
+    ZERO,
+    REPLACE,
+    INCR_SAT,
+    DECR_SAT,
+    INVERT,
+    INCR,
+    DECR
 };
 
-enum ComparisonFunction
+enum class ComparisonFunction
 {
-    FUNC_NEVER = 0,
-    FUNC_LESS,
-    FUNC_EQUAL,
-    FUNC_LESS_EQUAL,
-    FUNC_GREATER,
-    FUNC_NOT_EQUAL,
-    FUNC_GREATER_EQUAL,
-    FUNC_ALWAYS
+    NEVER = 0,
+    LESS,
+    EQUAL,
+    LESS_EQUAL,
+    GREATER,
+    NOT_EQUAL,
+    GREATER_EQUAL,
+    ALWAYS
 };
 
 struct RasterizerStateDesc
@@ -99,42 +99,44 @@ struct DepthStencilStateDesc
 
 // BUFFER COMMON
 
-enum BufferType
+enum class BufferType
 {
-    BUFFER_VERTEX = 0,
-    BUFFER_INDEX,
-    BUFFER_UNIFORM,
-    BUFFER_APPEND,
-    BUFFER_QUERY
+    VERTEX = 0,
+    INDEX,
+    UNIFORM,
+    APPEND,
+    QUERY
 };
 
-enum BufferUsageType
+enum class BufferUsageType
 {
-    USAGE_STATIC = 0,
-    USAGE_DYNAMIC
+    STATIC = 0,
+    DYNAMIC
 };
 
 enum class BufferMapType
 {
-    MAP_READ = 0,
-    MAP_WRITE,
-    MAP_READ_WRITE
+    READ = 0,
+    WRITE,
+    READ_WRITE
 };
 
-enum BufferDataType
+enum class BufferDataType
 {
-    BUFFER_FLOAT = 0,
-    BUFFER_INT,
-    BUFFER_UINT
+    FLOAT = 0,
+    INT,
+    UINT
 };
 
 // TODO: add instancing capability
 
-enum InputLayoutType
+enum class InputLayoutType
 {
-    LAYOUT_STANDARD_VERTEX = 0,
-    LAYOUT_STANDARD_SKINNED_VERTEX,
-    LAYOUT_CUSTOM
+    STANDARD_VERTEX = 0,
+    STANDARD_SKINNED_VERTEX,
+    OCEAN_VERTEX,
+    QUAD_VERTEX,
+    CUSTOM_VERTEX
 };
 
 struct InputElement
@@ -161,13 +163,13 @@ struct InputLayout
 
 enum class FramebufferClearTarget
 {
-    FB_TARGET_COLOR = 1,
-    FB_TARGET_DEPTH = 2,
-    FB_TARGET_STENCIL = 4,
-	FB_TARGET_ALL = 8
+    COLOR = 1,
+    DEPTH = 2,
+    STENCIL = 4,
+	ALL = 8
 };
 
-enum TextureTarget
+enum class TextureTarget
 {
     TEXTURE1D = 0,
     TEXTURE2D,
@@ -175,7 +177,7 @@ enum TextureTarget
     TEXTURECUBE
 };
 
-enum TextureWrapMode
+enum class TextureWrapMode
 {
     REPEAT = 0,
     MIRRORED_REPEAT,
@@ -183,27 +185,27 @@ enum TextureWrapMode
     CLAMP_TO_BORDER
 };
 
-enum TextureFormat
+enum class TextureFormat
 {
-    FORMAT_R32G32B32_FLOAT = 0,
-    FORMAT_R32G32B32A32_FLOAT,
-    FORMAT_R32G32B32_UINT,
-    FORMAT_R32G32B32A32_UINT,
-    FORMAT_R32G32B32_INT,
-    FORMAT_R32G32B32A32_INT,
-    FORMAT_R16G16B16A16_FLOAT,
-    FORMAT_R16G16B16A16_UINT,
-    FORMAT_R16G16B16A16_INT,
-    FORMAT_R8G8B8A8_UNORM,
-    FORMAT_R8G8B8A8_UINT,
-    FORMAT_D32_FLOAT_S8_UINT,
-    FORMAT_D24_FLOAT_S8_UINT,
-    FORMAT_D16_FLOAT
+    R32G32B32_FLOAT = 0,
+    R32G32B32A32_FLOAT,
+    R32G32B32_UINT,
+    R32G32B32A32_UINT,
+    R32G32B32_INT,
+    R32G32B32A32_INT,
+    R16G16B16A16_FLOAT,
+    R16G16B16A16_UINT,
+    R16G16B16A16_INT,
+    R8G8B8A8_UNORM,
+    R8G8B8A8_UINT,
+    D32_FLOAT_S8_UINT,
+    D24_FLOAT_S8_UINT,
+    D16_FLOAT
 };
 
 // GL_LINEAR_MIP_MAP_LINEAR = D3D11_FILTER_MIN_MAG_MIP_LINEAR
 
-enum TextureFilteringMode
+enum class TextureFilteringMode
 {
     LINEAR_ALL = 0,
     NEAREST_ALL,
@@ -214,13 +216,13 @@ enum TextureFilteringMode
 
 // Shader Common
 
-enum ShaderType
+enum class ShaderType
 {
-    SHADER_VERTEX = 0,
-    SHADER_GEOMETRY = 1,
-    SHADER_TESSELLATION_CONTROL = 2,
-    SHADER_TESSELLATION_EVALUATION = 3,
-    SHADER_PIXEL = 4
+    VERTEX = 0,
+    GEOMETRY = 1,
+    TESSELLATION_CONTROL = 2,
+    TESSELLATION_EVALUATION = 3,
+    PIXEL = 4
 };
 
 #endif 
