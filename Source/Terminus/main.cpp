@@ -81,12 +81,15 @@ ResourceHandle vertexArray;
 ResourceHandle shaderProgram;
 ResourceHandle depthStencilState;
 ResourceHandle rasterizerState;
+ResourceHandle texture;
+ResourceHandle samplerState;
 
 CommandData::DrawIndexed indexedDrawCmdData;
 CommandData::UniformBufferCopy copyCmdData;
 CommandData::ClearRenderTarget clearRenderTargetData;
 
 ShaderCache shaderCache;
+TextureCache textureCache;
 
 // Init method declarations
 
@@ -130,10 +133,6 @@ int main(void)
     Input::SetActiveContext("Test");
     
     Test test;
-    
-	TextureCache cache;
-
-	cache.RegisterLoader<StbLoader>();
 
     while(!PlatformBackend::IsShutdownRequested())
     {
@@ -248,8 +247,13 @@ void SetupMatrices()
 void SetupGraphicsResources()
 {
     shaderCache.RegisterLoader<TextLoader>();
+    textureCache.RegisterLoader<StbLoader>();
     
     // Setup graphics resources
+    
+    GL_CHECK_ERROR(texture = textureCache.Load("brick.png"));
+    
+    GL_CHECK_ERROR(samplerState = RenderBackend::CreateSamplerState(LINEAR_ALL, LINEAR_ALL, REPEAT, REPEAT, REPEAT));
     
 	vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
 	indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
@@ -301,7 +305,9 @@ void DrawScene()
 	GPUCommand::ClearRenderTarget(&clearRenderTargetData);
     
     // Bind Shader Program
-	RenderBackend::BindShaderProgram(shaderProgram);
+    RenderBackend::BindShaderProgram(shaderProgram);
+    GL_CHECK_ERROR(RenderBackend::BindSamplerState(samplerState, 0, SHADER_PIXEL));
+    GL_CHECK_ERROR(RenderBackend::BindTexture2D(texture, SHADER_PIXEL));
     // Bind Uniform Buffer
 	GPUCommand::UniformBufferCopy(&copyCmdData);
 	RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);

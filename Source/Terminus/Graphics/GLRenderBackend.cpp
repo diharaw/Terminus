@@ -128,6 +128,8 @@ namespace RenderBackend
     // GLFW Window
     GLFWwindow* m_Window;
     
+    ResourceHandle m_CurrentProgram;
+    
     void Initialize()
     {
         m_Window = PlatformBackend::GetWindow();
@@ -249,10 +251,13 @@ namespace RenderBackend
 		}
 	}
 
-	void BindSamplerState(ResourceHandle _SamplerState, int _Slot)
+	void BindSamplerState(ResourceHandle _SamplerState, int _Slot, ShaderType _shaderStage)
 	{
 		glActiveTexture(GL_TEXTURE0 + _Slot);
 		glBindSampler(_Slot, m_SamplerStatePool.lookup(_Slot).m_id);
+        
+        ResourceHandle hndl = m_ShaderProgramPool.lookup(m_CurrentProgram).m_shaders[_shaderStage];
+        glUniform1i(m_ShaderPool.lookup(hndl).m_sampler_bindings[_Slot], _Slot);
 	}
 
 	void UnbindSamplerState(int _Slot)
@@ -261,7 +266,7 @@ namespace RenderBackend
 		glBindSampler(_Slot, 0);
 	}
 
-	void BindTexture2D(ResourceHandle _Texture2D)
+	void BindTexture2D(ResourceHandle _Texture2D, ShaderType _shaderStage)
 	{
 		glBindTexture(GL_TEXTURE_2D, m_Texture2DPool.lookup(_Texture2D).m_id);
 	}
@@ -278,7 +283,8 @@ namespace RenderBackend
 
 	void BindShaderProgram(ResourceHandle _ShaderProgram)
 	{
-        glUseProgram(m_ShaderProgramPool.lookup(_ShaderProgram).m_id);
+        m_CurrentProgram = _ShaderProgram;
+        glUseProgram(m_ShaderProgramPool.lookup(m_CurrentProgram).m_id);
 	}
 
 	void BindVertexArray(ResourceHandle _VertexArray)
@@ -444,7 +450,7 @@ namespace RenderBackend
 
 		return handle;
 	}
-
+    
 	ResourceHandle CreateTextureCube()
 	{
         return 0;
@@ -467,14 +473,14 @@ namespace RenderBackend
 		{
             Texture2D& texture = m_Texture2DPool.lookup(_RenderTargets[i]);
             
-			BindTexture2D(_RenderTargets[i]);
+			BindTexture2D(_RenderTargets[i], SHADER_VERTEX);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture.m_id, 0);
 			UnbindTexture2D();
 		}
 
         Texture2D& depth = m_Texture2DPool.lookup(_DepthTarget);
         
-		BindTexture2D(_DepthTarget);
+		BindTexture2D(_DepthTarget, SHADER_VERTEX);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.m_id, 0);
 		UnbindTexture2D();
 
@@ -1370,7 +1376,7 @@ namespace RenderBackend
             count++;
             
             program.m_shader_count++;
-            program.m_shaders[program.m_shader_count] = _Vertex;
+            program.m_shaders[SHADER_VERTEX] = _Vertex;
         }
         if(HANDLE_VALID(_Pixel))
         {
@@ -1378,7 +1384,7 @@ namespace RenderBackend
             count++;
             
             program.m_shader_count++;
-            program.m_shaders[program.m_shader_count] = _Pixel;
+            program.m_shaders[SHADER_PIXEL] = _Pixel;
         }
         if(HANDLE_VALID(_Geometry))
         {
@@ -1386,7 +1392,7 @@ namespace RenderBackend
             count++;
             
             program.m_shader_count++;
-            program.m_shaders[program.m_shader_count] = _Geometry;
+            program.m_shaders[SHADER_GEOMETRY] = _Geometry;
         }
         if(HANDLE_VALID(_TessellationControl))
         {
@@ -1394,7 +1400,7 @@ namespace RenderBackend
             count++;
             
             program.m_shader_count++;
-            program.m_shaders[program.m_shader_count] = _TessellationControl;
+            program.m_shaders[SHADER_TESSELLATION_CONTROL] = _TessellationControl;
         }
         if(HANDLE_VALID(_TessellationEvalution))
         {
@@ -1402,7 +1408,7 @@ namespace RenderBackend
             count++;
             
             program.m_shader_count++;
-            program.m_shaders[program.m_shader_count] = _TessellationEvalution;
+            program.m_shaders[SHADER_TESSELLATION_EVALUATION] = _TessellationEvalution;
         }
 
         // Bind Uniform Buffers

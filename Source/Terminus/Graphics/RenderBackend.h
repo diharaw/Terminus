@@ -243,11 +243,11 @@ namespace RenderBackend
     
     extern void ClearRenderTarget(Vector4 _ClearColor, FramebufferClearTarget _Target);
     
-    extern void BindSamplerState(ResourceHandle _SamplerState, int _Slot);
+    extern void BindSamplerState(ResourceHandle _SamplerState, int _Slot, ShaderType _shaderStage);
     
     extern void UnbindSamplerState(int _Slot);
     
-    extern void BindTexture2D(ResourceHandle _Texture2D);
+    extern void BindTexture2D(ResourceHandle _Texture2D, ShaderType _shaderStage);
     
     extern void UnbindTexture2D();
     
@@ -279,6 +279,8 @@ namespace RenderBackend
     
     extern void UnmapUniformBuffer();
     
+    // Destory Methods - Handles
+    
     extern void DestroyVertexBuffer(ResourceHandle _Handle);
     
     extern void DestroyIndexBuffer(ResourceHandle _Handle);
@@ -292,6 +294,7 @@ namespace RenderBackend
     extern void DestroyShaderProgram(ResourceHandle _Handle);
     
     extern void DestroySamplerState(ResourceHandle _Handle);
-}
 
+}
+        
 #endif
