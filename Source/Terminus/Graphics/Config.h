@@ -3,6 +3,8 @@
 
 #define TERMINUS_OPENGL
 
+#define TERMINUS_ENABLE_ERROR_CHECK
+
 #ifdef __APPLE__
     #if !defined(TERMINUS_OPENGL) && !defined(TERMINUS_METAL)
         #define TERMINUS_OPENGL

@@ -1,4 +1,6 @@
 #include "RenderDevice.h"
+#include "../Utility/StringUtility.h"
+#include "../Platform/PlatformBackend.h"
 #include <iostream>
 
 #ifdef TERMINUS_OPENGL
@@ -28,10 +30,10 @@ namespace Terminus { namespace Graphics {
 	{
 		Texture1D* texture = new Texture1D();
 
-		glGenTextures(1, &texture->m_id);
+		CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_1D;
 
-		glBindTexture(GL_TEXTURE_1D, texture->m_id);
+		CHECK_ERROR(glBindTexture(GL_TEXTURE_1D, texture->m_id));
 
 		GLenum texformat, textype;
 
@@ -125,12 +127,14 @@ namespace Terminus { namespace Graphics {
 			break;
 		}
 
-		glTexImage1D(GL_TEXTURE_1D, 0, texformat, width, 0, texformat, textype, data);
+		CHECK_ERROR(glTexImage1D(GL_TEXTURE_1D, 0, texformat, width, 0, texformat, textype, data));
 
-		if(generateMipmaps)
-			glGenerateMipmap(GL_TEXTURE_1D);
-
-		glBindTexture(GL_TEXTURE_1D, 0);
+		if (generateMipmaps)
+		{
+			CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_1D));
+		}
+		
+		CHECK_ERROR(glBindTexture(GL_TEXTURE_1D, 0));
 
 		return texture;
 	}
@@ -144,10 +148,10 @@ namespace Terminus { namespace Graphics {
 	{
 		Texture2D* texture = new Texture2D();
 
-		glGenTextures(1, &texture->m_id);
+		CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_2D;
 
-		glBindTexture(GL_TEXTURE_2D, texture->m_id);
+		CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texture->m_id));
 
 		GLenum texformat, textype;
 
@@ -241,12 +245,14 @@ namespace Terminus { namespace Graphics {
 			break;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, texformat, width, height,  0, texformat, textype, data);
+		CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, texformat, width, height,  0, texformat, textype, data));
 
 		if (generateMipmaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
+		{
+			CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+		}
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
 
 		return texture;
 	}
@@ -261,10 +267,10 @@ namespace Terminus { namespace Graphics {
 	{
 		Texture3D* texture = new Texture3D();
 
-		glGenTextures(1, &texture->m_id);
+		CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_3D;
 
-		glBindTexture(GL_TEXTURE_3D, texture->m_id);
+		CHECK_ERROR(glBindTexture(GL_TEXTURE_3D, texture->m_id));
 
 		GLenum texformat, textype;
 
@@ -361,9 +367,11 @@ namespace Terminus { namespace Graphics {
 		//glTexImage3D(GL_TEXTURE_3D, 0, texformat, width, height, 0, texformat, textype, data);
 
 		if (generateMipmaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
+		{
+			CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+		}
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
 
 		return texture;
 	}
@@ -384,7 +392,7 @@ namespace Terminus { namespace Graphics {
 												   BufferUsageType usageType)
 	{
 		VertexBuffer* buffer = new VertexBuffer();
-		glGenBuffers(1, &buffer->m_id);
+		CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
 
@@ -397,6 +405,7 @@ namespace Terminus { namespace Graphics {
 			glusageType = GL_DYNAMIC_DRAW;
 		}
 
+		buffer->bufferType = GL_ARRAY_BUFFER;
 		buffer->Data = data;
 		buffer->Size = size;
 		buffer->UsageType = glusageType;
@@ -409,7 +418,7 @@ namespace Terminus { namespace Graphics {
 												 BufferUsageType usageType)
 	{
 		IndexBuffer* buffer = new IndexBuffer();
-		glGenBuffers(1, &buffer->m_id);
+		CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
 
@@ -422,6 +431,7 @@ namespace Terminus { namespace Graphics {
 			glusageType = GL_DYNAMIC_DRAW;
 		}
 
+		buffer->bufferType = GL_ELEMENT_ARRAY_BUFFER;
 		buffer->Data = data;
 		buffer->Size = size;
 		buffer->UsageType = glusageType;
@@ -434,7 +444,7 @@ namespace Terminus { namespace Graphics {
 													 BufferUsageType usageType)
 	{
 		UniformBuffer* buffer = new UniformBuffer();
-		glGenBuffers(1, &buffer->m_id);
+		CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
 
@@ -447,10 +457,11 @@ namespace Terminus { namespace Graphics {
 			glusageType = GL_DYNAMIC_DRAW;
 		}
 
-		glBindBuffer(GL_UNIFORM_BUFFER, buffer->m_id);
-		glBufferData(GL_UNIFORM_BUFFER, size, data, glusageType);
-		glBindBuffer(GL_UNIFORM_BUFFER,0);
+		CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, buffer->m_id));
+		CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data, glusageType));
+		CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER,0));
 
+		buffer->bufferType = GL_UNIFORM_BUFFER;
 		buffer->Data = data;
 		buffer->Size = size;
 		buffer->UsageType = glusageType;
@@ -465,74 +476,74 @@ namespace Terminus { namespace Graphics {
 	{
 		VertexArray* vertexArray = new VertexArray();
 
-		glGenVertexArrays(1, &vertexArray->m_id);
-		glBindVertexArray(vertexArray->m_id);
+		CHECK_ERROR(glGenVertexArrays(1, &vertexArray->m_id));
+		CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
 
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id);
-		glBufferData(GL_ARRAY_BUFFER, vertexBuffer->Size, vertexBuffer->Data, vertexBuffer->UsageType);
+		CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
+		CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, vertexBuffer->Size, vertexBuffer->Data, vertexBuffer->UsageType));
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->Size, indexBuffer->Data, indexBuffer->UsageType);
+		CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
+		CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->Size, indexBuffer->Data, indexBuffer->UsageType));
 
 		if (layoutType == InputLayoutType::STANDARD_VERTEX)
 		{
 			// Vertices
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+			CHECK_ERROR(glEnableVertexAttribArray(0));
+			CHECK_ERROR(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0));
 
 			// Tex Coords
 
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_TexCoord));
+			CHECK_ERROR(glEnableVertexAttribArray(1));
+			CHECK_ERROR(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_TexCoord)));
 
 			// Normals
 
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Normal));
+			CHECK_ERROR(glEnableVertexAttribArray(2));
+			CHECK_ERROR(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Normal)));
 
 			// Tangents
 
-			glEnableVertexAttribArray(3);
-			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Tangent));
+			CHECK_ERROR(glEnableVertexAttribArray(3));
+			CHECK_ERROR(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Tangent)));
 		}
 		else if (layoutType == InputLayoutType::STANDARD_SKINNED_VERTEX)
 		{
 			// Vertices
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)0);
+			CHECK_ERROR(glEnableVertexAttribArray(0));
+			CHECK_ERROR(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)0));
 
 			// Tex Coords
 
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_TexCoord));
+			CHECK_ERROR(glEnableVertexAttribArray(1));
+			CHECK_ERROR(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_TexCoord)));
 
 			// Normals
 
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Normal));
+			CHECK_ERROR(glEnableVertexAttribArray(2));
+			CHECK_ERROR(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Normal)));
 
 			// Tangents
 
-			glEnableVertexAttribArray(3);
-			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Tangent));
+			CHECK_ERROR(glEnableVertexAttribArray(3));
+			CHECK_ERROR(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Tangent)));
 
 			// Bone Indices
 
-			glEnableVertexAttribArray(4);
-			glVertexAttribIPointer(4, 4, GL_INT, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_BoneIndices));
+			CHECK_ERROR(glEnableVertexAttribArray(4));
+			CHECK_ERROR(glVertexAttribIPointer(4, 4, GL_INT, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_BoneIndices)));
 
 			// Bone Weights
 
-			glEnableVertexAttribArray(5);
-			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)(offsetof(SkeletalVertex, m_BoneWeights)));
+			CHECK_ERROR(glEnableVertexAttribArray(5));
+			CHECK_ERROR(glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)(offsetof(SkeletalVertex, m_BoneWeights))));
 		}
 		else if (layoutType == InputLayoutType::CUSTOM_VERTEX)
 		{
 			for (int i = 0; i < layout->m_Elements.size(); i++)
 			{
-				glEnableVertexAttribArray(i);
+				CHECK_ERROR(glEnableVertexAttribArray(i));
 
 				GLenum dataType = 0;
 
@@ -550,13 +561,13 @@ namespace Terminus { namespace Graphics {
 					break;
 				}
 
-				glVertexAttribPointer(i, layout->m_Elements[i].m_numSubElements, dataType, layout->m_Elements[i].m_isNormalized, layout->m_vertexSize, (GLvoid*)0);
+				CHECK_ERROR(glVertexAttribPointer(i, layout->m_Elements[i].m_numSubElements, dataType, layout->m_Elements[i].m_isNormalized, layout->m_vertexSize, (GLvoid*)0));
 			}
 		}
 
-		glBindVertexArray(vertexArray->m_id);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id);
+		CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
+		CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
+		CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
 
 		return vertexArray;
 	}
@@ -638,116 +649,120 @@ namespace Terminus { namespace Graphics {
 	{
 		SamplerState* samplerState = new SamplerState();
 
-		glGenSamplers(1, &samplerState->m_id);
+		CHECK_ERROR(glGenSamplers(1, &samplerState->m_id));
 
 		switch (wrapModeU)
 		{
 		case TextureWrapMode::REPEAT:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_REPEAT));
 			break;
 
 		case TextureWrapMode::MIRRORED_REPEAT:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_EDGE:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
 			GLfloat borderColor[] = { borderRed, borderGreen, borderBlue, borderAlpha };
-			glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor);
+			CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
 			break;
 		}
 
 		switch (wrapModeV)
 		{
 		case TextureWrapMode::REPEAT:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_REPEAT));
 			break;
 
 		case TextureWrapMode::MIRRORED_REPEAT:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_EDGE:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
 			GLfloat borderColor[] = { borderRed, borderGreen, borderBlue, borderAlpha };
-			glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor);
+			CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
 			break;
 		}
 
 		switch (wrapModeW)
 		{
 		case TextureWrapMode::REPEAT:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_REPEAT);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_REPEAT));
 			break;
 
 		case TextureWrapMode::MIRRORED_REPEAT:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_EDGE:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER));
 			GLfloat borderColor[] = { borderRed, borderGreen, borderBlue, borderAlpha };
-			glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor);
+			CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
 			break;
 		}
 
 		if (minFilter == TextureFilteringMode::LINEAR_ALL && magFilter == TextureFilteringMode::LINEAR_ALL)
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 		}
 		else if (minFilter == TextureFilteringMode::LINEAR_ALL && magFilter == TextureFilteringMode::NEAREST_ALL)
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 		}
 		else if (minFilter == TextureFilteringMode::NEAREST_ALL && magFilter == TextureFilteringMode::LINEAR_ALL)
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
 		}
 		else if (minFilter == TextureFilteringMode::NEAREST_ALL && magFilter == TextureFilteringMode::NEAREST_ALL)
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
 		}
 		else if (minFilter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST && magFilter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST)
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
 		}
 		else if (minFilter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR && magFilter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR)
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
 		}
 		else
 		{
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 		}
 
 		if (GLEW_EXT_texture_filter_anisotropic)
 		{
 			GLfloat glmaxAnisotropy;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glmaxAnisotropy);
+			CHECK_ERROR(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glmaxAnisotropy));
 
 			if (maxAnisotropy <= glmaxAnisotropy)
-				glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+			{
+				CHECK_ERROR(glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy));
+			}
 			else
-				glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, glmaxAnisotropy);
+			{
+				CHECK_ERROR(glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, glmaxAnisotropy));
+			}
 		}
 
 		return samplerState;
@@ -757,7 +772,7 @@ namespace Terminus { namespace Graphics {
 	{
 		Framebuffer* framebuffer = new Framebuffer();
 
-		glGenFramebuffers(1, &framebuffer->m_id);
+		CHECK_ERROR(glGenFramebuffers(1, &framebuffer->m_id));
 
 		return framebuffer;
 	}
@@ -771,7 +786,9 @@ namespace Terminus { namespace Graphics {
 		switch (type)
 		{
 		case ShaderType::VERTEX:
-			shader->m_id = glCreateShader(GL_VERTEX_SHADER);
+		{
+			CHECK_ERROR(shader->m_id = glCreateShader(GL_VERTEX_SHADER));
+		}
 			break;
 
 		case ShaderType::GEOMETRY:
@@ -798,13 +815,13 @@ namespace Terminus { namespace Graphics {
 
 		const GLchar* source = shaderSource;
 
-		glShaderSource(shader->m_id, 1, &source, NULL);
-		glCompileShader(shader->m_id);
-		glGetShaderiv(shader->m_id, GL_COMPILE_STATUS, &success);
+		CHECK_ERROR(glShaderSource(shader->m_id, 1, &source, NULL));
+		CHECK_ERROR(glCompileShader(shader->m_id));
+		CHECK_ERROR(glGetShaderiv(shader->m_id, GL_COMPILE_STATUS, &success));
 
 		if (success == GL_FALSE)
 		{
-			glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog);
+			CHECK_ERROR(glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog));
 			std::cout << "Shader Compilation Failed" << std::endl;
 			return nullptr;
 		}
@@ -818,7 +835,70 @@ namespace Terminus { namespace Graphics {
 													 Shader* controlShader,
 													 Shader* evaluationShader)
 	{
+		ShaderProgram* shaderProgram = new ShaderProgram();
 
+		shaderProgram->m_shader_map[ShaderType::VERTEX] = vertexShader;
+		shaderProgram->m_shader_map[ShaderType::PIXEL] = pixelShader;
+
+		if (geometryShader)
+			shaderProgram->m_shader_map[ShaderType::GEOMETRY] = geometryShader;
+
+		if (controlShader && evaluationShader)
+		{
+			shaderProgram->m_shader_map[ShaderType::TESSELLATION_CONTROL] = controlShader;
+			shaderProgram->m_shader_map[ShaderType::TESSELLATION_EVALUATION] = evaluationShader;
+		}
+
+		for (auto it : shaderProgram->m_shader_map)
+			glAttachShader(shaderProgram->m_id, it.second->m_id);
+
+		glLinkProgram(shaderProgram->m_id);
+
+		GLint success;
+		char infoLog[512];
+
+		glGetProgramiv(shaderProgram->m_id, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			glGetProgramInfoLog(shaderProgram->m_id, 512, NULL, infoLog);
+			return nullptr;
+		}
+
+		// Bind Uniform Buffers
+		for (auto it : shaderProgram->m_shader_map)
+		{
+			StringVector uboList = StringUtility::find_line("#binding", it.second->m_source);
+
+			for (int i = 0; i < uboList.size(); i++)
+			{
+				StringVector tokens = StringUtility::delimit(" ", uboList[i]);
+				std::string uniformName = tokens[3];
+				GLuint binding = (GLuint)atoi(tokens[5].c_str());
+				const GLchar* uniformNameChar = uniformName.c_str();
+			    GLuint uboIndex = glGetUniformBlockIndex(shaderProgram->m_id, uniformNameChar);
+				glUniformBlockBinding(shaderProgram->m_id, uboIndex, binding);
+			}
+		}
+
+		// Bind Uniform Samplers 
+		for (auto it : shaderProgram->m_shader_map)
+		{
+			StringVector samplerList = StringUtility::find_line("uniform sampler", it.second->m_source);
+
+			for (int i = 0; i < samplerList.size(); i++)
+			{
+				StringVector tokens = StringUtility::delimit(" ", samplerList[i]);
+				std::string uniformName = tokens[2];
+				uniformName.erase(uniformName.end() - 1, uniformName.end());
+
+				GLuint binding = (GLuint)atoi(tokens[4].c_str());
+				const GLchar* uniformNameChar = uniformName.c_str();
+				GLuint location = glGetUniformLocation(shaderProgram->m_id, uniformNameChar);
+				it.second->m_sampler_bindings[binding] = location;
+			}
+		}
+
+		return shaderProgram;
 	}
 
 	DepthStencilState* RenderDevice::CreateDepthStencilState(bool enableDepthTest,
@@ -1214,164 +1294,304 @@ namespace Terminus { namespace Graphics {
 	{
 		framebuffer->m_render_targets.push_back(renderTarget);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id);
-		glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (framebuffer->m_render_targets.size() - 1), renderTarget->m_glTextureTarget, renderTarget->m_id, 0);
+		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
+		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id));
+		CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (framebuffer->m_render_targets.size() - 1), renderTarget->m_glTextureTarget, renderTarget->m_id, 0));
 
 		std::vector<GLuint> drawBuffers;
 
 		for (int i = 0; i < framebuffer->m_render_targets.size(); i++)
 			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
 
-		glDrawBuffers(framebuffer->m_render_targets.size(), &drawBuffers[0]);
+		CHECK_ERROR(glDrawBuffers(framebuffer->m_render_targets.size(), &drawBuffers[0]));
 
-		glBindTexture(renderTarget->m_glTextureTarget, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
+		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	void RenderDevice::AttachDepthStencilTarget(Framebuffer* framebuffer, Texture* renderTarget)
 	{
 		framebuffer->m_depth_target = renderTarget;
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id);
-		glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, renderTarget->m_glTextureTarget, renderTarget->m_id, 0);
-		glBindTexture(renderTarget->m_glTextureTarget, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
+		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id));
+		CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, renderTarget->m_glTextureTarget, renderTarget->m_id, 0));
+		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
+		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	void RenderDevice::DestroyTexture1D(Texture1D* texture)
 	{
-
+		glDeleteTextures(1, &texture->m_id);
+		delete texture;
 	}
 
 	void RenderDevice::DestroyTexture2D(Texture2D* texture)
 	{
-
+		glDeleteTextures(1, &texture->m_id);
+		delete texture;
 	}
 
 	void RenderDevice::DestroyTexture3D(Texture3D* texture)
 	{
-
+		glDeleteTextures(1, &texture->m_id);
+		delete texture;
 	}
 
 	void RenderDevice::DestroyTextureCube(TextureCube* texture)
 	{
-
-
+		glDeleteTextures(1, &texture->m_id);
+		delete texture;
 	}
 
 	void RenderDevice::DestroyVertexBuffer(VertexBuffer* buffer)
 	{
-
+		glDeleteBuffers(1, &buffer->m_id);
+		delete buffer;
 	}
 
 	void RenderDevice::DestroyIndexBuffer(IndexBuffer* buffer)
 	{
-
+		glDeleteBuffers(1, &buffer->m_id);
+		delete buffer;
 	}
 
 	void RenderDevice::DestroyUniformBuffer(UniformBuffer* buffer)
 	{
-
+		glDeleteBuffers(1, &buffer->m_id);
+		delete buffer;
 	}
 
 	void RenderDevice::DestroyRasterizerState(RasterizerState* state)
 	{
-
+		delete state;
 	}
 
 	void RenderDevice::DestroySamplerState(SamplerState* state)
 	{
-
+		delete state;
 	}
 
 	void RenderDevice::DestroyDepthStencilState(DepthStencilState* state)
 	{
-
-
+		delete state;
 	}
 
 	void RenderDevice::DestroyFramebuffer(Framebuffer* framebuffer)
 	{
-
+		glDeleteFramebuffers(1, &framebuffer->m_id);
+		delete framebuffer;
 	}
 
 	void RenderDevice::DestroyShader(Shader* shader)
 	{
-
+		delete shader;
 	}
 
 	void RenderDevice::DestoryShaderProgram(ShaderProgram* program)
 	{
+		for (auto it : program->m_shader_map)
+			delete it.second;
 
+		glDeleteProgram(program->m_id);
+		delete program;
 	}
 
 	void RenderDevice::BindTexture(Texture* texture,
 								   ShaderType shaderStage)
 	{
-
+		CHECK_ERROR(glBindTexture(texture->m_glTextureTarget ,texture->m_id));
 	}
 
 	void RenderDevice::BindUniformBuffer(UniformBuffer* uniformBuffer,
 									     ShaderType shaderStage,
 									     uint bufferSlot)
 	{
-
+		CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, bufferSlot, uniformBuffer->m_id));
 	}
 
 	void RenderDevice::BindRasterizerState(RasterizerState* state)
 	{
+		if (state->m_enableCullFace)
+			glEnable(GL_CULL_FACE);
+		else
+			glDisable(GL_CULL_FACE);
 
+		CHECK_ERROR(glCullFace(state->m_cullFace));
+
+		CHECK_ERROR(glPolygonMode(GL_FRONT_AND_BACK, state->m_polygonMode));
+
+		if (state->m_enableMultisample)
+			glEnable(GL_MULTISAMPLE);
+		else
+			glDisable(GL_MULTISAMPLE);
+
+		if (state->m_enableScissor)
+			glEnable(GL_SCISSOR_TEST);
+		else
+			glDisable(GL_SCISSOR_TEST);
+
+		if (state->m_enableFrontFaceCCW)
+			glFrontFace(GL_CCW);
+		else
+			glFrontFace(GL_CW);
 	}
 
 	void RenderDevice::BindSamplerState(SamplerState* state,
 										ShaderType shaderStage,
 										uint slot)
 	{
-
+		CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));
+		CHECK_ERROR(glBindSampler(slot, state->m_id));
+		CHECK_ERROR(glUniform1i(m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
 	}
 
 	void RenderDevice::BindFramebuffer(Framebuffer* framebuffer)
 	{
-
+		if (framebuffer)
+		{
+			CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
+		}
+		else
+		{
+			CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		}
 	}
 
 	void RenderDevice::BindDepthStencilState(DepthStencilState* state)
 	{
+		// Set Depth Options
 
+		if (state->m_enableDepth)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+
+		glDepthFunc(state->m_depthFunc);
+		glDepthMask((state->m_depthMask) ? GL_TRUE : GL_FALSE);
+
+		// Set Stencil Options
+
+		if (state->m_enableStencil)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+
+		CHECK_ERROR(glStencilFuncSeparate(GL_FRONT, state->m_frontStencilComparison, 1, state->m_stencilMask));
+		CHECK_ERROR(glStencilFuncSeparate(GL_FRONT, state->m_backStencilComparison, 1, state->m_stencilMask));
+
+		// Front Stencil Operation
+
+		CHECK_ERROR(glStencilOpSeparate(GL_FRONT, state->m_frontStencilFail, state->m_frontStencilPassDepthFail, state->m_frontStencilPassDepthPass));
+		CHECK_ERROR(glStencilOpSeparate(GL_BACK, state->m_backStencilFail, state->m_backStencilPassDepthFail, state->m_backStencilPassDepthPass));
 	}
 
 	void RenderDevice::BindShaderProgram(ShaderProgram* program)
 	{
-
+		CHECK_ERROR(glUseProgram(program->m_id));
 	}
 
 	void* RenderDevice::MapBuffer(Buffer* buffer, BufferMapType type)
 	{
+		void* bufferPointer;
 
+		switch (type)
+		{
+
+		case BufferMapType::READ:
+		{
+			CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_READ_ONLY));
+			break;
+		}
+
+		case BufferMapType::WRITE:
+		{
+			CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_WRITE_ONLY));
+			break;
+		}
+
+		case BufferMapType::READ_WRITE:
+		{
+			CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_READ_WRITE));
+			break;
+		}
+
+		default:
+			bufferPointer = nullptr;
+			break;
+		}
 	}
 
 	void RenderDevice::UnmapBuffer(Buffer* buffer)
 	{
+		CHECK_ERROR(glUnmapBuffer(buffer->bufferType));
+	}
 
+	void RenderDevice::SetPrimitiveType(DrawPrimitive _primitive)
+	{
+		switch (_primitive)
+		{
+		case DrawPrimitive::POINTS:
+			m_primitive_type = GL_POINTS;
+			break;
+
+		case DrawPrimitive::TRIANGLES:
+			m_primitive_type = GL_TRIANGLES;
+			break;
+
+		case DrawPrimitive::TRIANGLE_STRIP:
+			m_primitive_type = GL_TRIANGLE_STRIP;
+			break;
+
+		case DrawPrimitive::LINES:
+			m_primitive_type = GL_LINES;
+			break;
+
+		case DrawPrimitive::LINE_STRIP:
+			m_primitive_type = GL_LINE_STRIP;
+			break;
+		}
+	}
+
+	void RenderDevice::ClearFramebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor)
+	{
+		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+
+		switch (clearTarget)
+		{
+		case FramebufferClearTarget::DEPTH:
+			glClear(GL_DEPTH_BUFFER_BIT);
+			break;
+
+		case FramebufferClearTarget::ALL:
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			break;
+		}
+	}
+
+	void RenderDevice::SetViewport(int width, int height, int topLeftX, int topLeftY)
+	{
+		glViewport(topLeftX,
+			      (PlatformBackend::GetHeight() - (height + topLeftY)),
+				   width,
+				   height);
 	}
 
 	void RenderDevice::Draw(int firstIndex,
 							int count)
 	{
-
+		CHECK_ERROR(glDrawArrays(m_primitive_type, firstIndex, count));
 	}
 
 	void RenderDevice::DrawIndexed(int indexCount)
 	{
-
+		CHECK_ERROR(glDrawElements(m_primitive_type, indexCount, GL_UNSIGNED_INT, 0));
 	}
 
 	void RenderDevice::DrawIndexedBaseVertex(int indexCount,
 											 unsigned int baseIndex,
 											 unsigned int baseVertex)
 	{
-
+		CHECK_ERROR(glDrawElementsBaseVertex(m_primitive_type, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * baseIndex), baseVertex));
 	}
 
 	void RenderDevice::DrawInstanced()

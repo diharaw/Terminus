@@ -10,9 +10,10 @@
 
 #include "../../Third Party/glew/include/GL/glew.h"
 
+#ifdef TERMINUS_ENABLE_ERROR_CHECK
 #define CHECK_ERROR(x)																					  \
-x; int line = __LINE__;																					  \
-{																										  \
+x; {int line = __LINE__;																				  \
+																										  \
 	GLenum err(glGetError());																			  \
 																										  \
 	while (err != GL_NO_ERROR)																			  \
@@ -31,10 +32,17 @@ x; int line = __LINE__;																					  \
 		std::cerr << "GL_" << error.c_str() << " - FILE:" << __FILE__ << " , LINE:" << line << std::endl; \
 		err = glGetError();																				  \
 	}																									  \
-}																										  \
+}																										  
+#else
+#define CHECK_ERROR(x)	x
+#endif
 
 namespace Terminus { namespace Graphics {
     
+	struct Texture;
+	struct Shader;
+
+	using ShaderMap = std::unordered_map<ShaderType, Shader*>;
 	using BindingMap = std::unordered_map<GLuint, GLuint>;
 	using RenderTargetList = std::vector<Texture*>;
 
@@ -69,6 +77,7 @@ namespace Terminus { namespace Graphics {
     {
 		GLuint m_id;
 		GLenum UsageType;
+		GLenum bufferType;
 		void* Data;
 		uint Size;
     };
@@ -104,7 +113,7 @@ namespace Terminus { namespace Graphics {
     struct ShaderProgram
     {
 		GLuint m_id;
-		ResourceHandle m_shaders[5];
+		ShaderMap m_shader_map;
 		int m_shader_count;
     };
     

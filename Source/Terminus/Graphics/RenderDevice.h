@@ -172,6 +172,9 @@ namespace Terminus { namespace Graphics {
         void  BindShaderProgram(ShaderProgram* program);
         void* MapBuffer(Buffer* buffer, BufferMapType type);
         void  UnmapBuffer(Buffer* buffer);
+		void  SetPrimitiveType(DrawPrimitive primitive);
+		void  ClearFramebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor);
+		void  SetViewport(int width, int height, int topLeftX, int topLeftY);
         
         // Stateless Methods
 		void Draw(int firstIndex, 
