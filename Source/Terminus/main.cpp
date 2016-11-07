@@ -1,5 +1,5 @@
+#include "Graphics\Config.h"
 #include "Platform/PlatformBackend.h"
-#include "Graphics/RenderBackend.h"
 #include "GUI/ImGuiBackend.h"
 #include "Graphics/RenderConfigUI.h"
 #include "Graphics/CommandList.h"
@@ -19,6 +19,7 @@
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
 #include <iostream>
+#include "Graphics/RenderDevice.h"
 
 class Test
 {
@@ -74,22 +75,20 @@ Matrix4 model;
 Matrix4 view;
 Matrix4 projection;
 
-ResourceHandle vertexBuffer;
-ResourceHandle indexBuffer;
-ResourceHandle uniformBuffer;
-ResourceHandle vertexArray;
-ResourceHandle shaderProgram;
-ResourceHandle depthStencilState;
-ResourceHandle rasterizerState;
-ResourceHandle texture;
-ResourceHandle samplerState;
-
-CommandData::DrawIndexed indexedDrawCmdData;
-CommandData::UniformBufferCopy copyCmdData;
-CommandData::ClearRenderTarget clearRenderTargetData;
+Terminus::Graphics::VertexBuffer* vertexBuffer;
+Terminus::Graphics::IndexBuffer* indexBuffer;
+Terminus::Graphics::UniformBuffer* uniformBuffer;
+Terminus::Graphics::VertexArray* vertexArray;
+Terminus::Graphics::ShaderProgram* shaderProgram;
+Terminus::Graphics::DepthStencilState* depthStencilState;
+Terminus::Graphics::RasterizerState* rasterizerState;
+Terminus::Graphics::Texture2D* texture;
+Terminus::Graphics::SamplerState* samplerState;
 
 ShaderCache shaderCache;
 TextureCache textureCache;
+
+Terminus::Graphics::RenderDevice render_device;
 
 // Init method declarations
 
@@ -114,7 +113,7 @@ int main(void)
     
     Input::Initialize();
     
-    RenderBackend::Initialize();
+	render_device.Initialize(nullptr, 0);
 	imgui_backend::initialize();
     
     SetupCube();
@@ -144,8 +143,7 @@ int main(void)
         Terminus::EventHandler::Update();
 
         DrawScene();
-        
-		RenderBackend::SwapBuffers();
+		render_device.SwapBuffers();
     }
     
     CleanUpGraphicsResources();
@@ -251,40 +249,28 @@ void SetupGraphicsResources()
     
     // Setup graphics resources
     
-    GL_CHECK_ERROR(texture = textureCache.Load("brick.png"));
+    texture = textureCache.Load("brick.png");
     
-    GL_CHECK_ERROR(samplerState = RenderBackend::CreateSamplerState(LINEAR_ALL, LINEAR_ALL, REPEAT, REPEAT, REPEAT));
+    samplerState = render_device.CreateSamplerState(TextureFilteringMode::LINEAR_ALL, TextureFilteringMode::LINEAR_ALL, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT);
     
-	vertexBuffer  = RenderBackend::CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, USAGE_STATIC);
-	indexBuffer   = RenderBackend::CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, USAGE_STATIC);
-	vertexArray   = RenderBackend::CreateVertexArray(vertexBuffer, indexBuffer, LAYOUT_STANDARD_VERTEX);
-	uniformBuffer = RenderBackend::CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, USAGE_DYNAMIC);
+	vertexBuffer  = render_device.CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, BufferUsageType::STATIC);
+	indexBuffer   = render_device.CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, BufferUsageType::STATIC);
+	vertexArray   = render_device.CreateVertexArray(vertexBuffer, indexBuffer, InputLayoutType::STANDARD_VERTEX);
+	uniformBuffer = render_device.CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, BufferUsageType::DYNAMIC);
 
-    depthStencilState = RenderBackend::CreateDepthStencilState();
-	rasterizerState = RenderBackend::CreateRasterizerState();
+    depthStencilState = render_device.CreateDepthStencilState();
+	rasterizerState = render_device.CreateRasterizerState();
     
-    RenderBackend::SetDepthStencilState(depthStencilState);
-	RenderBackend::SetRasterizerState(rasterizerState);
+	render_device.BindDepthStencilState(depthStencilState);
+	render_device.BindRasterizerState(rasterizerState);
     
 	shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
-    
-    indexedDrawCmdData.IndexCount = 36;
     
     char* ptr = (char*)malloc(sizeof(Matrix4) * 3);
     
     memcpy(ptr, &model, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
-    
-    clearRenderTargetData.ClearColor = Vector4(0.3f, 0.3f, 0.3f, 1.0f);
-    clearRenderTargetData.Target = FramebufferClearTarget::FB_TARGET_ALL;
-    
-    copyCmdData.Data = (void*)ptr;
-    copyCmdData.Buffer = uniformBuffer;
-    copyCmdData.Size = sizeof(Matrix4) * 3;
-	copyCmdData.MapType = BufferMapType::MAP_WRITE;
-    
-	GPUCommand::UniformBufferCopy(&copyCmdData);
 }
 
 void DrawScene()

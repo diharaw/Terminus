@@ -7,6 +7,7 @@
 #include "../Resource/AssetCommon.h"
 #include "../Types.h"
 #include "../Utility/SlotMap.h"
+#include "../Platform/PlatformBackend.h"
 #include "../Memory/PoolAllocator.h"
 
 #ifdef TERMINUS_OPENGL
@@ -175,6 +176,7 @@ namespace Terminus { namespace Graphics {
 		void  SetPrimitiveType(DrawPrimitive primitive);
 		void  ClearFramebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor);
 		void  SetViewport(int width, int height, int topLeftX, int topLeftY);
+		void  SwapBuffers();
         
         // Stateless Methods
 		void Draw(int firstIndex, 
@@ -188,6 +190,7 @@ namespace Terminus { namespace Graphics {
         
     private:
         
+		GLFWwindow*			     m_window;
 		Framebuffer*			 m_current_framebuffer;
         // Backend Specifics
 #ifdef TERMINUS_OPENGL

@@ -1,6 +1,5 @@
 #include "RenderDevice.h"
 #include "../Utility/StringUtility.h"
-#include "../Platform/PlatformBackend.h"
 #include <iostream>
 
 #ifdef TERMINUS_OPENGL
@@ -19,7 +18,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::Initialize(void* memory, size_t size)
 	{
-
+		m_window = PlatformBackend::GetWindow();
 	}
 
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
@@ -1574,6 +1573,11 @@ namespace Terminus { namespace Graphics {
 			      (PlatformBackend::GetHeight() - (height + topLeftY)),
 				   width,
 				   height);
+	}
+
+	void RenderDevice::SwapBuffers()
+	{
+		glfwSwapBuffers(m_window);
 	}
 
 	void RenderDevice::Draw(int firstIndex,
