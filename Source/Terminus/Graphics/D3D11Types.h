@@ -3,9 +3,17 @@
 #ifndef D3D11TYPES_H
 #define D3D11TYPES_H
 
-#include "../Config.h"
+#include "Config.h"
 
 #ifdef TERMINUS_DIRECT3D11
+
+#include <d3d11.h>
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+
+#define CHECK_ERROR(x)	x; \
 
 namespace Terminus { namespace Graphics {
     
@@ -85,5 +93,7 @@ namespace Terminus { namespace Graphics {
     };
     
 } }
+
+#endif
 
 #endif

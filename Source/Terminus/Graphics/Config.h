@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define TERMINUS_OPENGL
+
 #ifdef __APPLE__
     #if !defined(TERMINUS_OPENGL) && !defined(TERMINUS_METAL)
         #define TERMINUS_OPENGL

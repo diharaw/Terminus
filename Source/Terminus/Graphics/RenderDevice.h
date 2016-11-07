@@ -2,14 +2,33 @@
 #define RENDERDEVICE_H
 
 #include <vector>
+#include "Config.h"
+#include "RenderCommon.h"
+#include "../Resource/AssetCommon.h"
 #include "../Types.h"
+#include "../Utility/SlotMap.h"
+#include "../Memory/PoolAllocator.h"
 
 #ifdef TERMINUS_OPENGL
 #include "GLTypes.h"
-#include "../../Third Party/glew/include/GL/glew.h"
 #elif TERMINUS_DIRECT3D11
 #include "D3D11Types.h"
 #endif
+
+#define MAX_TEXTURE_1D 1
+#define MAX_TEXTURE_2D 1
+#define MAX_TEXTURE_3D 1024
+#define MAX_TEXTURE_CUBE 64
+#define MAX_FRAMEBUFFER 64
+#define MAX_VERTEX_BUFFER 64
+#define MAX_INDEX_BUFFER 64
+#define MAX_UNIFORM_BUFFER 64
+#define MAX_VERTEX_ARRAY 64
+#define MAX_SHADER_PROGRAM 256
+#define MAX_SHADER 256
+#define MAX_SAMPLER_STATE 16
+#define MAX_RASTERIZER_STATE 16
+#define MAX_DEPTH_STENCIL_STATE 16
 
 namespace Terminus { namespace Graphics {
     
@@ -17,83 +36,164 @@ namespace Terminus { namespace Graphics {
     {
         
     private:
-        
-        // Object Pools
-        std::vector<Texture1D>   	  m_Texture1DPool;
-        std::vector<Texture2D>   	  m_Texture2DPool;
-        std::vector<Texture3D>   	  m_Texture3DPool;
-        std::vector<TextureCube> 	  m_TextureCubePool;
-        std::vector<VertexBuffer>     m_VertexBufferPool;
-        std::vector<IndexBuffer>      m_IndexBufferPool;
-        std::vector<UniformBuffer>    m_UniformBufferPool;
-        std::vector<VertexArray>      m_VertexArrayPool;
-        std::vector<SamplerState>     m_SamplerStatePool;
-        std::vector<RasterizerState>  m_RasterizerStatePool;
-        std::vector<Framebuffer> 	  m_FramebufferPool;
-        std::vector<Shader> 	      m_ShaderPool;
-        std::vector<ShaderProgram>    m_ShaderProgramPool;
-        
+        // Allocators 
+		PoolAllocator* m_Texture1DAllocator;
+		PoolAllocator* m_Texture2DAllocator;
+		PoolAllocator* m_Texture3DAllocator;
+		PoolAllocator* m_TextureCubeAllocator;
+		PoolAllocator* m_VertexBufferAllocator;
+		PoolAllocator* m_IndexBufferAllocator;
+		PoolAllocator* m_UniformBufferAllocator;
+		PoolAllocator* m_VertexArrayAllocator;
+		PoolAllocator* m_ShaderAllocator;
+		PoolAllocator* m_ShaderProgramAllocator;
+		PoolAllocator* m_FramebufferAllocator;
+		PoolAllocator* m_RasterizerStateAllocator;
+		PoolAllocator* m_DepthStencilStateAllocator;
+		PoolAllocator* m_SamplerStateAllocator;
+
+#ifdef TERMINUS_OPENGL
+        // Stateful Object References for Window mode switching. GL only.
+        SlotMap<VertexArray*, MAX_VERTEX_ARRAY>	m_VertexArrayPool;
+        SlotMap<Framebuffer*, MAX_FRAMEBUFFER> 	m_FramebufferPool;
+#endif
+
     public:
         
         RenderDevice();
         ~RenderDevice();
+		void Initialize(void* memory, size_t size);
         
         // Object Creation
-        auto  CreateTexture1D();
-        auto  CreateTexture2D();
-        auto  CreateTexture3D();
-        auto  CreateTextureCube();
-        auto  CreateVertexBuffer();
-        auto  CreateIndexBuffer();
-        auto  CreateUniformBuffer();
-        auto  CreateRasterizerState();
-        auto  CreateSamplerState();
-        auto  CreateFramebuffer();
-        auto  CreateShader();
-        auto  CreateShaderProgram();
+        Texture1D*		 CreateTexture1D(uint16 width,
+										 void* data,
+								         TextureFormat format,
+										 bool generateMipmaps = true,
+										 uint mipMapLevels = 10);
+		Texture2D*		 CreateTexture2D(uint16 width,
+										 uint16 height,
+										 void* data,
+									     TextureFormat format,
+									     bool generateMipmaps = true,
+										 uint mipMapLevels = 10);
+		Texture3D*		 CreateTexture3D(uint16 width,
+										 uint16 height,
+										 uint16 depth, 
+										 void* data,
+										 TextureFormat format,
+										 bool generateMipmaps = true,
+										 uint mipMapLevels = 10);
+		TextureCube*	 CreateTextureCube(uint16 width,
+										   uint16 height, 
+										   uint16 depth, 
+										   void* data,
+										   TextureFormat format,
+										   bool generateMipmaps = true,
+										   uint mipMapLevels = 10);
+        VertexBuffer*	 CreateVertexBuffer(void* data, 
+											uint size, 
+											BufferUsageType usageType);
+        IndexBuffer*	 CreateIndexBuffer(void* data,
+										   uint size,
+										   BufferUsageType usageType);
+        UniformBuffer*   CreateUniformBuffer(void* data,
+											 uint size,
+											 BufferUsageType usageType);
+		VertexArray*     CreateVertexArray(VertexBuffer* vertexBuffer, 
+										   IndexBuffer* indexBuffer, 
+										   InputLayoutType layoutType, 
+										   InputLayout* layout = nullptr);
+        RasterizerState* CreateRasterizerState(CullMode cullMode = CullMode::BACK,
+											   FillMode fillMode = FillMode::SOLID,
+											   bool frontWindingCCW = true,
+											   bool multisample = false,
+											   bool scissor = false);
+        SamplerState*	 CreateSamplerState(TextureFilteringMode minFilter,
+											TextureFilteringMode magFilter,
+											TextureWrapMode wrapModeU,
+											TextureWrapMode wrapModeV,
+											TextureWrapMode wrapModeW,
+											float maxAnisotropy = 1.0f,
+											float borderRed = 0.0f,
+											float borderGreen = 0.0f,
+											float borderBlue = 0.0f,
+											float borderAlpha = 0.0f);
+        Framebuffer*	 CreateFramebuffer();
+        Shader*			 CreateShader(ShaderType type, 
+								      const char* shaderSource);
+        ShaderProgram*   CreateShaderProgram(Shader* vertexShader,
+											 Shader* pixelShader,
+											 Shader* geometryShader = nullptr,
+											 Shader* controlShader = nullptr,
+											 Shader* evaluationShader = nullptr);
+		DepthStencilState* CreateDepthStencilState(bool enableDepthTest = true,
+												   bool enableStencilTest = false,
+												   bool depthMask = true,
+												   ComparisonFunction depthComparisonFunction = ComparisonFunction::LESS,
+												   StencilOperation frontStencilFail = StencilOperation::REPLACE,
+												   StencilOperation frontStencilPassDepthFail = StencilOperation::REPLACE,
+												   StencilOperation frontStencilPassDepthPass = StencilOperation::REPLACE,
+												   ComparisonFunction frontStencilComparisonFunction = ComparisonFunction::LESS,
+												   StencilOperation backStencilFail = StencilOperation::REPLACE,
+												   StencilOperation backStencilPassDepthFail = StencilOperation::REPLACE,
+												   StencilOperation backStencilPassDepthPass = StencilOperation::REPLACE,
+												   ComparisonFunction backStencilComparisonFunction = ComparisonFunction::LESS,
+												   uint stencilMask = 0xFF);
+		void AttachRenderTarget(Framebuffer* framebuffer, Texture* renderTarget);
+		void AttachDepthStencilTarget(Framebuffer* framebuffer, Texture* renderTarget);
         
         // Object Destruction
-        auto  DestroyTexture1D();
-        void  DestroyTexture2D();
-        void  DestroyTexture3D();
-        void  DestroyTextureCube();
-        void  DestroyVertexBuffer();
-        void  DestroyIndexBuffer();
-        void  DestroyUniformBuffer();
-        void  DestroyRasterizerState();
-        void  DestroySamplerState();
-        void  DestroyFramebuffer();
-        void  DestroyShader();
-        void  DestoryShaderProgram();
+        void DestroyTexture1D(Texture1D* texture);
+        void DestroyTexture2D(Texture2D* texture);
+        void DestroyTexture3D(Texture3D* texture);
+        void DestroyTextureCube(TextureCube* texture);
+        void DestroyVertexBuffer(VertexBuffer* buffer);
+        void DestroyIndexBuffer(IndexBuffer* buffer);
+        void DestroyUniformBuffer(UniformBuffer* buffer);
+        void DestroyRasterizerState(RasterizerState* state);
+        void DestroySamplerState(SamplerState* state);
+		void DestroyDepthStencilState(DepthStencilState* state);
+        void DestroyFramebuffer(Framebuffer* framebuffer);
+        void DestroyShader(Shader* shader);
+        void DestoryShaderProgram(ShaderProgram* program);
         
         // Object Use
-        void  BindTexture1D();
-        void  BindTexture2D();
-        void  BindTexture3D();
-        void  BindTextureCube();
-        void  BindUniformBuffer();
-        void  BindRasterizerState();
-        void  BindSamplerState();
-        void  BindFramebuffer();
-        void  BindShaderProgram();
-        void* MapBuffer();
-        void  UnmapBuffer();
+        void  BindTexture(Texture* texture,
+						  ShaderType shaderStage);
+        void  BindUniformBuffer(UniformBuffer* uniformBuffer, 
+								ShaderType shaderStage, 
+								uint bufferSlot);
+        void  BindRasterizerState(RasterizerState* state);
+        void  BindSamplerState(SamplerState* state,
+							   ShaderType shaderStage,
+							   uint slot);
+        void  BindFramebuffer(Framebuffer* framebuffer);
+		void  BindDepthStencilState(DepthStencilState* state);
+        void  BindShaderProgram(ShaderProgram* program);
+        void* MapBuffer(Buffer* buffer, BufferMapType type);
+        void  UnmapBuffer(Buffer* buffer);
         
         // Stateless Methods
-        void  Draw();
-        void  DrawIndexed();
-        void  DrawIndexedBaseVertex();
-        void  DrawInstanced();
-        void  DrawIndexedInstanced();
+		void Draw(int firstIndex, 
+				  int count);
+		void DrawIndexed(int indexCount);
+		void DrawIndexedBaseVertex(int indexCount, 
+								   unsigned int baseIndex, 
+								   unsigned int baseVertex);
+        void DrawInstanced();
+        void DrawIndexedInstanced();
         
     private:
         
+		Framebuffer*			 m_current_framebuffer;
         // Backend Specifics
 #ifdef TERMINUS_OPENGL
-        GLenum m_primitive_type;
-        ShaderProgram m_current_program;
+        GLenum					 m_primitive_type;
+        ShaderProgram*			 m_current_program;
 #elif TERMINUS_DIRECT3D11
-        
+		D3D11_PRIMITIVE_TOPOLOGY m_primitive_type;
+		ID3D11Device*			 m_device;
+		ID3D11DeviceContext*	 m_device_context;
 #endif
         
     };
