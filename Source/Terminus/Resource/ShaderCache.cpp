@@ -1,3 +1,4 @@
+#include "../Graphics/Config.h"
 #include "ShaderCache.h"
 #include "../IO/FileSystem.h"
 #include <iostream>
@@ -32,11 +33,18 @@ namespace Terminus { namespace Resource {
 			Graphics::Shader* tess_eval;
 			Graphics::Shader* tess_control;
 
+#if defined(TERMINUS_OPENGL)
+			std::string extension = ".glsl";
+#else defined(TERMINUS_DIRECT3D11)
+			std::string extension = ".hlsl";
+#endif
+
 			// load vertex shader
 			{
 				if (_vertexID != nullptr)
 				{
-					std::string id = std::string(_vertexID);
+					std::string filename = std::string(_vertexID);
+					std::string id = filename + extension;
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
@@ -65,7 +73,8 @@ namespace Terminus { namespace Resource {
 			{
 				if (_vertexID != nullptr)
 				{
-					std::string id = std::string(_pixelID);
+					std::string filename = std::string(_pixelID);
+					std::string id = filename + extension;
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
@@ -94,7 +103,8 @@ namespace Terminus { namespace Resource {
 			{
 				if (_geometryID != nullptr)
 				{
-					std::string id = std::string(_geometryID);
+					std::string filename = std::string(_geometryID);
+					std::string id = filename + extension;
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
@@ -123,7 +133,8 @@ namespace Terminus { namespace Resource {
 			{
 				if (_tessevalID != nullptr)
 				{
-					std::string id = std::string(_tessevalID);
+					std::string filename = std::string(_tessevalID);
+					std::string id = filename + extension;
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
@@ -152,7 +163,8 @@ namespace Terminus { namespace Resource {
 			{
 				if (_tesscontrolID != nullptr)
 				{
-					std::string id = std::string(_tesscontrolID);
+					std::string filename = std::string(_tesscontrolID);
+					std::string id = filename + extension;
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{

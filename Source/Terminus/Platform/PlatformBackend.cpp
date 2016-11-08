@@ -2,7 +2,7 @@
 #include "PlatformBackend.h"
 #include "../Input/Input.h"
 #include "../Graphics/Config.h"
-
+#include <string>
 #include "../GUI/ImGuiBackend.h"
 
 #ifdef TERMINUS_OPENGL
@@ -57,23 +57,28 @@ namespace PlatformBackend
 
 		m_Width = _Width;
 		m_Height = _Height;
+		std::string title = "Terminus Engine - Build ";
+		title += std::to_string(TERMINUS_BUILD);
 
 #if defined(TERMINUS_OPENGL)
+		title += " (OpenGL)";
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_MAX_MAJOR_VERSION);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_MAX_MINOR_VERSION);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #elif defined(TERMINUS_OPENGL_ES)
+		title += " (OpenGL ES)";
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(TERMINUS_DIRECT3D11)
+		title += " (Direct3D 11)";
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
 #ifdef __APPLE__
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-        
-        m_Window = glfwCreateWindow(_Width, _Height, "Hello World", NULL, NULL);
+		
+        m_Window = glfwCreateWindow(_Width, _Height, title.c_str(), NULL, NULL);
         
         if(!m_Window)
         {

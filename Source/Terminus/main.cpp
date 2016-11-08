@@ -1,10 +1,9 @@
-#include "Graphics\Config.h"
+#include "Graphics/Config.h"
 #include "Platform/PlatformBackend.h"
 #include "GUI/ImGuiBackend.h"
 #include "Graphics/RenderConfigUI.h"
 #include "Graphics/CommandList.h"
 #include "Graphics/RenderSystem.h"
-#include <glm.hpp>
 #include "Memory/PoolAllocator.h"
 #include "Memory/StackAllocator.h"
 #include "GlobalMemory.h"
@@ -20,6 +19,7 @@
 #include "Resource/AssetCommon.h"
 #include <iostream>
 #include "Graphics/RenderDevice.h"
+#include "Math/MathUtility.h"
 
 class Test
 {
@@ -114,7 +114,7 @@ int main(void)
     Input::Initialize();
     
 	render_device.Initialize(nullptr, 0);
-	imgui_backend::initialize();
+	//imgui_backend::initialize();
     
     SetupCube();
     SetupMatrices();
@@ -148,7 +148,8 @@ int main(void)
     
     CleanUpGraphicsResources();
     
-	imgui_backend::shutdown();
+	//imgui_backend::shutdown();
+	render_device.Shutdown();
     PlatformBackend::Shutdown();
     
     Terminus::Memory::Shutdown();
@@ -239,7 +240,7 @@ void SetupMatrices()
     model = Matrix4();
     
     view = glm::lookAtRH(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-    projection = glm::perspectiveRH(45.0f , aspectRatio, 0.1f, 1000.0f);
+    projection = Terminus::Math::Perspective(45.0f , aspectRatio, 0.1f, 1000.0f);
 }
 
 void SetupGraphicsResources()
@@ -267,7 +268,7 @@ void SetupGraphicsResources()
 	render_device.BindDepthStencilState(depthStencilState);
 	render_device.BindRasterizerState(rasterizerState);
     
-	shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
+	shaderProgram = shaderCache.Load("Shaders/Basic_Vertex", "Shaders/Basic_Pixel");
     
     char* ptr = (char*)render_device.MapBuffer(uniformBuffer, BufferMapType::WRITE);
     
@@ -302,7 +303,7 @@ void DrawScene()
     // Bind Shader Program
 	render_device.BindShaderProgram(shaderProgram);
 	render_device.BindSamplerState(samplerState, ShaderType::PIXEL ,0);
-	render_device.BindTexture(texture, ShaderType::PIXEL);
+	render_device.BindTexture(texture, ShaderType::PIXEL, 0);
     // Bind Uniform Buffer
 	render_device.BindUniformBuffer(uniformBuffer, ShaderType::VERTEX, 0);
     
@@ -317,11 +318,12 @@ void CleanUpGraphicsResources()
 	delete[] verticesList;
 	delete[] indicesList;
 
+	render_device.DestroyTexture2D((Terminus::Graphics::Texture2D*)texture);
 	render_device.DestroyDepthStencilState(depthStencilState);
 	render_device.DestroySamplerState(samplerState);
 	render_device.DestroyRasterizerState(rasterizerState);
-    render_device.DestroyIndexBuffer(indexBuffer);
-    render_device.DestroyVertexBuffer(vertexBuffer);
+    //render_device.DestroyIndexBuffer(indexBuffer);
+    //render_device.DestroyVertexBuffer(vertexBuffer);
 	render_device.DestroyVertexArray(vertexArray);
     render_device.DestroyUniformBuffer(uniformBuffer);
 }

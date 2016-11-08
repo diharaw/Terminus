@@ -31,6 +31,11 @@ namespace Terminus { namespace Graphics {
 		GL_CHECK_ERROR();
 	}
 
+	void RenderDevice::Shutdown()
+	{
+
+	}
+
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
 											 void* data,
 											 TextureFormat format,
@@ -152,6 +157,7 @@ namespace Terminus { namespace Graphics {
 											 uint16 height,
 											 void* data,
 											 TextureFormat format,
+											 bool createRenderTargetView,
 											 bool generateMipmaps,
 											 uint mipMapLevels)
 	{
@@ -1417,7 +1423,8 @@ namespace Terminus { namespace Graphics {
 	}
 
 	void RenderDevice::BindTexture(Texture* texture,
-								   ShaderType shaderStage)
+								   ShaderType shaderStage,
+								   uint bufferSlot)
 	{
 		GL_CHECK_ERROR(glBindTexture(texture->m_glTextureTarget ,texture->m_id));
 	}

@@ -19,7 +19,7 @@ namespace Terminus { namespace Resource {
 
 	Terminus::Graphics::Texture* TextureFactory::Create(asset_common::ImageLoadData* _data)
 	{
-		return m_device->CreateTexture2D(_data->width, _data->height, _data->bytes, TextureFormat::R8G8B8A8_UNORM);
+		return m_device->CreateTexture2D(_data->width, _data->height, _data->bytes, TextureFormat::R8G8B8A8_UNORM, false);
 	}
 
 } }

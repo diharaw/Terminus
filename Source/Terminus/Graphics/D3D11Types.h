@@ -8,6 +8,7 @@
 #ifdef TERMINUS_DIRECT3D11
 
 #include <d3d11.h>
+#include <d3dcompiler.h>
 #include <unordered_map>
 
 #pragma comment(lib, "d3d11.lib")
@@ -29,7 +30,7 @@ namespace Terminus { namespace Graphics {
 
     struct Texture
     {
-		TextureTarget			 m_textureTarget;
+		TextureTarget			 m_type;
 		ID3D11ShaderResourceView* m_textureView;
 		ID3D11DepthStencilView* m_depthView;
 		ID3D11RenderTargetView* m_renderTargetView;

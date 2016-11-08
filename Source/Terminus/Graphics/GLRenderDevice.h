@@ -60,6 +60,7 @@ namespace Terminus { namespace Graphics {
 			RenderDevice();
 			~RenderDevice();
 			void Initialize(void* memory, size_t size);
+			void Shutdown();
 
 			// Object Creation
 			Texture1D*		 CreateTexture1D(uint16 width,
@@ -71,6 +72,7 @@ namespace Terminus { namespace Graphics {
 				uint16 height,
 				void* data,
 				TextureFormat format,
+				bool createRenderTargetView,
 				bool generateMipmaps = true,
 				uint mipMapLevels = 10);
 			Texture3D*		 CreateTexture3D(uint16 width,
@@ -157,7 +159,8 @@ namespace Terminus { namespace Graphics {
 
 			// Object Use
 			void  BindTexture(Texture* texture,
-				ShaderType shaderStage);
+				ShaderType shaderStage,
+				uint bufferSlot);
 			void  BindUniformBuffer(UniformBuffer* uniformBuffer,
 				ShaderType shaderStage,
 				uint bufferSlot);

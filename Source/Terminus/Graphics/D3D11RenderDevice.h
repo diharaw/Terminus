@@ -56,6 +56,7 @@ namespace Terminus { namespace Graphics {
 			RenderDevice();
 			~RenderDevice();
 			void Initialize(void* memory, size_t size);
+			void Shutdown();
 
 			// Object Creation
 			Texture1D*		 CreateTexture1D(uint16 width,
@@ -67,6 +68,7 @@ namespace Terminus { namespace Graphics {
 				uint16 height,
 				void* data,
 				TextureFormat format,
+				bool createRenderTargetView,
 				bool generateMipmaps = true,
 				uint mipMapLevels = 10);
 			Texture3D*		 CreateTexture3D(uint16 width,
@@ -153,7 +155,8 @@ namespace Terminus { namespace Graphics {
 
 			// Object Use
 			void  BindTexture(Texture* texture,
-				ShaderType shaderStage);
+				ShaderType shaderStage,
+				uint bufferSlot);
 			void  BindUniformBuffer(UniformBuffer* uniformBuffer,
 				ShaderType shaderStage,
 				uint bufferSlot);
@@ -185,16 +188,21 @@ namespace Terminus { namespace Graphics {
 		private:
 
 			bool InitializeAPI();
+			ID3D10Blob* CreateStubShaderByteCodeFromLayout(InputLayout _layout);
 
 			bool				     m_vsync;
 			int						 m_video_card_memory;
 			GLFWwindow*			     m_window;
 			Framebuffer*			 m_current_framebuffer;
 			Framebuffer*			 m_default_framebuffer;
+			Texture2D*				 m_default_render_target;
+			Texture2D*				 m_default_depth_target;
+			char					 m_video_card_desc[128];
 
 			D3D11_PRIMITIVE_TOPOLOGY m_primitive_type;
 			ID3D11Device*			 m_device;
 			ID3D11DeviceContext*	 m_device_context;
+			IDXGISwapChain*			 m_swap_chain;
 		};
 
 } }

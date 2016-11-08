@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define TERMINUS_BUILD 161108
+
 //#define TERMINUS_OPENGL
 
 #define TERMINUS_ENABLE_ERROR_CHECK
