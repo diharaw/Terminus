@@ -7,6 +7,11 @@
 #include <nfd.h>
 #include <boxer/boxer.h>
 
+#if defined(WIN32)
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "GLFW\glfw3native.h"
+#endif
+
 enum class Selection
 {
     OK,
@@ -78,6 +83,10 @@ namespace PlatformBackend
      * @return int Window Height
      */
 	extern int GetHeight();
+
+#if defined(WIN32)
+	extern HWND GetHandleWin32();
+#endif
     
     inline Selection show_message_box(String _Message, String _Title, Style _Style = Style::Info, Buttons _Buttons = Buttons::OK)
     {

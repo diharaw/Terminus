@@ -11,7 +11,7 @@
 #include "../../Third Party/glew/include/GL/glew.h"
 
 #ifdef TERMINUS_ENABLE_ERROR_CHECK
-#define CHECK_ERROR(x)																					  \
+#define GL_CHECK_ERROR(x)																				  \
 x; {int line = __LINE__;																				  \
 																										  \
 	GLenum err(glGetError());																			  \
@@ -34,7 +34,7 @@ x; {int line = __LINE__;																				  \
 	}																									  \
 }																										  
 #else
-#define CHECK_ERROR(x)	x
+#define GL_CHECK_ERROR(x)	x
 #endif
 
 namespace Terminus { namespace Graphics {

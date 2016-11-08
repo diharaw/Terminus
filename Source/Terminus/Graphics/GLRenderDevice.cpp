@@ -1,8 +1,8 @@
-#include "RenderDevice.h"
+#include "GLRenderDevice.h"
 #include "../Utility/StringUtility.h"
 #include <iostream>
 
-#ifdef TERMINUS_OPENGL
+#if defined(TERMINUS_OPENGL)
 
 namespace Terminus { namespace Graphics {
 
@@ -28,7 +28,7 @@ namespace Terminus { namespace Graphics {
 			std::cout << "ERROR" << std::endl;
 		}
 
-		CHECK_ERROR();
+		GL_CHECK_ERROR();
 	}
 
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
@@ -39,10 +39,10 @@ namespace Terminus { namespace Graphics {
 	{
 		Texture1D* texture = new Texture1D();
 
-		CHECK_ERROR(glGenTextures(1, &texture->m_id));
+		GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_1D;
 
-		CHECK_ERROR(glBindTexture(GL_TEXTURE_1D, texture->m_id));
+		GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_1D, texture->m_id));
 
 		GLenum texformat, textype;
 
@@ -136,14 +136,14 @@ namespace Terminus { namespace Graphics {
 			break;
 		}
 
-		CHECK_ERROR(glTexImage1D(GL_TEXTURE_1D, 0, texformat, width, 0, texformat, textype, data));
+		GL_CHECK_ERROR(glTexImage1D(GL_TEXTURE_1D, 0, texformat, width, 0, texformat, textype, data));
 
 		if (generateMipmaps)
 		{
-			CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_1D));
+			GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_1D));
 		}
 		
-		CHECK_ERROR(glBindTexture(GL_TEXTURE_1D, 0));
+		GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_1D, 0));
 
 		return texture;
 	}
@@ -157,10 +157,10 @@ namespace Terminus { namespace Graphics {
 	{
 		Texture2D* texture = new Texture2D();
 
-		CHECK_ERROR(glGenTextures(1, &texture->m_id));
+		GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_2D;
 
-		CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texture->m_id));
+		GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texture->m_id));
 
 		GLenum texformat, textype;
 
@@ -254,14 +254,14 @@ namespace Terminus { namespace Graphics {
 			break;
 		}
 
-		CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, texformat, width, height,  0, texformat, textype, data));
+		GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, texformat, width, height,  0, texformat, textype, data));
 
 		if (generateMipmaps)
 		{
-			CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+			GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
 		}
 
-		CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
+		GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
 
 		return texture;
 	}
@@ -276,10 +276,10 @@ namespace Terminus { namespace Graphics {
 	{
 		Texture3D* texture = new Texture3D();
 
-		CHECK_ERROR(glGenTextures(1, &texture->m_id));
+		GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_3D;
 
-		CHECK_ERROR(glBindTexture(GL_TEXTURE_3D, texture->m_id));
+		GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_3D, texture->m_id));
 
 		GLenum texformat, textype;
 
@@ -377,10 +377,10 @@ namespace Terminus { namespace Graphics {
 
 		if (generateMipmaps)
 		{
-			CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+			GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
 		}
 
-		CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
+		GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
 
 		return texture;
 	}
@@ -401,7 +401,7 @@ namespace Terminus { namespace Graphics {
 												   BufferUsageType usageType)
 	{
 		VertexBuffer* buffer = new VertexBuffer();
-		CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
+		GL_CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
 
@@ -427,7 +427,7 @@ namespace Terminus { namespace Graphics {
 												 BufferUsageType usageType)
 	{
 		IndexBuffer* buffer = new IndexBuffer();
-		CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
+		GL_CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
 
@@ -453,7 +453,7 @@ namespace Terminus { namespace Graphics {
 													 BufferUsageType usageType)
 	{
 		UniformBuffer* buffer = new UniformBuffer();
-		CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
+		GL_CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
 
@@ -466,9 +466,9 @@ namespace Terminus { namespace Graphics {
 			glusageType = GL_DYNAMIC_DRAW;
 		}
 
-		CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, buffer->m_id));
-		CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data, glusageType));
-		CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER,0));
+		GL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, buffer->m_id));
+		GL_CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data, glusageType));
+		GL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER,0));
 
 		buffer->bufferType = GL_UNIFORM_BUFFER;
 		buffer->Data = data;
@@ -485,74 +485,74 @@ namespace Terminus { namespace Graphics {
 	{
 		VertexArray* vertexArray = new VertexArray();
 
-		CHECK_ERROR(glGenVertexArrays(1, &vertexArray->m_id));
-		CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
+		GL_CHECK_ERROR(glGenVertexArrays(1, &vertexArray->m_id));
+		GL_CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
 
-		CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
-		CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, vertexBuffer->Size, vertexBuffer->Data, vertexBuffer->UsageType));
+		GL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
+		GL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, vertexBuffer->Size, vertexBuffer->Data, vertexBuffer->UsageType));
 
-		CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
-		CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->Size, indexBuffer->Data, indexBuffer->UsageType));
+		GL_CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
+		GL_CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->Size, indexBuffer->Data, indexBuffer->UsageType));
 
 		if (layoutType == InputLayoutType::STANDARD_VERTEX)
 		{
 			// Vertices
 
-			CHECK_ERROR(glEnableVertexAttribArray(0));
-			CHECK_ERROR(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(0));
+			GL_CHECK_ERROR(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0));
 
 			// Tex Coords
 
-			CHECK_ERROR(glEnableVertexAttribArray(1));
-			CHECK_ERROR(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_TexCoord)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(1));
+			GL_CHECK_ERROR(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_TexCoord)));
 
 			// Normals
 
-			CHECK_ERROR(glEnableVertexAttribArray(2));
-			CHECK_ERROR(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Normal)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(2));
+			GL_CHECK_ERROR(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Normal)));
 
 			// Tangents
 
-			CHECK_ERROR(glEnableVertexAttribArray(3));
-			CHECK_ERROR(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Tangent)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(3));
+			GL_CHECK_ERROR(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Tangent)));
 		}
 		else if (layoutType == InputLayoutType::STANDARD_SKINNED_VERTEX)
 		{
 			// Vertices
 
-			CHECK_ERROR(glEnableVertexAttribArray(0));
-			CHECK_ERROR(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)0));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(0));
+			GL_CHECK_ERROR(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)0));
 
 			// Tex Coords
 
-			CHECK_ERROR(glEnableVertexAttribArray(1));
-			CHECK_ERROR(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_TexCoord)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(1));
+			GL_CHECK_ERROR(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_TexCoord)));
 
 			// Normals
 
-			CHECK_ERROR(glEnableVertexAttribArray(2));
-			CHECK_ERROR(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Normal)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(2));
+			GL_CHECK_ERROR(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Normal)));
 
 			// Tangents
 
-			CHECK_ERROR(glEnableVertexAttribArray(3));
-			CHECK_ERROR(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Tangent)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(3));
+			GL_CHECK_ERROR(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_Tangent)));
 
 			// Bone Indices
 
-			CHECK_ERROR(glEnableVertexAttribArray(4));
-			CHECK_ERROR(glVertexAttribIPointer(4, 4, GL_INT, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_BoneIndices)));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(4));
+			GL_CHECK_ERROR(glVertexAttribIPointer(4, 4, GL_INT, sizeof(SkeletalVertex), (GLvoid*)offsetof(SkeletalVertex, m_BoneIndices)));
 
 			// Bone Weights
 
-			CHECK_ERROR(glEnableVertexAttribArray(5));
-			CHECK_ERROR(glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)(offsetof(SkeletalVertex, m_BoneWeights))));
+			GL_CHECK_ERROR(glEnableVertexAttribArray(5));
+			GL_CHECK_ERROR(glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(SkeletalVertex), (GLvoid*)(offsetof(SkeletalVertex, m_BoneWeights))));
 		}
 		else if (layoutType == InputLayoutType::CUSTOM_VERTEX)
 		{
 			for (int i = 0; i < layout->m_Elements.size(); i++)
 			{
-				CHECK_ERROR(glEnableVertexAttribArray(i));
+				GL_CHECK_ERROR(glEnableVertexAttribArray(i));
 
 				GLenum dataType = 0;
 
@@ -570,13 +570,13 @@ namespace Terminus { namespace Graphics {
 					break;
 				}
 
-				CHECK_ERROR(glVertexAttribPointer(i, layout->m_Elements[i].m_numSubElements, dataType, layout->m_Elements[i].m_isNormalized, layout->m_vertexSize, (GLvoid*)0));
+				GL_CHECK_ERROR(glVertexAttribPointer(i, layout->m_Elements[i].m_numSubElements, dataType, layout->m_Elements[i].m_isNormalized, layout->m_vertexSize, (GLvoid*)0));
 			}
 		}
 
-		CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
-		CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
-		CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
+		GL_CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
+		GL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
+		GL_CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
 
 		return vertexArray;
 	}
@@ -658,119 +658,119 @@ namespace Terminus { namespace Graphics {
 	{
 		SamplerState* samplerState = new SamplerState();
 
-		CHECK_ERROR(glGenSamplers(1, &samplerState->m_id));
+		GL_CHECK_ERROR(glGenSamplers(1, &samplerState->m_id));
 
 		switch (wrapModeU)
 		{
 		case TextureWrapMode::REPEAT:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_REPEAT));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_REPEAT));
 			break;
 
 		case TextureWrapMode::MIRRORED_REPEAT:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_EDGE:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
 			GLfloat borderColor[] = { borderRed, borderGreen, borderBlue, borderAlpha };
-			CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
+			GL_CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
 			break;
 		}
 
 		switch (wrapModeV)
 		{
 		case TextureWrapMode::REPEAT:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_REPEAT));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_REPEAT));
 			break;
 
 		case TextureWrapMode::MIRRORED_REPEAT:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_EDGE:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
 			GLfloat borderColor[] = { borderRed, borderGreen, borderBlue, borderAlpha };
-			CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
+			GL_CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
 			break;
 		}
 
 		switch (wrapModeW)
 		{
 		case TextureWrapMode::REPEAT:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_REPEAT));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_REPEAT));
 			break;
 
 		case TextureWrapMode::MIRRORED_REPEAT:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_EDGE:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 			break;
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER));
 			GLfloat borderColor[] = { borderRed, borderGreen, borderBlue, borderAlpha };
-			CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
+			GL_CHECK_ERROR(glSamplerParameterfv(samplerState->m_id, GL_TEXTURE_BORDER_COLOR, borderColor));
 			break;
 		}
 
 		if (minFilter == TextureFilteringMode::LINEAR_ALL && magFilter == TextureFilteringMode::LINEAR_ALL)
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 		}
 		else if (minFilter == TextureFilteringMode::LINEAR_ALL && magFilter == TextureFilteringMode::NEAREST_ALL)
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 		}
 		else if (minFilter == TextureFilteringMode::NEAREST_ALL && magFilter == TextureFilteringMode::LINEAR_ALL)
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
 		}
 		else if (minFilter == TextureFilteringMode::NEAREST_ALL && magFilter == TextureFilteringMode::NEAREST_ALL)
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
 		}
 		else if (minFilter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST && magFilter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST)
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
 		}
 		else if (minFilter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR && magFilter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR)
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
 		}
 		else
 		{
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_CHECK_ERROR(glSamplerParameteri(samplerState->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 		}
 
 		if (GLEW_EXT_texture_filter_anisotropic)
 		{
 			GLfloat glmaxAnisotropy;
-			CHECK_ERROR(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glmaxAnisotropy));
+			GL_CHECK_ERROR(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glmaxAnisotropy));
 
 			if (maxAnisotropy <= glmaxAnisotropy)
 			{
-				CHECK_ERROR(glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy));
+				GL_CHECK_ERROR(glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy));
 			}
 			else
 			{
-				CHECK_ERROR(glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, glmaxAnisotropy));
+				GL_CHECK_ERROR(glSamplerParameterf(samplerState->m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, glmaxAnisotropy));
 			}
 		}
 
@@ -781,7 +781,7 @@ namespace Terminus { namespace Graphics {
 	{
 		Framebuffer* framebuffer = new Framebuffer();
 
-		CHECK_ERROR(glGenFramebuffers(1, &framebuffer->m_id));
+		GL_CHECK_ERROR(glGenFramebuffers(1, &framebuffer->m_id));
 
 		return framebuffer;
 	}
@@ -796,7 +796,7 @@ namespace Terminus { namespace Graphics {
 		{
 		case ShaderType::VERTEX:
 		{
-			CHECK_ERROR(shader->m_id = glCreateShader(GL_VERTEX_SHADER));
+			GL_CHECK_ERROR(shader->m_id = glCreateShader(GL_VERTEX_SHADER));
 		}
 			break;
 
@@ -824,13 +824,13 @@ namespace Terminus { namespace Graphics {
 
 		const GLchar* source = shaderSource;
 
-		CHECK_ERROR(glShaderSource(shader->m_id, 1, &source, NULL));
-		CHECK_ERROR(glCompileShader(shader->m_id));
-		CHECK_ERROR(glGetShaderiv(shader->m_id, GL_COMPILE_STATUS, &success));
+		GL_CHECK_ERROR(glShaderSource(shader->m_id, 1, &source, NULL));
+		GL_CHECK_ERROR(glCompileShader(shader->m_id));
+		GL_CHECK_ERROR(glGetShaderiv(shader->m_id, GL_COMPILE_STATUS, &success));
 
 		if (success == GL_FALSE)
 		{
-			CHECK_ERROR(glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog));
+			GL_CHECK_ERROR(glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog));
 			std::cout << "Shader Compilation Failed" << std::endl;
 			return nullptr;
 		}
@@ -846,7 +846,7 @@ namespace Terminus { namespace Graphics {
 	{
 		ShaderProgram* shaderProgram = new ShaderProgram();
 
-		CHECK_ERROR(shaderProgram->m_id = glCreateProgram());
+		GL_CHECK_ERROR(shaderProgram->m_id = glCreateProgram());
 
 		shaderProgram->m_shader_map[ShaderType::VERTEX] = vertexShader;
 		shaderProgram->m_shader_map[ShaderType::PIXEL] = pixelShader;
@@ -862,10 +862,10 @@ namespace Terminus { namespace Graphics {
 
 		for (auto it : shaderProgram->m_shader_map)
 		{
-			CHECK_ERROR(glAttachShader(shaderProgram->m_id, it.second->m_id));
+			GL_CHECK_ERROR(glAttachShader(shaderProgram->m_id, it.second->m_id));
 		}
 		
-		CHECK_ERROR(glLinkProgram(shaderProgram->m_id));
+		GL_CHECK_ERROR(glLinkProgram(shaderProgram->m_id));
 
 		GLint success;
 		char infoLog[512];
@@ -1307,29 +1307,29 @@ namespace Terminus { namespace Graphics {
 	{
 		framebuffer->m_render_targets.push_back(renderTarget);
 
-		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
-		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id));
-		CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (framebuffer->m_render_targets.size() - 1), renderTarget->m_glTextureTarget, renderTarget->m_id, 0));
+		GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
+		GL_CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id));
+		GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (framebuffer->m_render_targets.size() - 1), renderTarget->m_glTextureTarget, renderTarget->m_id, 0));
 
 		std::vector<GLuint> drawBuffers;
 
 		for (int i = 0; i < framebuffer->m_render_targets.size(); i++)
 			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
 
-		CHECK_ERROR(glDrawBuffers(framebuffer->m_render_targets.size(), &drawBuffers[0]));
+		GL_CHECK_ERROR(glDrawBuffers(framebuffer->m_render_targets.size(), &drawBuffers[0]));
 
-		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
-		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		GL_CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
+		GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	void RenderDevice::AttachDepthStencilTarget(Framebuffer* framebuffer, Texture* renderTarget)
 	{
 		framebuffer->m_depth_target = renderTarget;
-		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
-		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id));
-		CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, renderTarget->m_glTextureTarget, renderTarget->m_id, 0));
-		CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
-		CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
+		GL_CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, framebuffer->m_id));
+		GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, renderTarget->m_glTextureTarget, renderTarget->m_id, 0));
+		GL_CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
+		GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	void RenderDevice::DestroyTexture1D(Texture1D* texture)
@@ -1376,7 +1376,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::DestroyVertexArray(VertexArray* vertexArray)
 	{
-		CHECK_ERROR(glDeleteVertexArrays(1, &vertexArray->m_id));
+		GL_CHECK_ERROR(glDeleteVertexArrays(1, &vertexArray->m_id));
 		delete vertexArray;
 	}
 
@@ -1387,7 +1387,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::DestroySamplerState(SamplerState* state)
 	{
-		CHECK_ERROR(glDeleteSamplers(1, &state->m_id));
+		GL_CHECK_ERROR(glDeleteSamplers(1, &state->m_id));
 		delete state;
 	}
 
@@ -1419,14 +1419,14 @@ namespace Terminus { namespace Graphics {
 	void RenderDevice::BindTexture(Texture* texture,
 								   ShaderType shaderStage)
 	{
-		CHECK_ERROR(glBindTexture(texture->m_glTextureTarget ,texture->m_id));
+		GL_CHECK_ERROR(glBindTexture(texture->m_glTextureTarget ,texture->m_id));
 	}
 
 	void RenderDevice::BindUniformBuffer(UniformBuffer* uniformBuffer,
 									     ShaderType shaderStage,
 									     uint bufferSlot)
 	{
-		CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, bufferSlot, uniformBuffer->m_id));
+		GL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, bufferSlot, uniformBuffer->m_id));
 	}
 
 	void RenderDevice::BindVertexArray(VertexArray* vertexArray)
@@ -1441,9 +1441,9 @@ namespace Terminus { namespace Graphics {
 		else
 			glDisable(GL_CULL_FACE);
 
-		CHECK_ERROR(glCullFace(state->m_cullFace));
+		GL_CHECK_ERROR(glCullFace(state->m_cullFace));
 
-		CHECK_ERROR(glPolygonMode(GL_FRONT_AND_BACK, state->m_polygonMode));
+		GL_CHECK_ERROR(glPolygonMode(GL_FRONT_AND_BACK, state->m_polygonMode));
 
 		if (state->m_enableMultisample)
 			glEnable(GL_MULTISAMPLE);
@@ -1465,20 +1465,20 @@ namespace Terminus { namespace Graphics {
 										ShaderType shaderStage,
 										uint slot)
 	{
-		CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));
-		CHECK_ERROR(glBindSampler(slot, state->m_id));
-		CHECK_ERROR(glUniform1i(m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
+		GL_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));
+		GL_CHECK_ERROR(glBindSampler(slot, state->m_id));
+		GL_CHECK_ERROR(glUniform1i(m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
 	}
 
 	void RenderDevice::BindFramebuffer(Framebuffer* framebuffer)
 	{
 		if (framebuffer)
 		{
-			CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
+			GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_id));
 		}
 		else
 		{
-			CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+			GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 		}
 	}
 
@@ -1501,45 +1501,45 @@ namespace Terminus { namespace Graphics {
 		else
 			glDisable(GL_STENCIL_TEST);
 
-		CHECK_ERROR(glStencilFuncSeparate(GL_FRONT, state->m_frontStencilComparison, 1, state->m_stencilMask));
-		CHECK_ERROR(glStencilFuncSeparate(GL_FRONT, state->m_backStencilComparison, 1, state->m_stencilMask));
+		GL_CHECK_ERROR(glStencilFuncSeparate(GL_FRONT, state->m_frontStencilComparison, 1, state->m_stencilMask));
+		GL_CHECK_ERROR(glStencilFuncSeparate(GL_FRONT, state->m_backStencilComparison, 1, state->m_stencilMask));
 
 		// Front Stencil Operation
 
-		CHECK_ERROR(glStencilOpSeparate(GL_FRONT, state->m_frontStencilFail, state->m_frontStencilPassDepthFail, state->m_frontStencilPassDepthPass));
-		CHECK_ERROR(glStencilOpSeparate(GL_BACK, state->m_backStencilFail, state->m_backStencilPassDepthFail, state->m_backStencilPassDepthPass));
+		GL_CHECK_ERROR(glStencilOpSeparate(GL_FRONT, state->m_frontStencilFail, state->m_frontStencilPassDepthFail, state->m_frontStencilPassDepthPass));
+		GL_CHECK_ERROR(glStencilOpSeparate(GL_BACK, state->m_backStencilFail, state->m_backStencilPassDepthFail, state->m_backStencilPassDepthPass));
 	}
 
 	void RenderDevice::BindShaderProgram(ShaderProgram* program)
 	{
 		m_current_program = program;
-		CHECK_ERROR(glUseProgram(program->m_id));
+		GL_CHECK_ERROR(glUseProgram(program->m_id));
 	}
 
 	void* RenderDevice::MapBuffer(Buffer* buffer, BufferMapType type)
 	{
 		void* bufferPointer;
 
-		CHECK_ERROR(glBindBuffer(buffer->bufferType, buffer->m_id));
+		GL_CHECK_ERROR(glBindBuffer(buffer->bufferType, buffer->m_id));
 
 		switch (type)
 		{
 
 		case BufferMapType::READ:
 		{
-			CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_READ_ONLY));
+			GL_CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_READ_ONLY));
 			break;
 		}
 
 		case BufferMapType::WRITE:
 		{
-			CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_WRITE_ONLY));
+			GL_CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_WRITE_ONLY));
 			break;
 		}
 
 		case BufferMapType::READ_WRITE:
 		{
-			CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_READ_WRITE));
+			GL_CHECK_ERROR(bufferPointer = glMapBuffer(buffer->bufferType, GL_READ_WRITE));
 			break;
 		}
 
@@ -1553,7 +1553,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::UnmapBuffer(Buffer* buffer)
 	{
-		CHECK_ERROR(glUnmapBuffer(buffer->bufferType));
+		GL_CHECK_ERROR(glUnmapBuffer(buffer->bufferType));
 		glBindBuffer(buffer->bufferType, 0);
 	}
 
@@ -1615,19 +1615,19 @@ namespace Terminus { namespace Graphics {
 	void RenderDevice::Draw(int firstIndex,
 							int count)
 	{
-		CHECK_ERROR(glDrawArrays(m_primitive_type, firstIndex, count));
+		GL_CHECK_ERROR(glDrawArrays(m_primitive_type, firstIndex, count));
 	}
 
 	void RenderDevice::DrawIndexed(int indexCount)
 	{
-		CHECK_ERROR(glDrawElements(m_primitive_type, indexCount, GL_UNSIGNED_INT, 0));
+		GL_CHECK_ERROR(glDrawElements(m_primitive_type, indexCount, GL_UNSIGNED_INT, 0));
 	}
 
 	void RenderDevice::DrawIndexedBaseVertex(int indexCount,
 											 unsigned int baseIndex,
 											 unsigned int baseVertex)
 	{
-		CHECK_ERROR(glDrawElementsBaseVertex(m_primitive_type, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * baseIndex), baseVertex));
+		GL_CHECK_ERROR(glDrawElementsBaseVertex(m_primitive_type, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * baseIndex), baseVertex));
 	}
 
 	void RenderDevice::DrawInstanced()

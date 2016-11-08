@@ -1,8 +1,7 @@
 #include <iostream>
 #include "PlatformBackend.h"
 #include "../Input/Input.h"
-
-#define TERMINUS_OPENGL
+#include "../Graphics/Config.h"
 
 #include "../GUI/ImGuiBackend.h"
 
@@ -59,14 +58,14 @@ namespace PlatformBackend
 		m_Width = _Width;
 		m_Height = _Height;
 
-#ifdef TERMINUS_OPENGL
+#if defined(TERMINUS_OPENGL)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_MAX_MAJOR_VERSION);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_MAX_MINOR_VERSION);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#elif TERMINUS_OPENGL_ES
+#elif defined(TERMINUS_OPENGL_ES)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#else
+#elif defined(TERMINUS_DIRECT3D11)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
@@ -136,4 +135,11 @@ namespace PlatformBackend
 	{
 		return m_Height;
 	}
+
+#if defined(WIN32)
+	HWND GetHandleWin32()
+	{
+		return glfwGetWin32Window(m_Window);
+	}
+#endif
 }

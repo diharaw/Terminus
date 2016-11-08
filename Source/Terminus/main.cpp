@@ -264,8 +264,8 @@ void SetupGraphicsResources()
     depthStencilState = render_device.CreateDepthStencilState();
 	rasterizerState = render_device.CreateRasterizerState();
     
-	CHECK_ERROR(render_device.BindDepthStencilState(depthStencilState));
-	CHECK_ERROR(render_device.BindRasterizerState(rasterizerState));
+	render_device.BindDepthStencilState(depthStencilState);
+	render_device.BindRasterizerState(rasterizerState);
     
 	shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
     

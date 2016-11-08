@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define TERMINUS_OPENGL
+//#define TERMINUS_OPENGL
 
 #define TERMINUS_ENABLE_ERROR_CHECK
 
