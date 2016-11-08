@@ -1,5 +1,4 @@
 #include "RenderSystem.h"
-#include "RenderBackend.h"
 #include "RenderCommon.h"
 
 int			  RenderSystem::m_last_render_pass = -1;
@@ -42,11 +41,11 @@ void RenderSystem::update()
 			cmd->SetRenderPass(i);
 			cmd->SetRenderSubpass(j);
 
-			if (pass->m_geometry == GEOMETRY_SCENE)
+			if (pass->m_geometry == GeometryType::SCENE)
 			{
 				
 			}
-			else if (pass->m_geometry == GEOMETRY_QUAD)
+			else if (pass->m_geometry == GeometryType::QUAD)
 			{
 
 			}

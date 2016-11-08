@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 #include "RenderCommon.h"
-#include "RenderBackend.h"
+#include "RenderDevice.h"
 #include "../Types.h"
 
 typedef void(*BackendFunction)(const void*);
@@ -23,10 +23,7 @@ struct DrawCommand
 
 	DrawCommand()
 	{
-		SetMaterial(-1);
-		SetDepthTest(DEPTH_ENABLE);
-		SetFaceCulling(CULL_BACK);
-		SetStencilTest(0);
+		
 	}
 
 	inline void SetRenderPass(int _renderPass) { SortKey temp = _renderPass; m_sort_key |= temp << 59; }

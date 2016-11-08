@@ -1,191 +1,206 @@
 #include "ShaderCache.h"
 #include "../IO/FileSystem.h"
-#include "../Graphics/RenderBackend.h"
+#include <iostream>
 
-ShaderCache::ShaderCache()
-{
-    
-}
+namespace Terminus { namespace Resource {
 
-ShaderCache::~ShaderCache()
-{
-    
-}
+		ShaderCache::ShaderCache()
+		{
 
-ResourceHandle ShaderCache::Load(const char* _vertexID,
-                                 const char* _pixelID,
-                                 const char* _geometryID,
-                                 const char* _tessevalID,
-                                 const char* _tesscontrolID)
-{
-    ResourceHandle vertex, pixel, geometry, tess_eval, tess_control;
-    
-    // load vertex shader
-    {
-        if(_vertexID != nullptr)
-        {
-            std::string id = std::string(_vertexID);
-            
-            if (m_ShaderMap.find(id) == m_ShaderMap.end())
-            {
-                std::string extension = FileSystem::get_file_extention(id);
-                
-                if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-                {
-                    return USHRT_MAX;
-                }
-                else
-                {
-                    asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-                    data->shader_type = SHADER_VERTEX;
-                    
-                    vertex = m_Factory.Create(data);
-                }
-            }
-            else
-                vertex = m_ShaderMap[id];
-        }
-        else
-            return USHRT_MAX;
-    }
-    
-    // load pixel shader
-    {
-        if(_vertexID != nullptr)
-        {
-            std::string id = std::string(_pixelID);
-            
-            if (m_ShaderMap.find(id) == m_ShaderMap.end())
-            {
-                std::string extension = FileSystem::get_file_extention(id);
-                
-                if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-                {
-                    return USHRT_MAX;
-                }
-                else
-                {
-                    asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-                    data->shader_type = SHADER_PIXEL;
-                    
-                    pixel = m_Factory.Create(data);
-                }
-            }
-            else
-                pixel = m_ShaderMap[id];
-        }
-        else
-            return USHRT_MAX;
-    }
-    
-    // load geometry shader
-    {
-        if(_geometryID != nullptr)
-        {
-            std::string id = std::string(_geometryID);
-            
-            if (m_ShaderMap.find(id) == m_ShaderMap.end())
-            {
-                std::string extension = FileSystem::get_file_extention(id);
-                
-                if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-                {
-                    return USHRT_MAX;
-                }
-                else
-                {
-                    asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-                    data->shader_type = SHADER_GEOMETRY;
-                    
-                    geometry = m_Factory.Create(data);
-                }
-            }
-            else
-                geometry = m_ShaderMap[id];
-        }
-        else
-            geometry = USHRT_MAX;
-    }
-    
-    // load tessellation evaluation shader
-    {
-        if(_tessevalID != nullptr)
-        {
-            std::string id = std::string(_tessevalID);
-            
-            if (m_ShaderMap.find(id) == m_ShaderMap.end())
-            {
-                std::string extension = FileSystem::get_file_extention(id);
-                
-                if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-                {
-                    return USHRT_MAX;
-                }
-                else
-                {
-                    asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-                    data->shader_type = SHADER_TESSELLATION_EVALUATION;
-                    
-                    tess_eval = m_Factory.Create(data);
-                }
-            }
-            else
-                tess_eval = m_ShaderMap[id];
-        }
-        else
-            tess_eval = USHRT_MAX;
-    }
-    
-    // load tessellation control shader
-    {
-        if(_tesscontrolID != nullptr)
-        {
-            std::string id = std::string(_tesscontrolID);
-            
-            if (m_ShaderMap.find(id) == m_ShaderMap.end())
-            {
-                std::string extension = FileSystem::get_file_extention(id);
-                
-                if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-                {
-                    return USHRT_MAX;
-                }
-                else
-                {
-                    asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-                    data->shader_type = SHADER_TESSELLATION_CONTROL;
-                    
-                    tess_control = m_Factory.Create(data);
-                }
-            }
-            else
-                tess_control = m_ShaderMap[id];
-        }
-        else
-            tess_control = USHRT_MAX;
-    }
-    
-    ResourceHandle program = RenderBackend::CreateShaderProgram(vertex, geometry, tess_control, tess_eval, pixel);
-    
-    if(HANDLE_VALID(program))
-    {
-        m_ShaderProgramMap[vertex] = program;
-        m_ShaderProgramMap[pixel] = program;
-        
-        if(HANDLE_VALID(geometry))
-            m_ShaderProgramMap[geometry] = program;
-        if(HANDLE_VALID(tess_control))
-            m_ShaderProgramMap[tess_control] = program;
-        if(HANDLE_VALID(tess_eval))
-            m_ShaderProgramMap[tess_eval] = program;
-        
-        return program;
-    }
-    else
-        return USHRT_MAX;
-}
+		}
 
-void ShaderCache::Unload(ResourceHandle _Handle)
-{
-    
-}
+		ShaderCache::~ShaderCache()
+		{
+
+		}
+
+		void ShaderCache::Initialize(Graphics::RenderDevice* device)
+		{
+			m_device = device;
+			m_Factory.Initialize(device);
+		}
+
+		Graphics::ShaderProgram* ShaderCache::Load(const char* _vertexID,
+												   const char* _pixelID,
+												   const char* _geometryID,
+												   const char* _tessevalID,
+												   const char* _tesscontrolID)
+		{
+			Graphics::Shader* vertex;
+			Graphics::Shader* pixel; 
+			Graphics::Shader* geometry;
+			Graphics::Shader* tess_eval;
+			Graphics::Shader* tess_control;
+
+			// load vertex shader
+			{
+				if (_vertexID != nullptr)
+				{
+					std::string id = std::string(_vertexID);
+
+					if (m_ShaderMap.find(id) == m_ShaderMap.end())
+					{
+						std::string extension = FileSystem::get_file_extention(id);
+
+						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
+						{
+							return nullptr;
+						}
+						else
+						{
+							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							data->shader_type = ShaderType::VERTEX;
+
+							vertex = m_Factory.Create(data);
+						}
+					}
+					else
+						vertex = m_ShaderMap[id];
+				}
+				else
+					return nullptr;
+			}
+
+			// load pixel shader
+			{
+				if (_vertexID != nullptr)
+				{
+					std::string id = std::string(_pixelID);
+
+					if (m_ShaderMap.find(id) == m_ShaderMap.end())
+					{
+						std::string extension = FileSystem::get_file_extention(id);
+
+						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
+						{
+							return nullptr;
+						}
+						else
+						{
+							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							data->shader_type = ShaderType::PIXEL;
+
+							pixel = m_Factory.Create(data);
+						}
+					}
+					else
+						pixel = m_ShaderMap[id];
+				}
+				else
+					return nullptr;
+			}
+
+			// load geometry shader
+			{
+				if (_geometryID != nullptr)
+				{
+					std::string id = std::string(_geometryID);
+
+					if (m_ShaderMap.find(id) == m_ShaderMap.end())
+					{
+						std::string extension = FileSystem::get_file_extention(id);
+
+						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
+						{
+							return nullptr;
+						}
+						else
+						{
+							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							data->shader_type = ShaderType::GEOMETRY;
+
+							geometry = m_Factory.Create(data);
+						}
+					}
+					else
+						geometry = m_ShaderMap[id];
+				}
+				else
+					geometry = nullptr;
+			}
+
+			// load tessellation evaluation shader
+			{
+				if (_tessevalID != nullptr)
+				{
+					std::string id = std::string(_tessevalID);
+
+					if (m_ShaderMap.find(id) == m_ShaderMap.end())
+					{
+						std::string extension = FileSystem::get_file_extention(id);
+
+						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
+						{
+							return nullptr;
+						}
+						else
+						{
+							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							data->shader_type = ShaderType::TESSELLATION_EVALUATION;
+
+							tess_eval = m_Factory.Create(data);
+						}
+					}
+					else
+						tess_eval = m_ShaderMap[id];
+				}
+				else
+					tess_eval = nullptr;
+			}
+
+			// load tessellation control shader
+			{
+				if (_tesscontrolID != nullptr)
+				{
+					std::string id = std::string(_tesscontrolID);
+
+					if (m_ShaderMap.find(id) == m_ShaderMap.end())
+					{
+						std::string extension = FileSystem::get_file_extention(id);
+
+						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
+						{
+							return nullptr;
+						}
+						else
+						{
+							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							data->shader_type = ShaderType::TESSELLATION_CONTROL;
+
+							tess_control = m_Factory.Create(data);
+						}
+					}
+					else
+						tess_control = m_ShaderMap[id];
+				}
+				else
+					tess_control = nullptr;
+			}
+			
+			Graphics::ShaderProgram* program = m_device->CreateShaderProgram(vertex, pixel, geometry, tess_control, tess_eval);
+
+			if (program)
+			{
+				m_ShaderProgramMap[vertex] = program;
+				m_ShaderProgramMap[pixel] = program;
+
+				if (geometry)
+					m_ShaderProgramMap[geometry] = program;
+				if (tess_control)
+					m_ShaderProgramMap[tess_control] = program;
+				if (tess_eval)
+					m_ShaderProgramMap[tess_eval] = program;
+
+				return program;
+			}
+			else
+				return nullptr;
+		}
+
+		void ShaderCache::Unload(Graphics::ShaderProgram* program)
+		{
+			// TODO : erase from map
+			m_device->DestoryShaderProgram(program);
+		}
+
+} }

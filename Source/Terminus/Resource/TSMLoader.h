@@ -5,12 +5,16 @@
 
 #include "AssetLoader.h"
 
-class TSMLoader : public IAssetLoader
-{
-public:
-	TSMLoader();
-	~TSMLoader();
-	void* Load(std::string _id);
-};
+namespace Terminus { namespace Resource {
+
+	class TSMLoader : public IAssetLoader
+	{
+	public:
+		TSMLoader();
+		~TSMLoader();
+		void* Load(std::string _id);
+	};
+
+} }
 
 #endif

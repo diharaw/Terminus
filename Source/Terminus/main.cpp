@@ -82,11 +82,11 @@ Terminus::Graphics::VertexArray* vertexArray;
 Terminus::Graphics::ShaderProgram* shaderProgram;
 Terminus::Graphics::DepthStencilState* depthStencilState;
 Terminus::Graphics::RasterizerState* rasterizerState;
-Terminus::Graphics::Texture2D* texture;
+Terminus::Graphics::Texture* texture;
 Terminus::Graphics::SamplerState* samplerState;
 
-ShaderCache shaderCache;
-TextureCache textureCache;
+Terminus::Resource::ShaderCache shaderCache;
+Terminus::Resource::TextureCache textureCache;
 
 Terminus::Graphics::RenderDevice render_device;
 
@@ -244,8 +244,11 @@ void SetupMatrices()
 
 void SetupGraphicsResources()
 {
-    shaderCache.RegisterLoader<TextLoader>();
-    textureCache.RegisterLoader<StbLoader>();
+	shaderCache.Initialize(&render_device);
+	textureCache.Initialize(&render_device);
+
+    shaderCache.RegisterLoader<Terminus::Resource::TextLoader>();
+    textureCache.RegisterLoader<Terminus::Resource::StbLoader>();
     
     // Setup graphics resources
     
@@ -261,16 +264,20 @@ void SetupGraphicsResources()
     depthStencilState = render_device.CreateDepthStencilState();
 	rasterizerState = render_device.CreateRasterizerState();
     
-	render_device.BindDepthStencilState(depthStencilState);
-	render_device.BindRasterizerState(rasterizerState);
+	CHECK_ERROR(render_device.BindDepthStencilState(depthStencilState));
+	CHECK_ERROR(render_device.BindRasterizerState(rasterizerState));
     
 	shaderProgram = shaderCache.Load("Shaders/Basic_Vertex.glsl", "Shaders/Basic_Pixel.glsl");
     
-    char* ptr = (char*)malloc(sizeof(Matrix4) * 3);
+    char* ptr = (char*)render_device.MapBuffer(uniformBuffer, BufferMapType::WRITE);
     
     memcpy(ptr, &model, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
     memcpy(ptr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
+
+	render_device.UnmapBuffer(uniformBuffer);
+	render_device.SetPrimitiveType(DrawPrimitive::TRIANGLES);
+	
 }
 
 void DrawScene()
@@ -279,36 +286,42 @@ void DrawScene()
 
 	model = glm::rotate(glm::radians(seconds * 25.0f), Vector3(0.0f, 1.0f, 1.0f));
 
-	char* memPtr = (char*)copyCmdData.Data;
+	char* memPtr = (char*)render_device.MapBuffer(uniformBuffer, BufferMapType::WRITE);
 
 	memcpy(memPtr, &model, sizeof(glm::mat4));
 	memcpy(memPtr + sizeof(glm::mat4), &view, sizeof(glm::mat4));
 	memcpy(memPtr + sizeof(glm::mat4) * 2, &projection, sizeof(glm::mat4));
 
-	RenderBackend::BindFramebuffer();
-	RenderBackend::SetViewport(PlatformBackend::GetWidth(), PlatformBackend::GetHeight(), 0, 0);
+	render_device.UnmapBuffer(uniformBuffer);
+
+	render_device.BindFramebuffer(nullptr);
+	render_device.SetViewport(PlatformBackend::GetWidth(), PlatformBackend::GetHeight(), 0, 0);
     
-	GPUCommand::ClearRenderTarget(&clearRenderTargetData);
+	render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
     
     // Bind Shader Program
-    RenderBackend::BindShaderProgram(shaderProgram);
-    GL_CHECK_ERROR(RenderBackend::BindSamplerState(samplerState, 0, SHADER_PIXEL));
-    GL_CHECK_ERROR(RenderBackend::BindTexture2D(texture, SHADER_PIXEL));
+	render_device.BindShaderProgram(shaderProgram);
+	render_device.BindSamplerState(samplerState, ShaderType::PIXEL ,0);
+	render_device.BindTexture(texture, ShaderType::PIXEL);
     // Bind Uniform Buffer
-	GPUCommand::UniformBufferCopy(&copyCmdData);
-	RenderBackend::BindUniformBuffer(uniformBuffer, SHADER_VERTEX, 0);
+	render_device.BindUniformBuffer(uniformBuffer, ShaderType::VERTEX, 0);
     
     // Bind Vertex Array
-	RenderBackend::BindVertexArray(vertexArray);
+	render_device.BindVertexArray(vertexArray);
 
-    GPUCommand::DrawIndexed(&indexedDrawCmdData);
+	render_device.DrawIndexed(36);
 }
 
 void CleanUpGraphicsResources()
 {
-    RenderBackend::DestroyIndexBuffer(indexBuffer);
-    RenderBackend::DestroyVertexBuffer(vertexBuffer);
-	RenderBackend::DestroyVertexArray(vertexArray);
-    RenderBackend::DestroyUniformBuffer(uniformBuffer);
-	RenderBackend::DestroyShaderProgram(shaderProgram);
+	delete[] verticesList;
+	delete[] indicesList;
+
+	render_device.DestroyDepthStencilState(depthStencilState);
+	render_device.DestroySamplerState(samplerState);
+	render_device.DestroyRasterizerState(rasterizerState);
+    render_device.DestroyIndexBuffer(indexBuffer);
+    render_device.DestroyVertexBuffer(vertexBuffer);
+	render_device.DestroyVertexArray(vertexArray);
+    render_device.DestroyUniformBuffer(uniformBuffer);
 }

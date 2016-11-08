@@ -6,9 +6,13 @@
 #include "AssetCache.h"
 #include "MeshFactory.h"
 
-class MeshCache : public IAssetCache<MeshCache>
-{
+namespace Terminus { namespace Resource {
 
-};
+	class MeshCache : public IAssetCache<MeshCache>
+	{
+
+	};
+
+} }
 
 #endif

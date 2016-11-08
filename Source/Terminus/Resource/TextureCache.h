@@ -7,17 +7,23 @@
 #include "AssetCache.h"
 #include "TextureFactory.h"
 
-class TextureCache : public IAssetCache<TextureFactory>
-{
-private:
-	std::unordered_map<std::string, ResourceHandle> m_AssetMap;
+namespace Terminus { namespace Resource {
 
-public:
-	TextureCache();
-	~TextureCache();
+	class TextureCache : public IAssetCache<TextureFactory>
+	{
+	private:
+		std::unordered_map<std::string, Graphics::Texture*> m_AssetMap;
+		Graphics::RenderDevice* m_device;
 
-	ResourceHandle Load(std::string _ID);
-	void Unload(ResourceHandle _Handle);
-};
+	public:
+		TextureCache();
+		~TextureCache();
+		void Initialize(Graphics::RenderDevice* device);
+
+		Graphics::Texture* Load(std::string _ID);
+		void Unload(Graphics::Texture* texture);
+	};
+
+} }
 
 #endif

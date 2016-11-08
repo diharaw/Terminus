@@ -5,12 +5,16 @@
 
 #include "AssetLoader.h"
 
-class StbLoader : public IAssetLoader
-{
-public:
-    StbLoader();
-    ~StbLoader();
-    void* Load(std::string _id);
-};
+namespace Terminus { namespace Resource {
+
+	class StbLoader : public IAssetLoader
+	{
+	public:
+		StbLoader();
+		~StbLoader();
+		void* Load(std::string _id);
+	};
+
+} }
 
 #endif

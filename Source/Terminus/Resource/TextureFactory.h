@@ -5,16 +5,23 @@
 
 #include "../Graphics/RenderCommon.h"
 #include "AssetCommon.h"
+#include "../Graphics/RenderDevice.h"
 
-struct Texture2D;
+namespace Terminus { namespace Resource {
 
-class TextureFactory
-{
-public:
-	TextureFactory();
-	~TextureFactory();
+	class TextureFactory
+	{
+	private:
+		Graphics::RenderDevice* m_device;
 
-	ResourceHandle Create(asset_common::ImageLoadData* _data);
-};
+	public:
+		TextureFactory();
+		~TextureFactory();
+		void Initialize(Graphics::RenderDevice* device);
+
+		Graphics::Texture* Create(asset_common::ImageLoadData* _data);
+	};
+
+} }
 
 #endif

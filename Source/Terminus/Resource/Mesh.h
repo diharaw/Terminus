@@ -5,6 +5,7 @@
 
 #include "../Types.h"
 #include "AssetCommon.h"
+#include "../Graphics/RenderDevice.h"
 #include "../Graphics/RenderCommon.h"
 
 struct VertexArray;
@@ -23,7 +24,7 @@ struct Mesh
 	bool IsSkeletal;
 	uint MeshCount;
 	SubMesh* SubMeshes;
-	ResourceHandle VAOHandle;
+	Terminus::Graphics::VertexArray* VertexArray;
 };
 
 #endif

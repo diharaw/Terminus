@@ -151,6 +151,7 @@ namespace Terminus { namespace Graphics {
         void DestroyVertexBuffer(VertexBuffer* buffer);
         void DestroyIndexBuffer(IndexBuffer* buffer);
         void DestroyUniformBuffer(UniformBuffer* buffer);
+		void DestroyVertexArray(VertexArray* vertexArray);
         void DestroyRasterizerState(RasterizerState* state);
         void DestroySamplerState(SamplerState* state);
 		void DestroyDepthStencilState(DepthStencilState* state);
@@ -168,6 +169,7 @@ namespace Terminus { namespace Graphics {
         void  BindSamplerState(SamplerState* state,
 							   ShaderType shaderStage,
 							   uint slot);
+		void  BindVertexArray(VertexArray* vertexArray);
         void  BindFramebuffer(Framebuffer* framebuffer);
 		void  BindDepthStencilState(DepthStencilState* state);
         void  BindShaderProgram(ShaderProgram* program);

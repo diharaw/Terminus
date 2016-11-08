@@ -4,14 +4,23 @@
 #define MESHFACTORY_H
 
 #include "Mesh.h"
+#include "../Graphics/RenderDevice.h"
 #include <string>
 
-class MeshFactory 
-{
-public:
-	MeshFactory();
-	~MeshFactory();
-	Mesh* Create(asset_common::MeshLoadData* _Data);
-};
+namespace Terminus { namespace Resource {
+
+	class MeshFactory
+	{
+	private:
+		Graphics::RenderDevice* m_device;
+
+	public:
+		MeshFactory();
+		~MeshFactory();
+		void Initialize(Graphics::RenderDevice* device);
+		Mesh* Create(asset_common::MeshLoadData* _Data);
+	};
+
+} }
 
 #endif

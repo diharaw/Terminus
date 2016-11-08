@@ -19,6 +19,16 @@ namespace Terminus { namespace Graphics {
 	void RenderDevice::Initialize(void* memory, size_t size)
 	{
 		m_window = PlatformBackend::GetWindow();
+
+		glfwMakeContextCurrent(m_window);
+
+		glewExperimental = GL_TRUE;
+		if (glewInit() != GLEW_OK)
+		{
+			std::cout << "ERROR" << std::endl;
+		}
+
+		CHECK_ERROR();
 	}
 
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
@@ -471,7 +481,7 @@ namespace Terminus { namespace Graphics {
 	VertexArray* RenderDevice::CreateVertexArray(VertexBuffer* vertexBuffer,
 												 IndexBuffer* indexBuffer,
 												 InputLayoutType layoutType,
-												 InputLayout* layout = nullptr)
+												 InputLayout* layout)
 	{
 		VertexArray* vertexArray = new VertexArray();
 
@@ -836,6 +846,8 @@ namespace Terminus { namespace Graphics {
 	{
 		ShaderProgram* shaderProgram = new ShaderProgram();
 
+		CHECK_ERROR(shaderProgram->m_id = glCreateProgram());
+
 		shaderProgram->m_shader_map[ShaderType::VERTEX] = vertexShader;
 		shaderProgram->m_shader_map[ShaderType::PIXEL] = pixelShader;
 
@@ -849,9 +861,11 @@ namespace Terminus { namespace Graphics {
 		}
 
 		for (auto it : shaderProgram->m_shader_map)
-			glAttachShader(shaderProgram->m_id, it.second->m_id);
-
-		glLinkProgram(shaderProgram->m_id);
+		{
+			CHECK_ERROR(glAttachShader(shaderProgram->m_id, it.second->m_id));
+		}
+		
+		CHECK_ERROR(glLinkProgram(shaderProgram->m_id));
 
 		GLint success;
 		char infoLog[512];
@@ -1360,6 +1374,12 @@ namespace Terminus { namespace Graphics {
 		delete buffer;
 	}
 
+	void RenderDevice::DestroyVertexArray(VertexArray* vertexArray)
+	{
+		CHECK_ERROR(glDeleteVertexArrays(1, &vertexArray->m_id));
+		delete vertexArray;
+	}
+
 	void RenderDevice::DestroyRasterizerState(RasterizerState* state)
 	{
 		delete state;
@@ -1367,6 +1387,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::DestroySamplerState(SamplerState* state)
 	{
+		CHECK_ERROR(glDeleteSamplers(1, &state->m_id));
 		delete state;
 	}
 
@@ -1406,6 +1427,11 @@ namespace Terminus { namespace Graphics {
 									     uint bufferSlot)
 	{
 		CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, bufferSlot, uniformBuffer->m_id));
+	}
+
+	void RenderDevice::BindVertexArray(VertexArray* vertexArray)
+	{
+		glBindVertexArray(vertexArray->m_id);
 	}
 
 	void RenderDevice::BindRasterizerState(RasterizerState* state)
@@ -1486,12 +1512,15 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::BindShaderProgram(ShaderProgram* program)
 	{
+		m_current_program = program;
 		CHECK_ERROR(glUseProgram(program->m_id));
 	}
 
 	void* RenderDevice::MapBuffer(Buffer* buffer, BufferMapType type)
 	{
 		void* bufferPointer;
+
+		CHECK_ERROR(glBindBuffer(buffer->bufferType, buffer->m_id));
 
 		switch (type)
 		{
@@ -1518,11 +1547,14 @@ namespace Terminus { namespace Graphics {
 			bufferPointer = nullptr;
 			break;
 		}
+
+		return bufferPointer;
 	}
 
 	void RenderDevice::UnmapBuffer(Buffer* buffer)
 	{
 		CHECK_ERROR(glUnmapBuffer(buffer->bufferType));
+		glBindBuffer(buffer->bufferType, 0);
 	}
 
 	void RenderDevice::SetPrimitiveType(DrawPrimitive _primitive)
