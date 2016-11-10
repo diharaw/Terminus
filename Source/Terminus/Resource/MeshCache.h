@@ -8,9 +8,19 @@
 
 namespace Terminus { namespace Resource {
 
-	class MeshCache : public IAssetCache<MeshCache>
+	class MeshCache : public IAssetCache<MeshFactory>
 	{
+	private:
+		std::unordered_map<std::string, Mesh*> m_AssetMap;
+		Graphics::RenderDevice* m_device;
 
+	public:
+		MeshCache();
+		~MeshCache();
+		void Initialize(Graphics::RenderDevice* device);
+
+		Mesh* Load(std::string _ID);
+		void Unload(Mesh* mesh);
 	};
 
 } }

@@ -1,17 +1,17 @@
 #pragma once
 
-#ifndef STBLOADER_H
-#define STBLOADER_H
+#ifndef STBIMAGELOADER_H
+#define STBIMAGELOADER_H
 
 #include "AssetLoader.h"
 
 namespace Terminus { namespace Resource {
 
-	class StbLoader : public IAssetLoader
+	class StbImageLoader : public IAssetLoader
 	{
 	public:
-		StbLoader();
-		~StbLoader();
+		StbImageLoader();
+		~StbImageLoader();
 		void* Load(std::string _id);
 	};
 

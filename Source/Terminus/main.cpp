@@ -13,8 +13,11 @@
 #include "Input/InputContext.h"
 #include "Core/Event/EventHandler.h"
 #include "Resource/ShaderCache.h"
+#include "Resource/MeshCache.h"
+#include "Resource/AssimpMeshLoader.h"
+#include "Resource/TSMLoader.h"
 #include "Resource/TextLoader.h"
-#include "Resource/StbLoader.h"
+#include "Resource/StbImageLoader.h"
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
 #include <iostream>
@@ -75,6 +78,8 @@ Matrix4 model;
 Matrix4 view;
 Matrix4 projection;
 
+Mesh* testMesh;
+
 Terminus::Graphics::VertexBuffer* vertexBuffer;
 Terminus::Graphics::IndexBuffer* indexBuffer;
 Terminus::Graphics::UniformBuffer* uniformBuffer;
@@ -87,7 +92,7 @@ Terminus::Graphics::SamplerState* samplerState;
 
 Terminus::Resource::ShaderCache shaderCache;
 Terminus::Resource::TextureCache textureCache;
-
+Terminus::Resource::MeshCache meshCache;
 Terminus::Graphics::RenderDevice render_device;
 
 // Init method declarations
@@ -97,6 +102,7 @@ void SetupMatrices();
 void SetupGraphicsResources();
 void CleanUpGraphicsResources();
 void DrawScene();
+void DrawMesh(Mesh* mesh);
 
 int main(void)
 {
@@ -157,79 +163,24 @@ int main(void)
     return 0;
 }
 
-
 void SetupCube()
 {
-    // Cube Vertex data
-    
-    verticesList = new Vertex[8];
-    indicesList = new unsigned int[36];
-    
-    verticesList[0].m_Position = Vector3(-1.0f, -1.0f, 1.0f); // Front Bottom Left
-    verticesList[0].m_TexCoord = Vector2(0.0f, 1.0f);
-    
-    verticesList[1].m_Position = Vector3(-1.0f, 1.0f, 1.0f);  // Front Top Left
-    verticesList[1].m_TexCoord = Vector2(0.0f, 0.0f);
-    
-    verticesList[2].m_Position = Vector3(1.0f, -1.0f, 1.0f);  // Front Bottom Right
-    verticesList[2].m_TexCoord = Vector2(1.0f, 1.0f);
-    
-    verticesList[3].m_Position = Vector3(1.0f, 1.0f, 1.0f);   // Front Top Right
-    verticesList[3].m_TexCoord = Vector2(1.0f, 0.0f);
-    
-    verticesList[4].m_Position = Vector3(-1.0f, -1.0f, -1.0f); // Back Bottom Left
-    verticesList[4].m_TexCoord = Vector2(0.0f, 1.0f);
-    
-    verticesList[5].m_Position = Vector3(-1.0f, 1.0f, -1.0f);  // Back Top Left
-    verticesList[5].m_TexCoord = Vector2(0.0f, 0.0f);
-    
-    verticesList[6].m_Position = Vector3(1.0f, -1.0f, -1.0f);  // Back Bottom Right
-    verticesList[6].m_TexCoord = Vector2(1.0f, 1.0f);
-    
-    verticesList[7].m_Position = Vector3(1.0f, 1.0f, -1.0f);   // Back Top Right
-    verticesList[7].m_TexCoord = Vector2(1.0f, 0.0f);
-    
-    indicesList[0] = 0; // Front
-    indicesList[1] = 2;
-    indicesList[2] = 1;
-    indicesList[3] = 2;
-    indicesList[4] = 3;
-    indicesList[5] = 1;
-    
-    indicesList[6] = 0;  // Left
-    indicesList[7] = 5;
-    indicesList[8] = 4;
-    indicesList[9] = 0;
-    indicesList[10] = 1;
-    indicesList[11] = 5;
-    
-    indicesList[12] = 3; // Right
-    indicesList[13] = 2;
-    indicesList[14] = 7;
-    indicesList[15] = 7;
-    indicesList[16] = 2;
-    indicesList[17] = 6;
-    
-    indicesList[18] = 5; // Up
-    indicesList[19] = 1;
-    indicesList[20] = 7;
-    indicesList[21] = 7;
-    indicesList[22] = 1;
-    indicesList[23] = 3;
-    
-    indicesList[24] = 0; // Down
-    indicesList[25] = 4;
-    indicesList[26] = 6;
-    indicesList[27] = 6;
-    indicesList[28] = 2;
-    indicesList[29] = 0;
-    
-    indicesList[30] = 7; // Back
-    indicesList[31] = 6;
-    indicesList[32] = 4;
-    indicesList[33] = 4;
-    indicesList[34] = 5;
-    indicesList[35] = 7;
+	meshCache.Initialize(&render_device);
+	meshCache.RegisterLoader<Terminus::Resource::AssimpMeshLoader>();
+	meshCache.RegisterLoader<Terminus::Resource::TSMLoader>();
+
+	testMesh = meshCache.Load("cube.tsm");
+
+}
+
+void DrawMesh(Mesh* mesh)
+{
+	render_device.BindVertexArray(mesh->VertexArray);
+
+	for (int i = 0; i < mesh->MeshCount; i++)
+	{
+		render_device.DrawIndexedBaseVertex(mesh->SubMeshes[i].m_IndexCount, mesh->SubMeshes[i].m_BaseIndex, mesh->SubMeshes[i].m_BaseVertex);
+	}
 }
 
 void SetupMatrices()
@@ -249,7 +200,7 @@ void SetupGraphicsResources()
 	textureCache.Initialize(&render_device);
 
     shaderCache.RegisterLoader<Terminus::Resource::TextLoader>();
-    textureCache.RegisterLoader<Terminus::Resource::StbLoader>();
+    textureCache.RegisterLoader<Terminus::Resource::StbImageLoader>();
     
     // Setup graphics resources
     
@@ -257,9 +208,6 @@ void SetupGraphicsResources()
     
     samplerState = render_device.CreateSamplerState(TextureFilteringMode::LINEAR_ALL, TextureFilteringMode::LINEAR_ALL, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT);
     
-	vertexBuffer  = render_device.CreateVertexBuffer(&verticesList[0], sizeof(Vertex) * 8, BufferUsageType::STATIC);
-	indexBuffer   = render_device.CreateIndexBuffer(&indicesList[0], sizeof(unsigned int) * 36, BufferUsageType::STATIC);
-	vertexArray   = render_device.CreateVertexArray(vertexBuffer, indexBuffer, InputLayoutType::STANDARD_VERTEX);
 	uniformBuffer = render_device.CreateUniformBuffer(NULL, sizeof(Matrix4) * 3, BufferUsageType::DYNAMIC);
 
     depthStencilState = render_device.CreateDepthStencilState();
@@ -278,7 +226,6 @@ void SetupGraphicsResources()
 
 	render_device.UnmapBuffer(uniformBuffer);
 	render_device.SetPrimitiveType(DrawPrimitive::TRIANGLES);
-	
 }
 
 void DrawScene()
@@ -307,10 +254,7 @@ void DrawScene()
     // Bind Uniform Buffer
 	render_device.BindUniformBuffer(uniformBuffer, ShaderType::VERTEX, 0);
     
-    // Bind Vertex Array
-	render_device.BindVertexArray(vertexArray);
-
-	render_device.DrawIndexed(36);
+	DrawMesh(testMesh);
 }
 
 void CleanUpGraphicsResources()
@@ -318,12 +262,11 @@ void CleanUpGraphicsResources()
 	delete[] verticesList;
 	delete[] indicesList;
 
+	meshCache.Unload(testMesh);
+
 	render_device.DestroyTexture2D((Terminus::Graphics::Texture2D*)texture);
 	render_device.DestroyDepthStencilState(depthStencilState);
 	render_device.DestroySamplerState(samplerState);
 	render_device.DestroyRasterizerState(rasterizerState);
-    //render_device.DestroyIndexBuffer(indexBuffer);
-    //render_device.DestroyVertexBuffer(vertexBuffer);
-	render_device.DestroyVertexArray(vertexArray);
     render_device.DestroyUniformBuffer(uniformBuffer);
 }

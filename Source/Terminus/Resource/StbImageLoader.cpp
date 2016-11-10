@@ -1,4 +1,4 @@
-#include "StbLoader.h"
+#include "StbImageLoader.h"
 #include "AssetCommon.h"
 #include "../IO/FileSystem.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -7,7 +7,7 @@
 
 namespace Terminus { namespace Resource {
 
-	StbLoader::StbLoader()
+	StbImageLoader::StbImageLoader()
 	{
 		REGISTER_EXTENSION("png");
 		REGISTER_EXTENSION("bmp");
@@ -15,12 +15,12 @@ namespace Terminus { namespace Resource {
 		REGISTER_EXTENSION("tga");
 	}
 
-	StbLoader::~StbLoader()
+	StbImageLoader::~StbImageLoader()
 	{
 
 	}
 
-	void* StbLoader::Load(std::string _id)
+	void* StbImageLoader::Load(std::string _id)
 	{
 		FileHandle handle = FileSystem::read_file(_id);
 

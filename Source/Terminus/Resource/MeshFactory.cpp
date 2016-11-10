@@ -31,7 +31,7 @@ namespace Terminus { namespace Resource {
 			}
 			else
 			{
-				vertexBuffer = m_device->CreateVertexBuffer(&_Data->skeletalVertices[0], sizeof(Vertex) * _Data->header.m_VertexCount, BufferUsageType::STATIC);
+				vertexBuffer = m_device->CreateVertexBuffer(&_Data->vertices[0], sizeof(Vertex) * _Data->header.m_VertexCount, BufferUsageType::STATIC);
 				mesh->VertexArray = m_device->CreateVertexArray(vertexBuffer, indexBuffer, InputLayoutType::STANDARD_VERTEX);
 			}
 

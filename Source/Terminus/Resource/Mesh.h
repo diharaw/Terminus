@@ -7,6 +7,7 @@
 #include "AssetCommon.h"
 #include "../Graphics/RenderDevice.h"
 #include "../Graphics/RenderCommon.h"
+#include <string>
 
 struct VertexArray;
 
@@ -21,6 +22,7 @@ struct SubMesh
 
 struct Mesh
 {
+	std::string id;
 	bool IsSkeletal;
 	uint MeshCount;
 	SubMesh* SubMeshes;
