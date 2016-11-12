@@ -209,6 +209,11 @@ namespace Terminus { namespace Resource {
 				return nullptr;
 		}
 
+		Graphics::ShaderProgram* ShaderCache::Load(ShaderKey key)
+		{
+
+		}
+
 		void ShaderCache::Unload(Graphics::ShaderProgram* program)
 		{
 			// TODO : erase from map

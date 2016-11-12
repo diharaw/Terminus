@@ -6,10 +6,13 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cassert>
 
 namespace Terminus
 {
-    using StringVector = std::vector<std::string>;
+	using String = std::string;
+    using StringList = std::vector<std::string>;
+	using PositionList = std::vector<size_t>;
     
     namespace StringUtility
     {
@@ -28,9 +31,9 @@ namespace Terminus
                 return n;
         }
         
-        inline StringVector find_line(std::string _keyword, std::string _source)
+        inline StringList find_line(std::string _keyword, std::string _source)
         {
-            StringVector lineList;
+			StringList lineList;
             std::string line;
             std::istringstream sourceStream(_source);
             
@@ -47,9 +50,9 @@ namespace Terminus
             return lineList;
         }
         
-        inline StringVector delimit(std::string _delimiter, std::string _source)
+        inline StringList delimit(std::string _delimiter, std::string _source)
         {
-            StringVector list;
+			StringList list;
             std::string token;
             std::string::size_type n = 0;
             
@@ -91,6 +94,109 @@ namespace Terminus
             int line = find(_sourceSubstring, _source);
             _source.replace(line, _sourceSubstring.length(), _destSubstring);
         }
+
+		StringList Split(String str, char delimiter)
+		{
+			StringList internal;
+			std::stringstream ss(str);
+			String tok;
+
+			while (getline(ss, tok, delimiter))
+			{
+				internal.push_back(tok);
+			}
+
+			return internal;
+		}
+
+		inline bool DefineExists(String name, StringList defines)
+		{
+			for (auto define : defines)
+			{
+				if (name == define)
+					return true;
+			}
+
+			return false;
+		}
+
+		inline PositionList FindAllSubstringPositions(String source, String substring)
+		{
+			PositionList positions;
+
+			size_t pos = source.find(substring, 0);
+			while (pos != std::string::npos)
+			{
+				positions.push_back(pos);
+				pos = source.find(substring, pos + 1);
+			}
+
+			return positions;
+		}
+
+		inline String GenerateSource(String source, StringList defines)
+		{
+			String result = "";
+			String remaining = source;
+
+			while (true)
+			{
+				size_t pos = remaining.find("#ifdef ");
+
+				if (pos != std::string::npos)
+				{
+					if (pos != 0)
+						result += remaining.substr(0, pos - 1);
+
+					remaining = remaining.substr(pos, remaining.size() - pos);
+
+					size_t new_line_pos = remaining.find_first_of('\n');
+					String line = remaining.substr(0, new_line_pos);
+
+					StringList tokens = Split(line, ' ');
+
+					size_t else_pos = remaining.find("#else");
+					size_t endif_pos = remaining.find("#endif");
+					bool has_else = false;
+
+					// Assert to ensure this is a valid source file.
+					assert(endif_pos != std::string::npos);
+					// Find if 'else' exists
+					if (else_pos != std::string::npos && else_pos < endif_pos)
+					{
+						has_else = true;
+					}
+
+					if (DefineExists(tokens[1], defines))
+					{
+						if (has_else)
+						{
+							result += remaining.substr(new_line_pos + 1, (else_pos - 1) - (new_line_pos + 1));
+						}
+						else
+						{
+							result += remaining.substr(new_line_pos + 1, endif_pos - (new_line_pos + 1));
+						}
+					}
+					else
+					{
+						if (has_else)
+						{
+							result += remaining.substr(else_pos + 5, (endif_pos - 1) - (else_pos + 5));
+						}
+					}
+
+					remaining = remaining.substr(endif_pos + 6, remaining.size() - (endif_pos + 6));
+				}
+				else
+				{
+					result += remaining;
+					break;
+				}
+			}
+
+			return result;
+		}
         
     };
 }

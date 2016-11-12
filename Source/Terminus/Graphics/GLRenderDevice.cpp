@@ -886,11 +886,11 @@ namespace Terminus { namespace Graphics {
 		// Bind Uniform Buffers
 		for (auto it : shaderProgram->m_shader_map)
 		{
-			StringVector uboList = StringUtility::find_line("#binding", it.second->m_source);
+			StringList uboList = StringUtility::find_line("#binding", it.second->m_source);
 
 			for (int i = 0; i < uboList.size(); i++)
 			{
-				StringVector tokens = StringUtility::delimit(" ", uboList[i]);
+				StringList tokens = StringUtility::delimit(" ", uboList[i]);
 				std::string uniformName = tokens[3];
 				GLuint binding = (GLuint)atoi(tokens[5].c_str());
 				const GLchar* uniformNameChar = uniformName.c_str();
@@ -902,11 +902,11 @@ namespace Terminus { namespace Graphics {
 		// Bind Uniform Samplers 
 		for (auto it : shaderProgram->m_shader_map)
 		{
-			StringVector samplerList = StringUtility::find_line("uniform sampler", it.second->m_source);
+			StringList samplerList = StringUtility::find_line("uniform sampler", it.second->m_source);
 
 			for (int i = 0; i < samplerList.size(); i++)
 			{
-				StringVector tokens = StringUtility::delimit(" ", samplerList[i]);
+				StringList tokens = StringUtility::delimit(" ", samplerList[i]);
 				std::string uniformName = tokens[2];
 				uniformName.erase(uniformName.end() - 1, uniformName.end());
 

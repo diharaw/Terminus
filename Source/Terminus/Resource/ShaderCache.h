@@ -9,7 +9,17 @@
 #include <unordered_map>
 #include "../Types.h"
 
+#define SHADER_DEF_NORMAL_MAP		  "USE_NORMAL_MAP"
+#define SHADER_DEF_DIFFUSE_MAP		  "USE_DIFFUSE_MAP"
+#define SHADER_DEF_ROUGHNESS_MAP	  "USE_ROUGHNESS_MAP"
+#define SHADER_DEF_METALNESS_MAP	  "USE_METALNESS_MAP"
+#define SHADER_DEF_PARALLAX_OCCLUSION "USE_PARALLAX_OCCLUSION"
+#define SHADER_DEF_APPLE			  "APPLE"
+#define SHADER_DEF_SKELETAL_MESH	  "SKELETAL_VERTEX"
+
 namespace Terminus { namespace Resource {
+
+	using ShaderKey = uint64;
 
 	class ShaderCache : public IAssetCache<ShaderFactory>
 	{
@@ -28,6 +38,7 @@ namespace Terminus { namespace Resource {
 									  const char* _geometryID = nullptr,
 									  const char* _tessevalID = nullptr,
 									  const char* _tesscontrolID = nullptr);
+		Graphics::ShaderProgram* Load(ShaderKey key);
 		void Unload(Graphics::ShaderProgram* program);
 	};
 
