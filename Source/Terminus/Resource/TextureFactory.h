@@ -19,7 +19,7 @@ namespace Terminus { namespace Resource {
 		~TextureFactory();
 		void Initialize(Graphics::RenderDevice* device);
 
-		Graphics::Texture* Create(asset_common::ImageLoadData* _data);
+		Graphics::Texture* Create(AssetCommon::ImageLoadData* _data);
 	};
 
 } }

@@ -38,7 +38,7 @@ namespace Terminus { namespace Resource {
 			}
 			else
 			{
-				asset_common::MeshLoadData* data = static_cast<asset_common::MeshLoadData*>(m_LoaderMap[extension]->Load(_ID));
+				AssetCommon::MeshLoadData* data = static_cast<AssetCommon::MeshLoadData*>(m_LoaderMap[extension]->Load(_ID));
 
 				Mesh* mesh = m_Factory.Create(data);
 				mesh->SubMeshes = new SubMesh[data->header.m_MeshCount];

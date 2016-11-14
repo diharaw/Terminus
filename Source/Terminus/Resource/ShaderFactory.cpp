@@ -17,7 +17,7 @@ namespace Terminus { namespace Resource {
 		m_device = device;
 	}
 
-	Graphics::Shader* ShaderFactory::Create(asset_common::TextLoadData* _data)
+	Graphics::Shader* ShaderFactory::Create(AssetCommon::TextLoadData* _data)
 	{
 		Graphics::Shader* shader = m_device->CreateShader(_data->shader_type, _data->buffer);
 

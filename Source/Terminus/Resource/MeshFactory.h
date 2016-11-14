@@ -18,7 +18,7 @@ namespace Terminus { namespace Resource {
 		MeshFactory();
 		~MeshFactory();
 		void Initialize(Graphics::RenderDevice* device);
-		Mesh* Create(asset_common::MeshLoadData* _Data);
+		Mesh* Create(AssetCommon::MeshLoadData* _Data);
 	};
 
 } }

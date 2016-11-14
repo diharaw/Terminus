@@ -14,7 +14,7 @@ namespace Terminus { namespace Resource {
 	public:
 		MaterialFactory();
 		~MaterialFactory();
-		Graphics::Material* Create(asset_common::TextLoadData* data, TextureCache* textureCache);
+		Graphics::Material* Create(AssetCommon::TextLoadData* data, TextureCache* textureCache);
 	};
 
 } }

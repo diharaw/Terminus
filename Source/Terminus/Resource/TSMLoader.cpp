@@ -20,7 +20,7 @@ namespace Terminus { namespace Resource {
 
 		if (handle.buffer)
 		{
-			asset_common::MeshLoadData* load_data = new asset_common::MeshLoadData();
+			AssetCommon::MeshLoadData* load_data = new AssetCommon::MeshLoadData();
 
 			size_t offset = 0;;
 

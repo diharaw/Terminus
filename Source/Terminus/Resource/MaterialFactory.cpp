@@ -12,7 +12,7 @@ namespace Terminus { namespace Resource {
 
 	}
 
-	Graphics::Material* MaterialFactory::Create(asset_common::TextLoadData* data, TextureCache* textureCache)
+	Graphics::Material* MaterialFactory::Create(AssetCommon::TextLoadData* data, TextureCache* textureCache)
 	{
 		JsonDocument doc;
 		doc.Parse(data->buffer);

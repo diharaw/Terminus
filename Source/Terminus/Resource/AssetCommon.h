@@ -61,6 +61,11 @@ typedef struct
 	char m_Displacement[50];
 }TSM_Material;
 
+typedef struct
+{
+	char material[50];
+}TSM_Material_Final;
+
 // TSM Skeleton Structs
 
 typedef struct
@@ -98,7 +103,14 @@ typedef struct
 	double m_Duration;
 }TSM_AnimationHeader;
 
-namespace asset_common
+typedef struct
+{
+	char m_Albedo[50];
+	char m_Normal[50];
+	String m_MeshName;
+}Assimp_Material;
+
+namespace AssetCommon
 {
     struct MeshLoadData
     {
@@ -110,6 +122,17 @@ namespace asset_common
 		uint*			indices;
 		bool			IsSkeletal;
     };
+
+	struct AssimpMeshLoadData
+	{
+		TSM_FileHeader   header;
+		TSM_MeshHeader*  meshes;
+		Assimp_Material* materials;
+		Vertex*			 vertices;
+		SkeletalVertex*  skeletalVertices;
+		uint*			 indices;
+		bool			 IsSkeletal;
+	};
     
     struct ImageLoadData
     {

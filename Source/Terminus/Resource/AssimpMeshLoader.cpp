@@ -1,6 +1,7 @@
 #include "AssetCommon.h"
 #include "../IO/FileSystem.h"
 #include "AssimpMeshLoader.h"
+#include <iostream>
 
 namespace Terminus { namespace Resource {
 
@@ -18,14 +19,11 @@ namespace Terminus { namespace Resource {
 
 	void* AssimpMeshLoader::Load(std::string _id)
 	{
-		FileHandle handle = FileSystem::read_file(_id);
-
-		if (handle.buffer)
 		{
-			asset_common::MeshLoadData* load_data = new asset_common::MeshLoadData();
+			AssetCommon::AssimpMeshLoadData* load_data = new AssetCommon::AssimpMeshLoadData();
 			const aiScene* Scene;
 			Assimp::Importer Importer;
-			Scene = Importer.ReadFileFromMemory(handle.buffer, handle.size, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+			Scene = Importer.ReadFile(_id.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
 			load_data->header.m_MeshCount = Scene->mNumMeshes;
 			load_data->header.m_VertexCount = 0;
@@ -37,7 +35,7 @@ namespace Terminus { namespace Resource {
 			load_data->IsSkeletal = false;
 
 			if (load_data->header.m_MaterialCount > 0)
-				load_data->materials = new TSM_Material[load_data->header.m_MaterialCount];
+				load_data->materials = new Assimp_Material[load_data->header.m_MaterialCount];
 			else
 				load_data->materials = nullptr;
 
@@ -55,17 +53,17 @@ namespace Terminus { namespace Resource {
 				load_data->header.m_VertexCount += Scene->mMeshes[i]->mNumVertices;
 				load_data->header.m_IndexCount += load_data->meshes[i].m_IndexCount;
 
+				std::cout << Scene->mMeshes[i]->mMaterialIndex << std::endl;
+
 				if (!DoesMaterialExist(processedMatId, Scene->mMeshes[i]->mMaterialIndex))
 				{
 					processedMatId.push_back(Scene->mMeshes[i]->mMaterialIndex);
 					load_data->meshes[i].m_MaterialIndex = materialIndex;
 
 					TempMaterial = Scene->mMaterials[Scene->mMeshes[i]->mMaterialIndex];
+					load_data->materials[materialIndex].m_MeshName = std::string(Scene->mMeshes[i]->mName.C_Str());
 					strncpy(load_data->materials[materialIndex].m_Albedo, GetTexturePath(TempMaterial, aiTextureType_DIFFUSE), 50);
 					strncpy(load_data->materials[materialIndex].m_Normal, GetTexturePath(TempMaterial, aiTextureType_HEIGHT), 50);
-					strncpy(load_data->materials[materialIndex].m_Displacement, GetTexturePath(TempMaterial, aiTextureType_DISPLACEMENT), 50);
-					strncpy(load_data->materials[materialIndex].m_Roughness, "\0", 50);
-					strncpy(load_data->materials[materialIndex].m_Metallicness, "\0", 50);
 
 					materialIndex++;
 				}

@@ -80,11 +80,14 @@ namespace FileSystem
         fclose(_file);
     }
     
-    FileHandle read_file(std::string _path, bool _text)
+    FileHandle read_file(std::string _path, bool _text, bool _absolute)
     {
         FileHandle file;
         
         char* buffer;
+
+		file.buffer = nullptr;
+		file.size = 0;
         
 #ifdef __APPLE__
         std::string cwd = get_current_working_directory();
@@ -93,12 +96,19 @@ namespace FileSystem
         for (int i = 0; i < m_directory_list.size(); i++)
         {
             std::string currentDirectory;
-            
+      
+			if (!_absolute)
+			{
 #ifdef __APPLE__
-            currentDirectory = cwd;
+				currentDirectory = cwd;
 #endif
-            currentDirectory += m_directory_list[i] + "/";
-            currentDirectory += _path;
+				currentDirectory += m_directory_list[i] + "/";
+				currentDirectory += _path;
+			}
+			else
+			{
+				currentDirectory = _path;
+			}
             
             FILE* currentFile = open_file_from_directory(currentDirectory, _text);
             
@@ -124,7 +134,7 @@ namespace FileSystem
             }
             
             // If file does not exist, the FILE handle should be NULL, so i should be able to remove the following line.
-            close_file_from_directory(currentFile);
+            //close_file_from_directory(currentFile);
         }
         
         return file;
@@ -163,6 +173,17 @@ namespace FileSystem
 			start = startAlt;
 
 		return _filePath.substr(start + 1, _filePath.length());
+	}
+
+	std::string get_file_path(const std::string& _filePath)
+	{
+		size_t start = _filePath.find_last_of("/");
+		size_t startAlt = _filePath.find_last_of("\\");
+
+		if (start == std::string::npos)
+			start = startAlt;
+
+		return _filePath.substr(0, start + 1);
 	}
 
     std::string get_current_working_directory()
@@ -228,5 +249,24 @@ namespace FileSystem
 			fclose(m_CurrentWriteTarget);
 			m_CurrentWriteTarget = NULL;
 		}
+	}
+
+	void copy_file(std::string input, std::string output)
+	{
+		FileHandle handle = FileSystem::read_file(input, false, true);
+
+		if (handle.size != 0 && handle.buffer != nullptr)
+		{
+			if (FileSystem::write_begin(output))
+			{
+				FileSystem::write(&handle.buffer, handle.size, 1, 0);
+				FileSystem::write_end();
+			}
+		}
+		else
+		{
+			std::cout << "Error Copying File" << std::endl;
+		}
+		
 	}
 }

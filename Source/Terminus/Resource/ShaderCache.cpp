@@ -56,7 +56,7 @@ namespace Terminus { namespace Resource {
 						}
 						else
 						{
-							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
 							data->shader_type = ShaderType::VERTEX;
 
 							vertex = m_Factory.Create(data);
@@ -86,7 +86,7 @@ namespace Terminus { namespace Resource {
 						}
 						else
 						{
-							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
 							data->shader_type = ShaderType::PIXEL;
 
 							pixel = m_Factory.Create(data);
@@ -116,7 +116,7 @@ namespace Terminus { namespace Resource {
 						}
 						else
 						{
-							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
 							data->shader_type = ShaderType::GEOMETRY;
 
 							geometry = m_Factory.Create(data);
@@ -146,7 +146,7 @@ namespace Terminus { namespace Resource {
 						}
 						else
 						{
-							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
 							data->shader_type = ShaderType::TESSELLATION_EVALUATION;
 
 							tess_eval = m_Factory.Create(data);
@@ -176,7 +176,7 @@ namespace Terminus { namespace Resource {
 						}
 						else
 						{
-							asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(id));
+							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
 							data->shader_type = ShaderType::TESSELLATION_CONTROL;
 
 							tess_control = m_Factory.Create(data);
@@ -211,7 +211,7 @@ namespace Terminus { namespace Resource {
 
 		Graphics::ShaderProgram* ShaderCache::Load(ShaderKey key)
 		{
-
+			return nullptr;
 		}
 
 		void ShaderCache::Unload(Graphics::ShaderProgram* program)

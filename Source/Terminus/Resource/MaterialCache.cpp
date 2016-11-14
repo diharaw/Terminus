@@ -34,7 +34,7 @@ namespace Terminus { namespace Resource {
 			}
 			else
 			{
-				asset_common::TextLoadData* data = static_cast<asset_common::TextLoadData*>(m_LoaderMap[extension]->Load(key));
+				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(key));
 
 				Graphics::Material* material = m_Factory.Create(data, m_TextureCache);
 				m_MaterialMap[key] = material;

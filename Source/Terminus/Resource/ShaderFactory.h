@@ -19,7 +19,7 @@ namespace Terminus { namespace Resource {
 		~ShaderFactory();
 		void Initialize(Graphics::RenderDevice* device);
 
-		Graphics::Shader* Create(asset_common::TextLoadData* _data);
+		Graphics::Shader* Create(AssetCommon::TextLoadData* _data);
 	};
 
 } }

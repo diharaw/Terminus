@@ -23,6 +23,7 @@
 #include <iostream>
 #include "Graphics/RenderDevice.h"
 #include "Math/MathUtility.h"
+#include "Utility\MeshImporter.h"
 
 class Test
 {
@@ -111,7 +112,6 @@ int main(void)
     Terminus::Memory::Initialize();
 
     FileSystem::add_directory("Assets");
-	
     FileWatcher::add_directory("Assets");
     
     if(!PlatformBackend::Initialize(800, 600))
@@ -126,6 +126,8 @@ int main(void)
     SetupMatrices();
     SetupGraphicsResources();
 
+	Terminus::Utility::ImportMesh("Assets/Nanosuit/nanosuit.obj");
+	
     InputContext* context = Input::CreateContext();
     context->m_ContextName = "Test";
     context->m_KeyboardStateMap[GLFW_KEY_E] = "HELLO WORLD";
@@ -141,9 +143,6 @@ int main(void)
 
     while(!PlatformBackend::IsShutdownRequested())
     {
-        //glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT);
-        
         PlatformBackend::Update();
         FileWatcher::update();
         Terminus::EventHandler::Update();

@@ -26,7 +26,7 @@ namespace Terminus { namespace Resource {
 
 		if (handle.buffer)
 		{
-			asset_common::ImageLoadData* load_data = new asset_common::ImageLoadData();
+			AssetCommon::ImageLoadData* load_data = new AssetCommon::ImageLoadData();
 
 			load_data->bytes = stbi_load_from_memory((const unsigned char*)handle.buffer,
 				(int)handle.size,

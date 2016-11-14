@@ -26,7 +26,7 @@ namespace Terminus { namespace Resource {
 
 		if (handle.buffer)
 		{
-			asset_common::TextLoadData* load_data = new asset_common::TextLoadData();
+			AssetCommon::TextLoadData* load_data = new AssetCommon::TextLoadData();
 
 			load_data->buffer = handle.buffer;
 

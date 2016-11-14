@@ -17,7 +17,7 @@ namespace Terminus { namespace Resource {
 			m_device = device;
 		}
 
-		Mesh* MeshFactory::Create(asset_common::MeshLoadData* _Data)
+		Mesh* MeshFactory::Create(AssetCommon::MeshLoadData* _Data)
 		{
 			Graphics::IndexBuffer* indexBuffer = m_device->CreateIndexBuffer(&_Data->indices[0], sizeof(uint) * _Data->header.m_IndexCount, BufferUsageType::STATIC);
 			Graphics::VertexBuffer* vertexBuffer;

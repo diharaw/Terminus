@@ -19,7 +19,7 @@ namespace FileSystem
      * @param _text Text flag. Set to true when reading text to add null terminator.
      * @return FileHandle structure.
      */
-    extern FileHandle read_file(std::string _path, bool _text = false);
+    extern FileHandle read_file(std::string _path, bool _text = false, bool _absolute = false);
     /**
      * Add a directory containing Assets.
      * @param _path Path of directory.
@@ -53,6 +53,9 @@ namespace FileSystem
      * @param _fileName path of the file.
      * @return size_t File size.
      */
+
+	extern std::string get_file_path(const std::string& _filePath);
+
 	extern size_t get_file_size(const std::string& _fileName);
     /**
      * Checks if a given directory exists.
@@ -83,6 +86,8 @@ namespace FileSystem
      * Finishes file write by closing file. Must be called after at least WriteBegin.
      */
 	extern void write_end();
+
+	extern void copy_file(std::string input, std::string output);
 }
 
 #endif

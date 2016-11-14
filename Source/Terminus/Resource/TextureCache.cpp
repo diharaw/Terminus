@@ -38,7 +38,7 @@ namespace Terminus { namespace Resource {
 			}
 			else
 			{
-				asset_common::ImageLoadData* data = static_cast<asset_common::ImageLoadData*>(m_LoaderMap[extension]->Load(_ID));
+				AssetCommon::ImageLoadData* data = static_cast<AssetCommon::ImageLoadData*>(m_LoaderMap[extension]->Load(_ID));
 
 				Graphics::Texture* texture = m_Factory.Create(data);
 				m_AssetMap[_ID] = texture;
