@@ -26,12 +26,12 @@ namespace PlatformBackend
 	void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
         Input::ProcessMouseButtonInput(button, action);
-		imgui_backend::mouse_button_callback(window, button, action, mods);
+		Terminus::ImGuiBackend::mouse_button_callback(window, button, action, mods);
 	}
 
 	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		imgui_backend::scroll_callback(window, xoffset, yoffset);
+		Terminus::ImGuiBackend::scroll_callback(window, xoffset, yoffset);
 	}
     
     void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -42,12 +42,12 @@ namespace PlatformBackend
 	void KeyCallback(GLFWwindow* window, int key, int param, int action, int mods)
 	{
         Input::ProcessKeyboardInput(key, action);
-		imgui_backend::key_callback(window, key, param, action, mods);
+		Terminus::ImGuiBackend::key_callback(window, key, param, action, mods);
 	}
 
 	void CharCallback(GLFWwindow* window, unsigned int c)
 	{
-		imgui_backend::char_callback(window, c);
+		Terminus::ImGuiBackend::char_callback(window, c);
 	}
     
     bool Initialize(int _Width, int _Height)

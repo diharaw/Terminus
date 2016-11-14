@@ -30,18 +30,14 @@ namespace Terminus { namespace Resource {
 			load_data->header.m_IndexCount = 0;
 			load_data->header.m_MaterialCount = Scene->mNumMaterials;
 			load_data->meshes = new TSM_MeshHeader[Scene->mNumMeshes];
-
+			
 			// Temp
 			load_data->IsSkeletal = false;
-
-			if (load_data->header.m_MaterialCount > 0)
-				load_data->materials = new Assimp_Material[load_data->header.m_MaterialCount];
-			else
-				load_data->materials = nullptr;
 
 			aiMaterial* TempMaterial;
 			uint8 materialIndex = 0;
 
+			std::vector<Assimp_Material> temp_materials;
 			std::vector<unsigned int> processedMatId;
 
 			for (int i = 0; i < load_data->header.m_MeshCount; i++)
@@ -60,13 +56,36 @@ namespace Terminus { namespace Resource {
 					processedMatId.push_back(Scene->mMeshes[i]->mMaterialIndex);
 					load_data->meshes[i].m_MaterialIndex = materialIndex;
 
-					TempMaterial = Scene->mMaterials[Scene->mMeshes[i]->mMaterialIndex];
-					load_data->materials[materialIndex].m_MeshName = std::string(Scene->mMeshes[i]->mName.C_Str());
-					strncpy(load_data->materials[materialIndex].m_Albedo, GetTexturePath(TempMaterial, aiTextureType_DIFFUSE), 50);
-					strncpy(load_data->materials[materialIndex].m_Normal, GetTexturePath(TempMaterial, aiTextureType_HEIGHT), 50);
+					Assimp_Material temp;
 
+					TempMaterial = Scene->mMaterials[Scene->mMeshes[i]->mMaterialIndex];
+					temp.m_MeshName = std::string(Scene->mMeshes[i]->mName.C_Str());
+
+					const char* albedo = GetTexturePath(TempMaterial, aiTextureType_DIFFUSE);
+
+					if(albedo != nullptr)
+						strncpy(temp.m_Albedo, albedo, 50);
+
+					const char* normal = GetTexturePath(TempMaterial, aiTextureType_HEIGHT);
+
+					if (normal != nullptr)
+						strncpy(temp.m_Normal, normal, 50);
+
+					temp_materials.push_back(temp);
 					materialIndex++;
 				}
+			}
+
+			load_data->header.m_MaterialCount = processedMatId.size();
+
+			if (load_data->header.m_MaterialCount > 0)
+				load_data->materials = new Assimp_Material[load_data->header.m_MaterialCount];
+			else
+				load_data->materials = nullptr;
+
+			for (int i = 0; i < temp_materials.size(); i++)
+			{
+				load_data->materials[i] = temp_materials[i];
 			}
 
 			load_data->vertices = new Vertex[load_data->header.m_VertexCount];
@@ -157,6 +176,11 @@ namespace Terminus { namespace Resource {
 		}
 		else
 		{
+			String cppStr = std::string(path.C_Str());
+
+			if (cppStr == "")
+				return nullptr;
+
 			const char* cPath = path.C_Str();
 			return cPath;
 		}

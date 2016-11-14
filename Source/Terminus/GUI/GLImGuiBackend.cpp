@@ -1,3 +1,8 @@
+#include "../Graphics/Config.h"
+
+#if defined(TERMINUS_OPENGL)
+
+#include "../IO/FileSystem.h"
 #include "../../Third Party/glew/include/GL/glew.h"
 #include "ImGuiBackend.h"
 #include "../Platform/PlatformBackend.h"
@@ -9,8 +14,8 @@
 #include <GLFW/glfw3native.h>
 #endif
 
-namespace imgui_backend
-{
+namespace Terminus { namespace ImGuiBackend {
+	
 	static GLFWwindow*  g_Window = NULL;
 	static double       g_Time = 0.0f;
 	static bool         g_MousePressed[3] = { false, false, false };
@@ -39,7 +44,7 @@ namespace imgui_backend
 
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		g_MouseWheel += (float)yoffset; 
+		g_MouseWheel += (float)yoffset;
 	}
 
 	void key_callback(GLFWwindow* window, int key, int param, int action, int mods)
@@ -163,7 +168,7 @@ namespace imgui_backend
 		ImGuiIO& io = ImGui::GetIO();
 		unsigned char* pixels;
 		int width, height;
-		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   
+		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 		GLint last_texture;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
 		glGenTextures(1, &g_FontTexture);
@@ -247,6 +252,16 @@ namespace imgui_backend
 		glVertexAttribPointer(g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)OFFSETOF(ImDrawVert, col));
 #undef OFFSETOF
 
+		ImGuiIO& io = ImGui::GetIO();
+		//FileHandle font_handle = FileSystem::read_file("Fonts/DroidSans.ttf");
+		//io.Fonts->AddFontFromMemoryTTF(font_handle.buffer, font_handle.size, 16.0f);
+		//free(font_handle.buffer);
+
+		//FileHandle font_handle = FileSystem::read_file("Font/DroidSans.ttf");
+		//io.Fonts->AddFontFromMemoryTTF(font_handle.buffer, font_handle.size, 16.0f);
+		//free(font_handle.buffer);
+		io.Fonts->AddFontFromFileTTF("Assets/Font/DroidSans.ttf", 16.0f);
+
 		create_fonts_texture();
 
 		glBindTexture(GL_TEXTURE_2D, last_texture);
@@ -304,7 +319,7 @@ namespace imgui_backend
 		{
 			double mouse_x, mouse_y;
 			glfwGetCursorPos(g_Window, &mouse_x, &mouse_y);
-			io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);  
+			io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
 		}
 		else
 		{
@@ -313,7 +328,7 @@ namespace imgui_backend
 
 		for (int i = 0; i < 3; i++)
 		{
-			io.MouseDown[i] = g_MousePressed[i] || glfwGetMouseButton(g_Window, i) != 0;    
+			io.MouseDown[i] = g_MousePressed[i] || glfwGetMouseButton(g_Window, i) != 0;
 			g_MousePressed[i] = false;
 		}
 
@@ -325,7 +340,7 @@ namespace imgui_backend
 		ImGui::NewFrame();
 	}
 
-	void initialize()
+	void initialize(Graphics::RenderDevice& device)
 	{
 		g_Window = PlatformBackend::GetWindow();
 
@@ -351,7 +366,7 @@ namespace imgui_backend
 		io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
 		io.RenderDrawListsFn = render_callback;
-        io.SetClipboardTextFn = set_clipboard_text;
+		io.SetClipboardTextFn = set_clipboard_text;
 		io.GetClipboardTextFn = get_clipboard_text;
 #ifdef _WIN32
 		io.ImeWindowHandle = glfwGetWin32Window(g_Window);
@@ -369,4 +384,7 @@ namespace imgui_backend
 	{
 		ImGui::Render();
 	}
-}
+
+} }
+
+#endif

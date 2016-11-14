@@ -120,14 +120,12 @@ int main(void)
     Input::Initialize();
     
 	render_device.Initialize(nullptr, 0);
-	//imgui_backend::initialize();
+	Terminus::ImGuiBackend::initialize(render_device);
     
     SetupCube();
     SetupMatrices();
     SetupGraphicsResources();
 
-	Terminus::Utility::ImportMesh("Assets/Nanosuit/nanosuit.obj");
-	
     InputContext* context = Input::CreateContext();
     context->m_ContextName = "Test";
     context->m_KeyboardStateMap[GLFW_KEY_E] = "HELLO WORLD";
@@ -147,14 +145,23 @@ int main(void)
         FileWatcher::update();
         Terminus::EventHandler::Update();
 
+		Terminus::ImGuiBackend::new_frame();
+
+		bool open = true;
+
+		ImGui::ShowTestWindow(&open);
+
         DrawScene();
+		Terminus::ImGuiBackend::render();
+
 		render_device.SwapBuffers();
     }
     
     CleanUpGraphicsResources();
     
-	//imgui_backend::shutdown();
+	Terminus::ImGuiBackend::shutdown();
 	render_device.Shutdown();
+
     PlatformBackend::Shutdown();
     
     Terminus::Memory::Shutdown();
@@ -169,7 +176,6 @@ void SetupCube()
 	meshCache.RegisterLoader<Terminus::Resource::TSMLoader>();
 
 	testMesh = meshCache.Load("cube.tsm");
-
 }
 
 void DrawMesh(Mesh* mesh)

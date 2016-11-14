@@ -60,7 +60,7 @@ namespace Terminus { namespace Utility {
 						String sourcePath = meshPath;
 						sourcePath += map;
 
-						//FileSystem::copy_file(sourcePath, texPath);
+						FileSystem::copy_file(sourcePath, texPath);
 					}
 					else
 					{
@@ -93,7 +93,7 @@ namespace Terminus { namespace Utility {
 						String sourcePath = meshPath;
 						sourcePath += map;
 
-						//FileSystem::copy_file(sourcePath, texPath);
+						FileSystem::copy_file(sourcePath, texPath);
 					}
 
 					// Roughness Value

@@ -185,6 +185,18 @@ namespace Terminus { namespace Graphics {
 			void DrawInstanced();
 			void DrawIndexedInstanced();
 
+			// Getters
+			inline ID3D11Device* GetD3D11Device()
+			{
+				return m_device;
+			}
+
+			inline ID3D11DeviceContext* GetD3D11DeviceContext()
+			{
+				return m_device_context;
+			}
+
+
 		private:
 
 			bool InitializeAPI();

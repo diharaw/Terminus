@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <fstream>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -253,20 +256,15 @@ namespace FileSystem
 
 	void copy_file(std::string input, std::string output)
 	{
-		FileHandle handle = FileSystem::read_file(input, false, true);
+		std::ifstream source(input, std::ios::binary);
+		std::ofstream dest(output, std::ios::binary);
 
-		if (handle.size != 0 && handle.buffer != nullptr)
-		{
-			if (FileSystem::write_begin(output))
-			{
-				FileSystem::write(&handle.buffer, handle.size, 1, 0);
-				FileSystem::write_end();
-			}
-		}
-		else
-		{
-			std::cout << "Error Copying File" << std::endl;
-		}
-		
+		std::istreambuf_iterator<char> begin_source(source);
+		std::istreambuf_iterator<char> end_source;
+		std::ostreambuf_iterator<char> begin_dest(dest);
+		std::copy(begin_source, end_source, begin_dest);
+
+		source.close();
+		dest.close();
 	}
 }
