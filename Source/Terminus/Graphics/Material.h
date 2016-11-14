@@ -29,9 +29,9 @@ namespace Terminus { namespace Graphics {
 		Texture2D* texture_maps[5];
 		bool 	   backface_cull;
 		uint64 	   material_key;
-		Vector4    manual_diffuse;
-		float 	   manual_roughness;
-		float 	   manual_metalness;
+		Vector4    diffuse_value;
+		float 	   roughness_value;
+		float 	   metalness_value;
 	};
 
 } }

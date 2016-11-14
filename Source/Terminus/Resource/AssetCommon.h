@@ -134,7 +134,7 @@ namespace asset_common
     {
         
     };
-    
+
     struct AnimationLoadData
     {
         

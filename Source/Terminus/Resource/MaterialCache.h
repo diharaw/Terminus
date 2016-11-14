@@ -15,6 +15,7 @@ namespace Terminus { namespace Resource {
 	private:
 		std::unordered_map<std::string, Graphics::Material*> m_MaterialMap;
 		TextureCache* m_TextureCache;
+		Graphics::RenderDevice* m_device;
 
 	public:
 		MaterialCache();

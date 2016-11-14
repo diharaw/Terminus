@@ -12,6 +12,9 @@
 #include <gtc/quaternion.hpp>
 #include <gtx/quaternion.hpp>
 #include <atomic>
+#include "document.h"
+#include "stringbuffer.h"
+#include "writer.h"
 
 #define T_SAFE_DELETE(x) if(x){ delete x; x = nullptr; }
 #define T_SAFE_DELETE_ARRAY(x) if(x) { delete[] x; x = nullptr; }
@@ -37,6 +40,8 @@ using Matrix4 = glm::mat4;
 using Quaternion = glm::quat;
 using ResourceHandle = unsigned;
 using String = std::string;
+using JsonDocument = rapidjson::Document;
+using JsonValue = rapidjson::Value;
 
 namespace Atomic
 {
