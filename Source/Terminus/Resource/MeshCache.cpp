@@ -17,9 +17,10 @@ namespace Terminus { namespace Resource {
 		}
 	}
 
-	void MeshCache::Initialize(Graphics::RenderDevice* device)
+	void MeshCache::Initialize(Graphics::RenderDevice* device, MaterialCache* materialCache)
 	{
 		m_device = device;
+		m_material_cache = materialCache;
 		m_Factory.Initialize(m_device);
 	}
 
@@ -50,10 +51,17 @@ namespace Terminus { namespace Resource {
 					mesh->SubMeshes[i].m_IndexCount = data->meshes[i].m_IndexCount;
 				}
 
+				for (int i = 0; i < data->header.m_MaterialCount; i++)
+				{
+					String mat_path = std::string(data->materials[i].material);
+					std::cout <<  mat_path << std::endl;
+				}
+
 				mesh->MeshCount = data->header.m_MeshCount;
 				mesh->id = _ID;
 				m_AssetMap[_ID] = mesh;
 
+				// Will have to keep vertices and indices around until Physics shape is generated.
 				if(data->skeletalVertices)
 					free(data->skeletalVertices);
 
@@ -62,6 +70,9 @@ namespace Terminus { namespace Resource {
 
 				if (data->vertices)
 					free(data->vertices);
+
+				if (data->materials)
+					free(data->materials);
 
 				free(data);
 

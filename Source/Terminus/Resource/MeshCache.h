@@ -5,6 +5,7 @@
 
 #include "AssetCache.h"
 #include "MeshFactory.h"
+#include "MaterialCache.h"
 
 namespace Terminus { namespace Resource {
 
@@ -13,11 +14,12 @@ namespace Terminus { namespace Resource {
 	private:
 		std::unordered_map<std::string, Mesh*> m_AssetMap;
 		Graphics::RenderDevice* m_device;
+		MaterialCache* m_material_cache;
 
 	public:
 		MeshCache();
 		~MeshCache();
-		void Initialize(Graphics::RenderDevice* device);
+		void Initialize(Graphics::RenderDevice* device, MaterialCache* materialCache);
 
 		Mesh* Load(std::string _ID);
 		void Unload(Mesh* mesh);

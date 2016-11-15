@@ -29,6 +29,7 @@ namespace Terminus { namespace Resource {
 			load_data->vertices = new Vertex[load_data->header.m_VertexCount];
 			load_data->indices = new uint[load_data->header.m_IndexCount];
 			load_data->meshes = new TSM_MeshHeader[load_data->header.m_MeshCount];
+			load_data->materials = new TSM_Material_Final[load_data->header.m_MaterialCount];
 
 			offset += sizeof(TSM_FileHeader);
 
@@ -39,6 +40,11 @@ namespace Terminus { namespace Resource {
 			offset += sizeof(uint) * load_data->header.m_IndexCount;
 
 			memcpy(load_data->meshes, handle.buffer + offset, sizeof(TSM_MeshHeader) * load_data->header.m_MeshCount);
+			offset += sizeof(TSM_MeshHeader) * load_data->header.m_MeshCount;
+
+			memcpy(load_data->materials, handle.buffer + offset, sizeof(TSM_Material_Final) * load_data->header.m_MaterialCount);
+
+			free(handle.buffer);
 
 			return static_cast<void*>(load_data);
 		}

@@ -3,7 +3,6 @@
 #ifndef MATERIALCACHE_H
 #define MATERIALCACHE_H
 
-#include "../Graphics/Material.h"
 #include "../Resource/AssetCache.h"
 #include "MaterialFactory.h"
 #include "TextureCache.h"

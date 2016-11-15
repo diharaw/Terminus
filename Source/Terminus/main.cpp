@@ -95,6 +95,7 @@ Terminus::Resource::ShaderCache shaderCache;
 Terminus::Resource::TextureCache textureCache;
 Terminus::Resource::MeshCache meshCache;
 Terminus::Graphics::RenderDevice render_device;
+Terminus::Resource::MaterialCache materialCache;
 
 // Init method declarations
 
@@ -121,10 +122,12 @@ int main(void)
     
 	render_device.Initialize(nullptr, 0);
 	Terminus::ImGuiBackend::initialize(render_device);
-    
-    SetupCube();
+   
     SetupMatrices();
     SetupGraphicsResources();
+	SetupCube();
+
+	//Terminus::Utility::ImportMesh("Assets/Nanosuit/nanosuit.obj");
 
     InputContext* context = Input::CreateContext();
     context->m_ContextName = "Test";
@@ -171,11 +174,14 @@ int main(void)
 
 void SetupCube()
 {
-	meshCache.Initialize(&render_device);
+	materialCache.Initialize(&render_device, &textureCache);
+
+	meshCache.Initialize(&render_device, &materialCache);
 	meshCache.RegisterLoader<Terminus::Resource::AssimpMeshLoader>();
 	meshCache.RegisterLoader<Terminus::Resource::TSMLoader>();
 
-	testMesh = meshCache.Load("cube.tsm");
+	//testMesh = meshCache.Load("cube.tsm");
+	testMesh = meshCache.Load("Mesh/nanosuit.tsm");
 }
 
 void DrawMesh(Mesh* mesh)

@@ -119,9 +119,12 @@ namespace Terminus { namespace Utility {
 						FileSystem::write_end();
 					}
 
-					strncpy(&mats[i].material[0], matPath.c_str(), matPath.size());
+					String formattedString = "Material/Mat_";
+					formattedString += data->materials[i].m_MeshName;
+					formattedString += ".json\0";
+					strncpy(mats[i].material, formattedString.c_str(),50);
 				}
-				
+
 				if (FileSystem::write_begin(outputPath))
 				{
 					long Offset = 0;
@@ -138,7 +141,7 @@ namespace Terminus { namespace Utility {
 					FileSystem::write(data->meshes, sizeof(TSM_MeshHeader), data->header.m_MeshCount, Offset);
 					Offset += sizeof(TSM_MeshHeader) * data->header.m_MeshCount;
 					// Write Materials
-					FileSystem::write(&mats, sizeof(TSM_Material_Final), data->header.m_MaterialCount, Offset);
+					FileSystem::write(mats, sizeof(TSM_Material_Final), data->header.m_MaterialCount, Offset);
 
 					FileSystem::write_end();
 				}

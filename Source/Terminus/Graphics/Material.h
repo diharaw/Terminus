@@ -3,7 +3,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "RenderDevice.h"
+#include "../Types.h"
 
 // Material Key Options
 
@@ -14,6 +14,9 @@
 // Metalness Maps or value
 
 namespace Terminus { namespace Graphics {
+
+	// Forward Declaration
+	struct Texture2D;
 
 	enum TexureMap
 	{

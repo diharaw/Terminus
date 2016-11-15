@@ -60,17 +60,17 @@ namespace Terminus { namespace Graphics {
 
 			// Object Creation
 			Texture1D*		 CreateTexture1D(uint16 width,
-				void* data,
-				TextureFormat format,
-				bool generateMipmaps = true,
-				uint mipMapLevels = 10);
+																   void* data,
+																   TextureFormat format,
+																   bool generateMipmaps = true,
+																   uint mipMapLevels = 10);
 			Texture2D*		 CreateTexture2D(uint16 width,
-				uint16 height,
-				void* data,
-				TextureFormat format,
-				bool createRenderTargetView,
-				bool generateMipmaps = true,
-				uint mipMapLevels = 10);
+																   uint16 height,
+																   void* data,
+																   TextureFormat format,
+																   bool createRenderTargetView,
+																   bool generateMipmaps = true,
+																   uint mipMapLevels = 10);
 			Texture3D*		 CreateTexture3D(uint16 width,
 				uint16 height,
 				uint16 depth,
@@ -174,7 +174,7 @@ namespace Terminus { namespace Graphics {
 			void  ClearFramebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor);
 			void  SetViewport(int width, int height, int topLeftX, int topLeftY);
 			void  SwapBuffers();
-
+		
 			// Stateless Methods
 			void Draw(int firstIndex,
 				int count);
@@ -196,6 +196,25 @@ namespace Terminus { namespace Graphics {
 				return m_device_context;
 			}
 
+			inline Framebuffer* GetFramebufferFromPool(String name)
+			{
+				return m_framebuffer_map[name];
+			}
+
+			inline Texture2D* GetRenderTargetFromPool(String name)
+			{
+				return m_render_target_map[name];
+			}
+
+			inline void AddToRenderTargetPool(String name, Texture2D* texture)
+			{
+				m_render_target_map[name] = texture;
+			}
+
+			inline void AddToFramebufferPool(String name, Framebuffer* framebuffer)
+			{
+				m_framebuffer_map[name] = framebuffer;
+			}
 
 		private:
 
@@ -210,6 +229,8 @@ namespace Terminus { namespace Graphics {
 			Texture2D*				 m_default_render_target;
 			Texture2D*				 m_default_depth_target;
 			char					 m_video_card_desc[128];
+			std::unordered_map<String, Texture2D*> m_render_target_map;
+			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
 
 			D3D11_PRIMITIVE_TOPOLOGY m_primitive_type;
 			ID3D11Device*			 m_device;

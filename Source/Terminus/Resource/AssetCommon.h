@@ -116,7 +116,7 @@ namespace AssetCommon
     {
 		TSM_FileHeader  header;
 		TSM_MeshHeader* meshes;
-		TSM_Material*   materials;
+		TSM_Material_Final*   materials;
 		Vertex*			vertices;
 		SkeletalVertex* skeletalVertices;
 		uint*			indices;

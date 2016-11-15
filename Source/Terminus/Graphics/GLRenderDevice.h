@@ -178,7 +178,7 @@ namespace Terminus { namespace Graphics {
 			void  ClearFramebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor);
 			void  SetViewport(int width, int height, int topLeftX, int topLeftY);
 			void  SwapBuffers();
-
+			
 			// Stateless Methods
 			void Draw(int firstIndex,
 				int count);
@@ -189,12 +189,34 @@ namespace Terminus { namespace Graphics {
 			void DrawInstanced();
 			void DrawIndexedInstanced();
 
+			inline Framebuffer* GetFramebufferFromPool(String name)
+			{
+				return m_framebuffer_map[name];
+			}
+
+			inline Texture2D* GetRenderTargetFromPool(String name)
+			{
+				return m_render_target_map[name];
+			}
+
+			inline void AddToRenderTargetPool(String name, Texture2D* texture)
+			{
+				m_render_target_map[name] = texture;
+			}
+
+			inline void AddToFramebufferPool(String name, Framebuffer* framebuffer)
+			{
+				m_framebuffer_map[name] = framebuffer;
+			}
+
 		private:
 
 			GLFWwindow*			     m_window;
 			Framebuffer*			 m_current_framebuffer;
 			GLenum					 m_primitive_type;
 			ShaderProgram*			 m_current_program;
+			std::unordered_map<String, Texture2D*> m_render_target_map;
+			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
 		};
 
 } }
