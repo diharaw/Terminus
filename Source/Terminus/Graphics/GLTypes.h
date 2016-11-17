@@ -37,11 +37,24 @@ x; {int line = __LINE__;																				  \
 #define GL_CHECK_ERROR(x)	x
 #endif
 
+
+namespace std
+{
+    template<>
+    struct hash<ShaderType>
+    {
+        size_t operator()(const ShaderType& em) const
+        {
+            return std::hash<int>()((int)em);
+        }
+    };
+}
+        
 namespace Terminus { namespace Graphics {
     
 	struct Texture;
 	struct Shader;
-
+    
 	using ShaderMap = std::unordered_map<ShaderType, Shader*>;
 	using BindingMap = std::unordered_map<GLuint, GLuint>;
 	using RenderTargetList = std::vector<Texture*>;

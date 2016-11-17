@@ -7,7 +7,7 @@
 
 namespace Terminus { namespace ECS {
 
-	using ComponentID = uint16_t;
+using ComponentID = uint16_t;
 
 #define INVALID_COMPONENT 0;
 

@@ -1,3 +1,6 @@
+#ifndef SLOTMAP_H
+#define SLOTMAP_H
+
 #include <stdint.h>
 #include <climits>
 
@@ -68,3 +71,5 @@ struct SlotMap
         _freelist_enqueue = id & INDEX_MASK;
     }
 };
+
+#endif

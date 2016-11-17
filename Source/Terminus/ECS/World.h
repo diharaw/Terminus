@@ -5,6 +5,7 @@
 
 #include "System.h"
 #include "ComponentPool.h"
+#include <vector>
 
 namespace Terminus { namespace ECS {
 
@@ -39,7 +40,13 @@ namespace Terminus { namespace ECS {
 			m_component_pools[T::_id] = new ComponentPool<T>();
 		}
 	};
-
+    
+    template <typename T>
+    void ISystem::RegisterComponentType()
+    {
+        m_world->RegisterComponentPool<T>();
+    }
+    
 
 } }
 

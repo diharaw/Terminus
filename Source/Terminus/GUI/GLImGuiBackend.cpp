@@ -71,6 +71,8 @@ namespace Terminus { namespace ImGuiBackend {
 
 	void render_callback(ImDrawData* draw_data)
 	{
+        glActiveTexture(GL_TEXTURE0);
+        glBindSampler(0, 0);
 		// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 		ImGuiIO& io = ImGui::GetIO();
 		int fb_width = (int)(io.DisplaySize.x * io.DisplayFramebufferScale.x);
@@ -260,8 +262,15 @@ namespace Terminus { namespace ImGuiBackend {
 		//FileHandle font_handle = FileSystem::read_file("Font/DroidSans.ttf");
 		//io.Fonts->AddFontFromMemoryTTF(font_handle.buffer, font_handle.size, 16.0f);
 		//free(font_handle.buffer);
-		io.Fonts->AddFontFromFileTTF("Assets/Font/DroidSans.ttf", 16.0f);
-
+#ifdef __APPLE__
+        String cwd = FileSystem::get_current_working_directory();
+        String full_path = cwd;
+        cwd += "/Assets/Font/DroidSans.ttf";
+        io.Fonts->AddFontFromFileTTF(cwd.c_str(), 16.0f);
+#else
+        io.Fonts->AddFontFromFileTTF("Assets/Font/DroidSans.ttf", 16.0f);
+#endif
+    
 		create_fonts_texture();
 
 		glBindTexture(GL_TEXTURE_2D, last_texture);

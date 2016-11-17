@@ -29,10 +29,7 @@ namespace Terminus { namespace ECS {
 		World* m_world;
 
 		template <typename T>
-		void RegisterComponentType()
-		{
-			m_world->RegisterComponentPool<T>();
-		}
+        void RegisterComponentType();
 	};
 
 } }

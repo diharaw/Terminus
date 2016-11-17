@@ -16,6 +16,7 @@ namespace Terminus { namespace Graphics {
 	struct Texture2D;
 	struct Framebuffer;
 	struct FramebufferInfo;
+	struct RenderTargetInfo;
 
 	enum SystemUniforms
 	{

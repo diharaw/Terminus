@@ -1,9 +1,7 @@
 #include "Graphics/Config.h"
 #include "Platform/PlatformBackend.h"
 #include "GUI/ImGuiBackend.h"
-#include "Graphics/RenderConfigUI.h"
 #include "Graphics/CommandList.h"
-#include "Graphics/RenderSystem.h"
 #include "Memory/PoolAllocator.h"
 #include "Memory/StackAllocator.h"
 #include "GlobalMemory.h"
@@ -23,7 +21,8 @@
 #include <iostream>
 #include "Graphics/RenderDevice.h"
 #include "Math/MathUtility.h"
-#include "Utility\MeshImporter.h"
+#include "Utility/MeshImporter.h"
+#include "ECS/World.h"
 
 class Test
 {
@@ -96,6 +95,8 @@ Terminus::Resource::TextureCache textureCache;
 Terminus::Resource::MeshCache meshCache;
 Terminus::Graphics::RenderDevice render_device;
 Terminus::Resource::MaterialCache materialCache;
+
+Terminus::ECS::World entity_world;
 
 // Init method declarations
 
