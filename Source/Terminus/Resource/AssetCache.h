@@ -4,7 +4,7 @@
 #define ASSETCACHE_H
 
 #include "../Memory/StackAllocator.h"
-#include "../GlobalMemory.h"
+#include "../Global.h"
 #include "AssetLoader.h"
 #include <string>
 #include <unordered_map>

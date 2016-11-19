@@ -19,22 +19,22 @@ TaskScheduler::~TaskScheduler()
 	}
 }
 
-int TaskScheduler::worker_thread_count()
+int TaskScheduler::WorkerThreadCount()
 {
 	return m_NumWorkerThreads;
 }
 
-TaskData* TaskScheduler::create_task(int _ThreadIndex)
+TaskData* TaskScheduler::CreateTask(int _ThreadIndex)
 {
 	return m_TaskQueueList[_ThreadIndex]->CreateTask();
 }
 
-ProcessData* TaskScheduler::create_process(int _ThreadIndex)
+ProcessData* TaskScheduler::CreateProcess(int _ThreadIndex)
 {
 	return nullptr;
 }
 
-void TaskScheduler::execute()
+void TaskScheduler::Execute()
 {
 	for (int i = 0; i < m_NumWorkerThreads; i++)
 	{

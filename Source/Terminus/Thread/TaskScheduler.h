@@ -13,8 +13,8 @@ public:
 	TaskScheduler();
 	~TaskScheduler();
 
-	int worker_thread_count();
-	TaskData* create_task(int _ThreadIndex = 0);
-	ProcessData* create_process(int _ThreadIndex = 0);
-	void execute();
+	int WorkerThreadCount();
+	TaskData* CreateTask(int _ThreadIndex = 0);
+	ProcessData* CreateProcess(int _ThreadIndex = 0);
+	void Execute();
 };

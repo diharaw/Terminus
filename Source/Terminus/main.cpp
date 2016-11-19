@@ -4,7 +4,7 @@
 #include "Graphics/CommandList.h"
 #include "Memory/PoolAllocator.h"
 #include "Memory/StackAllocator.h"
-#include "GlobalMemory.h"
+#include "Global.h"
 #include "IO/FileSystem.h"
 #include "IO/FileWatcher.h"
 #include "Input/Input.h"
@@ -111,7 +111,7 @@ int main(void)
 {
     // Engine init
     
-    Terminus::Memory::Initialize();
+    Terminus::Global::Initialize();
 
     FileSystem::add_directory("Assets");
     FileWatcher::add_directory("Assets");
@@ -168,7 +168,7 @@ int main(void)
 
     PlatformBackend::Shutdown();
     
-    Terminus::Memory::Shutdown();
+    Terminus::Global::Shutdown();
     
     return 0;
 }
