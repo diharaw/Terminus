@@ -24,7 +24,7 @@ namespace Terminus { namespace Graphics {
 		NORMAL = 1,
 		ROUGHNESS = 2,
 		METALNESS = 3,
-		DISPLACEMENT = 5,
+		DISPLACEMENT = 4,
 	};
 
 	struct Material
