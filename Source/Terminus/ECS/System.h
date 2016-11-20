@@ -17,9 +17,9 @@ namespace Terminus { namespace ECS {
 	public:
 		ISystem(World* world);
 		virtual ~ISystem();
-		virtual void OnInitialize() = 0;
-		virtual void OnTick() = 0;
-		virtual void OnShutdown() = 0;
+		virtual void Initialize() = 0;
+		virtual void Update(double delta) = 0;
+		virtual void Shutdown() = 0;
 		void OnEntityCreated(Entity entity);
 		void OnEntityDestroyed(Entity entity);
 		void OnComponentAttached(Entity entity, ComponentID id);

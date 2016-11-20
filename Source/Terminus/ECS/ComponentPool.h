@@ -46,7 +46,10 @@ namespace Terminus { namespace ECS {
 
 		inline IComponent* GetComponent(Entity entity)
 		{
-			return &m_components.lookup(m_entity_map[entity]);
+			if (m_entity_map.find(entity) == m_entity_map.end())
+				return nullptr;
+			else
+				return &m_components.lookup(m_entity_map[entity]);
 		}
 
 		inline void RemoveComponent(Entity entity)

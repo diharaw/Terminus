@@ -21,6 +21,19 @@ namespace Terminus { namespace Math {
 		return projection;
 	}
 
+	inline Matrix4 Ortho(float left, float right, float down, float up, float near, float far)
+	{
+		Matrix4 projection = glm::ortho(left, right, down, up, near, far);
+
+#if defined(TERMINUS_DIRECT3D11)
+		glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 0.5f));
+		glm::mat4 translate = glm::translate(glm::vec3(0.0f, 0.0f, 1.0f));
+		projection = scale * translate * projection;
+#endif
+
+		return projection;
+	}
+
 } }
 
 #endif

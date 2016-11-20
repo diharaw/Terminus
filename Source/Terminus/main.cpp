@@ -116,7 +116,7 @@ int main(void)
     FileSystem::add_directory("Assets");
     FileWatcher::add_directory("Assets");
     
-    if(!PlatformBackend::Initialize(800, 600))
+    if(!PlatformBackend::Initialize(1280, 720))
         return -1;
     
     Input::Initialize();

@@ -295,14 +295,14 @@ namespace Input
                 {
                     double last_position = m_mouse.x_position;
                     // Fire Mouse Axis Event
-                    InputAxisEvent* event = new InputAxisEvent("xaxis", _Xpos, _Xpos - last_position);
+                    InputAxisEvent* event = new InputAxisEvent(it.second, _Xpos, _Xpos - last_position);
                     Terminus::EventHandler::QueueEvent(event);
                 }
                 if(it.first == MOUSE_AXIS_Y)
                 {
                     double last_position = m_mouse.y_position;
                     // Fire Mouse Axis Event
-                    InputAxisEvent* event = new InputAxisEvent("taxis", _Ypos, _Ypos - last_position);
+                    InputAxisEvent* event = new InputAxisEvent(it.second, _Ypos, _Ypos - last_position);
                     Terminus::EventHandler::QueueEvent(event);
                 }
             }

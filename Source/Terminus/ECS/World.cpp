@@ -1,4 +1,5 @@
 #include "World.h"
+#include "../Types.h"
 
 namespace Terminus { namespace ECS {
 
@@ -10,15 +11,36 @@ namespace Terminus { namespace ECS {
 	World::~World()
 	{
 		for (auto it : m_systems)
-			delete it;
-
+		{
+			T_SAFE_DELETE(it);
+		}
+		
 		for (auto it : m_component_pools)
-			delete it.second;
+		{
+			T_SAFE_DELETE(it.second);
+		}
 	}
 
 	Entity World::CreateEntity()
 	{
-		return m_last_entity_id++;
+		Entity entity = m_last_entity_id++;
+		m_entities.push_back(entity);
+		return entity;
+	}
+
+	void World::Initialize()
+	{
+		for (auto entity : m_entities)
+		{
+			for (auto system : m_systems)
+				system->OnEntityCreated(entity);
+		}
+	}
+
+	void World::Update(double delta)
+	{
+		for (auto system : m_systems)
+			system->Update(delta);
 	}
 
 	void World::DestroyEntity(Entity entity)
@@ -36,6 +58,15 @@ namespace Terminus { namespace ECS {
 	{
 		// Check if entity exists;
 		return m_component_pools[id]->GetComponent(entity);;
+	}
+
+	bool World::HasComponent(Entity entity, ComponentID id)
+	{
+		IComponent* component = GetComponent(entity, id);
+		if (component)
+			return true;
+		else
+			return false;
 	}
 
 	void World::RemoveComponent(Entity entity, ComponentID id)

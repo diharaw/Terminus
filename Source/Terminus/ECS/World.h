@@ -10,6 +10,7 @@
 namespace Terminus { namespace ECS {
 
 	using SystemList = std::vector<ISystem*>;
+	using EntityList = std::vector<Entity>;
 	using ComponentPoolMap = std::unordered_map<ComponentID, IComponentPool*>;
 
 	class World
@@ -17,6 +18,7 @@ namespace Terminus { namespace ECS {
 	private:
 		Entity m_last_entity_id;
 		SystemList m_systems;
+		EntityList m_entities;
 		ComponentPoolMap m_component_pools;
 
 	public:
@@ -24,8 +26,11 @@ namespace Terminus { namespace ECS {
 		~World();
 		Entity CreateEntity();
 		void DestroyEntity(Entity entity);
+		void Initialize();
+		void Update(double delta);
 		IComponent* AttachComponent(Entity entity, ComponentID id);
 		IComponent* GetComponent(Entity entity, ComponentID id);
+		bool HasComponent(Entity entity, ComponentID id);
 		void RemoveComponent(Entity entity, ComponentID id);
 
 		template<typename T>
@@ -47,7 +52,6 @@ namespace Terminus { namespace ECS {
         m_world->RegisterComponentPool<T>();
     }
     
-
 } }
 
 #endif

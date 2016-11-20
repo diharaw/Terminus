@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef TERMINUS_GLOBAL_H
+#define TERMINUS_GLOBAL_H
+
 #include "Memory/LinearAllocator.h"
 #include "Thread/TaskScheduler.h"
 
@@ -21,3 +26,5 @@ namespace Terminus
         extern void Shutdown();
     }
 }
+
+#endif
