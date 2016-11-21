@@ -12,6 +12,7 @@ namespace Terminus { namespace ECS {
 
 	struct ScriptComponent : IComponent
 	{
+        static const ComponentID _id;
 		virtual void Initialize() = 0;
 		virtual void Update(double delta, Entity entity) = 0;
 		virtual void Shutdown() = 0;

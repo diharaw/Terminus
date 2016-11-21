@@ -10,6 +10,7 @@ namespace Terminus { namespace ECS {
 
 	struct TransformComponent : IComponent
 	{
+        static const ComponentID _id;
 		Matrix4 global_transform;
 		Vector3 position;
 		Vector3 scale;
