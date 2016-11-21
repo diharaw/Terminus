@@ -16,9 +16,8 @@ include_directories("Third Party/Delegates11")
 include_directories("Third Party/Bullet 3/src")
 include_directories("Third Party/lua/src”)
 include_directories("Third Party/Selene/include”)
-include_directories(“Terminus-Engine")
+include_directories("Terminus-Engine")
 
 add_subdirectory("Terminus-Engine")
 add_subdirectory("Terminus-Editor")
 add_subdirectory("Third Party")
-
