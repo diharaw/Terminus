@@ -30,7 +30,7 @@
 #include "alu.h"
 #include "hrtf.h"
 
-#include "compat.h"
+#include "compat_al.h"
 #include "almalloc.h"
 
 

@@ -38,7 +38,7 @@
 #endif
 
 #include "alMain.h"
-#include "compat.h"
+#include "compat_al.h"
 #include "bool.h"
 
 

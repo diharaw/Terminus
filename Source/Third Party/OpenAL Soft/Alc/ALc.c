@@ -38,7 +38,7 @@
 #include "bformatdec.h"
 #include "alu.h"
 
-#include "compat.h"
+#include "compat_al.h"
 #include "threads.h"
 #include "alstring.h"
 #include "almalloc.h"

@@ -12,5 +12,6 @@ set_target_properties( Terminus-Editor
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/Terminus"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+target_include_directories(Terminus-Editor PUBLIC "../Terminus-Engine")
 
 target_link_libraries(Terminus-Editor Terminus-Engine)

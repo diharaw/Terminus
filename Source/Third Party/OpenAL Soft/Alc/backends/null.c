@@ -28,7 +28,7 @@
 #include "alMain.h"
 #include "alu.h"
 #include "threads.h"
-#include "compat.h"
+#include "compat_al.h"
 
 #include "backends/base.h"
 

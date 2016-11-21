@@ -100,7 +100,7 @@ DEFINE_PROPERTYKEY(PKEY_AudioEndpoint_FormFactor, 0x1da5d803, 0xd492, 0x4edd, 0x
 #include "uintmap.h"
 #include "vector.h"
 #include "alstring.h"
-#include "compat.h"
+#include "compat_al.h"
 #include "threads.h"
 
 

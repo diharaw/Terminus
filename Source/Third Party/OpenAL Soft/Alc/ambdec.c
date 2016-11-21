@@ -7,7 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "compat.h"
+#include "compat_al.h"
 
 
 static char *lstrip(char *line)

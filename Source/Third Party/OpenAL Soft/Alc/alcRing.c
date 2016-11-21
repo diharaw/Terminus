@@ -26,7 +26,7 @@
 #include "alMain.h"
 #include "threads.h"
 #include "almalloc.h"
-#include "compat.h"
+#include "compat_al.h"
 
 
 /* NOTE: This lockless ringbuffer implementation is copied from JACK, extended
