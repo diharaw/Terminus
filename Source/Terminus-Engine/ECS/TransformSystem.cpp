@@ -15,12 +15,17 @@ namespace Terminus { namespace ECS {
 
 	void TransformSystem::Initialize()
 	{
-
+        SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_world->GetComponentArray<TransformComponent>();
+        
+        for (int i = 0; i < component_list._num_objects; i++)
+        {
+            // Generate World Matrix
+        }
 	}
 
 	void TransformSystem::Update(double delta)
 	{
-
+        
 	}
 
 	void TransformSystem::Shutdown()
@@ -30,10 +35,7 @@ namespace Terminus { namespace ECS {
 
 	void TransformSystem::OnEntityCreated(Entity entity)
 	{
-		if (m_world->HasComponent(entity, TransformComponent::_id))
-		{
-
-		}
+		
 	}
 
 	void TransformSystem::OnEntityDestroyed(Entity entity)

@@ -32,6 +32,16 @@ namespace Terminus { namespace ECS {
 		IComponent* GetComponent(Entity entity, ComponentID id);
 		bool HasComponent(Entity entity, ComponentID id);
 		void RemoveComponent(Entity entity, ComponentID id);
+        
+        template<typename T>
+        SlotMap<T, MAX_COMPONENTS>& GetComponentArray()
+        {
+            assert(m_component_pools.find(T::_id) != m_component_pools.end());
+            
+            ComponentPool<T>* pool = (ComponentPool<T>*)m_component_pools[T::_id];
+            
+            return pool->m_components;
+        }
 
 		template<typename T>
 		void RegisterSystem()

@@ -29,6 +29,7 @@ namespace Terminus { namespace ECS {
 	template <typename T>
 	class ComponentPool : public IComponentPool
 	{
+    public:
 		SlotMap<T, MAX_COMPONENTS> m_components;
 
 	public:
