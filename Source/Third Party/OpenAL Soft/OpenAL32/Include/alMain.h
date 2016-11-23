@@ -189,7 +189,6 @@ typedef ALuint64SOFT ALuint64;
 #endif
 #endif
 
-
 static const union {
     ALuint u;
     ALubyte b[sizeof(ALuint)];

@@ -3,6 +3,7 @@
 #ifndef MATHUTITLTY_H
 #define MATHUTITLTY_H
 
+#include <gtc/matrix_transform.hpp>
 #include "../Graphics/Config.h"
 #include "../Types.h"
 
@@ -21,9 +22,9 @@ namespace Terminus { namespace Math {
 		return projection;
 	}
 
-	inline Matrix4 Ortho(float left, float right, float down, float up, float near, float far)
+	inline Matrix4 Ortho(float left, float right, float down, float up, float nearPlane, float farPlane)
 	{
-		Matrix4 projection = glm::ortho(left, right, down, up, near, far);
+		Matrix4 projection = glm::ortho(left, right, down, up, nearPlane, farPlane);
 
 #if defined(TERMINUS_DIRECT3D11)
 		glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 0.5f));
