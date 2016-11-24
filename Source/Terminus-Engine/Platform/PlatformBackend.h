@@ -41,16 +41,9 @@ namespace PlatformBackend
 {
     /**
      * Initializes Window and optionally Creates OpenGL/OpenGL ES context if OpenGL is requested
-     * @param _Width Width of window.
-     * @param _Height Height of window.
      * @return true if Initialization is successful. false if failed.
      */
-    extern bool Initialize(int width, int height);
-    /**
-     * Initializes Window via a configuration file containing window properties
-     * @return true if Initialization is successful. false if failed.
-     */
-    extern bool CreateFromFile();
+    extern bool Initialize();
     /**
      * Shutdown window and rendering conxtet if present
      */
@@ -63,6 +56,10 @@ namespace PlatformBackend
      * Requests window Shutdown
      */
     extern void RequestShutdown();
+
+	extern void SetFullscreen(bool fullscreen);
+
+	extern void SetWindowSize(uint width, uint height);
     /**
      * Check if an Application shutdown was requested
      * @return true window should shutdown. false if not.

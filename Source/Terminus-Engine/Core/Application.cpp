@@ -16,7 +16,7 @@ namespace Terminus {
 	{
 		Global::Initialize();
 
-		if (!PlatformBackend::Initialize(1280, 720))
+		if (!PlatformBackend::Initialize())
 			return false;
 
 		Input::Initialize();
