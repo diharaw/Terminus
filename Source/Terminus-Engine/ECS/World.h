@@ -43,11 +43,7 @@ namespace Terminus { namespace ECS {
             return pool->m_components;
         }
 
-		template<typename T>
-		void RegisterSystem()
-		{
-			m_systems.push_back(new T(this));
-		}
+		void RegisterSystem(ISystem* system);
 
 		template<typename T>
 		void RegisterComponentPool()

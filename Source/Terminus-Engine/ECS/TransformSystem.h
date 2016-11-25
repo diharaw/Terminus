@@ -11,7 +11,7 @@ namespace Terminus { namespace ECS {
 	class TransformSystem : public ISystem
 	{
 	public:
-		TransformSystem(World* world);
+		TransformSystem();
 		~TransformSystem();
 		virtual void Initialize();
 		virtual void Update(double delta);

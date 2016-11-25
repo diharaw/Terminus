@@ -27,17 +27,19 @@
 #include "Math/MathUtility.h"
 #include "Utility/MeshImporter.h"
 #include "ECS/World.h"
+#include "ECS/TransformSystem.h"
 
 #define TERMINUS_DECLARE_MAIN(x)			\
 int main()															\
 {																			\
-	Terminus::Application* app = new x();		\
+	Terminus::Global::Initialize();							\
+	Terminus::Application* app = T_NEW x();	\
 	if(app->Initialize())										\
 	{																		\
 		app->Run();												\
 	}																		\
 	app->Shutdown();											\
-	T_SAFE_DELETE(app)									\
+	Terminus::Global::Shutdown();						\
 }																			\
 
 namespace Terminus {
@@ -47,7 +49,7 @@ namespace Terminus {
 	private:
 		// Entity-Component-System
 		ECS::World 			 			   m_world;
-		//ECS::TransformSystem 	   m_transform_system;
+		ECS::TransformSystem 	   m_transform_system;
 		//ECS::ScriptSystem    		   m_script_system;
 		//ECS::RenderSystem	 	   m_render_system;
 

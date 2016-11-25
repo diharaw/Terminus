@@ -2,14 +2,19 @@
 
 namespace Terminus { namespace ECS {
 
-	ISystem::ISystem(World* world)
+	ISystem::ISystem()
 	{
-		m_world = world;
+		
 	}
 
 	ISystem::~ISystem()
 	{
 
+	}
+
+	void ISystem::SetWorld(World* world)
+	{
+		m_world = world;
 	}
 
 	void ISystem::OnEntityCreated(Entity entity)

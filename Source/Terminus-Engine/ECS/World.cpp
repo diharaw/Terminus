@@ -9,12 +9,7 @@ namespace Terminus { namespace ECS {
 	}
 
 	World::~World()
-	{
-		for (auto it : m_systems)
-		{
-			T_SAFE_DELETE(it);
-		}
-		
+	{		
 		for (auto it : m_component_pools)
 		{
 			T_SAFE_DELETE(it.second);
@@ -41,6 +36,12 @@ namespace Terminus { namespace ECS {
 	{
 		for (auto system : m_systems)
 			system->Update(delta);
+	}
+
+	void World::RegisterSystem(ISystem* system)
+	{
+		system->SetWorld(this);
+		m_systems.push_back(system);
 	}
 
 	void World::DestroyEntity(Entity entity)

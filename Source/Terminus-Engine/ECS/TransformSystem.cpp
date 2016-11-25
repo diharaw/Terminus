@@ -3,7 +3,7 @@
 
 namespace Terminus { namespace ECS {
 
-	TransformSystem::TransformSystem(World* world) : ISystem(world)
+	TransformSystem::TransformSystem() : ISystem()
 	{
 		RegisterComponentType<TransformComponent>();
 	}

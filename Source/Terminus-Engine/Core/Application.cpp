@@ -14,14 +14,17 @@ namespace Terminus {
 
 	bool Application::Initialize()
 	{
-		Global::Initialize();
-
 		if (!PlatformBackend::Initialize())
 			return false;
 
 		Input::Initialize();
 		m_render_device.Initialize(nullptr, 0);
-		
+
+		m_world.Initialize();
+		m_world.RegisterSystem(&m_transform_system);
+		m_world.Initialize();
+
+		return true;
 	}
 
 	void Application::Run()
@@ -37,7 +40,6 @@ namespace Terminus {
 	{
 		m_render_device.Shutdown();
 		PlatformBackend::Shutdown();
-		Global::Shutdown();
 	}
 
 }

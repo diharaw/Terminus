@@ -15,11 +15,12 @@ namespace Terminus { namespace ECS {
 	class ISystem
 	{
 	public:
-		ISystem(World* world);
+		ISystem();
 		virtual ~ISystem();
 		virtual void Initialize() = 0;
 		virtual void Update(double delta) = 0;
 		virtual void Shutdown() = 0;
+		void SetWorld(World* world);
 		void OnEntityCreated(Entity entity);
 		void OnEntityDestroyed(Entity entity);
 		void OnComponentAttached(Entity entity, ComponentID id);
