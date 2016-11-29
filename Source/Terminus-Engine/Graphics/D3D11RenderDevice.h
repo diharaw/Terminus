@@ -55,7 +55,8 @@ namespace Terminus { namespace Graphics {
 
 			RenderDevice();
 			~RenderDevice();
-			void Initialize(void* memory, size_t size);
+			void Initialize();
+			void InitializeTask(void* data);
 			void Shutdown();
 
 			// Object Creation

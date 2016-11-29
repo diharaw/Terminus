@@ -10,7 +10,7 @@ namespace Terminus { namespace ECS {
 
 	using Entity = uint32_t;
 
-	class World;
+	class Scene;
 
 	class ISystem
 	{
@@ -20,14 +20,14 @@ namespace Terminus { namespace ECS {
 		virtual void Initialize() = 0;
 		virtual void Update(double delta) = 0;
 		virtual void Shutdown() = 0;
-		void SetWorld(World* world);
+		void SetScene(Scene* scene);
 		void OnEntityCreated(Entity entity);
 		void OnEntityDestroyed(Entity entity);
 		void OnComponentAttached(Entity entity, ComponentID id);
 		void OnComponentRemoved(Entity entity, ComponentID id);
 
 	protected:
-		World* m_world;
+		Scene* m_scene;
 
 		template <typename T>
         void RegisterComponentType();

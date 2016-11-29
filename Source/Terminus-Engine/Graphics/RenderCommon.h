@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 
+struct RenderDeviceInitData
+{
+	//PlatformBackend* platform_backend;
+	void* memory;
+	size_t size;
+};
+
 enum class GeometryType
 {
 	SCENE = 0,

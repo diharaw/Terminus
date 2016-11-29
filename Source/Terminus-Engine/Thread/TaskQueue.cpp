@@ -1,45 +1,37 @@
 #include "TaskQueue.h"
 
-ITaskQueue::ITaskQueue()
+TaskData* TaskQueue::CreateTask()
 {
-	m_LastIndex = -1;
-}
-
-ITaskQueue::~ITaskQueue()
-{
-
-}
-
-TaskData* ITaskQueue::CreateTask()
-{
-	m_LastIndex++;
-	return &m_TaskList[m_LastIndex];
+	m_last_index++;
+	return &m_task_list[m_last_index];
 }
 
 TaskQueue::TaskQueue()
 {
-	m_IsDestroyRequested = false;
-	m_WorkerThread = Thread(&TaskQueue::ProcessQueue, this);
+	m_last_index = -1;
+	m_is_destroy_requested = false;
+	m_worker_thread = Thread(&TaskQueue::ProcessQueue, this);
+	m_is_long_running = false;
 }
 
 TaskQueue::~TaskQueue()
 {
-	m_Mutex.lock();
-	m_IsDestroyRequested = true;
-	m_ConditionVariable.notify_one();
-	m_Mutex.unlock();
-	m_WorkerThread.join();
+	m_mutex.lock();
+	m_is_destroy_requested = true;
+	m_condition_variable.notify_one();
+	m_mutex.unlock();
+	m_worker_thread.join();
 }
 
 void TaskQueue::Execute()
 {
-	m_ConditionVariable.notify_one();
+	m_condition_variable.notify_one();
 }
 
 void TaskQueue::Wait()
 {
-	std::unique_lock<std::mutex> lock(m_Mutex);
-	m_ConditionVariable.wait(lock, [this] { return (m_LastIndex == -1); });
+	std::unique_lock<std::mutex> lock(m_mutex);
+	m_condition_variable.wait(lock, [this] { return (m_last_index == -1); });
 }
 
 void TaskQueue::ProcessQueue()
@@ -47,22 +39,22 @@ void TaskQueue::ProcessQueue()
 	while (true)
 	{
 		{
-			std::unique_lock<std::mutex> lock(m_Mutex);
-			m_ConditionVariable.wait(lock, [this] { return !(m_LastIndex == -1) || m_IsDestroyRequested; });
+			std::unique_lock<std::mutex> lock(m_mutex);
+			m_condition_variable.wait(lock, [this] { return !(m_last_index == -1) || m_is_destroy_requested; });
 
-			if (m_IsDestroyRequested)
+			if (m_is_destroy_requested)
 			{
 				break;
 			}
 		}
-	
-		TaskData* current = &m_TaskList[m_LastIndex];
-		current->function(current->data);
+
+		TaskData* current = &m_task_list[m_last_index];
+		current->function.Invoke(current->data);
 
 		{
-			std::lock_guard<std::mutex> lock(m_Mutex);
-			m_LastIndex--;
-			m_ConditionVariable.notify_one();
+			std::lock_guard<std::mutex> lock(m_mutex);
+			m_last_index--;
+			m_condition_variable.notify_one();
 		}
 	}
 }

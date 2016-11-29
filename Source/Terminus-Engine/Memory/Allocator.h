@@ -74,7 +74,7 @@ namespace Terminus
         
         virtual void* Allocate(size_t _AllocationSize, uint8 _Alignment) = 0;
         virtual void  Deallocate(void* _Address) = 0;
-        
+
         inline void*  GetStart() { return m_StartAddress; }
         inline size_t GetTotalMemory() { return m_TotalMemory; }
         inline size_t GetUsedMemory() { return m_UsedMemory; }

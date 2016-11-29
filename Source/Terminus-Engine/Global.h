@@ -4,7 +4,7 @@
 #define TERMINUS_GLOBAL_H
 
 #include "Memory/LinearAllocator.h"
-#include "Thread/TaskScheduler.h"
+#include "Thread/ThreadPool.h"
 
 #define MB_IN_BYTES 1024*1024
 #define MAX_MEMORY_MB 10
@@ -22,7 +22,7 @@ namespace Terminus
         extern void Initialize();
         extern LinearAllocator* GetDefaultAllocator();
         extern LinearAllocator* GetPerFrameAllocator();
-        extern TaskScheduler*   GetTaskScheduler();
+        extern ThreadPool*   GetDefaultThreadPool();
         extern void Shutdown();
     }
 }

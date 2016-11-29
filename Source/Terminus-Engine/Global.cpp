@@ -9,7 +9,7 @@ namespace Terminus
         void* g_per_frame_memory = nullptr;
         LinearAllocator* g_allocator = nullptr;
         LinearAllocator* g_per_frame_allocator = nullptr;
-        TaskScheduler*   g_task_scheduler = nullptr;
+        ThreadPool*   g_thread_pool = nullptr;
         
         void Initialize()
         {
@@ -19,7 +19,8 @@ namespace Terminus
             //g_per_frame_memory = malloc(MAX_PER_FRAME_MEMORY);
             //g_per_frame_allocator = new LinearAllocator(MAX_PER_FRAME_MEMORY, g_per_frame_memory);
             
-            //g_task_scheduler = T_NEW TaskScheduler();
+			g_thread_pool = T_NEW ThreadPool();
+			g_thread_pool->Initialize();
         }
         
         LinearAllocator* GetDefaultAllocator()
@@ -32,9 +33,9 @@ namespace Terminus
             return g_per_frame_allocator;
         }
         
-        TaskScheduler* GetTaskScheduler()
+        ThreadPool* GetDefaultThreadPool()
         {
-            return g_task_scheduler;
+            return g_thread_pool;
         }
         
         void Shutdown()

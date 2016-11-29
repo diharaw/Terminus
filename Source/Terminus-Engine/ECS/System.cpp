@@ -12,9 +12,9 @@ namespace Terminus { namespace ECS {
 
 	}
 
-	void ISystem::SetWorld(World* world)
+	void ISystem::SetScene(Scene* scene)
 	{
-		m_world = world;
+		m_scene = scene;
 	}
 
 	void ISystem::OnEntityCreated(Entity entity)

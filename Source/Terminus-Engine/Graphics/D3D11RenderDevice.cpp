@@ -1,4 +1,5 @@
 #include "D3D11RenderDevice.h"
+#include "../Global.h"
 #include <algorithm>
 
 #if defined(TERMINUS_DIRECT3D11) && defined(WIN32)
@@ -14,7 +15,20 @@ namespace Terminus { namespace Graphics {
 
 	}
 
-	void RenderDevice::Initialize(void* memory, size_t size)
+	void RenderDevice::Initialize()
+	{
+		ThreadPool* thread_pool = Global::GetDefaultThreadPool();
+		// Create RenderDevice initializationg task
+		RenderDeviceInitData* data = Global::GetPerFrameAllocator()->NewPerFrame<RenderDeviceInitData>();
+	
+		TaskData* task = thread_pool->CreateTask();
+		task->data = data;
+		task->function.Bind<RenderDevice, &RenderDevice::InitializeTask>(this);
+
+		thread_pool->SubmitAndWait();
+	}
+
+	void RenderDevice::InitializeTask(void* data)
 	{
 		m_window = PlatformBackend::GetWindow();
 		assert(InitializeAPI());

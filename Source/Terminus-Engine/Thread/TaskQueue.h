@@ -6,14 +6,14 @@
 #include <vector>
 #include <condition_variable>
 #include <iostream>
+#include "Delegate11.h"
 
 #define MAX_TASKS 1024
 
-class ITaskQueue;
 class TaskQueue;
 
-typedef void(*WorkerFunction) (void*);
-typedef std::vector<ITaskQueue*> TaskQueueList;
+typedef Delegate<void(void*)> WorkerFunction;
+typedef std::vector<TaskQueue*> TaskQueueList;
 typedef std::thread Thread;
 typedef std::mutex Mutex;
 typedef std::condition_variable ConditionVariable;
@@ -24,42 +24,25 @@ struct TaskData
 	void*		   data;
 };
 
-struct ProcessData
-{
-
-};
-
-class ITaskQueue
+class TaskQueue
 {
 protected:
-	int		 m_LastIndex;
-	TaskData m_TaskList[MAX_TASKS];
-
-public:
-	ITaskQueue();
-	virtual ~ITaskQueue();
-	virtual void Execute() = 0;
-	virtual void Wait() = 0;
-	TaskData* CreateTask();
-
+	int		 m_last_index;
+	TaskData m_task_list[MAX_TASKS];
 private:
-	virtual void ProcessQueue() = 0;
-};
-
-class TaskQueue : public ITaskQueue
-{
-private:
-	Thread			  m_WorkerThread;
-	Mutex			  m_Mutex;
-	ConditionVariable m_ConditionVariable;
-	bool			  m_IsDestroyRequested;
+	Thread			  m_worker_thread;
+	Mutex			  m_mutex;
+	ConditionVariable m_condition_variable;
+	bool			  m_is_destroy_requested;
+	bool              m_is_long_running;
 
 public:
 	TaskQueue();
-	virtual ~TaskQueue();
-	virtual void Execute();
-	virtual void Wait();
-	
+	~TaskQueue();
+	void Execute();
+	void Wait();
+	TaskData* CreateTask();
+
 private:
-	virtual void ProcessQueue();
+	void ProcessQueue();
 };

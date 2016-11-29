@@ -18,6 +18,13 @@ namespace Terminus
         void* Allocate(size_t _AllocationSize, uint8 _Alignment) override;
         void  Deallocate(void* _Address) override;
         void Clear();
+
+		template<typename T>
+		T* NewPerFrame()
+		{
+			void* mem = Allocate(sizeof(T), 8);
+			return new(mem)T();
+		}
     };
 }
 

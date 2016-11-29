@@ -1,14 +1,14 @@
-#include "World.h"
+#include "Scene.h"
 #include "../Types.h"
 
 namespace Terminus { namespace ECS {
 
-	World::World()
+	Scene::Scene()
 	{
 		m_last_entity_id = 0;
 	}
 
-	World::~World()
+	Scene::~Scene()
 	{		
 		for (auto it : m_component_pools)
 		{
@@ -16,14 +16,14 @@ namespace Terminus { namespace ECS {
 		}
 	}
 
-	Entity World::CreateEntity()
+	Entity Scene::CreateEntity()
 	{
 		Entity entity = m_last_entity_id++;
 		m_entities.push_back(entity);
 		return entity;
 	}
 
-	void World::Initialize()
+	void Scene::Initialize()
 	{
 		for (auto entity : m_entities)
 		{
@@ -32,36 +32,36 @@ namespace Terminus { namespace ECS {
 		}
 	}
 
-	void World::Update(double delta)
+	void Scene::Update(double delta)
 	{
 		for (auto system : m_systems)
 			system->Update(delta);
 	}
 
-	void World::RegisterSystem(ISystem* system)
+	void Scene::RegisterSystem(ISystem* system)
 	{
-		system->SetWorld(this);
+		system->SetScene(this);
 		m_systems.push_back(system);
 	}
 
-	void World::DestroyEntity(Entity entity)
+	void Scene::DestroyEntity(Entity entity)
 	{
 		//return 0;
 	}
 
-	IComponent* World::AttachComponent(Entity entity, ComponentID id)
+	IComponent* Scene::AttachComponent(Entity entity, ComponentID id)
 	{
 		// Check if entity already exists. Only one instance allowed for now.
 		return m_component_pools[id]->AttachComponent(entity);
 	}
 
-	IComponent* World::GetComponent(Entity entity, ComponentID id)
+	IComponent* Scene::GetComponent(Entity entity, ComponentID id)
 	{
 		// Check if entity exists;
 		return m_component_pools[id]->GetComponent(entity);;
 	}
 
-	bool World::HasComponent(Entity entity, ComponentID id)
+	bool Scene::HasComponent(Entity entity, ComponentID id)
 	{
 		IComponent* component = GetComponent(entity, id);
 		if (component)
@@ -70,7 +70,7 @@ namespace Terminus { namespace ECS {
 			return false;
 	}
 
-	void World::RemoveComponent(Entity entity, ComponentID id)
+	void Scene::RemoveComponent(Entity entity, ComponentID id)
 	{
 
 		m_component_pools[id]->RemoveComponent(entity);;
