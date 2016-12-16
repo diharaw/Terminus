@@ -12,6 +12,9 @@ typedef Terminus::Delegate<void(Event*)> EventCallback;
 typedef std::vector<EventCallback> CallbackList;
 typedef std::map<EventType, CallbackList> EventCallbackMap;
 
+#define EVENT_METHOD_DECLARATION(x) void x(Event* event)
+#define EVENT_METHOD_DEFINITION(x, y) void x::y(Event* event)
+
 namespace Terminus
 {
     class EventHandler

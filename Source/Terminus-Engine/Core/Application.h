@@ -91,6 +91,11 @@ namespace Terminus {
 		void InitializeAudio();
 		void InitializeECS();
 		void InitializeScript();
+        
+    public:
+        EVENT_METHOD_DECLARATION(OnStateInput);
+        EVENT_METHOD_DECLARATION(OnActionInput);
+        EVENT_METHOD_DECLARATION(OnAxisInput);
 	};
 
 }

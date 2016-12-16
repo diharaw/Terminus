@@ -4,14 +4,35 @@ namespace Terminus {
 
 	Application::Application()
 	{
-
+        
 	}
 
 	Application::~Application()
 	{
 
 	}
+    
+    EVENT_METHOD_DEFINITION(Application,OnStateInput)
+    {
+        InputStateEvent* stateEvent = (InputStateEvent*) event;
+        
+        std::cout << stateEvent->GetValue() << std::endl;
+    }
 
+    EVENT_METHOD_DEFINITION(Application,OnActionInput)
+    {
+        InputActionEvent* actionEvent = (InputActionEvent*) event;
+        
+        std::cout << actionEvent->GetAction() << std::endl;
+    }
+    
+    EVENT_METHOD_DEFINITION(Application,OnAxisInput)
+    {
+        InputAxisEvent* axisEvent = (InputAxisEvent*) event;
+        
+        std::cout << axisEvent->GetValue() << std::endl;
+    }
+    
 	bool Application::Initialize()
 	{
 		m_thread_pool = Global::GetDefaultThreadPool();
@@ -28,7 +49,26 @@ namespace Terminus {
 		InitializeScript();
         
         ImGuiBackend::initialize(m_render_device);
+        
+        EventCallback callback;
+        callback.Bind<Application, &Application::OnStateInput>(this);
+        EventHandler::RegisterListener(InputStateEvent::sk_Type, callback);
+        
+        callback.Bind<Application, &Application::OnAxisInput>(this);
+        EventHandler::RegisterListener(InputAxisEvent::sk_Type, callback);
+        
+        callback.Bind<Application, &Application::OnActionInput>(this);
+        EventHandler::RegisterListener(InputActionEvent::sk_Type, callback);
+        
+        InputContext* context = Input::CreateContext();
+        context->m_ContextName = "Test";
+        context->m_KeyboardStateMap[SDLK_f] = "Charge";
+        context->m_KeyboardActionMap[SDLK_e] = "User";
+        context->m_KeyboardAxisNegativeMap[SDLK_s] = "Forward";
+        context->m_KeyboardAxisPositiveMap[SDLK_w] = "Forward";
 
+        Input::SetActiveContext("Test");
+        
 		return true;
 	}
 

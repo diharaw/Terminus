@@ -121,13 +121,13 @@ namespace Input
             if(!context)
                 return;
             
-            // Check if State
-            if(context->m_KeyboardStateMap.find(_Key) != context->m_KeyboardStateMap.end() && _Action == SDL_KEYDOWN)
+            // Check if Action
+            if(context->m_KeyboardActionMap.find(_Key) != context->m_KeyboardActionMap.end() && _Action == SDL_KEYDOWN)
             {
-                std::string state = context->m_KeyboardStateMap[_Key];
+                std::string action = context->m_KeyboardActionMap[_Key];
                 
                 // Fire Event
-                InputStateEvent* event = new InputStateEvent(state);
+                InputActionEvent* event = new InputActionEvent(action);
                 Terminus::EventHandler::QueueEvent(event);
                 
                 m_keyboard.button_states[_Key] = _Action;
@@ -135,15 +135,15 @@ namespace Input
                 return;
             }
             
-            // Check if Action
-            if(context->m_KeyboardActionMap.find(_Key) != context->m_KeyboardActionMap.end())
+            // Check if State
+            if(context->m_KeyboardStateMap.find(_Key) != context->m_KeyboardStateMap.end())
             {
-                std::string action = context->m_KeyboardActionMap[_Key];
+                std::string state = context->m_KeyboardStateMap[_Key];
                 
                 if(_Action == SDL_KEYDOWN)
                 {
                     // Fire Pressed Event
-                    InputActionEvent* event = new InputActionEvent(action, 1);
+                    InputStateEvent* event = new InputStateEvent(state, 1);
                     Terminus::EventHandler::QueueEvent(event);
                     
                     return;
@@ -151,7 +151,7 @@ namespace Input
                 if(_Action == SDL_KEYUP)
                 {
                     // Fire Released Event
-                    InputActionEvent* event = new InputActionEvent(action, 0);
+                    InputStateEvent* event = new InputStateEvent(state, 0);
                     Terminus::EventHandler::QueueEvent(event);
                     
                     return;
@@ -241,26 +241,26 @@ namespace Input
             if(!context)
                 return;
             
-            // Check if State
-            if(context->m_MouseStateMap.find((uint8)_Key) != context->m_MouseStateMap.end() && _Action == SDL_KEYDOWN)
+            // Check if Action
+            if(context->m_MouseActionMap.find((uint8)_Key) != context->m_MouseActionMap.end() && _Action == SDL_KEYDOWN)
             {
-                std::string state = context->m_MouseStateMap[_Key];
+                std::string action = context->m_MouseActionMap[_Key];
                 // Fire Event
-                InputStateEvent* event = new InputStateEvent(state);
+                InputActionEvent* event = new InputActionEvent(action);
                 Terminus::EventHandler::QueueEvent(event);
                 
                 return;
             }
             
-            // Check if Action
-            if(context->m_MouseActionMap.find((uint8)_Key) != context->m_MouseActionMap.end())
+            // Check if State
+            if(context->m_MouseStateMap.find((uint8)_Key) != context->m_MouseStateMap.end())
             {
-                std::string action = context->m_MouseActionMap[_Key];
+                std::string state = context->m_MouseStateMap[_Key];
                 
                 if(_Action == SDL_KEYDOWN)
                 {
                     // Fire Pressed Event
-                    InputActionEvent* event = new InputActionEvent(action, 1);
+                    InputStateEvent* event = new InputStateEvent(state, 1);
                     Terminus::EventHandler::QueueEvent(event);
                     
                     return;
@@ -268,7 +268,7 @@ namespace Input
                 if(_Action == SDL_KEYUP)
                 {
                     // Fire Released Event
-                    InputActionEvent* event = new InputActionEvent(action, 0);
+                    InputStateEvent* event = new InputStateEvent(state, 0);
                     Terminus::EventHandler::QueueEvent(event);
                     
                     return;
@@ -346,7 +346,10 @@ namespace Input
                 
             case SDL_KEYUP:
             case SDL_KEYDOWN:
-                ProcessKeyboardInput(event.key.keysym.sym, event.type);
+            {
+                if(event.key.repeat == 0)
+                    ProcessKeyboardInput(event.key.keysym.sym, event.type);
+            }
                 break;
                 
             default:

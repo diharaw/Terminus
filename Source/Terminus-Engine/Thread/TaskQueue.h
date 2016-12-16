@@ -6,7 +6,7 @@
 #include <vector>
 #include <condition_variable>
 #include <iostream>
-#include "Delegate11.h"
+#include "../Core/Event/EventHandler.h"
 
 #define MAX_TASKS 1024
 

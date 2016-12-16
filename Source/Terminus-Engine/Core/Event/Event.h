@@ -63,22 +63,6 @@ public:
 };
 
 
-class InputStateEvent : public Event
-{
-public:
-    static const EventType sk_Type;
-    
-private:
-    std::string            m_state;
-    
-public:
-    InputStateEvent(std::string _state) : m_state(_state) {}
-    virtual ~InputStateEvent() {}
-    inline virtual EventType GetType()                    { return sk_Type; }
-    inline virtual std::string GetName()                  { return "Input State Event"; }
-    inline std::string GetState()                         { return m_state; }
-};
-
 class InputActionEvent : public Event
 {
 public:
@@ -86,14 +70,30 @@ public:
     
 private:
     std::string            m_action;
-    int                    m_value;
     
 public:
-    InputActionEvent(std::string _action, int _value) : m_action(_action), m_value(_value) {}
+    InputActionEvent(std::string _action) : m_action(_action) {}
     virtual ~InputActionEvent() {}
     inline virtual EventType GetType()                    { return sk_Type; }
     inline virtual std::string GetName()                  { return "Input Action Event"; }
-    inline std::string GetAction()                        { return m_action; }
+    inline std::string GetAction()                         { return m_action; }
+};
+
+class InputStateEvent : public Event
+{
+public:
+    static const EventType sk_Type;
+    
+private:
+    std::string            m_state;
+    int                    m_value;
+    
+public:
+    InputStateEvent(std::string _state, int _value) : m_state(_state), m_value(_value) {}
+    virtual ~InputStateEvent() {}
+    inline virtual EventType GetType()                    { return sk_Type; }
+    inline virtual std::string GetName()                  { return "Input State Event"; }
+    inline std::string GetState()                        { return m_state; }
     inline int GetValue()                                 { return m_value; }
 };
 
