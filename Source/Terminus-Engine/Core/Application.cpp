@@ -36,6 +36,8 @@ namespace Terminus {
 		{
 			PlatformBackend::Update();
 			EventHandler::Update();
+            m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+            m_render_device.SwapBuffers();
 			Global::GetPerFrameAllocator()->Clear();
 		}
 	}
