@@ -16,8 +16,8 @@ namespace Terminus
             g_memory = malloc(MAX_MEMORY);
             g_allocator = new LinearAllocator(MAX_MEMORY, g_memory);
             
-            //g_per_frame_memory = malloc(MAX_PER_FRAME_MEMORY);
-            //g_per_frame_allocator = new LinearAllocator(MAX_PER_FRAME_MEMORY, g_per_frame_memory);
+            g_per_frame_memory = malloc(MAX_PER_FRAME_MEMORY);
+            g_per_frame_allocator = new LinearAllocator(MAX_PER_FRAME_MEMORY, g_per_frame_memory);
             
 			g_thread_pool = T_NEW ThreadPool();
 			g_thread_pool->Initialize();
@@ -40,6 +40,15 @@ namespace Terminus
         
         void Shutdown()
         {
+            if(g_per_frame_memory)
+            {
+                g_per_frame_allocator->Clear();
+                delete g_per_frame_allocator;
+                g_per_frame_allocator = nullptr;
+            }
+            
+            free(g_per_frame_memory);
+            
             std::cout << g_allocator->GetUsedMemory() << " / " << g_allocator->GetTotalMemory() << std::endl;
             
             if(g_allocator)

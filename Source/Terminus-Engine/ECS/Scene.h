@@ -6,6 +6,7 @@
 #include "System.h"
 #include "ComponentPool.h"
 #include <vector>
+#include <iostream>
 
 namespace Terminus { namespace ECS {
 
@@ -53,7 +54,8 @@ namespace Terminus { namespace ECS {
     template <typename T>
     void ISystem::RegisterComponentType()
     {
-        m_scene->RegisterComponentPool<T>();
+        if(m_scene)
+            m_scene->RegisterComponentPool<T>();
     }
     
 } }

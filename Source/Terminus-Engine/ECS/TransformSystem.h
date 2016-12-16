@@ -4,7 +4,6 @@
 #define TRANSFORMSYSTEm_H
 
 #include "System.h"
-#include "TransformComponent.h"
 
 namespace Terminus { namespace ECS {
 

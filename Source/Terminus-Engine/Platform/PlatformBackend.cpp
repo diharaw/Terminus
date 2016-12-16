@@ -57,7 +57,7 @@ namespace PlatformBackend
         m_title += " (Vulkan)";
 #endif
         
-        m_Window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_Height, m_Width, window_flags);
+        m_Window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_Width, m_Height, window_flags);
         if(!m_Window)
             return false;
         
@@ -125,6 +125,7 @@ namespace PlatformBackend
 			m_Width = 1280;
 			m_Height = 720;
 			m_refresh_rate = 60;
+            m_resizable = true;
             m_window_mode = WindowMode::WINDOWED;
 			m_vsync = false;
 		}

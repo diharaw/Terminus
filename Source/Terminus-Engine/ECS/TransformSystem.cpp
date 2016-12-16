@@ -1,4 +1,5 @@
 #include "TransformSystem.h"
+#include "TransformComponent.h"
 #include "Scene.h"
 
 namespace Terminus { namespace ECS {

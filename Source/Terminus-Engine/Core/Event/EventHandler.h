@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-typedef Delegate<void(Event*)> EventCallback;
+typedef Terminus::Delegate<void(Event*)> EventCallback;
 typedef std::vector<EventCallback> CallbackList;
 typedef std::map<EventType, CallbackList> EventCallbackMap;
 

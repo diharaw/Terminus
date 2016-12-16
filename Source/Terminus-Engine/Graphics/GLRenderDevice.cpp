@@ -1634,7 +1634,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::SwapBuffers()
 	{
-		glfwSwapBuffers(m_window);
+		SDL_GL_SwapWindow(m_window);
 	}
 
 	void RenderDevice::Draw(int firstIndex,
