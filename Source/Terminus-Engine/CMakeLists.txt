@@ -15,13 +15,12 @@ set_target_properties( Terminus-Engine
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-target_link_libraries(Terminus-Engine glfw)
+target_link_libraries(Terminus-Engine SDL2-static)
 target_link_libraries(Terminus-Engine glew_s)
 target_link_libraries(Terminus-Engine assimp)
 target_link_libraries(Terminus-Engine imgui)
 target_link_libraries(Terminus-Engine liblua)
 target_link_libraries(Terminus-Engine zipstatic)
-target_link_libraries(Terminus-Engine angelscript)
 target_link_libraries(Terminus-Engine simplefilewatcher)
 target_link_libraries(Terminus-Engine ${OPENGL_LIBRARIES})
 target_link_libraries(Terminus-Engine Bullet2FileLoader)

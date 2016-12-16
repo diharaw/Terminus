@@ -3,7 +3,7 @@
 
 #include "../../Third Party/glew/include/GL/glew.h"
 #include "../Types.h"
-#include <GLFW/glfw3.h>
+#include <SDL.h>
 #include <nfd.h>
 #include <boxer/boxer.h>
 
