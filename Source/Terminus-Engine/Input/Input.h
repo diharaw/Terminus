@@ -2,6 +2,8 @@
 #define INPUT_H
 
 #include <string>
+#include <SDL.h>
+#include "../Types.h"
 
 #define MAX_MOUSE_BUTTONS 5
 #define MAX_KEYBOARD_BUTTONS 512
@@ -158,8 +160,9 @@ namespace Input
     struct MouseDevice
     {
         bool button_states[MAX_MOUSE_BUTTONS];
-        double x_position;
-        double y_position;
+        Uint32 wheel;
+        int x_position;
+        int y_position;
     };
     
     struct KeyboardDevice
@@ -173,13 +176,13 @@ namespace Input
 	extern void LoadContext(std::string _Name, int _PlayerIndex = 0);
     extern InputContext* CreateContext(int _PlayerIndex = 0);
     extern void SetActiveContext(std::string _Name, int _PlayerIndex = 0);
-    extern void ProcessKeyboardInput(int _Key, int _Action);
-    extern void ProcessMouseButtonInput(int _Key, int _Action);
+    extern void ProcessKeyboardInput(Sint32 _Key, Uint32 _Action);
+    extern void ProcessMouseButtonInput(Uint8 _Key, Uint32 _Action);
     extern void ProcessCursorInput(double _Xpos, int _Ypos);
+    extern void ProcessMouseWheelInput(Uint32 value);
+    extern void ProcessWindowEvents(SDL_Event& event);
     extern MouseDevice* GetMouseDevice();
     extern KeyboardDevice* GetKeyboardDevice();
-
-    extern void GamepadCallback(int _Joy, int _Event);
 }
 
 #endif

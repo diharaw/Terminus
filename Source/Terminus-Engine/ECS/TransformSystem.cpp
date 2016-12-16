@@ -1,5 +1,5 @@
 #include "TransformSystem.h"
-#include "World.h"
+#include "Scene.h"
 
 namespace Terminus { namespace ECS {
 
@@ -15,7 +15,7 @@ namespace Terminus { namespace ECS {
 
 	void TransformSystem::Initialize()
 	{
-        SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_world->GetComponentArray<TransformComponent>();
+        SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<TransformComponent>();
         
         for (int i = 0; i < component_list._num_objects; i++)
         {

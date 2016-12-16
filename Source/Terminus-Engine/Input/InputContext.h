@@ -8,7 +8,8 @@
 enum MouseAxis
 {
     MOUSE_AXIS_X = 0,
-    MOUSE_AXIS_Y = 1
+    MOUSE_AXIS_Y = 1,
+    MOUSE_WHEEL = 2
 };
 
 struct InputContext

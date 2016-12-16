@@ -4,6 +4,16 @@
 
 #if defined(TERMINUS_OPENGL)
 
+#ifdef TERMINUS_OPENGL
+#ifdef __APPLE__
+#define GL_MAX_MAJOR_VERSION 4
+#define GL_MAX_MINOR_VERSION 1
+#else
+#define GL_MAX_MAJOR_VERSION 4
+#define GL_MAX_MINOR_VERSION 5
+#endif
+#endif
+
 namespace Terminus { namespace Graphics {
 
 	RenderDevice::RenderDevice()
@@ -20,7 +30,15 @@ namespace Terminus { namespace Graphics {
 	{
 		m_window = PlatformBackend::GetWindow();
 
-		glfwMakeContextCurrent(m_window);
+        SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+        SDL_GL_SetAttribute (SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAX_MAJOR_VERSION);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MAX_MINOR_VERSION);
+        
+        m_gl_context = SDL_GL_CreateContext(m_window);
 
 		glewExperimental = GL_TRUE;
 		if (glewInit() != GLEW_OK)
@@ -33,7 +51,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::Shutdown()
 	{
-
+        SDL_GL_DeleteContext(m_gl_context);
 	}
 
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,

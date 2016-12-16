@@ -3,7 +3,6 @@
 #include "../Core/Event/EventHandler.h"
 #include "PlayerContext.h"
 #include <vector>
-#include <GLFW/glfw3.h>
 
 #define MAX_PLAYERS 8
 
@@ -16,21 +15,21 @@ namespace Input
 
     void FindPlayerDevices()
     {
-         for (int i = m_PlayerContextList.size(); i < m_PlayerCount; i++)
-        {
-            bool present = (bool)glfwJoystickPresent(GLFW_JOYSTICK_1 + i);
-
-            if(present)
-            {
-                if(i > m_PlayerContextList.size() - 1)
-                {
-                    PlayerContexts newPlayer = PlayerContexts();
-                    m_PlayerContextList.push_back(newPlayer);
-                }
-
-                m_PlayerContextList[i].m_GamepadIndex = GLFW_JOYSTICK_1 + i;
-            }
-        }
+//         for (int i = m_PlayerContextList.size(); i < m_PlayerCount; i++)
+//        {
+//            bool present = (bool)glfwJoystickPresent(GLFW_JOYSTICK_1 + i);
+//
+//            if(present)
+//            {
+//                if(i > m_PlayerContextList.size() - 1)
+//                {
+//                    PlayerContexts newPlayer = PlayerContexts();
+//                    m_PlayerContextList.push_back(newPlayer);
+//                }
+//
+//                m_PlayerContextList[i].m_GamepadIndex = GLFW_JOYSTICK_1 + i;
+//            }
+//        }
     }
 
     void Initialize()
@@ -112,7 +111,7 @@ namespace Input
         }
     }
 
-    void ProcessKeyboardInput(int _Key, int _Action)
+    void ProcessKeyboardInput(Sint32 _Key, Uint32 _Action)
     {
         if(m_PlayerContextList.size() != 0)
         {
@@ -123,7 +122,7 @@ namespace Input
                 return;
             
             // Check if State
-            if(context->m_KeyboardStateMap.find(_Key) != context->m_KeyboardStateMap.end() && _Action == GLFW_PRESS)
+            if(context->m_KeyboardStateMap.find(_Key) != context->m_KeyboardStateMap.end() && _Action == SDL_KEYDOWN)
             {
                 std::string state = context->m_KeyboardStateMap[_Key];
                 
@@ -141,7 +140,7 @@ namespace Input
             {
                 std::string action = context->m_KeyboardActionMap[_Key];
                 
-                if(_Action == GLFW_PRESS)
+                if(_Action == SDL_KEYDOWN)
                 {
                     // Fire Pressed Event
                     InputActionEvent* event = new InputActionEvent(action, 1);
@@ -149,7 +148,7 @@ namespace Input
                     
                     return;
                 }
-                if(_Action == GLFW_RELEASE)
+                if(_Action == SDL_KEYUP)
                 {
                     // Fire Released Event
                     InputActionEvent* event = new InputActionEvent(action, 0);
@@ -162,7 +161,7 @@ namespace Input
             }
             
             // Check if Axis Press
-            if(_Action == GLFW_PRESS)
+            if(_Action == SDL_KEYDOWN)
             {
                 // Check if Positive Axis
                 if(context->m_KeyboardAxisPositiveMap.find(_Key) != context->m_KeyboardAxisPositiveMap.end())
@@ -198,7 +197,7 @@ namespace Input
             }
             
             // Check if Axis Release
-            if(_Action == GLFW_RELEASE)
+            if(_Action == SDL_KEYUP)
             {
                 if(context->m_KeyboardAxisPositiveMap.find(_Key) != context->m_KeyboardAxisPositiveMap.end())
                 {
@@ -232,7 +231,7 @@ namespace Input
         }
     }
     
-    void ProcessMouseButtonInput(int _Key, int _Action)
+    void ProcessMouseButtonInput(Uint8 _Key, Uint32 _Action)
     {
         if(m_PlayerContextList.size() != 0)
         {
@@ -243,7 +242,7 @@ namespace Input
                 return;
             
             // Check if State
-            if(context->m_MouseStateMap.find((uint8)_Key) != context->m_MouseStateMap.end() && _Action == GLFW_PRESS)
+            if(context->m_MouseStateMap.find((uint8)_Key) != context->m_MouseStateMap.end() && _Action == SDL_KEYDOWN)
             {
                 std::string state = context->m_MouseStateMap[_Key];
                 // Fire Event
@@ -258,7 +257,7 @@ namespace Input
             {
                 std::string action = context->m_MouseActionMap[_Key];
                 
-                if(_Action == GLFW_PRESS)
+                if(_Action == SDL_KEYDOWN)
                 {
                     // Fire Pressed Event
                     InputActionEvent* event = new InputActionEvent(action, 1);
@@ -266,7 +265,7 @@ namespace Input
                     
                     return;
                 }
-                if(_Action == GLFW_RELEASE)
+                if(_Action == SDL_KEYUP)
                 {
                     // Fire Released Event
                     InputActionEvent* event = new InputActionEvent(action, 0);
@@ -311,16 +310,48 @@ namespace Input
         m_mouse.x_position = _Xpos;
         m_mouse.y_position = _Ypos;
     }
-
-    void GamepadCallback(int _Joy, int _Event)
+    
+    void ProcessMouseWheelInput(Uint32 value)
     {
-        if(_Event == GLFW_CONNECTED)
+        if(m_PlayerContextList.size() != 0)
         {
-
-        }
-        else if(_Event == GLFW_DISCONNECTED)
-        {
-
+            InputContext* context = m_PlayerContextList[0].m_ActiveContext;
+            
+            if(!context)
+                return;
+            
+            for (auto it : context->m_MouseAxisMap)
+            {
+                if(it.first == MOUSE_WHEEL)
+                {
+                    Uint32 last_value = m_mouse.wheel;
+                    InputAxisEvent* event = new InputAxisEvent(it.second, value, value - last_value);
+                    Terminus::EventHandler::QueueEvent(event);
+                }
+            }
         }
     }
+    
+    void ProcessWindowEvents(SDL_Event& event)
+    {
+        switch (event.type) {
+            case SDL_MOUSEWHEEL:
+                ProcessMouseWheelInput(event.wheel.y);
+                break;
+                
+            case SDL_MOUSEBUTTONUP:
+            case SDL_MOUSEBUTTONDOWN:
+                ProcessMouseButtonInput(event.button.button, event.type);
+                break;
+                
+            case SDL_KEYUP:
+            case SDL_KEYDOWN:
+                ProcessKeyboardInput(event.key.keysym.sym, event.type);
+                break;
+                
+            default:
+                break;
+        }
+    }
+
 }

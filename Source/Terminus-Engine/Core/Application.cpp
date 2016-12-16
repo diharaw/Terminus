@@ -61,7 +61,7 @@ namespace Terminus {
 
 	void Application::InitializeGraphics()
 	{
-		m_render_device.Initialize();
+		m_render_device.Initialize(nullptr, 0);
 	}
 
 	void Application::InitializePhysics()

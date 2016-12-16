@@ -53,7 +53,7 @@ namespace Terminus { namespace ECS {
     template <typename T>
     void ISystem::RegisterComponentType()
     {
-        m_world->RegisterComponentPool<T>();
+        m_scene->RegisterComponentPool<T>();
     }
     
 } }

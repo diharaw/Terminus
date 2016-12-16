@@ -37,6 +37,13 @@ enum class Style
     Question
 };
 
+enum class WindowMode
+{
+    WINDOWED,
+    BORDERLESS_WINDOW,
+    FULLSCREEN
+};
+
 namespace PlatformBackend
 {
     /**
@@ -57,7 +64,7 @@ namespace PlatformBackend
      */
     extern void RequestShutdown();
 
-	extern void SetFullscreen(bool fullscreen);
+	extern void SetWindowMode(WindowMode mode);
 
 	extern void SetWindowSize(uint width, uint height);
     /**
@@ -69,7 +76,7 @@ namespace PlatformBackend
      * Retrieve the GLFWwindow pointer
      * @return GLFWwindow pointer
      */
-    extern GLFWwindow* GetWindow();
+    extern SDL_Window* GetWindow();
     /**
      * Get Window Width
      * @return int Window Width

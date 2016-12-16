@@ -211,7 +211,8 @@ namespace Terminus { namespace Graphics {
 
 		private:
 
-			GLFWwindow*			     m_window;
+            SDL_GLContext            m_gl_context;
+			SDL_Window*			     m_window;
 			Framebuffer*			 m_current_framebuffer;
 			GLenum					 m_primitive_type;
 			ShaderProgram*			 m_current_program;
