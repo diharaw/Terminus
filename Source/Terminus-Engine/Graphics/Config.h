@@ -24,3 +24,19 @@
 #endif
 
 #endif
+
+// Terminus Platform
+
+#if defined(__APPLE__)
+    #include "TargetConditionals.h"
+    #if !TARGET_OS_IPHONE
+        #define TERMINUS_PLATFORM_MACOS
+    #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+        #define TERMINUS_PLATFORM_IOS
+    #endif
+#elif defined(__WIN32__)
+    #define TERMINUS_PLATFORM_WIN32
+#else
+    #define TERMINUS_PLATFORM_LINUX
+#endif
+

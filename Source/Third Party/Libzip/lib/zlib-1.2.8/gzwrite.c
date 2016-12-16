@@ -5,6 +5,15 @@
 
 #include "gzguts.h"
 
+#ifdef __APPLE__
+#include "TargetConditionals.h"
+#if TARGET_IPHONE
+#include <unistd.h>
+#elif TARGET_IPHONE_SIMULATOR
+#include <unistd.h>
+#endif
+#endif
+
 /* Local functions */
 local int gz_init OF((gz_statep));
 local int gz_comp OF((gz_statep, int));

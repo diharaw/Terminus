@@ -26,6 +26,8 @@ namespace Terminus {
 		InitializePhysics();
 		InitializeAudio();
 		InitializeScript();
+        
+        ImGuiBackend::initialize(m_render_device);
 
 		return true;
 	}
@@ -35,8 +37,14 @@ namespace Terminus {
 		while (!PlatformBackend::IsShutdownRequested())
 		{
 			PlatformBackend::Update();
+            ImGuiBackend::new_frame();
 			EventHandler::Update();
-            m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+            m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+            
+            static bool testWin = true;
+            ImGui::ShowTestWindow(&testWin);
+            
+            ImGuiBackend::render();
             m_render_device.SwapBuffers();
 			Global::GetPerFrameAllocator()->Clear();
 		}
@@ -44,6 +52,7 @@ namespace Terminus {
 
 	void Application::Shutdown()
 	{
+        ImGuiBackend::shutdown();
 		m_render_device.Shutdown();
 		PlatformBackend::Shutdown();
 	}

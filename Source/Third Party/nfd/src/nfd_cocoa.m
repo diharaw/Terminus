@@ -4,6 +4,11 @@
   http://www.frogtoss.com/labs
  */
 
+#if defined(__APPLE__)
+#include "TargetConditionals.h"
+
+#if !TARGET_OS_IPHONE
+
 #include <AppKit/AppKit.h>
 #include "nfd.h"
 #include "nfd_common.h"
@@ -233,3 +238,7 @@ nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
 
     return nfdResult;
 }
+
+#endif
+
+#endif

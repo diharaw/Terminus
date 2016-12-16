@@ -1,15 +1,14 @@
 #ifndef PlatformBackend_h
 #define PlatformBackend_h
 
+#include "../Graphics/Config.h"
 #include "../../Third Party/glew/include/GL/glew.h"
 #include "../Types.h"
 #include <SDL.h>
-#include <nfd.h>
-#include <boxer/boxer.h>
 
-#if defined(WIN32)
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include "GLFW\glfw3native.h"
+#if !defined(TERMINUS_PLATFORM_IOS)
+    #include <nfd.h>
+    #include <boxer/boxer.h>
 #endif
 
 enum class Selection
@@ -94,12 +93,17 @@ namespace PlatformBackend
     
     inline Selection show_message_box(String _Message, String _Title, Style _Style = Style::Info, Buttons _Buttons = Buttons::OK)
     {
+#if !defined(TERMINUS_PLATFORM_IOS)
         Selection result = (Selection)boxer::show(_Message.c_str(), _Title.c_str(), (boxer::Style)_Style, (boxer::Buttons)_Buttons);
         return result;
+#else
+        return Selection::OK;
+#endif
     }
     
     inline String* open_file_dialog(String _Extensions, String _DefaultPath = "")
     {
+#if !defined(TERMINUS_PLATFORM_IOS)
         char* openPath = NULL;
         nfdresult_t result = NFD_OpenDialog(_Extensions.c_str(), _DefaultPath.c_str(), &openPath);
         if (result == NFD_OKAY)
@@ -109,10 +113,14 @@ namespace PlatformBackend
         }
         else
             return nullptr;
+#else
+        return nullptr;
+#endif
     }
     
     inline String* save_file_dialog(String _Extensions, String _DefaultPath = "")
     {
+#if !defined(TERMINUS_PLATFORM_IOS)
         char* savePath = NULL;
         nfdresult_t result = NFD_SaveDialog(_Extensions.c_str(), _DefaultPath.c_str(), &savePath);
         if (result == NFD_OKAY)
@@ -123,6 +131,9 @@ namespace PlatformBackend
         else
             return nullptr;
     }
+#else
+    return nullptr;
+#endif
 }
 
-#endif 
+#endif
