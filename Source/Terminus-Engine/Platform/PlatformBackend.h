@@ -6,6 +6,10 @@
 #include "../Types.h"
 #include <SDL.h>
 
+#if defined(TERMINUS_PLATFORM_WIN32)
+#include <Windows.h>
+#endif
+
 #if !defined(TERMINUS_PLATFORM_IOS)
     #include <nfd.h>
     #include <boxer/boxer.h>

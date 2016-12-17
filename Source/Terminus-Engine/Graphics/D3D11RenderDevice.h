@@ -224,7 +224,7 @@ namespace Terminus { namespace Graphics {
 
 			bool				     m_vsync;
 			int						 m_video_card_memory;
-			GLFWwindow*			     m_window;
+			SDL_Window*			     m_window;
 			Framebuffer*			 m_current_framebuffer;
 			Framebuffer*			 m_default_framebuffer;
 			Texture2D*				 m_default_render_target;

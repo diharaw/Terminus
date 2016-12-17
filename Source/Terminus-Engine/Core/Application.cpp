@@ -74,6 +74,8 @@ namespace Terminus {
 
 	void Application::Run()
 	{
+		m_render_device.BindFramebuffer(nullptr);
+
 		while (!PlatformBackend::IsShutdownRequested())
 		{
 			PlatformBackend::Update();
@@ -112,7 +114,7 @@ namespace Terminus {
 
 	void Application::InitializeGraphics()
 	{
-		m_render_device.Initialize(nullptr, 0);
+		m_render_device.Initialize();
 	}
 
 	void Application::InitializePhysics()

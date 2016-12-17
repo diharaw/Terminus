@@ -5,6 +5,7 @@
 #include <string>
 #include "../GUI/ImGuiBackend.h"
 #include "../IO/FileSystem.h"
+#include <SDL_syswm.h>
 
 namespace PlatformBackend
 {
@@ -18,7 +19,7 @@ namespace PlatformBackend
 	String				   m_title;
     bool                   m_is_running;
 
-    bool CreateWindow()
+    bool CreatePlatformWindow()
     {
         Uint32 window_flags = 0;
         
@@ -130,7 +131,7 @@ namespace PlatformBackend
 			m_vsync = false;
 		}
 		
-        CreateWindow();
+		CreatePlatformWindow();
 
         if(!m_Window)
         {
@@ -174,7 +175,7 @@ namespace PlatformBackend
     void SetWindowMode(WindowMode mode)
 	{
         m_window_mode = mode;
-        CreateWindow();
+		CreatePlatformWindow();
 	}
 
 	void SetWindowSize(uint width, uint height)
@@ -215,7 +216,7 @@ namespace PlatformBackend
 	{
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(g_Window, &wmInfo);
+        SDL_GetWindowWMInfo(m_Window, &wmInfo);
         return wmInfo.info.win.window;
 	}
 #endif

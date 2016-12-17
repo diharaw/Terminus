@@ -16,6 +16,9 @@ namespace Terminus { namespace Resource {
 	{
 		JsonDocument doc;
 		doc.Parse(_data->buffer);
+
+		// Temp
+		return nullptr;
 	}
 
 } }

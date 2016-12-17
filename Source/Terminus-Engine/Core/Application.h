@@ -33,6 +33,26 @@
 #include "ECS/Scene.h"
 #include "ECS/TransformSystem.h"
 
+#if defined(TERMINUS_PLATFORM_WIN32)
+#define TERMINUS_DECLARE_MAIN(x)							\
+int WINAPI WinMain(HINSTANCE hinstance,			    \
+									 HINSTANCE hprevinstance,			\
+								     LPSTR lpcmdline,							\
+									 int ncmdshow)								\
+{																							\
+	Terminus::Global::Initialize();											\
+	Terminus::Application* app = T_NEW x();					\
+	if(app->Initialize())														\
+	{																						\
+		app->Run();																\
+	}																						\
+	app->Shutdown();															\
+	Terminus::Global::Shutdown();										\
+	return 0;																			\
+}																							\
+
+#else
+
 #define TERMINUS_DECLARE_MAIN(x)			\
 int main()															\
 {																			\
@@ -44,7 +64,11 @@ int main()															\
 	}																		\
 	app->Shutdown();											\
 	Terminus::Global::Shutdown();						\
+	return 0;															\
 }																			\
+
+#endif
+
 
 namespace Terminus {
 

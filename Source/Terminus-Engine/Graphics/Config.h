@@ -34,7 +34,7 @@
     #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         #define TERMINUS_PLATFORM_IOS
     #endif
-#elif defined(__WIN32__)
+#elif defined(WIN32)
     #define TERMINUS_PLATFORM_WIN32
 #else
     #define TERMINUS_PLATFORM_LINUX

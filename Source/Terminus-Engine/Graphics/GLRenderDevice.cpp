@@ -26,7 +26,7 @@ namespace Terminus { namespace Graphics {
 
 	}
 
-	void RenderDevice::Initialize(void* memory, size_t size)
+	void RenderDevice::Initialize()
 	{
 		m_window = PlatformBackend::GetWindow();
 
