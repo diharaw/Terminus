@@ -28,9 +28,6 @@ namespace Terminus { namespace ECS {
 
 	protected:
 		Scene* m_scene;
-
-		template <typename T>
-        void RegisterComponentType();
 	};
 
 } }

@@ -78,9 +78,6 @@ namespace Terminus {
 		// Entity-Component-System
 		//ECS::Sc 			 			   m_world;
 		ECS::SceneManager		    m_scene_manager;
-		ECS::TransformSystem 	    m_transform_system;
-		//ECS::ScriptSystem    		   m_script_system;
-		//ECS::RenderSystem	 	   m_render_system;
 
 		// Graphics
 		Graphics::RenderDevice   m_render_device;

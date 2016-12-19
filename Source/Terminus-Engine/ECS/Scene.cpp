@@ -1,5 +1,11 @@
 #include "Scene.h"
 #include "../Types.h"
+#include "TransformComponent.h"
+#include "CameraComponent.h"
+#include "MeshComponent.h"
+#include "ScriptComponent.h"
+#include "TransformSystem.h"
+#include "RenderSystem.h"
 
 namespace Terminus { namespace ECS {
 
@@ -10,10 +16,15 @@ namespace Terminus { namespace ECS {
 
 	Scene::~Scene()
 	{		
-		for (auto it : m_component_pools)
+		for (auto pool : m_component_pools)
 		{
-			T_SAFE_DELETE(it.second);
+			T_SAFE_DELETE(pool.second);
 		}
+        
+        for (auto system : m_systems)
+        {
+            T_SAFE_DELETE(system);
+        }
 	}
 
 	Entity Scene::CreateEntity()
@@ -25,6 +36,15 @@ namespace Terminus { namespace ECS {
 
 	void Scene::Initialize()
 	{
+        // Register Component Pools
+        RegisterComponentPool<TransformComponent>();
+        RegisterComponentPool<CameraComponent>();
+        RegisterComponentPool<MeshComponent>();
+        
+        // Register Systems
+        RegisterSystem<TransformSystem>();
+        RegisterSystem<RenderSystem>();
+        
 		for (auto entity : m_entities)
 		{
 			for (auto system : m_systems)
@@ -36,12 +56,6 @@ namespace Terminus { namespace ECS {
 	{
 		for (auto system : m_systems)
 			system->Update(delta);
-	}
-
-	void Scene::RegisterSystem(ISystem* system)
-	{
-		system->SetScene(this);
-		m_systems.push_back(system);
 	}
 
 	void Scene::DestroyEntity(Entity entity)

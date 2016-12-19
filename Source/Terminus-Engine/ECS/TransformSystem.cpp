@@ -6,7 +6,7 @@ namespace Terminus { namespace ECS {
 
 	TransformSystem::TransformSystem() : ISystem()
 	{
-		RegisterComponentType<TransformComponent>();
+		
 	}
 
 	TransformSystem::~TransformSystem()

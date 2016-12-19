@@ -33,13 +33,20 @@ namespace Terminus { namespace ECS {
 		IComponent* GetComponent(Entity entity, ComponentID id);
 		bool HasComponent(Entity entity, ComponentID id);
 		void RemoveComponent(Entity entity, ComponentID id);
-      	void RegisterSystem(ISystem* system);
 
 		template<typename T>
 		void RegisterComponentPool()
 		{
 			m_component_pools[T::_id] = new ComponentPool<T>();
 		}
+        
+        template<typename T>
+        void RegisterSystem()
+        {
+            T* system = new T();
+            system->SetScene(this);
+            m_systems.push_back(system);
+        }
 
 		template<typename T>
 		SlotMap<T, MAX_COMPONENTS>& GetComponentArray()
@@ -50,13 +57,6 @@ namespace Terminus { namespace ECS {
 		} 
 
 	};
-    
-    template <typename T>
-    void ISystem::RegisterComponentType()
-    {
-        if(m_scene)
-            m_scene->RegisterComponentPool<T>();
-    }
     
 } }
 

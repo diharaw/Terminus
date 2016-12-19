@@ -22,7 +22,7 @@ namespace Terminus { namespace ECS {
 		TaskData* task = m_thread_pool.CreateTask();
 
 		task->function.Bind<SceneManager, &SceneManager::SceneLoadTask>(this);
-		SceneLoadData* data = Global::GetPerFrameAllocator()->NewPerFrame<SceneLoadData>();
+		SceneLoadData* data = new SceneLoadData();
 		data->scene_name = scene;
 		
 		m_thread_pool.Submit();
@@ -33,7 +33,7 @@ namespace Terminus { namespace ECS {
 		TaskData* task = m_thread_pool.CreateTask();
 
 		task->function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
-		SceneLoadData* data = Global::GetPerFrameAllocator()->NewPerFrame<SceneLoadData>();
+		SceneLoadData* data = new SceneLoadData();
 		data->scene_name = scene;
 
 		m_thread_pool.Submit();

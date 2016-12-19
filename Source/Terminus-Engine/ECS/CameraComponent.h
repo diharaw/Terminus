@@ -12,10 +12,13 @@ namespace Terminus {  namespace ECS {
 	{
         static const ComponentID _id;
 		Graphics::Camera* camera;
-		Vector3				     offset;
-		bool						     inherit_rotation_x;
-		bool							 inherit_rotation_y;
-		bool							 inherit_rotation_z;
+		Vector3 offset;
+		bool inherit_rotation_x;
+		bool inherit_rotation_y;
+		bool inherit_rotation_z;
+        bool is_offscreen;
+        bool is_active;
+        Vector4 screen_rect;
 	};
 
 	const ComponentID CameraComponent::_id = 1;

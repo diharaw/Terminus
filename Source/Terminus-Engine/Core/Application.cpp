@@ -44,6 +44,8 @@ namespace Terminus {
 			PlatformBackend::Update();
             EventHandler::Update();
             
+            m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f,0.3f,1.0f));
+            
 #if defined(TERMINUS_WITH_EDITOR)
             ImGuiBackend::new_frame();
             static bool testWin = true;
