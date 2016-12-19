@@ -10,7 +10,7 @@ namespace Terminus { namespace ECS {
 
 	using Entity = uint32_t;
 
-	class Scene;
+	struct Scene;
 
 	class ISystem
 	{

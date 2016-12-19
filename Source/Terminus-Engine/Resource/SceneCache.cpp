@@ -12,6 +12,12 @@ namespace Terminus { namespace Resource {
 	{
 
 	}
+    
+    void SceneCache::Initialize(MeshCache* meshCache)
+    {
+        m_mesh_cache = meshCache;
+        m_Factory.Initialize(meshCache);
+    }
 
 	ECS::Scene* SceneCache::Load(String _ID)
 	{

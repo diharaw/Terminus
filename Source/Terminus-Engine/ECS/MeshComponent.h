@@ -12,8 +12,6 @@ namespace Terminus {  namespace ECS {
         Mesh* mesh;
     };
     
-    const ComponentID MeshComponent::_id = 3;
-    
 } }
 
 #endif

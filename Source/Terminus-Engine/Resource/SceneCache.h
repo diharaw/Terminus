@@ -12,10 +12,12 @@ namespace Terminus { namespace Resource {
 		{
 		private:
 			std::unordered_map<String, ECS::Scene*> m_AssetMap;
+            MeshCache* m_mesh_cache;
 
 		public:
 			SceneCache();
 			~SceneCache();
+            void Initialize(MeshCache* meshCache);
 			ECS::Scene* Load(String _ID);
 			void Unload(ECS::Scene* scene);
 		};

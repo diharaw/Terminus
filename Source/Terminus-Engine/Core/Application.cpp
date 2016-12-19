@@ -78,6 +78,7 @@ namespace Terminus {
 		m_material_cache.Initialize(&m_render_device, &m_texture_cache);
 		m_mesh_cache.Initialize(&m_render_device, &m_material_cache);
 		m_shader_cache.Initialize(&m_render_device);
+        m_scene_cache.Initialize(&m_mesh_cache);
 	}
 
 	void Application::InitializeGraphics()

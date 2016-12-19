@@ -15,9 +15,8 @@ namespace Terminus { namespace ECS {
 		Vector3 position;
 		Vector3 scale;
 		Vector3 rotation;
+        String parent_entity_name;
 	};
-
-	const ComponentID TransformComponent::_id = 0;
 
 } }
 

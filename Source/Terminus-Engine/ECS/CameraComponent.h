@@ -21,8 +21,6 @@ namespace Terminus {  namespace ECS {
         Vector4 screen_rect;
 	};
 
-	const ComponentID CameraComponent::_id = 1;
-
-} } 
+} }
 
 #endif

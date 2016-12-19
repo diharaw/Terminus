@@ -4,6 +4,7 @@
 #define SCENE_H
 
 #include "System.h"
+#include "../Types.h"
 #include "ComponentPool.h"
 #include <vector>
 #include <iostream>
@@ -13,19 +14,31 @@ namespace Terminus { namespace ECS {
 	using SystemList				   = std::vector<ISystem*>;
 	using EntityList					   = std::vector<Entity>;
 	using ComponentPoolMap = std::unordered_map<ComponentID, IComponentPool*>;
+    using EntityNameIDMap = std::unordered_map<std::string, Entity>;
+    using EntityIDNameMap = std::unordered_map<Entity,std::string>;
+    
+//    struct TransformComponent;
+//    struct CameraComponent;
+//    struct MeshComponent;
+//    
+//    class TransformSystem;
+//    class RenderSystem;
 
-	class Scene
+	struct Scene
 	{
-	private:
 		Entity							 m_last_entity_id;
 		SystemList					 m_systems;
 		EntityList						 m_entities;
 		ComponentPoolMap m_component_pools;
+        String m_name;
+        EntityNameIDMap m_entity_name_id_map;
+        EntityIDNameMap m_entity_id_name_map;
 
-	public:
 		Scene();
 		~Scene();
-		Entity CreateEntity();
+		Entity CreateEntity(String name);
+        Entity GetEntityByName(String name);
+        String GetNameByEntity(Entity entity);
 		void DestroyEntity(Entity entity);
 		void Initialize();
 		void Update(double delta);

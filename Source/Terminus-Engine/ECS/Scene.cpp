@@ -12,6 +12,15 @@ namespace Terminus { namespace ECS {
 	Scene::Scene()
 	{
 		m_last_entity_id = 0;
+        
+        // Register Component Pools
+        RegisterComponentPool<TransformComponent>();
+        RegisterComponentPool<CameraComponent>();
+        RegisterComponentPool<MeshComponent>();
+        
+        // Register Systems
+        RegisterSystem<TransformSystem>();
+        RegisterSystem<RenderSystem>();
 	}
 
 	Scene::~Scene()
@@ -27,24 +36,34 @@ namespace Terminus { namespace ECS {
         }
 	}
 
-	Entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(String name)
 	{
 		Entity entity = m_last_entity_id++;
 		m_entities.push_back(entity);
+        m_entity_id_name_map[entity] = name;
+        m_entity_name_id_map[name] = entity;
 		return entity;
 	}
+    
+    Entity Scene::GetEntityByName(String name)
+    {
+        if (m_entity_name_id_map.find(name) == m_entity_name_id_map.end())
+            return 0;
+        else
+            return m_entity_name_id_map[name];
+    }
+    
+    String Scene::GetNameByEntity(Entity entity)
+    {
+        if (m_entity_id_name_map.find(entity) == m_entity_id_name_map.end())
+            return 0;
+        else
+            return m_entity_id_name_map[entity];
+    }
+
 
 	void Scene::Initialize()
 	{
-        // Register Component Pools
-        RegisterComponentPool<TransformComponent>();
-        RegisterComponentPool<CameraComponent>();
-        RegisterComponentPool<MeshComponent>();
-        
-        // Register Systems
-        RegisterSystem<TransformSystem>();
-        RegisterSystem<RenderSystem>();
-        
 		for (auto entity : m_entities)
 		{
 			for (auto system : m_systems)

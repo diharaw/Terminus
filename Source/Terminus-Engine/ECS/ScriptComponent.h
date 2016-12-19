@@ -18,8 +18,6 @@ namespace Terminus { namespace ECS {
 		virtual void Shutdown() = 0;
 	};
 
-	const ComponentID ScriptComponent::_id = 2;
-
 } }
 
 #endif
