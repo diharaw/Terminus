@@ -3,7 +3,7 @@
 #ifndef  APPLICATION_H
 #define APPLICATION_H
 
-#include "Graphics/Config.h"
+#include "Core/Config.h"
 #include "Platform/PlatformBackend.h"
 #include "GUI/ImGuiBackend.h"
 #include "Graphics/CommandList.h"
@@ -98,7 +98,8 @@ namespace Terminus {
 		Resource::ShaderFactory  m_shader_factory;
 		Resource::TextureFactory  m_texture_factory;
 
-		ThreadPool*					   m_thread_pool;
+		ThreadPool*					   m_main_thread_pool;
+        ThreadPool*                    m_rendering_thread_pool;
 												   
 	public:
 		Application();
@@ -115,11 +116,6 @@ namespace Terminus {
 		void InitializeAudio();
 		void InitializeECS();
 		void InitializeScript();
-        
-    public:
-        EVENT_METHOD_DECLARATION(OnStateInput);
-        EVENT_METHOD_DECLARATION(OnActionInput);
-        EVENT_METHOD_DECLARATION(OnAxisInput);
 	};
 
 }

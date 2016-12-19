@@ -1,7 +1,7 @@
 #ifndef PlatformBackend_h
 #define PlatformBackend_h
 
-#include "../Graphics/Config.h"
+#include "../Core/Config.h"
 #include "../../Third Party/glew/include/GL/glew.h"
 #include "../Types.h"
 #include <SDL.h>

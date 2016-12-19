@@ -3,7 +3,7 @@
 #ifndef GLTYPES_H
 #define GLTYPES_H
 
-#include "Config.h"
+#include "../Core/Config.h"
 #include <unordered_map>
 
 #ifdef TERMINUS_OPENGL

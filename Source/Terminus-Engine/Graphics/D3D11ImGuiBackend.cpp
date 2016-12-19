@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "../Core/Config.h"
 
 #if defined(TERMINUS_DIRECT3D11)
 

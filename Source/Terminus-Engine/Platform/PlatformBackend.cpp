@@ -1,7 +1,7 @@
 #include <iostream>
 #include "PlatformBackend.h"
 #include "../Input/Input.h"
-#include "../Graphics/Config.h"
+#include "../Core/Config.h"
 #include <string>
 #include "../GUI/ImGuiBackend.h"
 #include "../IO/FileSystem.h"

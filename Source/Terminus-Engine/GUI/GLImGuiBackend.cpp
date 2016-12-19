@@ -1,4 +1,4 @@
-#include "../Graphics/Config.h"
+#include "../Core/Config.h"
 
 #if defined(TERMINUS_OPENGL)
 

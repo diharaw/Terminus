@@ -40,3 +40,6 @@
     #define TERMINUS_PLATFORM_LINUX
 #endif
 
+// Build Type
+
+#define TERMINUS_WITH_EDITOR

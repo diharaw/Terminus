@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "Types.h"
 #include <iostream>
 
 namespace Terminus
@@ -10,6 +11,7 @@ namespace Terminus
         LinearAllocator* g_allocator = nullptr;
         LinearAllocator* g_per_frame_allocator = nullptr;
         ThreadPool*   g_thread_pool = nullptr;
+        ThreadPool*   g_rendering_thread_pool = nullptr;
         
         void Initialize()
         {
@@ -21,6 +23,9 @@ namespace Terminus
             
 			g_thread_pool = T_NEW ThreadPool();
 			g_thread_pool->Initialize();
+            
+            g_rendering_thread_pool = T_NEW ThreadPool();
+            g_rendering_thread_pool->Initialize();
         }
         
         LinearAllocator* GetDefaultAllocator()
@@ -38,24 +43,27 @@ namespace Terminus
             return g_thread_pool;
         }
         
+        ThreadPool* GetRenderingThreadPool()
+        {
+            return g_rendering_thread_pool;
+        }
+        
         void Shutdown()
         {
             if(g_per_frame_memory)
             {
                 g_per_frame_allocator->Clear();
-                delete g_per_frame_allocator;
-                g_per_frame_allocator = nullptr;
+                std::cout << "Per-Frame Allocator : "<< g_per_frame_allocator->GetUsedMemory() << " / " << g_per_frame_allocator->GetTotalMemory() << std::endl;
+                T_SAFE_DELETE(g_per_frame_allocator);
             }
             
             free(g_per_frame_memory);
             
-            std::cout << g_allocator->GetUsedMemory() << " / " << g_allocator->GetTotalMemory() << std::endl;
-            
             if(g_allocator)
             {
                 g_allocator->Clear();
-                delete g_allocator;
-                g_allocator = nullptr;
+                std::cout << "Default Allocator : "<< g_allocator->GetUsedMemory() << " / " << g_allocator->GetTotalMemory() << std::endl;
+                T_SAFE_DELETE(g_allocator);
             }
             
             free(g_memory);

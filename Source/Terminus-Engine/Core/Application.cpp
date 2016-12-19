@@ -12,30 +12,10 @@ namespace Terminus {
 
 	}
     
-    EVENT_METHOD_DEFINITION(Application,OnStateInput)
-    {
-        InputStateEvent* stateEvent = (InputStateEvent*) event;
-        
-        std::cout << stateEvent->GetValue() << std::endl;
-    }
-
-    EVENT_METHOD_DEFINITION(Application,OnActionInput)
-    {
-        InputActionEvent* actionEvent = (InputActionEvent*) event;
-        
-        std::cout << actionEvent->GetAction() << std::endl;
-    }
-    
-    EVENT_METHOD_DEFINITION(Application,OnAxisInput)
-    {
-        InputAxisEvent* axisEvent = (InputAxisEvent*) event;
-        
-        std::cout << axisEvent->GetValue() << std::endl;
-    }
-    
 	bool Application::Initialize()
 	{
-		m_thread_pool = Global::GetDefaultThreadPool();
+		m_main_thread_pool = Global::GetDefaultThreadPool();
+        m_rendering_thread_pool = Global::GetRenderingThreadPool();
 
 		if (!PlatformBackend::Initialize())
 			return false;
@@ -48,26 +28,9 @@ namespace Terminus {
 		InitializeAudio();
 		InitializeScript();
         
+#if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::initialize(m_render_device);
-        
-        EventCallback callback;
-        callback.Bind<Application, &Application::OnStateInput>(this);
-        EventHandler::RegisterListener(InputStateEvent::sk_Type, callback);
-        
-        callback.Bind<Application, &Application::OnAxisInput>(this);
-        EventHandler::RegisterListener(InputAxisEvent::sk_Type, callback);
-        
-        callback.Bind<Application, &Application::OnActionInput>(this);
-        EventHandler::RegisterListener(InputActionEvent::sk_Type, callback);
-        
-        InputContext* context = Input::CreateContext();
-        context->m_ContextName = "Test";
-        context->m_KeyboardStateMap[SDLK_f] = "Charge";
-        context->m_KeyboardActionMap[SDLK_e] = "User";
-        context->m_KeyboardAxisNegativeMap[SDLK_s] = "Forward";
-        context->m_KeyboardAxisPositiveMap[SDLK_w] = "Forward";
-
-        Input::SetActiveContext("Test");
+#endif
         
 		return true;
 	}
@@ -79,14 +42,15 @@ namespace Terminus {
 		while (!PlatformBackend::IsShutdownRequested())
 		{
 			PlatformBackend::Update();
-            ImGuiBackend::new_frame();
-			EventHandler::Update();
-            m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+            EventHandler::Update();
             
+#if defined(TERMINUS_WITH_EDITOR)
+            ImGuiBackend::new_frame();
             static bool testWin = true;
             ImGui::ShowTestWindow(&testWin);
-            
             ImGuiBackend::render();
+#endif
+            
             m_render_device.SwapBuffers();
 			Global::GetPerFrameAllocator()->Clear();
 		}
@@ -94,7 +58,9 @@ namespace Terminus {
 
 	void Application::Shutdown()
 	{
+#if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::shutdown();
+#endif
 		m_render_device.Shutdown();
 		PlatformBackend::Shutdown();
 	}

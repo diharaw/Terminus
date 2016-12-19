@@ -4,7 +4,7 @@
 #define MATHUTITLTY_H
 
 #include <gtc/matrix_transform.hpp>
-#include "../Graphics/Config.h"
+#include "../Core/Config.h"
 #include "../Types.h"
 
 namespace Terminus { namespace Math {

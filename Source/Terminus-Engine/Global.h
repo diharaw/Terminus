@@ -23,6 +23,7 @@ namespace Terminus
         extern LinearAllocator* GetDefaultAllocator();
         extern LinearAllocator* GetPerFrameAllocator();
         extern ThreadPool*   GetDefaultThreadPool();
+        extern ThreadPool*   GetRenderingThreadPool();
         extern void Shutdown();
     }
 }

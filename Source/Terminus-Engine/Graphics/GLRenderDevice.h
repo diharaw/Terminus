@@ -1,7 +1,7 @@
 #ifndef GLRENDERDEVICE_H
 #define GLRENDERDEVICE_H
 
-#include "Config.h"
+#include "../Core/Config.h"
 
 #if defined(TERMINUS_OPENGL)
 

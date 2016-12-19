@@ -1,4 +1,4 @@
-#include "../Graphics/Config.h"
+#include "../Core/Config.h"
 #include "ShaderCache.h"
 #include "../IO/FileSystem.h"
 #include <iostream>

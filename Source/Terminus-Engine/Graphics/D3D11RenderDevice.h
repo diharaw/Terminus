@@ -1,7 +1,7 @@
 #ifndef D3D11RENDERDEVICE_H
 #define D3D11RENDERDEVICE_H
 
-#include "Config.h"
+#include "../Core/Config.h"
 
 #if defined(TERMINUS_DIRECT3D11)
 
