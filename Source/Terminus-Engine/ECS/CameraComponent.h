@@ -11,7 +11,7 @@ namespace Terminus {  namespace ECS {
 	struct CameraComponent : IComponent
 	{
         static const ComponentID _id;
-		Graphics::Camera* camera;
+		Graphics::Camera camera;
 		Vector3 offset;
 		bool inherit_rotation_x;
 		bool inherit_rotation_y;

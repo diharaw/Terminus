@@ -102,11 +102,46 @@ namespace Terminus { namespace Resource {
         ECS::CameraComponent* component = (ECS::CameraComponent*)scene->AttachComponent(entity, ECS::CameraComponent::_id);
         
         rapidjson::Value& projection_info = value["projection_info"];
+        
+        {
+            component->camera.SetFarPlane(projection_info["far_plane"].GetFloat());
+            component->camera.SetNearPlane(projection_info["near_plane"].GetFloat());
+            
+            String proj_type = String(projection_info["projection_type"].GetString());
+            
+            if(proj_type == "PERSPECTIVE")
+                component->camera.SetProjectionType(Terminus::Graphics::ProjectionType::PERSPECTIVE);
+            else
+                component->camera.SetProjectionType(Terminus::Graphics::ProjectionType::ORTHOGRAPHIC);
+            
+            component->camera.SetFoV(projection_info["field_of_view"].GetFloat());
+            
+            float aspect_x = projection_info["aspect_ratio_x"].GetFloat();
+            float aspect_y = projection_info["aspect_ratio_y"].GetFloat();
+            
+            component->camera.SetAspectRatio(aspect_x / aspect_y);
+        }
+        
+        component->is_active = value["is_active"].GetBool();
+        component->is_offscreen = value["is_offscreen"].GetBool();
+        
+        rapidjson::Value& viewport_rect = value["viewport_rect"];
+        
+        {
+            component->screen_rect.x = viewport_rect["x"].GetFloat();
+            component->screen_rect.y = viewport_rect["y"].GetFloat();
+            component->screen_rect.z = viewport_rect["w"].GetFloat();
+            component->screen_rect.w = viewport_rect["h"].GetFloat();
+        }
     }
     
     void SceneFactory::CreateMeshComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene)
     {
         ECS::MeshComponent* component = (ECS::MeshComponent*)scene->AttachComponent(entity, ECS::MeshComponent::_id);
+        
+        component->mesh = m_mesh_cache->Load(std::string(value["mesh"].GetString()));
+        
+        // TODO: Material Overrides
     }
 
 } }
