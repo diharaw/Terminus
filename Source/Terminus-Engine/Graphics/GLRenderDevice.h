@@ -13,6 +13,7 @@
 #include "../Platform/PlatformBackend.h"
 #include "../Memory/PoolAllocator.h"
 #include "GLTypes.h"
+#include "../Global.h"
 
 #define MAX_TEXTURE_1D 1
 #define MAX_TEXTURE_2D 1

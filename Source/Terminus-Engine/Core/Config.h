@@ -43,3 +43,5 @@
 // Build Type
 
 #define TERMINUS_WITH_EDITOR
+
+#define TERMINUS_PROFILING

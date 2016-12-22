@@ -2,6 +2,9 @@
 
 #include "TaskQueue.h"
 
+#define TASK_METHOD_DECLARATION(x) void x(void* data)
+#define TASK_METHOD_DEFINITION(x, y) void x::y(void* data)
+
 class ThreadPool
 {
 private:

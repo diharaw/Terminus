@@ -29,7 +29,7 @@ namespace Terminus { namespace Graphics {
 	void RenderDevice::Initialize()
 	{
 		m_window = PlatformBackend::GetWindow();
-
+        
 #ifdef __APPLE__
         SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 #endif
@@ -42,15 +42,15 @@ namespace Terminus { namespace Graphics {
         
         m_gl_context = SDL_GL_CreateContext(m_window);
         SDL_GL_MakeCurrent(m_window, m_gl_context);
-
-		glewExperimental = GL_TRUE;
-		if (glewInit() != GLEW_OK)
-		{
-			std::cout << "ERROR" << std::endl;
-		}
-
-		GL_CHECK_ERROR();
-	}
+        
+        glewExperimental = GL_TRUE;
+        if (glewInit() != GLEW_OK)
+        {
+            std::cout << "ERROR" << std::endl;
+        }
+        
+        GL_CHECK_ERROR();
+    }
 
 	void RenderDevice::Shutdown()
 	{

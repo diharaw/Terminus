@@ -1,6 +1,15 @@
 #include "Application.h"
 
+#if defined(TERMINUS_PROFILING)
+#define RMT_ENABLED 1
+#include "../Utility/Remotery.h"
+#endif
+
 namespace Terminus {
+    
+#if defined(TERMINUS_PROFILING)
+    Remotery* rmt;
+#endif
 
 	Application::Application()
 	{
@@ -16,6 +25,10 @@ namespace Terminus {
 	{
 		m_main_thread_pool = Global::GetDefaultThreadPool();
         m_rendering_thread_pool = Global::GetRenderingThreadPool();
+        
+#if defined(TERMINUS_PROFILING)
+    rmt_CreateGlobalInstance(&rmt);
+#endif
 
 		if (!PlatformBackend::Initialize())
 			return false;
@@ -28,44 +41,92 @@ namespace Terminus {
 		InitializeAudio();
 		InitializeScript();
         
-#if defined(TERMINUS_WITH_EDITOR)
-        ImGuiBackend::initialize(m_render_device);
-#endif
-        
 		return true;
 	}
 
 	void Application::Run()
 	{
-		m_render_device.BindFramebuffer(nullptr);
-
 		while (!PlatformBackend::IsShutdownRequested())
 		{
+#if defined(TERMINUS_PROFILING)
+            rmt_BeginCPUSample(GameLoop, 0);
+#endif
+            SubmitRendering();
 			PlatformBackend::Update();
             EventHandler::Update();
             
-            m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f,0.3f,1.0f));
+            // Synchronize Rendering Thread
+            m_rendering_thread_pool->Wait();
             
-#if defined(TERMINUS_WITH_EDITOR)
-            ImGuiBackend::new_frame();
-            static bool testWin = true;
-            ImGui::ShowTestWindow(&testWin);
-            ImGuiBackend::render();
-#endif
-            
-            m_render_device.SwapBuffers();
 			Global::GetPerFrameAllocator()->Clear();
+            
+#if defined(TERMINUS_PROFILING)
+            rmt_EndCPUSample();
+#endif
 		}
 	}
 
 	void Application::Shutdown()
 	{
+        ShutdownGraphics();
+		PlatformBackend::Shutdown();
+        
+#if defined(TERMINUS_PROFILING)
+        rmt_DestroyGlobalInstance(rmt);
+#endif
+	}
+    
+    void Application::SubmitRendering()
+    {
+        TaskData* task = m_rendering_thread_pool->CreateTask();
+        task->function.Bind<Application, &Application::RenderingTask>(this);
+        m_rendering_thread_pool->Submit();
+    }
+    
+    void Application::ShutdownGraphics()
+    {
+        TaskData* task = m_rendering_thread_pool->CreateTask();
+        task->function.Bind<Application, &Application::GraphicsShutdownTask>(this);
+        m_rendering_thread_pool->SubmitAndWait();
+    }
+    
+    TASK_METHOD_DEFINITION(Application, RenderingTask)
+    {
+#if defined(TERMINUS_PROFILING)
+        rmt_BeginCPUSample(RenderingTask, 0);
+#endif
+        m_render_device.BindFramebuffer(nullptr);
+        
+        m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f,0.3f,1.0f));
+        
+#if defined(TERMINUS_WITH_EDITOR)
+        ImGuiBackend::new_frame();
+        static bool testWin = true;
+        ImGui::ShowTestWindow(&testWin);
+        ImGuiBackend::render();
+#endif
+        
+        m_render_device.SwapBuffers();
+#if defined(TERMINUS_PROFILING)
+        rmt_EndCPUSample();
+#endif
+    }
+    
+    TASK_METHOD_DEFINITION(Application, GraphicsInitializeTask)
+    {
+        m_render_device.Initialize();
+#if defined(TERMINUS_WITH_EDITOR)
+        ImGuiBackend::initialize(m_render_device);
+#endif
+    }
+    
+    TASK_METHOD_DEFINITION(Application, GraphicsShutdownTask)
+    {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::shutdown();
 #endif
-		m_render_device.Shutdown();
-		PlatformBackend::Shutdown();
-	}
+        m_render_device.Shutdown();
+    }
 
 	void Application::InitializeInput()
 	{
@@ -83,7 +144,9 @@ namespace Terminus {
 
 	void Application::InitializeGraphics()
 	{
-		m_render_device.Initialize();
+        TaskData* task = m_rendering_thread_pool->CreateTask();
+        task->function.Bind<Application, &Application::GraphicsInitializeTask>(this);
+        m_rendering_thread_pool->SubmitAndWait();
 	}
 
 	void Application::InitializePhysics()

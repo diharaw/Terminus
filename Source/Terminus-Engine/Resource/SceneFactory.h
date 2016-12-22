@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef  SCENEFACTORY_H
+#ifndef SCENEFACTORY_H
 #define SCENEFACTORY_H
 
 #include "../ECS/Scene.h"

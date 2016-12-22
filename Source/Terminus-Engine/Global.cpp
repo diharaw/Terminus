@@ -25,7 +25,7 @@ namespace Terminus
 			g_thread_pool->Initialize();
             
             g_rendering_thread_pool = T_NEW ThreadPool();
-            g_rendering_thread_pool->Initialize();
+            g_rendering_thread_pool->Initialize(1);
         }
         
         LinearAllocator* GetDefaultAllocator()

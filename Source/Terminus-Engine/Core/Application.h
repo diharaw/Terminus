@@ -97,7 +97,7 @@ namespace Terminus {
 
 		ThreadPool*					   m_main_thread_pool;
         ThreadPool*                    m_rendering_thread_pool;
-												   
+        
 	public:
 		Application();
 		~Application();
@@ -113,6 +113,13 @@ namespace Terminus {
 		void InitializeAudio();
 		void InitializeECS();
 		void InitializeScript();
+        
+        void SubmitRendering();
+        void ShutdownGraphics();
+        
+        TASK_METHOD_DECLARATION(GraphicsInitializeTask);
+        TASK_METHOD_DECLARATION(GraphicsShutdownTask);
+        TASK_METHOD_DECLARATION(RenderingTask);
 	};
 
 }

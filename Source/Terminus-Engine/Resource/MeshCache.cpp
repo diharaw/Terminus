@@ -6,7 +6,7 @@ namespace Terminus { namespace Resource {
 
 	MeshCache::MeshCache()
 	{
-
+        
 	}
 
 	MeshCache::~MeshCache()

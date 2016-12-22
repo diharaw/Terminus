@@ -6,6 +6,7 @@
 #include "../Graphics/RenderCommon.h"
 #include "AssetCache.h"
 #include "TextureFactory.h"
+#include "../Global.h"
 
 namespace Terminus { namespace Resource {
 

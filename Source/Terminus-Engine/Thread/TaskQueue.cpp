@@ -2,6 +2,7 @@
 
 TaskData* TaskQueue::CreateTask()
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
 	m_last_index++;
 	return &m_task_list[m_last_index];
 }
@@ -53,7 +54,7 @@ void TaskQueue::ProcessQueue()
 
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
-			m_last_index--;
+            m_last_index--;
 			m_condition_variable.notify_one();
 		}
 	}
