@@ -78,9 +78,15 @@ namespace Terminus {
     
     void Application::SubmitRendering()
     {
+#if defined(TERMINUS_PROFILING)
+        rmt_BeginCPUSample(SubmitRendering, 0);
+#endif
         TaskData* task = m_rendering_thread_pool->CreateTask();
         task->function.Bind<Application, &Application::RenderingTask>(this);
         m_rendering_thread_pool->Submit();
+#if defined(TERMINUS_PROFILING)
+        rmt_EndCPUSample();
+#endif
     }
     
     void Application::ShutdownGraphics()
