@@ -14,6 +14,7 @@
 #include "../Memory/PoolAllocator.h"
 #include "GLTypes.h"
 #include "../Global.h"
+#include "GraphicsQueue.h"
 
 #define MAX_TEXTURE_1D 1
 #define MAX_TEXTURE_2D 1
@@ -209,6 +210,16 @@ namespace Terminus { namespace Graphics {
 			{
 				m_framebuffer_map[name] = framebuffer;
 			}
+            
+            inline GraphicsQueue& GetGraphicsQueueFront()
+            {
+                return m_graphics_queues[m_front_queue_index];
+            }
+            
+            inline GraphicsQueue& GetGraphicsQueueBack()
+            {
+                return m_graphics_queues[!m_front_queue_index];
+            }
 
 		private:
 
@@ -219,6 +230,8 @@ namespace Terminus { namespace Graphics {
 			ShaderProgram*			 m_current_program;
 			std::unordered_map<String, Texture2D*> m_render_target_map;
 			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
+            bool                     m_front_queue_index;
+            GraphicsQueue            m_graphics_queues[2];
 		};
 
 } }

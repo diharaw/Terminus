@@ -1,15 +1,12 @@
 #include "Application.h"
 
 #if defined(TERMINUS_PROFILING)
-#define RMT_ENABLED 1
 #include "../Utility/Remotery.h"
 #endif
 
 namespace Terminus {
     
-#if defined(TERMINUS_PROFILING)
-    Remotery* rmt;
-#endif
+    TERMINUS_PROFILER_INSTANCE
 
 	Application::Application()
 	{
@@ -26,9 +23,7 @@ namespace Terminus {
 		m_main_thread_pool = Global::GetDefaultThreadPool();
         m_rendering_thread_pool = Global::GetRenderingThreadPool();
         
-#if defined(TERMINUS_PROFILING)
-    rmt_CreateGlobalInstance(&rmt);
-#endif
+        TERMINUS_CREATE_PROFILER
 
 		if (!PlatformBackend::Initialize())
 			return false;
@@ -48,9 +43,8 @@ namespace Terminus {
 	{
 		while (!PlatformBackend::IsShutdownRequested())
 		{
-#if defined(TERMINUS_PROFILING)
-            rmt_BeginCPUSample(GameLoop, 0);
-#endif
+            TERMINUS_BEGIN_CPU_PROFILE(GameLoop)
+            
             SubmitRendering();
 			PlatformBackend::Update();
             EventHandler::Update();
@@ -60,9 +54,7 @@ namespace Terminus {
             
 			Global::GetPerFrameAllocator()->Clear();
             
-#if defined(TERMINUS_PROFILING)
-            rmt_EndCPUSample();
-#endif
+            TERMINUS_END_CPU_PROFILE
 		}
 	}
 
@@ -71,22 +63,18 @@ namespace Terminus {
         ShutdownGraphics();
 		PlatformBackend::Shutdown();
         
-#if defined(TERMINUS_PROFILING)
-        rmt_DestroyGlobalInstance(rmt);
-#endif
+        TERMINUS_DESTROY_PROFILER
 	}
     
     void Application::SubmitRendering()
     {
-#if defined(TERMINUS_PROFILING)
-        rmt_BeginCPUSample(SubmitRendering, 0);
-#endif
+        TERMINUS_BEGIN_CPU_PROFILE(SubmitRendering);
+
         TaskData* task = m_rendering_thread_pool->CreateTask();
         task->function.Bind<Application, &Application::RenderingTask>(this);
         m_rendering_thread_pool->Submit();
-#if defined(TERMINUS_PROFILING)
-        rmt_EndCPUSample();
-#endif
+
+        TERMINUS_END_CPU_PROFILE
     }
     
     void Application::ShutdownGraphics()
@@ -98,9 +86,8 @@ namespace Terminus {
     
     TASK_METHOD_DEFINITION(Application, RenderingTask)
     {
-#if defined(TERMINUS_PROFILING)
-        rmt_BeginCPUSample(RenderingTask, 0);
-#endif
+        TERMINUS_BEGIN_CPU_PROFILE(RenderingTask)
+
         m_render_device.BindFramebuffer(nullptr);
         
         m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f,0.3f,1.0f));
@@ -113,9 +100,8 @@ namespace Terminus {
 #endif
         
         m_render_device.SwapBuffers();
-#if defined(TERMINUS_PROFILING)
-        rmt_EndCPUSample();
-#endif
+        
+        TERMINUS_END_CPU_PROFILE
     }
     
     TASK_METHOD_DEFINITION(Application, GraphicsInitializeTask)

@@ -49,7 +49,22 @@ namespace Terminus { namespace Resource {
             if(m_task_sucess)
             {
                 Mesh* mesh = new Mesh();
+                mesh->SubMeshes = new SubMesh[_Data->header.m_MeshCount];
+                mesh->m_MinExtents = _Data->header.m_MinExtents;
+                mesh->m_MaxExtents = _Data->header.m_MaxExtents;
+                
+                for (int i = 0; i < _Data->header.m_MeshCount; i++)
+                {
+                    mesh->SubMeshes[i].m_BaseIndex = _Data->meshes[i].m_BaseIndex;
+                    mesh->SubMeshes[i].m_IndexCount = _Data->meshes[i].m_IndexCount;
+                    mesh->SubMeshes[i].m_BaseVertex = _Data->meshes[i].m_BaseVertex;
+                    mesh->SubMeshes[i].m_MinExtents = _Data->meshes[i].m_MinExtents;
+                    mesh->SubMeshes[i].m_MaxExtents = _Data->meshes[i].m_MaxExtents;
+                }
+                
                 mesh->VertexArray = m_mesh_vertex_array;
+                T_SAFE_DELETE(_Data);
+                
                 return mesh;
             }
             

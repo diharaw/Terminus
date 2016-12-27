@@ -173,6 +173,13 @@ namespace Terminus { namespace Graphics {
 		Texture* m_depth_target;
     };
     
+    struct GraphicsCommand
+    {
+        uint64 sort_key;
+        GraphicsCommandType type;
+        
+    };
+    
 } }
 
 #endif

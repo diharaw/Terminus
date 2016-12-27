@@ -26,6 +26,8 @@ struct Mesh
 	bool IsSkeletal;
 	uint MeshCount;
 	SubMesh* SubMeshes;
+    Vector3 m_MaxExtents;
+    Vector3 m_MinExtents;
 	Terminus::Graphics::VertexArray* VertexArray;
 };
 

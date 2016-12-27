@@ -24,7 +24,7 @@ namespace Terminus { namespace ECS {
 		SceneMap 						 m_scene_map;
 		Scene* 							 m_active_scene;
 		Scene* 							 m_preload_scene;
-		Resource::SceneCache* m_scene_cache;
+		Resource::SceneCache*            m_scene_cache;
 		ThreadPool						 m_thread_pool;
 
 	public:

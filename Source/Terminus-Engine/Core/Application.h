@@ -6,7 +6,6 @@
 #include "Core/Config.h"
 #include "Platform/PlatformBackend.h"
 #include "GUI/ImGuiBackend.h"
-#include "Graphics/CommandList.h"
 #include "Graphics/Renderer.h"
 #include "Memory/PoolAllocator.h"
 #include "Memory/StackAllocator.h"
@@ -81,7 +80,6 @@ namespace Terminus {
 
 		// Graphics
 		Graphics::RenderDevice   m_render_device;
-		Graphics::Renderer	   	    m_renderer;
 
 		// Resource Caches
 		Resource::MeshCache	    m_mesh_cache;

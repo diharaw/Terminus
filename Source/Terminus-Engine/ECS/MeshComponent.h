@@ -10,6 +10,9 @@ namespace Terminus {  namespace ECS {
     {
         static const ComponentID _id;
         Mesh* mesh;
+        bool cull_submeshes;
+        bool casts_shadow;
+        bool is_visible;
     };
     
 } }

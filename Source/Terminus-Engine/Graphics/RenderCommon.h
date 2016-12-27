@@ -79,6 +79,21 @@ struct RasterizerStateDesc
     bool m_scissor;
 };
 
+enum class GraphicsCommandType
+{
+    Draw = 0,
+    DrawIndexed,
+    DrawIndexedBaseVertex,
+    BindTexture,
+    BindSamplerState,
+    BindRasterizerState,
+    BindDepthStencilState,
+    BindVertexArray,
+    BindFramebuffer,
+    BindUniformBuffer,
+    CopyUniformData
+};
+
 struct DepthStencilStateDesc
 {
     bool m_enableDepthTest;
