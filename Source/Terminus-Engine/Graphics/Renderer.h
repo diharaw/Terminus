@@ -18,8 +18,14 @@ namespace Terminus { namespace Graphics {
         Renderer();
         ~Renderer();
         void Submit(RenderDevice& device);
+        void Swap();
+        uint32 CreateCommandBuffer();
+        CommandBuffer& GetCommandBuffer(uint32 index);
+        
+    private:
         GraphicsQueue& GetGraphicsQueueFront();
         GraphicsQueue& GetGraphicsQueueBack();
+        
         
 	};
 

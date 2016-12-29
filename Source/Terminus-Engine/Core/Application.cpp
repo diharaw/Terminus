@@ -58,6 +58,9 @@ namespace Terminus {
             // Synchronize Rendering Thread
             m_rendering_thread_pool->Wait();
             
+            // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
+            m_renderer.Swap();
+            
 			Global::GetPerFrameAllocator()->Clear();
             
             TERMINUS_END_CPU_PROFILE
@@ -96,7 +99,7 @@ namespace Terminus {
 
         // TEST TEST TEST
         
-        Graphics::CommandBuffer& cmd_buf = m_renderer.GetGraphicsQueueFront().m_cmd_buf[cmd_buf_idx];
+        Graphics::CommandBuffer& cmd_buf = m_renderer.GetCommandBuffer(cmd_buf_idx);
         
         Graphics::BindFramebufferCmdData cmd1;
         cmd1.framebuffer = nullptr;
@@ -134,8 +137,7 @@ namespace Terminus {
         
         // TEST TEST TEST
         
-        cmd_buf_idx = m_renderer.GetGraphicsQueueFront().CreateCommandBuffer();
-        m_renderer.GetGraphicsQueueBack().CreateCommandBuffer();
+        cmd_buf_idx = m_renderer.CreateCommandBuffer();
         
         // TEST TEST TEST
     }

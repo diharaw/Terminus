@@ -116,13 +116,26 @@ namespace Terminus { namespace Graphics {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::render();
 #endif
-        
-        // Swap Queues
-        m_front_queue_index = !m_front_queue_index;
-        
         device.SwapBuffers();
     }
+    
+    void Renderer::Swap()
+    {
+        // Swap Queues
+        m_front_queue_index = !m_front_queue_index;
+    }
 
+    uint32 Renderer::CreateCommandBuffer()
+    {
+        m_graphics_queues[0].CreateCommandBuffer();
+        return m_graphics_queues[1].CreateCommandBuffer();
+    }
+    
+    CommandBuffer& Renderer::GetCommandBuffer(uint32 index)
+    {
+        return m_graphics_queues[m_front_queue_index].m_cmd_buf[index];
+    }
+    
     GraphicsQueue& Renderer::GetGraphicsQueueFront()
     {
         return m_graphics_queues[m_front_queue_index];
