@@ -4,27 +4,27 @@
 #define RENDERER_H
 
 #include "RenderDevice.h"
+#include "GraphicsQueue.h"
 
 namespace Terminus { namespace Graphics {
 
-	namespace Renderer
+	class Renderer
 	{
-        inline void Render(RenderDevice& device)
-        {
-            
-        }
+    private:
+        bool          m_front_queue_index;
+        GraphicsQueue m_graphics_queues[2];
         
-        inline void SortQueue(GraphicsQueue& queue)
-        {
-            ThreadPool* thread_pool = Global::GetDefaultThreadPool();
-            
-            
-        }
+    public:
+        Renderer();
+        ~Renderer();
+        void Submit();
+        void Sort();
+        GraphicsQueue& GetGraphicsQueueFront();
+        GraphicsQueue& GetGraphicsQueueBack();
         
-        inline void SortTask(void* data)
-        {
-            
-        }
+    private:
+        void SortTask(void* data);
+        
 	};
 
 } }

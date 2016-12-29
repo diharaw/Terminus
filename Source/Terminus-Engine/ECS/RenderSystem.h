@@ -28,12 +28,6 @@ namespace Terminus { namespace ECS {
         Skybox
     };
     
-    struct MeshTransformPair
-    {
-        MeshComponent* mesh;
-        TransformComponent* transform;
-    };
-    
     struct DrawItem
     {
         uint64 sort_key;

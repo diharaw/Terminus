@@ -53,12 +53,16 @@ namespace Terminus { namespace ECS {
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
 		Scene* loaded = m_scene_cache->Load(load_data->scene_name);
+        
+        // Fire Scene Load Complete Event
 	}
 
 	void SceneManager::ScenePreloadTask(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
 		Scene* loaded = m_scene_cache->Load(load_data->scene_name);
+        
+        // Fire Scene Preload Complete Event
 	}
 
 	void SceneManager::RegisterSystem(ISystem* system)

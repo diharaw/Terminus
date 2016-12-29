@@ -29,7 +29,6 @@ namespace Terminus { namespace Graphics {
 	void RenderDevice::Initialize()
 	{
 		m_window = PlatformBackend::GetWindow();
-        m_front_queue_index = 0;
         
 #ifdef __APPLE__
         SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -1642,7 +1641,6 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::SwapBuffers()
 	{
-        m_front_queue_index = !m_front_queue_index;
 		SDL_GL_SwapWindow(m_window);
 	}
 

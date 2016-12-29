@@ -4,6 +4,7 @@
 #define SCENE_H
 
 #include "System.h"
+#include "../Graphics/RenderDevice.h"
 #include "../Types.h"
 #include "ComponentPool.h"
 #include <vector>
