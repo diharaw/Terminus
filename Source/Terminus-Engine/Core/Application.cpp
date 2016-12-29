@@ -8,6 +8,12 @@ namespace Terminus {
     
     TERMINUS_PROFILER_INSTANCE
 
+    // TEST TEST TEST
+    
+    int cmd_buf_idx;
+    
+    // TEST TEST TEST
+    
 	Application::Application()
 	{
         
@@ -88,18 +94,33 @@ namespace Terminus {
     {
         TERMINUS_BEGIN_CPU_PROFILE(RenderingTask)
 
-        m_render_device.BindFramebuffer(nullptr);
+        // TEST TEST TEST
         
-        m_render_device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f,0.3f,1.0f));
+        Graphics::CommandBuffer& cmd_buf = m_renderer.GetGraphicsQueueFront().m_cmd_buf[cmd_buf_idx];
+        
+        Graphics::BindFramebufferCmdData cmd1;
+        cmd1.framebuffer = nullptr;
+    
+        cmd_buf.Write(Graphics::CommandType::BindFramebuffer);
+        cmd_buf.Write(&cmd1, sizeof(cmd1));
+        
+        Graphics::ClearFramebufferCmdData cmd2;
+        cmd2.clear_target = FramebufferClearTarget::COLOR;
+        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+        
+        cmd_buf.Write(Graphics::CommandType::ClearFramebuffer);
+        cmd_buf.Write(&cmd2, sizeof(cmd2));
+        
+        cmd_buf.WriteEnd();
+        
+        // TEST TEST TEST
         
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::new_frame();
         static bool testWin = true;
         ImGui::ShowTestWindow(&testWin);
-        ImGuiBackend::render();
 #endif
-        
-        m_render_device.SwapBuffers();
+        m_renderer.Submit(m_render_device);
         
         TERMINUS_END_CPU_PROFILE
     }
@@ -110,6 +131,13 @@ namespace Terminus {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::initialize(m_render_device);
 #endif
+        
+        // TEST TEST TEST
+        
+        cmd_buf_idx = m_renderer.GetGraphicsQueueFront().CreateCommandBuffer();
+        m_renderer.GetGraphicsQueueBack().CreateCommandBuffer();
+        
+        // TEST TEST TEST
     }
     
     TASK_METHOD_DEFINITION(Application, GraphicsShutdownTask)

@@ -45,6 +45,7 @@ namespace Terminus { namespace ECS {
         Matrix4 view_projection_matrix;
         Vector4 screen_rect;
         bool is_shadow;
+        uint32 cmd_buf_idx;
         Graphics::RenderingPath* rendering_path;
     };
     

@@ -80,6 +80,7 @@ namespace Terminus {
 
 		// Graphics
 		Graphics::RenderDevice   m_render_device;
+        Graphics::Renderer       m_renderer;
 
 		// Resource Caches
 		Resource::MeshCache	    m_mesh_cache;

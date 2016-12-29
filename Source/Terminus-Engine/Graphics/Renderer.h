@@ -17,13 +17,9 @@ namespace Terminus { namespace Graphics {
     public:
         Renderer();
         ~Renderer();
-        void Submit();
-        void Sort();
+        void Submit(RenderDevice& device);
         GraphicsQueue& GetGraphicsQueueFront();
         GraphicsQueue& GetGraphicsQueueBack();
-        
-    private:
-        void SortTask(void* data);
         
 	};
 
