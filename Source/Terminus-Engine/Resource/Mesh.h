@@ -7,12 +7,14 @@
 #include "AssetCommon.h"
 #include "../Graphics/RenderDevice.h"
 #include "../Graphics/RenderCommon.h"
+#include "../Graphics/Material.h"
 #include <string>
 
 struct VertexArray;
 
 struct SubMesh
 {
+    Terminus::Graphics::Material* _material;
 	uint32 m_IndexCount;
 	uint32 m_BaseVertex;
 	uint32 m_BaseIndex;

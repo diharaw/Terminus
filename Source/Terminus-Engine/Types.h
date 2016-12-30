@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <glm.hpp>
 #include <string>
+#include <array>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtx/transform.hpp>

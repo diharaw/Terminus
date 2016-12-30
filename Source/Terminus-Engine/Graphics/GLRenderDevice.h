@@ -55,6 +55,14 @@ namespace Terminus { namespace Graphics {
 			// Stateful Object References for Window mode switching. GL only.
 			SlotMap<VertexArray*, MAX_VERTEX_ARRAY>	m_VertexArrayPool;
 			SlotMap<Framebuffer*, MAX_FRAMEBUFFER> 	m_FramebufferPool;
+            
+            // Resource IDs
+            
+            uint16 m_texture_res_id;
+            uint16 m_buffer_res_id;
+            uint16 m_framebuffer_res_id;
+            uint16 m_vertex_array_res_id;
+            uint16 m_shader_program_res_id;
 
 		public:
 

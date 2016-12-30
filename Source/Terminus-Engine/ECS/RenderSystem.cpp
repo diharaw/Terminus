@@ -3,6 +3,13 @@
 #include "CameraComponent.h"
 
 namespace Terminus { namespace ECS {
+    
+    // Sort Method
+    
+    bool DrawItemSort(Graphics::DrawItem i, Graphics::DrawItem j)
+    {
+        return i.sort_key.key > j.sort_key.key;
+    }
 
     RenderSystem::RenderSystem()
     {
@@ -24,7 +31,8 @@ namespace Terminus { namespace ECS {
         for (int i = 0; i < component_list._num_objects; i++)
         {
             SceneView& view = m_views[m_view_count++];
-            view.screen_rect = component_list._objects[i].screen_rect;
+            view._screen_rect = component_list._objects[i].screen_rect;
+            view._is_shadow = false;
         }
         
         // TODO : For each Shadow Camera, add SceneView
@@ -34,24 +42,34 @@ namespace Terminus { namespace ECS {
             MeshComponent* mesh_component = (MeshComponent*)m_scene->GetComponent(entity, TransformComponent::_id);
             TransformComponent* transform_component = (TransformComponent*)m_scene->GetComponent(entity, TransformComponent::_id);
             
-            if(mesh_component && transform_component)
-            {
-                for (int i = 0; i < m_view_count; i++)
-                {
-                    if((m_views[i].is_shadow && mesh_component->casts_shadow) || !m_views[i].is_shadow)
-                    {
-                        DrawItem& draw_item = m_views[i].visible_draw_items[m_views[i].visible_item_count++];
-                        draw_item.mesh = mesh_component->mesh;
-                        
-                        if(mesh_component->mesh->IsSkeletal)
-                            draw_item.type = DrawItemType::SkeletalMesh;
-                        else
-                            draw_item.type = DrawItemType::StaticMesh;
-                        
-                        draw_item.transform = &transform_component->global_transform;
-                    }
-                }
-            }
+            Renderable& renderable = m_renderables[m_renderable_count++];
+            
+            renderable._mesh = mesh_component->mesh;
+            renderable._sub_mesh_cull = mesh_component->cull_submeshes;
+            // TODO : assign Radius. Add to MeshImporter.
+            renderable._transform = transform_component;
+            
+            
+            // Commented for now.
+            
+//            if(mesh_component && transform_component)
+//            {
+//                for (auto view : m_views)
+//                {
+//                    if((view._is_shadow && mesh_component->casts_shadow) || !view._is_shadow)
+//                    {
+//                        Graphics::DrawItem& draw_item = view._draw_items[view._num_items++];
+//                        draw_item.vertex_array = mesh_component->mesh->VertexArray;
+//                        
+//                        if(mesh_component->mesh->IsSkeletal)
+//                            draw_item.type = Graphics::RenderableType::SkeletalMesh;
+//                        else
+//                            draw_item.type = Graphics::RenderableType::StaticMesh;
+//                        
+//                        draw_item.transform = &transform_component->global_transform;
+//                    }
+//                }
+//            }
         }
     }
     
@@ -60,42 +78,39 @@ namespace Terminus { namespace ECS {
         int worker_count = m_thread_pool->WorkerThreadCount();
         LinearAllocator* per_frame_alloc = Global::GetPerFrameAllocator();
         
-        // Frustum Cull each view parallely
-        for (int i = 0; i < m_view_count; i++)
+        // Assign views to threads and frustum cull, sort and fill command buffers in parallel.
+        
+        int items_per_thread = std::floor((float)m_view_count / (float)worker_count);
+        
+        if(items_per_thread == 0)
+            items_per_thread = m_view_count;
+        
+        int submitted_items = 0;
+        int scene_index = 0;
+        bool is_done = false;
+        
+        while(!is_done)
         {
-            int work_group_size = m_views[i].visible_item_count/worker_count;
+            int remaining_items = m_view_count - submitted_items;
             
-            if(m_views[i].visible_item_count < worker_count)
+            if(remaining_items <= items_per_thread)
             {
-                FrustumCullTaskData* data = per_frame_alloc->NewPerFrame<FrustumCullTaskData>();
-                work_group_size = m_views[i].visible_item_count;
-                
-                data->start_index = 0;
-                data->item_count = work_group_size;
-                
-                FrustumCullTask(data);
+                is_done = true;
+                items_per_thread = remaining_items;
             }
-            else
-            {
-                for(int j = 0; j < worker_count; j++)
-                {
-                    TaskData* task = m_thread_pool->CreateTask();
-                    FrustumCullTaskData* data = per_frame_alloc->NewPerFrame<FrustumCullTaskData>();
-                    
-                    data->start_index = j * work_group_size;
-                    data->item_count = work_group_size;
-                    
-                    task->data = data;
-                    task->function.Bind<RenderSystem, &RenderSystem::FrustumCullTask>(this);
-                }
-                
-                m_thread_pool->SubmitAndWait();
-            }
+            
+            TaskData* task = m_thread_pool->CreateTask();
+            RenderPrepareTaskData* data = per_frame_alloc->NewPerFrame<RenderPrepareTaskData>();
+    
+            data->_scene_index = scene_index++;
+            
+            task->data = data;
+            task->function.Bind<RenderSystem, &RenderSystem::RenderPrepareTask>(this);
+            
+            submitted_items += items_per_thread;
         }
         
-        // TODO: Sort Views Parallely
-        
-        // Generate Command List Parallely
+        m_thread_pool->SubmitAndWait();
     }
     
     void RenderSystem::Shutdown()
@@ -113,9 +128,26 @@ namespace Terminus { namespace ECS {
         
     }
     
-    TASK_METHOD_DEFINITION(RenderSystem, FrustumCullTask)
+    TASK_METHOD_DEFINITION(RenderSystem, RenderPrepareTask)
     {
+        RenderPrepareTaskData* _data = static_cast<RenderPrepareTaskData*>(data);
+        SceneView& scene_view = m_views[_data->_scene_index];
         
+        // Frustum cull Renderable array and fill DrawItem array
+        
+        for (int i = 0; i < m_renderable_count; i++)
+        {
+            Renderable& renderable = m_renderables[i];
+        }
+        
+        // Sort DrawItem array
+        
+        std::partial_sort(scene_view._draw_items.begin(),
+                          scene_view._draw_items.begin() + scene_view._num_items,
+                          scene_view._draw_items.end(),
+                          DrawItemSort);
+        
+        // Fill CommandBuffer while skipping redundant state changes
     }
     
 } }

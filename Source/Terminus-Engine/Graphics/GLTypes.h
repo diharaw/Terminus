@@ -61,6 +61,7 @@ namespace Terminus { namespace Graphics {
 
     struct Texture
     {
+        uint16 m_resource_id;
 		GLuint m_id;
 		GLenum m_glTextureTarget;
     };
@@ -88,6 +89,7 @@ namespace Terminus { namespace Graphics {
     
     struct Buffer
     {
+        uint16 m_resource_id;
 		GLuint m_id;
 		GLenum UsageType;
 		GLenum bufferType;
@@ -112,6 +114,7 @@ namespace Terminus { namespace Graphics {
     
     struct VertexArray
     {
+        uint16 m_resource_id;
 		GLuint m_id;
     };
     
@@ -125,6 +128,7 @@ namespace Terminus { namespace Graphics {
     
     struct ShaderProgram
     {
+        uint16 m_resource_id;
 		GLuint m_id;
 		ShaderMap m_shader_map;
 		int m_shader_count;
@@ -168,6 +172,7 @@ namespace Terminus { namespace Graphics {
     
     struct Framebuffer
     {
+        uint16 m_resource_id;
 		GLuint m_id;
 		RenderTargetList m_render_targets;
 		Texture* m_depth_target;

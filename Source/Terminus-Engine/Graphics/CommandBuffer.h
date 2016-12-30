@@ -3,7 +3,6 @@
 
 #include "../Types.h"
 #include "../Memory/Allocator.h"
-#include "RenderCommand.h"
 
 #define COMMAND_BUFFER_SIZE 1
 #define COMMAND_BUFFER_SIZE_BYTES COMMAND_BUFFER_SIZE*MB_IN_BYTES

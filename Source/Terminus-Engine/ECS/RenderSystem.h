@@ -6,56 +6,61 @@
 #include "TransformComponent.h"
 #include "../Global.h"
 #include "../Graphics/RenderingPath.h"
+#include "../Graphics/DrawItem.h"
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10
+#define MAX_RENDERABLES 1024
 
 namespace Terminus { namespace ECS {
     
-    struct FrustumCullTaskData
+    // Forward Declarations
+    
+    struct SceneView;
+    struct Renderable;
+    
+    // Type Definitions
+    
+    using DrawItemArray   = std::array<Graphics::DrawItem, MAX_DRAW_ITEMS>;
+    using SceneViewArray  = std::array<SceneView, MAX_VIEWS>;
+    using RenderableArray = std::array<Renderable, MAX_RENDERABLES>;
+    
+    struct RenderPrepareTaskData
     {
-        int start_index;
-        int item_count;
+        int _scene_index;
     };
     
-    enum class DrawItemType
+    struct Renderable
     {
-        StaticMesh = 0,
-        SkeletalMesh,
-        Terrain,
-        Ocean,
-        Particle,
-        Skybox
-    };
-    
-    struct DrawItem
-    {
-        uint64 sort_key;
-        DrawItemType type;
-        Mesh* mesh;
-        Matrix4* transform;
+        Mesh*               _mesh;
+        bool                _sub_mesh_cull;
+        float               _radius;
+        TransformComponent* _transform;
+        // TODO : Accomodate material overrides.
+        // TODO : Union containing Renderable type (Mesh, Ocean, Terrain etc)
     };
     
     struct SceneView
     {
-        DrawItem visible_draw_items[MAX_DRAW_ITEMS];
-        uint16 visible_item_count;
-        Matrix4 view_matrix;
-        Matrix4 projection_matrix;
-        Matrix4 view_projection_matrix;
-        Vector4 screen_rect;
-        bool is_shadow;
-        uint32 cmd_buf_idx;
-        Graphics::RenderingPath* rendering_path;
+        DrawItemArray            _draw_items;
+        int                      _num_items;
+        Matrix4                  _view_matrix;
+        Matrix4                  _projection_matrix;
+        Matrix4                  _view_projection_matrix;
+        Vector4                  _screen_rect;
+        bool                     _is_shadow;
+        uint32                   _cmd_buf_idx;
+        Graphics::RenderingPath* _rendering_path;
     };
     
     class RenderSystem : public ISystem
     {
     private:
-        SceneView m_views[MAX_VIEWS];
-        uint16 m_view_count;
-        
-        ThreadPool* m_thread_pool;
+        SceneViewArray  m_views;
+        uint16          m_view_count;
+        RenderableArray m_renderables;
+        uint16          m_renderable_count;
+        ThreadPool*     m_thread_pool;
         
     public:
         RenderSystem();
@@ -67,7 +72,7 @@ namespace Terminus { namespace ECS {
         void OnEntityDestroyed(Entity entity);
         
     private:
-        TASK_METHOD_DECLARATION(FrustumCullTask);
+        TASK_METHOD_DECLARATION(RenderPrepareTask);
     };
     
 } }

@@ -64,10 +64,10 @@ namespace Terminus { namespace Resource {
 
 					for (rapidjson::SizeType j = 0; j < value.Size(); j++)
 					{
-						int width;
-						int height;
-						String target_name;
-						TextureFormat format;
+						int width = 800;
+						int height = 600;
+						String target_name = "default_target";
+						TextureFormat format = TextureFormat::R8G8B8A8_UNORM;
 						Graphics::RenderTargetInfo target_info;
 
 						if (value[i].HasMember("name"))

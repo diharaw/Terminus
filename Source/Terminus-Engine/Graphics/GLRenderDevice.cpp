@@ -50,6 +50,12 @@ namespace Terminus { namespace Graphics {
         }
         
         GL_CHECK_ERROR();
+        
+        m_texture_res_id = 0;
+        m_buffer_res_id = 0;
+        m_framebuffer_res_id = 0;
+        m_vertex_array_res_id = 0;
+        m_shader_program_res_id = 0;
     }
 
 	void RenderDevice::Shutdown()
@@ -64,6 +70,7 @@ namespace Terminus { namespace Graphics {
 											 uint mipMapLevels)
 	{
 		Texture1D* texture = new Texture1D();
+        texture->m_resource_id = m_texture_res_id++;
 
 		GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_1D;
@@ -183,6 +190,7 @@ namespace Terminus { namespace Graphics {
 											 uint mipMapLevels)
 	{
 		Texture2D* texture = new Texture2D();
+        texture->m_resource_id = m_texture_res_id++;
 
 		GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_2D;
@@ -302,6 +310,7 @@ namespace Terminus { namespace Graphics {
 											 uint mipMapLevels)
 	{
 		Texture3D* texture = new Texture3D();
+        texture->m_resource_id = m_texture_res_id++;
 
 		GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
 		texture->m_glTextureTarget = GL_TEXTURE_3D;
@@ -428,6 +437,7 @@ namespace Terminus { namespace Graphics {
 												   BufferUsageType usageType)
 	{
 		VertexBuffer* buffer = new VertexBuffer();
+        buffer->m_resource_id = m_buffer_res_id++;
 		GL_CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
@@ -454,6 +464,7 @@ namespace Terminus { namespace Graphics {
 												 BufferUsageType usageType)
 	{
 		IndexBuffer* buffer = new IndexBuffer();
+        buffer->m_resource_id = m_buffer_res_id++;
 		GL_CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
@@ -480,6 +491,7 @@ namespace Terminus { namespace Graphics {
 													 BufferUsageType usageType)
 	{
 		UniformBuffer* buffer = new UniformBuffer();
+        buffer->m_resource_id = m_buffer_res_id++;
 		GL_CHECK_ERROR(glGenBuffers(1, &buffer->m_id));
 
 		GLenum glusageType;
@@ -511,6 +523,7 @@ namespace Terminus { namespace Graphics {
 												 InputLayout* layout)
 	{
 		VertexArray* vertexArray = new VertexArray();
+        vertexArray->m_resource_id = m_vertex_array_res_id++;
 
 		GL_CHECK_ERROR(glGenVertexArrays(1, &vertexArray->m_id));
 		GL_CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
@@ -807,6 +820,7 @@ namespace Terminus { namespace Graphics {
 	Framebuffer* RenderDevice::CreateFramebuffer()
 	{
 		Framebuffer* framebuffer = new Framebuffer();
+        framebuffer->m_resource_id = m_framebuffer_res_id++;
 
 		GL_CHECK_ERROR(glGenFramebuffers(1, &framebuffer->m_id));
 
@@ -872,6 +886,7 @@ namespace Terminus { namespace Graphics {
 													 Shader* evaluationShader)
 	{
 		ShaderProgram* shaderProgram = new ShaderProgram();
+        shaderProgram->m_resource_id = m_shader_program_res_id++;
 
 		GL_CHECK_ERROR(shaderProgram->m_id = glCreateProgram());
 
