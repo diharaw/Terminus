@@ -1,25 +1,60 @@
-# - Try to find Readline
-# Once done this will define
-#  READLINE_FOUND - System has readline
-#  READLINE_INCLUDE_DIRS - The readline include directories
-#  READLINE_LIBRARIES - The libraries needed to use readline
-#  READLINE_DEFINITIONS - Compiler switches required for using readline
+# - Find the readline library
+# This module defines
+#  READLINE_INCLUDE_DIR, path to readline/readline.h, etc.
+#  READLINE_LIBRARIES, the libraries required to use READLINE.
+#  READLINE_FOUND, If false, do not try to use READLINE.
+# also defined, but not for general use are
+# READLINE_readline_LIBRARY, where to find the READLINE library.
 
-find_package ( PkgConfig )
-pkg_check_modules ( PC_READLINE QUIET readline )
-set ( READLINE_DEFINITIONS ${PC_READLINE_CFLAGS_OTHER} )
+# Apple readline does not support readline hooks
+# So we look for another one by default
+IF(APPLE)
+  FIND_PATH(READLINE_INCLUDE_DIR NAMES readline/readline.h PATHS
+    /sw/include
+    /opt/local/include
+    /opt/include
+    /usr/local/include
+    /usr/include/
+    NO_DEFAULT_PATH
+    )
+ENDIF(APPLE)
+FIND_PATH(READLINE_INCLUDE_DIR NAMES readline/readline.h)
 
-find_path ( READLINE_INCLUDE_DIR readline/readline.h
-      HINTS ${PC_READLINE_INCLUDEDIR} ${PC_READLINE_INCLUDE_DIRS}
-      PATH_SUFFIXES readline )
 
-find_library ( READLINE_LIBRARY NAMES readline
-      HINTS ${PC_READLINE_LIBDIR} ${PC_READLINE_LIBRARY_DIRS} )
+# Apple readline does not support readline hooks
+# So we look for another one by default
+IF(APPLE)
+  FIND_LIBRARY(READLINE_readline_LIBRARY NAMES readline PATHS
+    /sw/lib
+    /opt/local/lib
+    /opt/lib
+    /usr/local/lib
+    /usr/lib
+    NO_DEFAULT_PATH
+    )
+ENDIF(APPLE)
+FIND_LIBRARY(READLINE_readline_LIBRARY NAMES readline)
 
-set ( READLINE_LIBRARIES ${READLINE_LIBRARY} )
-set ( READLINE_INCLUDE_DIRS ${READLINE_INCLUDE_DIR} )
+MARK_AS_ADVANCED(
+  READLINE_INCLUDE_DIR
+  READLINE_readline_LIBRARY
+  )
 
-include ( FindPackageHandleStandardArgs )
-# handle the QUIETLY and REQUIRED arguments and set READLINE_FOUND to TRUE
-# if all listed variables are TRUE
-find_package_handle_standard_args ( readline DEFAULT_MSG READLINE_LIBRARY READLINE_INCLUDE_DIR )
+SET( READLINE_FOUND "NO" )
+IF(READLINE_INCLUDE_DIR)
+  IF(READLINE_readline_LIBRARY)
+    SET( READLINE_FOUND "YES" )
+    SET( READLINE_LIBRARIES
+      ${READLINE_readline_LIBRARY} 
+      )
+
+  ENDIF(READLINE_readline_LIBRARY)
+ENDIF(READLINE_INCLUDE_DIR)
+
+IF(READLINE_FOUND)
+  MESSAGE(STATUS "Found readline library")
+ELSE(READLINE_FOUND)
+  IF(READLINE_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "Could not find readline -- please give some paths to CMake")
+  ENDIF(READLINE_FIND_REQUIRED)
+ENDIF(READLINE_FOUND)

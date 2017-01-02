@@ -21,7 +21,7 @@ namespace Terminus {
 
 	Application::~Application()
 	{
-
+        
 	}
     
 	bool Application::Initialize()
@@ -178,7 +178,7 @@ namespace Terminus {
 
 	void Application::InitializeAudio()
 	{
-
+        
 	}
 
 	void Application::InitializeECS()

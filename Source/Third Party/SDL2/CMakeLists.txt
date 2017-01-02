@@ -414,7 +414,7 @@ if(USE_GCC OR USE_CLANG)
     list(APPEND EXTRA_CFLAGS "-Wshadow")
   endif()
 
-  set(CMAKE_REQUIRED_FLAGS "-Wl,--no-undefined")
+  set(CMAKE_REQUIRED_FLAGS "-Wl")
   check_c_compiler_flag("" HAVE_NO_UNDEFINED)
   set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
   if(HAVE_NO_UNDEFINED)
