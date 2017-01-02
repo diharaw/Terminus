@@ -5,16 +5,21 @@ namespace Terminus { namespace ECS {
 	SceneManager::SceneManager()
 	{
 		m_thread_pool.Initialize(1);
+        
+        EventCallback callback;
+        callback.Bind<SceneManager, &SceneManager::OnSceneLoad>(this);
+        EventHandler::RegisterListener(SceneLoadEvent::sk_Type, callback);
 	}
 
 	SceneManager::~SceneManager()
 	{
 
 	}
-
-	void SceneManager::Initialize(Resource::SceneCache* sceneCache)
+    
+	void SceneManager::Initialize(Resource::SceneCache* sceneCache, Graphics::RenderDevice* device)
 	{
 		m_scene_cache = sceneCache;
+        m_render_device = device;
 	}
 
 	void SceneManager::Load(String scene)
@@ -55,6 +60,9 @@ namespace Terminus { namespace ECS {
 		Scene* loaded = m_scene_cache->Load(load_data->scene_name);
         
         // Fire Scene Load Complete Event
+        
+        SceneLoadEvent* event = new SceneLoadEvent(loaded);
+        EventHandler::QueueEvent(event);
 	}
 
 	void SceneManager::ScenePreloadTask(void* data)
@@ -63,6 +71,9 @@ namespace Terminus { namespace ECS {
 		Scene* loaded = m_scene_cache->Load(load_data->scene_name);
         
         // Fire Scene Preload Complete Event
+        
+        ScenePreloadEvent* event = new ScenePreloadEvent(loaded);
+        EventHandler::QueueEvent(event);
 	}
 
 	void SceneManager::RegisterSystem(ISystem* system)
@@ -74,5 +85,17 @@ namespace Terminus { namespace ECS {
 	{
 
 	}
+    
+    EVENT_METHOD_DEFINITION(SceneManager, OnSceneLoad)
+    {
+        SceneLoadEvent* event_data = (SceneLoadEvent*)event;
+        InitializeScene(event_data->GetScene());
+    }
+    
+    EVENT_METHOD_DEFINITION(SceneManager, OnScenePreload)
+    {
+        ScenePreloadEvent* event_data = (ScenePreloadEvent*)event;
+        InitializeScene(event_data->GetScene());
+    }
 
 } }

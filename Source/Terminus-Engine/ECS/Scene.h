@@ -7,6 +7,11 @@
 #include "../Graphics/RenderDevice.h"
 #include "../Types.h"
 #include "ComponentPool.h"
+#include "TransformSystem.h"
+#include "RenderSystem.h"
+#include "CameraComponent.h"
+#include "MeshComponent.h"
+#include "ScriptComponent.h"
 #include <vector>
 #include <iostream>
 
@@ -18,22 +23,25 @@ namespace Terminus { namespace ECS {
     using EntityNameIDMap = std::unordered_map<std::string, Entity>;
     using EntityIDNameMap = std::unordered_map<Entity,std::string>;
     
-//    struct TransformComponent;
-//    struct CameraComponent;
-//    struct MeshComponent;
-//    
-//    class TransformSystem;
-//    class RenderSystem;
-
 	struct Scene
 	{
-		Entity							 m_last_entity_id;
-		SystemList					 m_systems;
-		EntityList						 m_entities;
+		Entity			 m_last_entity_id;
+		SystemList		 m_systems;
+        
+        // Systems
+        TransformSystem  m_transform_system;
+        RenderSystem     m_render_system;
+        
+        // Component Pool
+        ComponentPool<TransformComponent> m_transform_component_pool;
+        ComponentPool<CameraComponent>    m_camera_component_pool;
+        ComponentPool<MeshComponent>      m_mesh_component_pool;
+        
+		EntityList		 m_entities;
 		ComponentPoolMap m_component_pools;
-        String m_name;
-        EntityNameIDMap m_entity_name_id_map;
-        EntityIDNameMap m_entity_id_name_map;
+        String           m_name;
+        EntityNameIDMap  m_entity_name_id_map;
+        EntityIDNameMap  m_entity_id_name_map;
 
 		Scene();
 		~Scene();
@@ -49,15 +57,13 @@ namespace Terminus { namespace ECS {
 		void RemoveComponent(Entity entity, ComponentID id);
 
 		template<typename T>
-		void RegisterComponentPool()
+		void RegisterComponentPool(ComponentPool<T>* pool)
 		{
-			m_component_pools[T::_id] = new ComponentPool<T>();
+            m_component_pools[T::_id] = pool;
 		}
         
-        template<typename T>
-        void RegisterSystem()
+        void RegisterSystem(ISystem* system)
         {
-            T* system = new T();
             system->SetScene(this);
             m_systems.push_back(system);
         }

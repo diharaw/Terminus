@@ -1,5 +1,6 @@
 #include "RenderSystem.h"
 #include "Scene.h"
+#include "../Resource/ShaderCache.h"
 #include "CameraComponent.h"
 
 namespace Terminus { namespace ECS {
@@ -23,6 +24,16 @@ namespace Terminus { namespace ECS {
         
     }
     
+    void RenderSystem::SetRenderDevice(Graphics::Renderer* renderer)
+    {
+        m_renderer = renderer;
+    }
+    
+    void RenderSystem::SetShaderCache(Resource::ShaderCache* shaderCache)
+    {
+        m_shader_cache = shaderCache;
+    }
+    
     void RenderSystem::Initialize()
     {
         SlotMap<CameraComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<CameraComponent>();
@@ -33,22 +44,49 @@ namespace Terminus { namespace ECS {
             SceneView& view = m_views[m_view_count++];
             view._screen_rect = component_list._objects[i].screen_rect;
             view._is_shadow = false;
+            view._cmd_buf_idx = m_renderer->CreateCommandBuffer();
         }
         
         // TODO : For each Shadow Camera, add SceneView
 
         for (Entity entity : m_scene->m_entities)
         {
-            MeshComponent* mesh_component = (MeshComponent*)m_scene->GetComponent(entity, TransformComponent::_id);
-            TransformComponent* transform_component = (TransformComponent*)m_scene->GetComponent(entity, TransformComponent::_id);
-            
-            Renderable& renderable = m_renderables[m_renderable_count++];
-            
-            renderable._mesh = mesh_component->mesh;
-            renderable._sub_mesh_cull = mesh_component->cull_submeshes;
-            // TODO : assign Radius. Add to MeshImporter.
-            renderable._transform = transform_component;
-            
+            if(m_scene->HasComponent(entity, TransformComponent::_id) && m_scene->HasComponent(entity, MeshComponent::_id))
+            {
+                MeshComponent* mesh_component = (MeshComponent*)m_scene->GetComponent(entity, MeshComponent::_id);
+                TransformComponent* transform_component = (TransformComponent*)m_scene->GetComponent(entity, TransformComponent::_id);
+                
+                Renderable& renderable = m_renderables[m_renderable_count++];
+                
+                renderable._mesh = mesh_component->mesh;
+                renderable._sub_mesh_cull = mesh_component->cull_submeshes;
+                // TODO : assign Radius. Add to MeshImporter.
+                renderable._transform = transform_component;
+                
+                if(mesh_component->mesh->IsSkeletal)
+                    renderable._type = RenderableType::SkeletalMesh;
+                else if(mesh_component->mesh->IsSkeletal)
+                    renderable._type = RenderableType::StaticMesh;
+                
+                renderable._shader_program_count = mesh_component->mesh->MeshCount;
+                renderable._programs = new Graphics::ShaderProgram*[renderable._shader_program_count];
+                
+                for (int i = 0; i < renderable._shader_program_count; i++)
+                {
+                    Resource::ShaderKey key;
+                    
+                    key.EncodeAlbedo(true);
+                    key.EncodeMeshType(renderable._type);
+                    key.EncodeNormal(true);
+                    key.EncodeMetalness(true);
+                    key.EncodeRoughness(true);
+                    key.EncodeParallaxOcclusion(false);
+                    
+                    // Send to rendering thread pool
+                    renderable._programs[i] = m_shader_cache->Load(key);
+                }
+                
+            }
             
             // Commented for now.
             

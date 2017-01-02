@@ -8,3 +8,4 @@ const EventType	InputAxisEvent::sk_Type(0x63fa800);
 const EventType	InputActionEvent::sk_Type(0x235cd18d);
 const EventType FileWatcherEvent::sk_Type(0x791dc446);
 const EventType SceneLoadEvent::sk_Type(0x8bd7b76e);
+const EventType ScenePreloadEvent::sk_Type(0x8bd7b36e);

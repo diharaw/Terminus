@@ -183,7 +183,7 @@ namespace Terminus {
 
 	void Application::InitializeECS()
 	{
-		m_scene_manager.Initialize(&m_scene_cache);
+		m_scene_manager.Initialize(&m_scene_cache, &m_render_device);
 	}
 
 	void Application::InitializeScript()

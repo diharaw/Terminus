@@ -7,6 +7,8 @@
 #include "../Global.h"
 #include "../Graphics/RenderingPath.h"
 #include "../Graphics/DrawItem.h"
+#include "../Graphics/Renderer.h"
+#include "../Resource/ShaderCache.h"
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10
@@ -32,10 +34,13 @@ namespace Terminus { namespace ECS {
     
     struct Renderable
     {
-        Mesh*               _mesh;
-        bool                _sub_mesh_cull;
-        float               _radius;
-        TransformComponent* _transform;
+        Mesh*                    _mesh;
+        bool                     _sub_mesh_cull;
+        float                    _radius;
+        TransformComponent*      _transform;
+        RenderableType           _type;
+        int                      _shader_program_count;
+        Graphics::ShaderProgram** _programs;
         // TODO : Accomodate material overrides.
         // TODO : Union containing Renderable type (Mesh, Ocean, Terrain etc)
     };
@@ -56,15 +61,19 @@ namespace Terminus { namespace ECS {
     class RenderSystem : public ISystem
     {
     private:
-        SceneViewArray  m_views;
-        uint16          m_view_count;
-        RenderableArray m_renderables;
-        uint16          m_renderable_count;
-        ThreadPool*     m_thread_pool;
+        SceneViewArray          m_views;
+        uint16                  m_view_count;
+        RenderableArray         m_renderables;
+        uint16                  m_renderable_count;
+        ThreadPool*             m_thread_pool;
+        Graphics::Renderer*     m_renderer;
+        Resource::ShaderCache*  m_shader_cache;
         
     public:
         RenderSystem();
         ~RenderSystem();
+        void SetRenderDevice(Graphics::Renderer* renderer);
+        void SetShaderCache(Resource::ShaderCache* shaderCache);
         virtual void Initialize();
         virtual void Update(double delta);
         virtual void Shutdown();

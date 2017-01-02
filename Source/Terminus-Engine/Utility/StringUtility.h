@@ -95,7 +95,7 @@ namespace Terminus
             _source.replace(line, _sourceSubstring.length(), _destSubstring);
         }
 
-		StringList Split(String str, char delimiter)
+		inline StringList Split(String str, char delimiter)
 		{
 			StringList internal;
 			std::stringstream ss(str);

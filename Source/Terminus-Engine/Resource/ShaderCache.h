@@ -8,6 +8,7 @@
 #include "ShaderFactory.h"
 #include <unordered_map>
 #include "../Types.h"
+#include "ShaderKey.h"
 
 #define SHADER_DEF_NORMAL_MAP		  "USE_NORMAL_MAP"
 #define SHADER_DEF_DIFFUSE_MAP		  "USE_DIFFUSE_MAP"
@@ -26,7 +27,7 @@ namespace Terminus { namespace Resource {
 	private:
 		std::unordered_map<std::string, Graphics::Shader*> m_ShaderMap;
 		std::unordered_map<Graphics::Shader*, Graphics::ShaderProgram*> m_ShaderProgramMap;
-        std::unordered_map<ShaderKey, Graphics::ShaderProgram*> m_ShaderProgramKeyMap;
+        std::unordered_map<uint64, Graphics::ShaderProgram*> m_ShaderProgramKeyMap;
 		Graphics::RenderDevice* m_device;
 
 	public:
