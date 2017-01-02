@@ -18,7 +18,40 @@ namespace Terminus { namespace Resource {
 		void ShaderCache::Initialize(Graphics::RenderDevice* device)
 		{
 			m_device = device;
-			m_Factory.Initialize(device);
+            
+#if defined(TERMINUS_OPENGL)
+            std::string extension = "glsl";
+#else defined(TERMINUS_DIRECT3D11)
+            std::string extension = "hlsl";
+#endif
+      
+            AssetCommon::TextLoadData* data;
+            String name;
+            String vertex_template, pixel_template;
+            
+            if (m_LoaderMap.find(extension) == m_LoaderMap.end())
+            {
+                assert(false);
+            }
+            else
+            {
+                // Vertex Template
+                name = "vertex_template.";
+                name += extension;
+                
+                data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
+                vertex_template = String(data->buffer);
+
+                // Pixel Template
+                name = "pixel_template.";
+                name += extension;
+                
+                data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
+                pixel_template = String(data->buffer);
+            }
+            
+            
+			m_Factory.Initialize(device, vertex_template, pixel_template);
 		}
 
 		Graphics::ShaderProgram* ShaderCache::Load(const char* _vertexID,
@@ -211,7 +244,58 @@ namespace Terminus { namespace Resource {
 
 		Graphics::ShaderProgram* ShaderCache::Load(ShaderKey key)
 		{
-			return nullptr;
+            if (m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
+            {
+                StringList defines;
+                
+                if(key.DecodeAlbedo())
+                {
+                    defines.push_back(SHADER_DEF_DIFFUSE_MAP);
+                }
+                if(key.DecodeNormal())
+                {
+                    defines.push_back(SHADER_DEF_NORMAL_MAP);
+                }
+                if(key.DecodeMetalness())
+                {
+                    defines.push_back(SHADER_DEF_METALNESS_MAP);
+                }
+                if(key.DecodeRoughness())
+                {
+                    defines.push_back(SHADER_DEF_ROUGHNESS_MAP);
+                }
+                if(key.DecodeMeshType() == 1)
+                {
+                    defines.push_back(SHADER_DEF_SKELETAL_MESH);
+                }
+                if(key.DecodeParallaxOcclusion())
+                {
+                    defines.push_back(SHADER_DEF_PARALLAX_OCCLUSION);
+                }
+                
+            #if defined(TERMINUS_PLATFORM_MACOS)
+                defines.push_back(SHADER_DEF_APPLE);
+            #endif
+                
+                Graphics::Shader* vertex = m_Factory.Create(defines, ShaderType::VERTEX);
+                
+                if(!vertex)
+                    return nullptr;
+                
+                Graphics::Shader* pixel = m_Factory.Create(defines, ShaderType::PIXEL);
+                
+                if(!pixel)
+                    return nullptr;
+                
+                Graphics::ShaderProgram* program = m_device->CreateShaderProgram(vertex, pixel, nullptr, nullptr, nullptr);
+                
+                if(!program)
+                    return program;
+                else
+                    return nullptr;
+            }
+            else
+                return m_ShaderProgramKeyMap[key._key];
 		}
 
 		void ShaderCache::Unload(Graphics::ShaderProgram* program)

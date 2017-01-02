@@ -24,17 +24,23 @@ namespace Terminus { namespace Graphics {
 		NORMAL = 1,
 		ROUGHNESS = 2,
 		METALNESS = 3,
-		DISPLACEMENT = 4,
+		DISPLACEMENT = 4
 	};
+    
+    enum class TessellationType
+    {
+        OFF = 0,
+        PN_TRIANGLES
+    };
 
 	struct Material
 	{
-		Texture2D* texture_maps[5];
-		bool 	   backface_cull;
-		uint64 	   material_key;
-		Vector4    diffuse_value;
-		float 	   roughness_value;
-		float 	   metalness_value;
+		Texture2D*       texture_maps[5];
+		bool             backface_cull;
+        TessellationType tessellation;
+		Vector4          diffuse_value;
+		float            roughness_value;
+		float            metalness_value;
 	};
 
 } }

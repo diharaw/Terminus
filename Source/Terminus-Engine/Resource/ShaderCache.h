@@ -19,13 +19,14 @@
 
 namespace Terminus { namespace Resource {
 
-	using ShaderKey = uint64;
+	
 
 	class ShaderCache : public IAssetCache<ShaderFactory>
 	{
 	private:
 		std::unordered_map<std::string, Graphics::Shader*> m_ShaderMap;
 		std::unordered_map<Graphics::Shader*, Graphics::ShaderProgram*> m_ShaderProgramMap;
+        std::unordered_map<ShaderKey, Graphics::ShaderProgram*> m_ShaderProgramKeyMap;
 		Graphics::RenderDevice* m_device;
 
 	public:
