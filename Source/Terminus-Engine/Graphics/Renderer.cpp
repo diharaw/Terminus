@@ -14,6 +14,14 @@ namespace Terminus { namespace Graphics {
         
     }
     
+    void Renderer::Initialize(RenderDevice& device)
+    {
+        m_per_frame_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerFrameUniforms), BufferUsageType::STATIC);
+        m_per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::STATIC);
+        m_per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::STATIC);
+        m_per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
+    }
+    
     void Renderer::Submit(RenderDevice& device)
     {
         GraphicsQueue& queue = GetGraphicsQueueBack();
@@ -144,6 +152,11 @@ namespace Terminus { namespace Graphics {
     GraphicsQueue& Renderer::GetGraphicsQueueBack()
     {
         return m_graphics_queues[!m_front_queue_index];
+    }
+    
+    LinearAllocator* Renderer::GetUniformAllocator()
+    {
+        return m_graphics_queues[m_front_queue_index].m_allocator;
     }
     
 } }

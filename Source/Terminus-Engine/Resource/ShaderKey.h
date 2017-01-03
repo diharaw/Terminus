@@ -2,6 +2,7 @@
 #define ShaderKey_h
 
 #include "AssetCommon.h"
+#include "../Graphics/DrawItem.h"
 
 namespace Terminus { namespace Resource {
   
@@ -18,7 +19,7 @@ namespace Terminus { namespace Resource {
             _key = 0;
         }
         
-        ShaderKey(RenderableType type, bool albedo, bool normal, bool metalness, bool roughness, bool parallax)
+        ShaderKey(Graphics::RenderableType type, bool albedo, bool normal, bool metalness, bool roughness, bool parallax)
         {
             EncodeMeshType(type);
             EncodeAlbedo(albedo);
@@ -58,9 +59,54 @@ namespace Terminus { namespace Resource {
             _key |= temp << 60;
         }
         
-        inline void EncodeMeshType(RenderableType type)
+        inline void EncodeMeshType(Graphics::RenderableType type)
         {
-            uint64 temp = type;
+            uint64 temp = 0;
+
+            switch(type)
+            {
+                case Graphics::RenderableType::StaticMesh:
+                {
+                    temp = 0;
+                    break;
+                }
+                    
+                case Graphics::RenderableType::SkeletalMesh:
+                {
+                    temp = 1;
+                    break;
+                }
+                    
+                case Graphics::RenderableType::Terrain:
+                {
+                    temp = 2;
+                    break;
+                }
+                    
+                case Graphics::RenderableType::Ocean:
+                {
+                    temp = 3;
+                    break;
+                }
+                    
+                case Graphics::RenderableType::Particle:
+                {
+                    temp = 4;
+                    break;
+                }
+                    
+                case Graphics::RenderableType::Skybox:
+                {
+                    temp = 5;
+                    break;
+                }
+                default:
+                {
+                    return;
+                }
+            }
+            
+            
             _key |= temp << 61;
         }
         

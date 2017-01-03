@@ -21,6 +21,14 @@
 #define T_SAFE_DELETE_ARRAY(x) if(x) { delete[] x; x = nullptr; }
 #define HANDLE_VALID(x) x != USHRT_MAX
 
+#if defined(_MSC_VER)
+    #define T_ALIGNED(x) __declspec(align(x))
+#else
+#if defined(__GNUC__) || defined(__clang__)
+    #define T_ALIGNED(x) __attribute__ ((aligned(x)))
+#endif
+#endif
+
 using uint = unsigned int;
 using uint8 = uint8_t;
 using uint16 = uint16_t;

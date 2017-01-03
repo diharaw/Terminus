@@ -18,6 +18,8 @@ namespace Terminus { namespace Graphics {
         BindShaderProgram,
         BindVertexArray,
         BindUniformBuffer,
+        BindSamplerState,
+        BindTexture2D,
         CopyUniformData,
         ClearFramebuffer,
         End
@@ -77,6 +79,20 @@ namespace Terminus { namespace Graphics {
         size_t size;
     };
     
+    struct BindTexture2DCmdData
+    {
+        Texture2D* texture;
+        ShaderType shader_type;
+        int           slot;
+    };
+    
+    struct BindSamplerStateCmdData
+    {
+        SamplerState* state;
+        ShaderType shader_type;
+        int           slot;
+    };
+    
     struct CommandBuffer
     {
         void*  m_memory;
@@ -111,6 +127,16 @@ namespace Terminus { namespace Graphics {
         
         inline void Write(void* cmd, size_t size)
         {
+            assert((m_used + size) <= m_total);
+            memcpy(m_pos, cmd, size);
+            Move(size);
+            m_used += size;
+        }
+        
+        template<typename T>
+        inline void Write(T* cmd)
+        {
+            size_t size = sizeof(T);
             assert((m_used + size) <= m_total);
             memcpy(m_pos, cmd, size);
             Move(size);

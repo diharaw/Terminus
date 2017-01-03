@@ -149,10 +149,11 @@ namespace Terminus { namespace Graphics {
 
 	struct RenderPass
 	{
-		String						   name;
-		RenderPassType	   render_pass_type;
-		RenderSubPassList  sub_passes;
-		FramebufferList		   framebuffers;
+		String				name;
+		RenderPassType	    render_pass_type;
+        GeometryType        geometry_type;
+		RenderSubPassList   sub_passes;
+		FramebufferList		framebuffers;
 		FramebufferInfoList framebuffer_info_list;
 	};
 

@@ -7,10 +7,13 @@
 
 namespace Terminus { namespace Graphics {
 
+    using RenderPassArray = std::array<RenderPass, MAX_RENDER_PASSES>;
+    
     struct RenderingPath
     {
-        String     _name;
-        RenderPass _render_passes[MAX_RENDER_PASSES];
+        String          _name;
+        int             _num_render_passes;
+        RenderPassArray _render_passes;;
     };
     
 } }

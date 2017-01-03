@@ -4,16 +4,6 @@
 #include "../Types.h"
 #include "../Graphics/RenderCommon.h"
 
-enum RenderableType
-{
-    StaticMesh = 0,
-    SkeletalMesh = 1,
-    Terrain = 2,
-    Ocean = 3,
-    Skybox = 4,
-    Particle = 5
-};
-
 struct Vertex
 {
 	// Veterx

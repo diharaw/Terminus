@@ -4,6 +4,7 @@
 #define MATERIAL_H
 
 #include "../Types.h"
+#include "RenderDevice.h"
 
 // Material Key Options
 
@@ -36,6 +37,7 @@ namespace Terminus { namespace Graphics {
 	struct Material
 	{
 		Texture2D*       texture_maps[5];
+        SamplerState*    sampler;
 		bool             backface_cull;
         TessellationType tessellation;
 		Vector4          diffuse_value;

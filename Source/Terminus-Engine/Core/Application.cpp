@@ -131,6 +131,8 @@ namespace Terminus {
     TASK_METHOD_DEFINITION(Application, GraphicsInitializeTask)
     {
         m_render_device.Initialize();
+        m_renderer.Initialize(m_render_device);
+        
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::initialize(m_render_device);
 #endif

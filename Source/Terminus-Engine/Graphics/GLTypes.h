@@ -168,6 +168,7 @@ namespace Terminus { namespace Graphics {
     struct SamplerState
     {
 		GLuint m_id;
+        uint16 m_resource_id;
     };
     
     struct Framebuffer

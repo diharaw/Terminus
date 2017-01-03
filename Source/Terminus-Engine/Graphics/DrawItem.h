@@ -3,6 +3,7 @@
 
 #include "RenderDevice.h"
 #include "Material.h"
+#include "Renderer.h"
 
 namespace Terminus { namespace Graphics {
     
@@ -41,8 +42,7 @@ namespace Terminus { namespace Graphics {
         RenderableType type;
         Material*      material;
         VertexArray*   vertex_array;
-        ShaderProgram* shader_program;
-        Framebuffer*   framebuffer;
+        PerDrawUniforms* uniforms;
         int            index_count;
         unsigned int   base_index;
         unsigned int   base_vertex;

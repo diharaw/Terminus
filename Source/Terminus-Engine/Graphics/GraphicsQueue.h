@@ -5,6 +5,8 @@
 #include "../Global.h"
 
 #define MAX_COMMAND_BUFFERS 32
+#define PER_FRAME_UNIFORM_MEMORY 1
+#define PER_FRAME_UNIFORM_MEMORY_BYTES PER_FRAME_UNIFORM_MEMORY*MB_IN_BYTES
 
 namespace Terminus { namespace Graphics {
     
@@ -12,10 +14,13 @@ namespace Terminus { namespace Graphics {
     {
         CommandBuffer m_cmd_buf[MAX_COMMAND_BUFFERS];
         uint32 m_num_cmd_buf;
+        LinearAllocator* m_allocator;
         
         GraphicsQueue()
         {
             m_num_cmd_buf = 0;
+            void* allocator_memory = Global::GetDefaultAllocator()->Allocate(PER_FRAME_UNIFORM_MEMORY_BYTES, 8);
+            m_allocator = T_NEW LinearAllocator(PER_FRAME_UNIFORM_MEMORY_BYTES, allocator_memory);
         }
         
         ~GraphicsQueue()

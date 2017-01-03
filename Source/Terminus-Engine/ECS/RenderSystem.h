@@ -38,9 +38,7 @@ namespace Terminus { namespace ECS {
         bool                     _sub_mesh_cull;
         float                    _radius;
         TransformComponent*      _transform;
-        RenderableType           _type;
-        int                      _shader_program_count;
-        Graphics::ShaderProgram** _programs;
+        Graphics::RenderableType _type;
         // TODO : Accomodate material overrides.
         // TODO : Union containing Renderable type (Mesh, Ocean, Terrain etc)
     };
@@ -49,9 +47,9 @@ namespace Terminus { namespace ECS {
     {
         DrawItemArray            _draw_items;
         int                      _num_items;
-        Matrix4                  _view_matrix;
-        Matrix4                  _projection_matrix;
-        Matrix4                  _view_projection_matrix;
+        Matrix4*                 _view_matrix;
+        Matrix4*                 _projection_matrix;
+        Matrix4*                 _view_projection_matrix;
         Vector4                  _screen_rect;
         bool                     _is_shadow;
         uint32                   _cmd_buf_idx;
