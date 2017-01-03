@@ -1,5 +1,5 @@
 #include <iostream>
-#include "PlatformBackend.h"
+#include "platform.h"
 #include "../Input/Input.h"
 #include "../Core/Config.h"
 #include <string>
@@ -7,26 +7,26 @@
 #include "../IO/FileSystem.h"
 #include <SDL_syswm.h>
 
-namespace PlatformBackend
+namespace platform
 {
-    SDL_Window*            m_Window;
-	int					   m_Width;
-	int					   m_Height;
-	WindowMode             m_window_mode;
-	bool				   m_vsync;
-	int					   m_refresh_rate;
-    bool                   m_resizable;
-	String				   m_title;
-    bool                   m_is_running;
+    SDL_Window*            _window;
+	int					   _width;
+	int					   _height;
+	WindowMode             _window_mode;
+	bool				   _vsync;
+	int					   _refresh_rate;
+    bool                   _resizable;
+	String				   _title;
+    bool                   _is_running;
 
-    bool CreatePlatformWindow()
+    bool create_platform_window()
     {
         Uint32 window_flags = 0;
         
-        if(m_resizable)
+        if(_resizable)
             window_flags = SDL_WINDOW_RESIZABLE;
         
-        switch (m_window_mode) {
+        switch (_window_mode) {
                 
             case WindowMode::BORDERLESS_WINDOW:
                 window_flags |= SDL_WINDOW_BORDERLESS;
@@ -40,35 +40,40 @@ namespace PlatformBackend
                 break;
         }
         
-        m_title = "Terminus Engine - Build ";
-        m_title += std::to_string(TERMINUS_BUILD);
+        _title = "Terminus Engine - Build ";
+        _title += std::to_string(TERMINUS_BUILD);
         
         
 #if defined(TERMINUS_OPENGL)
-        m_title += " (OpenGL)";
+        _title += " (OpenGL)";
         window_flags |= SDL_WINDOW_OPENGL;
 #elif defined(TERMINUS_OPENGL_ES)
-        m_title += " (OpenGL ES)";
+        _title += " (OpenGL ES)";
         window_flags |= SDL_WINDOW_OPENGL;
 #elif defined(TERMINUS_DIRECT3D11)
-        m_title += " (Direct3D 11)";
+        _title += " (Direct3D 11)";
 #elif defined(TERMINUS_DIRECT3D12)
-        m_title += " (Direct3D 12)";
+        _title += " (Direct3D 12)";
 #elif defined(TERMINUS_VULKAN)
-        m_title += " (Vulkan)";
+        _title += " (Vulkan)";
 #endif
         
-        m_Window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_Width, m_Height, window_flags);
-        if(!m_Window)
+        _window = SDL_CreateWindow(_title.c_str(),
+                                   SDL_WINDOWPOS_CENTERED,
+                                   SDL_WINDOWPOS_CENTERED,
+                                   _width,
+                                   _height,
+                                   window_flags);
+        if(!_window)
             return false;
         
         return true;
     }
     
-    bool Initialize()
+    bool initialize()
     {
         Uint32 flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK;
-        m_is_running = true;
+        _is_running = true;
         
         if (SDL_Init(flags) != 0)
             return false;
@@ -81,22 +86,22 @@ namespace PlatformBackend
 			config.Parse(handle.buffer);
 			
 			if (config.HasMember("width"))
-				m_Width = config["width"].GetInt();
+				_width = config["width"].GetInt();
 			else
 				return false;
 
 			if (config.HasMember("height"))
-				m_Height = config["height"].GetInt();
+				_height = config["height"].GetInt();
 			else
 				return false;
 
 			if (config.HasMember("refresh_rate"))
-				m_refresh_rate = config["refresh_rate"].GetInt();
+				_refresh_rate = config["refresh_rate"].GetInt();
 			else
 				return false;
 
 			if (config.HasMember("vsync"))
-				m_vsync = config["vsync"].GetBool();
+				_vsync = config["vsync"].GetBool();
 			else
 				return false;
 
@@ -105,42 +110,42 @@ namespace PlatformBackend
                 String window_mode_str = String(config["window_mode"].GetString());
                 
                 if(window_mode_str == "WINDOWED")
-                    m_window_mode = WindowMode::WINDOWED;
+                    _window_mode = WindowMode::WINDOWED;
                 else if(window_mode_str == "BORDERLESS_WINDOW")
-                    m_window_mode = WindowMode::BORDERLESS_WINDOW;
+                    _window_mode = WindowMode::BORDERLESS_WINDOW;
                 else if(window_mode_str == "FULLSCREEN")
-                    m_window_mode = WindowMode::FULLSCREEN;
+                    _window_mode = WindowMode::FULLSCREEN;
                 else
-                    m_window_mode = WindowMode::WINDOWED;
+                    _window_mode = WindowMode::WINDOWED;
             }
 			else
 				return false;
             
             if (config.HasMember("resizable"))
-                m_resizable = config["resizable"].GetBool();
+                _resizable = config["resizable"].GetBool();
             else
                 return false;
 		}
 		else
 		{
-			m_Width = 1280;
-			m_Height = 720;
-			m_refresh_rate = 60;
-            m_resizable = true;
-            m_window_mode = WindowMode::WINDOWED;
-			m_vsync = false;
+			_width = 1280;
+			_height = 720;
+			_refresh_rate = 60;
+            _resizable = true;
+            _window_mode = WindowMode::WINDOWED;
+			_vsync = false;
 		}
 		
-		CreatePlatformWindow();
+		create_platform_window();
 
-        if(!m_Window)
+        if(!_window)
         {
             SDL_Quit();
             return false;
         }
         
         // Poll input once to set initial mouse position
-        Update();
+        update();
         
         Input::MouseDevice* device = Input::GetMouseDevice();
         SDL_GetMouseState(&device->x_position, &device->y_position);
@@ -148,12 +153,12 @@ namespace PlatformBackend
         return true;
     }
     
-    void Shutdown()
+    void shutdown()
     {
-        SDL_DestroyWindow(m_Window);
+        SDL_DestroyWindow(_window);
     }
     
-    void Update()
+    void update()
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -163,7 +168,7 @@ namespace PlatformBackend
             
             switch (event.type) {
                 case SDL_QUIT:
-                    m_is_running = false;
+                    _is_running = false;
                     break;
                     
                 default:
@@ -172,47 +177,47 @@ namespace PlatformBackend
         }
     }
 
-    void SetWindowMode(WindowMode mode)
+    void set_window_mode(WindowMode mode)
 	{
-        m_window_mode = mode;
-		CreatePlatformWindow();
+        _window_mode = mode;
+		create_platform_window();
 	}
 
-	void SetWindowSize(uint width, uint height)
+	void set_window_size(uint width, uint height)
 	{
-		m_Width = width;
-		m_Height = height;
+		_width = width;
+		_height = height;
 
-        SDL_SetWindowSize(m_Window, width, height);
+        SDL_SetWindowSize(_window, width, height);
 	}
     
-    void RequestShutdown()
+    void request_shutdown()
     {
-        m_is_running = false;
+        _is_running = false;
     }
     
-    bool IsShutdownRequested()
+    bool shutdown_requested()
     {
-        return !m_is_running;
+        return !_is_running;
     }
     
-    SDL_Window* GetWindow()
+    SDL_Window* get_window()
     {
-        return m_Window;
+        return _window;
     }
 
-	int GetWidth()
+	int get_width()
 	{
-		return m_Width;
+		return _width;
 	}
 
-	int GetHeight()
+	int get_height()
 	{
-		return m_Height;
+		return _height;
 	}
 
 #if defined(WIN32)
-	HWND GetHandleWin32()
+	HWND get_handle_win32()
 	{
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);

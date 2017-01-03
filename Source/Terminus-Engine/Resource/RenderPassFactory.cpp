@@ -1,5 +1,5 @@
 #include "RenderPassCache.h"
-#include "../Platform/PlatformBackend.h"
+#include "../Platform/platform.h"
 
 namespace Terminus { namespace Resource {
 
@@ -113,13 +113,13 @@ namespace Terminus { namespace Resource {
 						if (value[i].HasMember("width_divisor"))
 						{
 							float divisor = value[i]["width_divisor"].GetFloat();
-							width = ((float)PlatformBackend::GetWidth()) / divisor;
+							width = static_cast<float>(platform::get_width()) / divisor;
 							target_info.width_divisor = divisor;
 						}
 						if (value[i].HasMember("height_divisor"))
 						{
 							float divisor = value[i]["height_divisor"].GetFloat();
-							height = ((float)PlatformBackend::GetHeight()) / divisor;
+							height = static_cast<float>(platform::get_height()) / divisor;
 							target_info.height_divisor = divisor;
 						}
 

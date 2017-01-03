@@ -28,7 +28,7 @@ namespace Terminus { namespace Graphics {
 
 	void RenderDevice::Initialize()
 	{
-		m_window = PlatformBackend::GetWindow();
+		m_window = platform::get_window();
         
 #ifdef __APPLE__
         SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -1649,7 +1649,7 @@ namespace Terminus { namespace Graphics {
 	void RenderDevice::SetViewport(int width, int height, int topLeftX, int topLeftY)
 	{
 		glViewport(topLeftX,
-			      (PlatformBackend::GetHeight() - (height + topLeftY)),
+			      (platform::get_height() - (height + topLeftY)),
 				   width,
 				   height);
 	}

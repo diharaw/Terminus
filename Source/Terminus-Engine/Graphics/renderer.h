@@ -49,28 +49,28 @@ namespace Terminus { namespace Graphics {
 	class Renderer
 	{
     private:
-        bool          m_front_queue_index;
-        GraphicsQueue m_graphics_queues[2];
+        bool          _front_queue_index;
+        GraphicsQueue _graphics_queues[2];
         
     public:
-        Graphics::UniformBuffer* m_per_frame_buffer;
-        Graphics::UniformBuffer* m_per_draw_buffer;
-        Graphics::UniformBuffer* m_per_draw_material_buffer;
-        Graphics::UniformBuffer* m_per_draw_bone_offsets_buffer;
+        Graphics::UniformBuffer* _per_frame_buffer;
+        Graphics::UniformBuffer* _per_draw_buffer;
+        Graphics::UniformBuffer* _per_draw_material_buffer;
+        Graphics::UniformBuffer* _per_draw_bone_offsets_buffer;
         
     public:
         Renderer();
         ~Renderer();
-        void Initialize(RenderDevice& device);
-        void Submit(RenderDevice& device);
-        void Swap();
-        uint32 CreateCommandBuffer();
-        CommandBuffer& GetCommandBuffer(uint32 index);
-        LinearAllocator* GetUniformAllocator();
+        void initialize(RenderDevice& device);
+        void submit(RenderDevice& device);
+        void swap();
+        uint32 create_command_buffer();
+        CommandBuffer& command_buffer(uint32 index);
+        LinearAllocator* uniform_allocator();
         
     private:
-        GraphicsQueue& GetGraphicsQueueFront();
-        GraphicsQueue& GetGraphicsQueueBack();
+        GraphicsQueue& graphics_queue_front();
+        GraphicsQueue& graphics_queue_back();
         
 	};
 

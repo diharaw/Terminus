@@ -24,42 +24,42 @@ namespace Terminus {
         
 	}
     
-	bool Application::Initialize()
+	bool Application::initialize()
 	{
 		m_main_thread_pool = Global::GetDefaultThreadPool();
         m_rendering_thread_pool = Global::GetRenderingThreadPool();
         
         TERMINUS_CREATE_PROFILER
 
-		if (!PlatformBackend::Initialize())
+		if (!platform::initialize())
 			return false;
 
-		InitializeInput();
-		InitializeGraphics();
-		InitializeResources();
-		InitializeECS();
-		InitializePhysics();
-		InitializeAudio();
-		InitializeScript();
+		initialize_input();
+		initialize_graphics();
+		initialize_resources();
+		initialize_ecs();
+		initialize_physics();
+		initialize_audio();
+		initialize_script();
         
 		return true;
 	}
 
-	void Application::Run()
+	void Application::run()
 	{
-		while (!PlatformBackend::IsShutdownRequested())
+		while (!platform::shutdown_requested())
 		{
             TERMINUS_BEGIN_CPU_PROFILE(GameLoop)
             
-            SubmitRendering();
-			PlatformBackend::Update();
+            submit_rendering();
+			platform::update();
             EventHandler::Update();
             
             // Synchronize Rendering Thread
             m_rendering_thread_pool->Wait();
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
-            m_renderer.Swap();
+            m_renderer.swap();
             
 			Global::GetPerFrameAllocator()->Clear();
             
@@ -67,39 +67,39 @@ namespace Terminus {
 		}
 	}
 
-	void Application::Shutdown()
+	void Application::shutdown()
 	{
-        ShutdownGraphics();
-		PlatformBackend::Shutdown();
+        shutdown_graphics();
+		platform::shutdown();
         
         TERMINUS_DESTROY_PROFILER
 	}
     
-    void Application::SubmitRendering()
+    void Application::submit_rendering()
     {
-        TERMINUS_BEGIN_CPU_PROFILE(SubmitRendering);
+        TERMINUS_BEGIN_CPU_PROFILE(submit_rendering);
 
         TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->function.Bind<Application, &Application::RenderingTask>(this);
+        task->function.Bind<Application, &Application::rendering_task>(this);
         m_rendering_thread_pool->Submit();
 
         TERMINUS_END_CPU_PROFILE
     }
     
-    void Application::ShutdownGraphics()
+    void Application::shutdown_graphics()
     {
         TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->function.Bind<Application, &Application::GraphicsShutdownTask>(this);
+        task->function.Bind<Application, &Application::graphics_shutdown_task>(this);
         m_rendering_thread_pool->SubmitAndWait();
     }
     
-    TASK_METHOD_DEFINITION(Application, RenderingTask)
+    TASK_METHOD_DEFINITION(Application, rendering_task)
     {
-        TERMINUS_BEGIN_CPU_PROFILE(RenderingTask)
+        TERMINUS_BEGIN_CPU_PROFILE(rendering_task)
 
         // TEST TEST TEST
         
-        Graphics::CommandBuffer& cmd_buf = m_renderer.GetCommandBuffer(cmd_buf_idx);
+        Graphics::CommandBuffer& cmd_buf = m_renderer.command_buffer(cmd_buf_idx);
         
         Graphics::BindFramebufferCmdData cmd1;
         cmd1.framebuffer = nullptr;
@@ -123,15 +123,15 @@ namespace Terminus {
         static bool testWin = true;
         ImGui::ShowTestWindow(&testWin);
 #endif
-        m_renderer.Submit(m_render_device);
+        m_renderer.submit(m_render_device);
         
         TERMINUS_END_CPU_PROFILE
     }
     
-    TASK_METHOD_DEFINITION(Application, GraphicsInitializeTask)
+    TASK_METHOD_DEFINITION(Application, graphics_initialize_task)
     {
         m_render_device.Initialize();
-        m_renderer.Initialize(m_render_device);
+        m_renderer.initialize(m_render_device);
         
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::initialize(m_render_device);
@@ -139,12 +139,12 @@ namespace Terminus {
         
         // TEST TEST TEST
         
-        cmd_buf_idx = m_renderer.CreateCommandBuffer();
+        cmd_buf_idx = m_renderer.create_command_buffer();
         
         // TEST TEST TEST
     }
     
-    TASK_METHOD_DEFINITION(Application, GraphicsShutdownTask)
+    TASK_METHOD_DEFINITION(Application, graphics_shutdown_task)
     {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::shutdown();
@@ -152,12 +152,12 @@ namespace Terminus {
         m_render_device.Shutdown();
     }
 
-	void Application::InitializeInput()
+	void Application::initialize_input()
 	{
 		Input::Initialize();
 	}
 
-	void Application::InitializeResources()
+	void Application::initialize_resources()
 	{
 		m_texture_cache.Initialize(&m_render_device);
 		m_material_cache.Initialize(&m_render_device, &m_texture_cache);
@@ -166,29 +166,29 @@ namespace Terminus {
         m_scene_cache.Initialize(&m_mesh_cache);
 	}
 
-	void Application::InitializeGraphics()
+	void Application::initialize_graphics()
 	{
         TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->function.Bind<Application, &Application::GraphicsInitializeTask>(this);
+        task->function.Bind<Application, &Application::graphics_initialize_task>(this);
         m_rendering_thread_pool->SubmitAndWait();
 	}
 
-	void Application::InitializePhysics()
+	void Application::initialize_physics()
 	{
 
 	}
 
-	void Application::InitializeAudio()
+	void Application::initialize_audio()
 	{
         
 	}
 
-	void Application::InitializeECS()
+	void Application::initialize_ecs()
 	{
 		m_scene_manager.Initialize(&m_scene_cache, &m_render_device);
 	}
 
-	void Application::InitializeScript()
+	void Application::initialize_script()
 	{
 
 	}

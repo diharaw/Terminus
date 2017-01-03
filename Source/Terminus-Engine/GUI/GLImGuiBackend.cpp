@@ -3,10 +3,10 @@
 #if defined(TERMINUS_OPENGL)
 
 #include "../IO/FileSystem.h"
-#include "../../Third Party/glew/include/GL/glew.h"
 #include "ImGuiBackend.h"
-#include "../Platform/PlatformBackend.h"
+#include <Platform/platform.h>
 #include <SDL_syswm.h>
+#include <GL/glew.h>
 
 namespace Terminus { namespace ImGuiBackend {
 	
@@ -354,7 +354,7 @@ namespace Terminus { namespace ImGuiBackend {
 
 	void initialize(Graphics::RenderDevice& device)
 	{
-        g_Window = PlatformBackend::GetWindow();
+        g_Window = platform::get_window();
         
         ImGuiIO& io = ImGui::GetIO();
         io.KeyMap[ImGuiKey_Tab] = SDLK_TAB;

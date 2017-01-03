@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include "../Platform/PlatformBackend.h"
+#include "../Platform/platform.h"
 
 namespace Terminus { namespace Graphics {
 
@@ -7,7 +7,7 @@ namespace Terminus { namespace Graphics {
 	{
 		m_Position = Vector3(0.0f, 0.0f, 0.0f);
 		m_Forward = Vector3(0.0f, 0.0f, -1.0f);
-		m_AspectRatio = static_cast<float>(PlatformBackend::GetWidth()) / static_cast<float>(PlatformBackend::GetHeight());
+		m_AspectRatio = static_cast<float>(platform::get_width()) / static_cast<float>(platform::get_height());
 	}
 
 	Camera::Camera(Vector3 _Position, Vector3 _Forward, float _FoV, float _AspectRatio, float _NearPlane, float _FarPlane)

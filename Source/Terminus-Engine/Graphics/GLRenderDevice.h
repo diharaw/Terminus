@@ -10,7 +10,7 @@
 #include "../Resource/AssetCommon.h"
 #include "../Types.h"
 #include "../Utility/SlotMap.h"
-#include "../Platform/PlatformBackend.h"
+#include "../Platform/platform.h"
 #include "../Memory/PoolAllocator.h"
 #include "GLTypes.h"
 #include "../Global.h"

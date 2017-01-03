@@ -44,7 +44,7 @@ namespace Terminus { namespace ECS {
             SceneView& view = m_views[m_view_count++];
             view._screen_rect = component_list._objects[i].screen_rect;
             view._is_shadow = false;
-            view._cmd_buf_idx = m_renderer->CreateCommandBuffer();
+            view._cmd_buf_idx = m_renderer->create_command_buffer();
         }
         
         // TODO : For each Shadow Camera, add SceneView
@@ -112,7 +112,7 @@ namespace Terminus { namespace ECS {
     
     void RenderSystem::Update(double delta)
     {
-        m_renderer->GetUniformAllocator()->Clear();
+        m_renderer->uniform_allocator()->Clear();
         
         int worker_count = m_thread_pool->WorkerThreadCount();
         LinearAllocator* per_frame_alloc = Global::GetPerFrameAllocator();
@@ -172,7 +172,7 @@ namespace Terminus { namespace ECS {
         RenderPrepareTaskData* _data = static_cast<RenderPrepareTaskData*>(data);
         SceneView& scene_view = m_views[_data->_scene_index];
      
-        LinearAllocator* uniform_allocator = m_renderer->GetUniformAllocator();
+        LinearAllocator* uniform_allocator = m_renderer->uniform_allocator();
         uniform_allocator->Clear();
         
         // Set up Per frame uniforms
@@ -181,7 +181,7 @@ namespace Terminus { namespace ECS {
         per_frame->projection = *scene_view._projection_matrix;
         per_frame->view       = *scene_view._view_matrix;
         
-        Graphics::CommandBuffer& cmd_buf = m_renderer->GetCommandBuffer(scene_view._cmd_buf_idx);
+        Graphics::CommandBuffer& cmd_buf = m_renderer->command_buffer(scene_view._cmd_buf_idx);
         
         // Frustum cull Renderable array and fill DrawItem array
         
@@ -247,7 +247,7 @@ namespace Terminus { namespace ECS {
                 cmd_buf.Write(Graphics::CommandType::BindUniformBuffer);
                 
                 Graphics::BindUniformBufferCmdData cmd3;
-                cmd3.buffer = m_renderer->m_per_frame_buffer;
+                cmd3.buffer = m_renderer->_per_frame_buffer;
                 cmd3.slot = PER_FRAME_UNIFORM_SLOT;
                 
                 cmd_buf.Write<Graphics::BindUniformBufferCmdData>(&cmd3);
@@ -257,7 +257,7 @@ namespace Terminus { namespace ECS {
                 cmd_buf.Write(Graphics::CommandType::CopyUniformData);
                 
                 Graphics::CopyUniformCmdData cmd4;
-                cmd4.buffer = m_renderer->m_per_frame_buffer;
+                cmd4.buffer = m_renderer->_per_frame_buffer;
                 cmd4.data   = per_frame;
                 cmd4.size   = sizeof(Graphics::PerFrameUniforms);
                 cmd4.map_type = BufferMapType::WRITE;
@@ -320,7 +320,7 @@ namespace Terminus { namespace ECS {
                         cmd_buf.Write(Graphics::CommandType::BindUniformBuffer);
                         
                         Graphics::BindUniformBufferCmdData cmd7;
-                        cmd7.buffer = m_renderer->m_per_draw_buffer;
+                        cmd7.buffer = m_renderer->_per_draw_buffer;
                         cmd7.slot = PER_DRAW_UNIFORM_SLOT;
                         
                         cmd_buf.Write<Graphics::BindUniformBufferCmdData>(&cmd7);
@@ -331,7 +331,7 @@ namespace Terminus { namespace ECS {
                         cmd_buf.Write(Graphics::CommandType::CopyUniformData);
                         
                         Graphics::CopyUniformCmdData cmd8;
-                        cmd8.buffer = m_renderer->m_per_draw_buffer;
+                        cmd8.buffer = m_renderer->_per_draw_buffer;
                         cmd8.data   = draw_item.uniforms;
                         cmd8.size   = sizeof(Graphics::PerDrawUniforms);
                         cmd8.map_type = BufferMapType::WRITE;

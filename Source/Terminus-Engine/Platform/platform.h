@@ -47,52 +47,52 @@ enum class WindowMode
     FULLSCREEN
 };
 
-namespace PlatformBackend
+namespace platform
 {
     /**
      * Initializes Window and optionally Creates OpenGL/OpenGL ES context if OpenGL is requested
      * @return true if Initialization is successful. false if failed.
      */
-    extern bool Initialize();
+    extern bool initialize();
     /**
      * Shutdown window and rendering conxtet if present
      */
-    extern void Shutdown();
+    extern void shutdown();
     /**
      * Polls for input events
      */
-    extern void Update();
+    extern void update();
     /**
      * Requests window Shutdown
      */
-    extern void RequestShutdown();
+    extern void request_shutdown();
 
-	extern void SetWindowMode(WindowMode mode);
+	extern void set_window_wode(WindowMode mode);
 
-	extern void SetWindowSize(uint width, uint height);
+	extern void set_window_size(uint width, uint height);
     /**
      * Check if an Application shutdown was requested
      * @return true window should shutdown. false if not.
      */
-    extern bool IsShutdownRequested();
+    extern bool shutdown_requested();
     /**
      * Retrieve the GLFWwindow pointer
      * @return GLFWwindow pointer
      */
-    extern SDL_Window* GetWindow();
+    extern SDL_Window* get_window();
     /**
      * Get Window Width
      * @return int Window Width
      */
-    extern int GetWidth();
+    extern int get_width();
     /**
      * Get Window Height
      * @return int Window Height
      */
-	extern int GetHeight();
+	extern int get_height();
 
 #if defined(WIN32)
-	extern HWND GetHandleWin32();
+	extern HWND get_handle_win32();
 #endif
     
     inline Selection show_message_box(String _Message, String _Title, Style _Style = Style::Info, Buttons _Buttons = Buttons::OK)

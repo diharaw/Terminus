@@ -4,7 +4,7 @@
 #define APPLICATION_H
 
 #include "Core/Config.h"
-#include "Platform/PlatformBackend.h"
+#include "Platform/platform.h"
 #include "GUI/ImGuiBackend.h"
 #include "Graphics/Renderer.h"
 #include "Memory/PoolAllocator.h"
@@ -41,11 +41,11 @@ int WINAPI WinMain(HINSTANCE hinstance,			    \
 {																							\
 	Terminus::Global::Initialize();											\
 	Terminus::Application* app = T_NEW x();					\
-	if(app->Initialize())														\
+	if(app->initialize())														\
 	{																						\
-		app->Run();																\
+		app->run();																\
 	}																						\
-	app->Shutdown();															\
+	app->shutdown();															\
 	Terminus::Global::Shutdown();										\
 	return 0;																			\
 }																							\
@@ -57,11 +57,11 @@ int main()															\
 {																			\
 	Terminus::Global::Initialize();							\
 	Terminus::Application* app = T_NEW x();	\
-	if(app->Initialize())										\
+	if(app->initialize())										\
 	{																		\
-		app->Run();												\
+		app->run();												\
 	}																		\
-	app->Shutdown();											\
+	app->shutdown();											\
 	Terminus::Global::Shutdown();						\
 	return 0;															\
 }																			\
@@ -100,25 +100,25 @@ namespace Terminus {
 	public:
 		Application();
 		~Application();
-		bool Initialize();
-		void Run();
-		void Shutdown();
+		bool initialize();
+		void run();
+		void shutdown();
 
 	private:
-		void InitializeInput();
-		void InitializeResources();
-		void InitializeGraphics();
-		void InitializePhysics();
-		void InitializeAudio();
-		void InitializeECS();
-		void InitializeScript();
+		void initialize_input();
+		void initialize_resources();
+		void initialize_graphics();
+		void initialize_physics();
+		void initialize_audio();
+		void initialize_ecs();
+		void initialize_script();
         
-        void SubmitRendering();
-        void ShutdownGraphics();
+        void submit_rendering();
+        void shutdown_graphics();
         
-        TASK_METHOD_DECLARATION(GraphicsInitializeTask);
-        TASK_METHOD_DECLARATION(GraphicsShutdownTask);
-        TASK_METHOD_DECLARATION(RenderingTask);
+        TASK_METHOD_DECLARATION(graphics_initialize_task);
+        TASK_METHOD_DECLARATION(graphics_shutdown_task);
+        TASK_METHOD_DECLARATION(rendering_task);
 	};
 
 }

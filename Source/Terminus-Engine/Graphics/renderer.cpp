@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "renderer.h"
 #include "../Core/Config.h"
 #include "../GUI/ImGuiBackend.h"
 
@@ -14,17 +14,17 @@ namespace Terminus { namespace Graphics {
         
     }
     
-    void Renderer::Initialize(RenderDevice& device)
+    void Renderer::initialize(RenderDevice& device)
     {
-        m_per_frame_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerFrameUniforms), BufferUsageType::STATIC);
-        m_per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::STATIC);
-        m_per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::STATIC);
-        m_per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
+        _per_frame_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerFrameUniforms), BufferUsageType::STATIC);
+        _per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::STATIC);
+        _per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::STATIC);
+        _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
     }
     
-    void Renderer::Submit(RenderDevice& device)
+    void Renderer::submit(RenderDevice& device)
     {
-        GraphicsQueue& queue = GetGraphicsQueueBack();
+        GraphicsQueue& queue = graphics_queue_back();
         
         for (int i = 0; i < queue.m_num_cmd_buf; i++)
         {
@@ -127,36 +127,36 @@ namespace Terminus { namespace Graphics {
         device.SwapBuffers();
     }
     
-    void Renderer::Swap()
+    void Renderer::swap()
     {
         // Swap Queues
-        m_front_queue_index = !m_front_queue_index;
+        _front_queue_index = !_front_queue_index;
     }
 
-    uint32 Renderer::CreateCommandBuffer()
+    uint32 Renderer::create_command_buffer()
     {
-        m_graphics_queues[0].CreateCommandBuffer();
-        return m_graphics_queues[1].CreateCommandBuffer();
+        _graphics_queues[0].CreateCommandBuffer();
+        return _graphics_queues[1].CreateCommandBuffer();
     }
     
-    CommandBuffer& Renderer::GetCommandBuffer(uint32 index)
+    CommandBuffer& Renderer::command_buffer(uint32 index)
     {
-        return m_graphics_queues[m_front_queue_index].m_cmd_buf[index];
+        return _graphics_queues[_front_queue_index].m_cmd_buf[index];
     }
     
-    GraphicsQueue& Renderer::GetGraphicsQueueFront()
+    GraphicsQueue& Renderer::graphics_queue_front()
     {
-        return m_graphics_queues[m_front_queue_index];
+        return _graphics_queues[_front_queue_index];
     }
     
-    GraphicsQueue& Renderer::GetGraphicsQueueBack()
+    GraphicsQueue& Renderer::graphics_queue_back()
     {
-        return m_graphics_queues[!m_front_queue_index];
+        return _graphics_queues[!_front_queue_index];
     }
     
-    LinearAllocator* Renderer::GetUniformAllocator()
+    LinearAllocator* Renderer::uniform_allocator()
     {
-        return m_graphics_queues[m_front_queue_index].m_allocator;
+        return _graphics_queues[_front_queue_index].m_allocator;
     }
     
 } }
