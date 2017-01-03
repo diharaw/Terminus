@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef  SCENE_H
-#define SCENE_H
-
 #include "System.h"
 #include "../Graphics/RenderDevice.h"
 #include "../Types.h"
@@ -79,5 +76,3 @@ namespace Terminus { namespace ECS {
 	};
     
 } }
-
-#endif

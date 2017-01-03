@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
-
 #include "../Types.h"
 #include "RenderDevice.h"
 
@@ -46,5 +43,3 @@ namespace Terminus { namespace Graphics {
 	};
 
 } }
-
-#endif
