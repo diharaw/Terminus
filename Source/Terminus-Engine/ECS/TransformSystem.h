@@ -5,8 +5,8 @@
 
 #include "System.h"
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	class TransformSystem : public ISystem
 	{
 	public:
@@ -18,8 +18,7 @@ namespace Terminus { namespace ECS {
 		void OnEntityCreated(Entity entity);
 		void OnEntityDestroyed(Entity entity);
 	};
-
-} }
+}
 
 #endif
 

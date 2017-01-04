@@ -27,7 +27,7 @@
 #include <assert.h>
 #include <functional>
 
-namespace Terminus
+namespace terminus
 {
     template <typename T>
     class Delegate {};

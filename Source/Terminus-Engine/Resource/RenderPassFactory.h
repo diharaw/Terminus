@@ -4,23 +4,22 @@
 #define RENDERPASSFACTORY_H
 
 #include "../Graphics/RenderPass.h"
-#include "../Graphics/RenderDevice.h"
+#include "../Graphics/render_device.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class RenderPassFactory
 	{
 	private:
-		Graphics::RenderDevice* m_device;
+		RenderDevice* m_device;
 
 	public:
 		RenderPassFactory();
 		~RenderPassFactory();
-		void Initialize(Graphics::RenderDevice* device);
+		void Initialize(RenderDevice* device);
 
-		Graphics::RenderPass* Create(AssetCommon::TextLoadData* _data);
+		RenderPass* Create(AssetCommon::TextLoadData* _data);
 	};
-
-} }
+}
 
 #endif

@@ -6,8 +6,8 @@
 #include "Component.h"
 #include <vector>
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	using Entity = uint32_t;
 
 	struct Scene;
@@ -29,7 +29,6 @@ namespace Terminus { namespace ECS {
 	protected:
 		Scene* m_scene;
 	};
-
-} }
+}
 
 #endif

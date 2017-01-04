@@ -1,5 +1,5 @@
-#include "GLRenderDevice.h"
-#include "../Utility/StringUtility.h"
+#include <Graphics/render_device_gl.h>
+#include <Utility/StringUtility.h>
 #include <iostream>
 
 #if defined(TERMINUS_OPENGL)
@@ -14,8 +14,8 @@
 #endif
 #endif
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 	RenderDevice::RenderDevice()
 	{
 
@@ -1687,7 +1687,6 @@ namespace Terminus { namespace Graphics {
 	{
 
 	}
-
-} }
+} // namespace terminus
 
 #endif

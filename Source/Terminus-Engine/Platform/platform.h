@@ -47,97 +47,103 @@ enum class WindowMode
     FULLSCREEN
 };
 
-namespace platform
+
+namespace terminus
 {
-    /**
-     * Initializes Window and optionally Creates OpenGL/OpenGL ES context if OpenGL is requested
-     * @return true if Initialization is successful. false if failed.
-     */
-    extern bool initialize();
-    /**
-     * Shutdown window and rendering conxtet if present
-     */
-    extern void shutdown();
-    /**
-     * Polls for input events
-     */
-    extern void update();
-    /**
-     * Requests window Shutdown
-     */
-    extern void request_shutdown();
-
-	extern void set_window_wode(WindowMode mode);
-
-	extern void set_window_size(uint width, uint height);
-    /**
-     * Check if an Application shutdown was requested
-     * @return true window should shutdown. false if not.
-     */
-    extern bool shutdown_requested();
-    /**
-     * Retrieve the GLFWwindow pointer
-     * @return GLFWwindow pointer
-     */
-    extern SDL_Window* get_window();
-    /**
-     * Get Window Width
-     * @return int Window Width
-     */
-    extern int get_width();
-    /**
-     * Get Window Height
-     * @return int Window Height
-     */
-	extern int get_height();
-
+    class Platform
+    {
+    public:
+        
+        Platform();
+        
+        ~Platform();
+        
+        bool initialize();
+        
+        void shutdown();
+        
+        void update();
+        
+        void request_shutdown();
+        
+        void set_window_mode(WindowMode mode);
+        
+        void set_window_size(uint width, uint height);
+        
+        bool shutdown_requested();
+        
+        SDL_Window* get_window();
+        
+        int get_width();
+        
+        int get_height();
+        
 #if defined(WIN32)
-	extern HWND get_handle_win32();
+        HWND get_handle_win32();
 #endif
+        
+    private:
+        bool create_platform_window();
+        
+    private:
+        SDL_Window*            _window;
+        int					   _width;
+        int					   _height;
+        WindowMode             _window_mode;
+        bool				   _vsync;
+        int					   _refresh_rate;
+        bool                   _resizable;
+        String				   _title;
+        bool                   _is_running;
+        
+    };
     
-    inline Selection show_message_box(String _Message, String _Title, Style _Style = Style::Info, Buttons _Buttons = Buttons::OK)
+    namespace platform
     {
-#if !defined(TERMINUS_PLATFORM_IOS)
-        Selection result = (Selection)boxer::show(_Message.c_str(), _Title.c_str(), (boxer::Style)_Style, (boxer::Buttons)_Buttons);
-        return result;
-#else
-        return Selection::OK;
-#endif
-    }
-    
-    inline String* open_file_dialog(String _Extensions, String _DefaultPath = "")
-    {
-#if !defined(TERMINUS_PLATFORM_IOS)
-        char* openPath = NULL;
-        nfdresult_t result = NFD_OpenDialog(_Extensions.c_str(), _DefaultPath.c_str(), &openPath);
-        if (result == NFD_OKAY)
+        inline Selection show_message_box(String _Message, String _Title, Style _Style = Style::Info, Buttons _Buttons = Buttons::OK)
         {
-            String* openPathStr = new String(openPath);
-            return openPathStr;
-        }
-        else
-            return nullptr;
-#else
-        return nullptr;
-#endif
-    }
-    
-    inline String* save_file_dialog(String _Extensions, String _DefaultPath = "")
-    {
 #if !defined(TERMINUS_PLATFORM_IOS)
-        char* savePath = NULL;
-        nfdresult_t result = NFD_SaveDialog(_Extensions.c_str(), _DefaultPath.c_str(), &savePath);
-        if (result == NFD_OKAY)
-        {
-            String* savePathStr = new String(savePath);
-            return savePathStr;
-        }
-        else
-            return nullptr;
-    }
+            Selection result = (Selection)boxer::show(_Message.c_str(), _Title.c_str(), (boxer::Style)_Style, (boxer::Buttons)_Buttons);
+            return result;
 #else
-    return nullptr;
+            return Selection::OK;
 #endif
+        }
+        
+        inline String* open_file_dialog(String _Extensions, String _DefaultPath = "")
+        {
+#if !defined(TERMINUS_PLATFORM_IOS)
+            char* openPath = NULL;
+            nfdresult_t result = NFD_OpenDialog(_Extensions.c_str(), _DefaultPath.c_str(), &openPath);
+            if (result == NFD_OKAY)
+            {
+                String* openPathStr = new String(openPath);
+                return openPathStr;
+            }
+            else
+                return nullptr;
+#else
+            return nullptr;
+#endif
+        }
+        
+        inline String* save_file_dialog(String _Extensions, String _DefaultPath = "")
+        {
+#if !defined(TERMINUS_PLATFORM_IOS)
+            char* savePath = NULL;
+            nfdresult_t result = NFD_SaveDialog(_Extensions.c_str(), _DefaultPath.c_str(), &savePath);
+            if (result == NFD_OKAY)
+            {
+                String* savePathStr = new String(savePath);
+                return savePathStr;
+            }
+            else
+                return nullptr;
+#else
+            return nullptr;
+#endif
+        }
+    }
 }
 
 #endif

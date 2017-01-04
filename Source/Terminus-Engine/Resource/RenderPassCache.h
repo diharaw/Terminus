@@ -6,22 +6,21 @@
 #include "AssetCache.h"
 #include "RenderPassFactory.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class RenderPassCache : public IAssetCache<RenderPassFactory>
 	{
 	private:
-		std::unordered_map<std::string, Graphics::RenderPass*> m_RenderPassMap;
-		Graphics::RenderDevice* m_device;
+		std::unordered_map<std::string, RenderPass*> m_RenderPassMap;
+		RenderDevice* m_device;
 
 	public:
 		RenderPassCache();
 		~RenderPassCache();
-		void Initialize(Graphics::RenderDevice* device);
-		Graphics::RenderPass* Load(String key);
+		void Initialize(RenderDevice* device);
+		RenderPass* Load(String key);
 		void Unload(Graphics::RenderPass* renderPass);
 	};
-
-} }
+}
 
 #endif

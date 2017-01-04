@@ -1,7 +1,7 @@
 #include "EventHandler.h"
 #include <iostream>
 
-namespace Terminus
+namespace terminus
 {
     std::vector<Event*> EventHandler::m_EventQueue;
     EventCallbackMap EventHandler::m_CallbackMap;

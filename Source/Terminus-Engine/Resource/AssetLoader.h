@@ -6,8 +6,8 @@
 
 #define REGISTER_EXTENSION(x) m_Extensions.push_back(x);
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class IAssetLoader
 	{
 	public:
@@ -18,7 +18,6 @@ namespace Terminus { namespace Resource {
 		virtual ~IAssetLoader() {}
 		virtual void* Load(std::string _id) = 0;
 	};
-
-} }
+}
 #endif
 

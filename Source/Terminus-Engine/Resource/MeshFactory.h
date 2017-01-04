@@ -4,16 +4,16 @@
 #define MESHFACTORY_H
 
 #include "Mesh.h"
-#include "../Graphics/RenderDevice.h"
+#include "../Graphics/render_device.h"
 #include "../Global.h"
 #include <string>
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
     struct MeshGPUResourcesTaskData
     {
-        Graphics::VertexBuffer* vertexBuffer;
-        Graphics::IndexBuffer* indexBuffer;
+        VertexBuffer* vertexBuffer;
+        IndexBuffer* indexBuffer;
         InputLayoutType layoutType;
         InputLayout* layout;
         void* index_buffer_data;
@@ -26,8 +26,8 @@ namespace Terminus { namespace Resource {
 	class MeshFactory
 	{
 	private:
-		Graphics::RenderDevice* m_device;
-        Graphics::VertexArray* m_mesh_vertex_array;
+		RenderDevice* m_device;
+        VertexArray* m_mesh_vertex_array;
         ThreadPool* m_rendering_thread_pool;
         
         MeshGPUResourcesTaskData m_task_data;
@@ -36,13 +36,12 @@ namespace Terminus { namespace Resource {
 	public:
 		MeshFactory();
 		~MeshFactory();
-		void Initialize(Graphics::RenderDevice* device);
+		void Initialize(RenderDevice* device);
 		Mesh* Create(AssetCommon::MeshLoadData* _Data);
         
     private:
         TASK_METHOD_DECLARATION(CreateGPUResourcesTask);
 	};
-
-} }
+}
 
 #endif

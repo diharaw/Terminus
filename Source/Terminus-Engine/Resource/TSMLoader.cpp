@@ -2,7 +2,7 @@
 #include "AssetCommon.h"
 #include "../IO/FileSystem.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	TSMLoader::TSMLoader()
 	{
@@ -16,7 +16,7 @@ namespace Terminus { namespace Resource {
 
 	void* TSMLoader::Load(std::string _id)
 	{
-		FileHandle handle = FileSystem::read_file(_id);
+		FileHandle handle = filesystem::read_file(_id);
 
 		if (handle.buffer)
 		{

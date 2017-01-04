@@ -1,6 +1,6 @@
 #include "FreeListAllocator.h"
 
-namespace Terminus
+namespace terminus
 {
     FreeListAllocator::FreeListAllocator(size_t _Size, void* _StartAddress) : Allocator(_Size, _StartAddress), m_free_blocks((FreeBlock*)_StartAddress)
     {

@@ -8,7 +8,7 @@
 #include <sstream>
 #include <cassert>
 
-namespace Terminus
+namespace terminus
 {
 	using String = std::string;
     using StringList = std::vector<std::string>;

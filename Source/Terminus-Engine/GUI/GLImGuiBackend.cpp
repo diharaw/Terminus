@@ -5,10 +5,11 @@
 #include "../IO/FileSystem.h"
 #include "ImGuiBackend.h"
 #include <Platform/platform.h>
+#include <Core/context.h>
 #include <SDL_syswm.h>
 #include <GL/glew.h>
 
-namespace Terminus { namespace ImGuiBackend {
+namespace terminus { namespace ImGuiBackend {
 	
     static SDL_Window*  g_Window = NULL;
 	static double       g_Time = 0.0f;
@@ -264,12 +265,12 @@ namespace Terminus { namespace ImGuiBackend {
 		//io.Fonts->AddFontFromMemoryTTF(font_handle.buffer, font_handle.size, 16.0f);
 		//free(font_handle.buffer);
 #ifdef __APPLE__
-        String cwd = FileSystem::get_current_working_directory();
+        String cwd = filesystem::get_current_working_directory();
         String full_path = cwd;
-        cwd += "/Assets/Font/DroidSans.ttf";
+        cwd += "/assets/font/DroidSans.ttf";
         io.Fonts->AddFontFromFileTTF(cwd.c_str(), 16.0f);
 #else
-        io.Fonts->AddFontFromFileTTF("Assets/Font/DroidSans.ttf", 16.0f);
+        io.Fonts->AddFontFromFileTTF("assets/font/DroidSans.ttf", 16.0f);
 #endif
     
 		create_fonts_texture();
@@ -352,9 +353,9 @@ namespace Terminus { namespace ImGuiBackend {
         ImGui::NewFrame();
 	}
 
-	void initialize(Graphics::RenderDevice& device)
+	void initialize()
 	{
-        g_Window = platform::get_window();
+        g_Window = context::get_platform().get_window();
         
         ImGuiIO& io = ImGui::GetIO();
         io.KeyMap[ImGuiKey_Tab] = SDLK_TAB;

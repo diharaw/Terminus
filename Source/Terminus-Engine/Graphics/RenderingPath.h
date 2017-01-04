@@ -5,8 +5,8 @@
 
 #define MAX_RENDER_PASSES 10
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
     using RenderPassArray = std::array<RenderPass, MAX_RENDER_PASSES>;
     
     struct RenderingPath
@@ -15,7 +15,6 @@ namespace Terminus { namespace Graphics {
         int             _num_render_passes;
         RenderPassArray _render_passes;;
     };
-    
-} }
+}
 
 #endif

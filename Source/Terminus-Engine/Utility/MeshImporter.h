@@ -10,16 +10,16 @@
 #include "../IO/FileSystem.h"
 #include "prettywriter.h"
 
-namespace Terminus { namespace Utility {
-
-	
-
+namespace terminus
+{
+    namespace Utility
+    {
 	inline void ImportMesh(String filename)
 	{
-		Resource::AssimpMeshLoader loader;
+		AssimpMeshLoader loader;
 		
-		String extension = FileSystem::get_file_extention(filename);
-		String meshPath = FileSystem::get_file_path(filename);
+		String extension = filesystem::get_file_extention(filename);
+		String meshPath = filesystem::get_file_path(filename);
 
 		for (String ext : loader.m_Extensions)
 		{
@@ -27,7 +27,7 @@ namespace Terminus { namespace Utility {
 			{
 				AssetCommon::AssimpMeshLoadData* data = (AssetCommon::AssimpMeshLoadData*)loader.Load(filename);
 
-				std::string fileName = FileSystem::get_filename(filename);
+				std::string fileName = filesystem::get_filename(filename);
 				std::string outputPath = "Assets/Mesh/";
 				outputPath += fileName;
 				outputPath += ".tsm";
@@ -46,8 +46,8 @@ namespace Terminus { namespace Utility {
 
 					if (map != "")
 					{
-						String name = FileSystem::get_file_name_and_extention(map);
-						String ext = FileSystem::get_file_extention(map);
+						String name = filesystem::get_file_name_and_extention(map);
+						String ext = filesystem::get_file_extention(map);
 						std::string texPath = "Assets/Texture/";
 						texPath += name;
 
@@ -60,7 +60,7 @@ namespace Terminus { namespace Utility {
 						String sourcePath = meshPath;
 						sourcePath += map;
 
-						FileSystem::copy_file(sourcePath, texPath);
+						filesystem::copy_file(sourcePath, texPath);
 					}
 					else
 					{
@@ -79,8 +79,8 @@ namespace Terminus { namespace Utility {
 
 					if (map != "")
 					{
-						String name = FileSystem::get_file_name_and_extention(map);
-						String ext = FileSystem::get_file_extention(map);
+						String name = filesystem::get_file_name_and_extention(map);
+						String ext = filesystem::get_file_extention(map);
 						std::string texPath = "Assets/Texture/";
 						texPath += name;
 
@@ -93,7 +93,7 @@ namespace Terminus { namespace Utility {
 						String sourcePath = meshPath;
 						sourcePath += map;
 
-						FileSystem::copy_file(sourcePath, texPath);
+						filesystem::copy_file(sourcePath, texPath);
 					}
 
 					// Roughness Value
@@ -113,10 +113,10 @@ namespace Terminus { namespace Utility {
 					doc.Accept(writer);
 					String test = std::string(buffer.GetString());
 
-					if (FileSystem::write_begin(matPath))
+					if (filesystem::write_begin(matPath))
 					{
-						FileSystem::write((void*)buffer.GetString(), buffer.GetSize(), 1, 0);
-						FileSystem::write_end();
+						filesystem::write((void*)buffer.GetString(), buffer.GetSize(), 1, 0);
+						filesystem::write_end();
 					}
 
 					String formattedString = "Material/Mat_";
@@ -125,25 +125,25 @@ namespace Terminus { namespace Utility {
 					strncpy(mats[i].material, formattedString.c_str(),50);
 				}
 
-				if (FileSystem::write_begin(outputPath))
+				if (filesystem::write_begin(outputPath))
 				{
 					long Offset = 0;
 					// Write Header
-					FileSystem::write(&data->header, sizeof(TSM_FileHeader), 1, Offset);
+					filesystem::write(&data->header, sizeof(TSM_FileHeader), 1, Offset);
 					Offset += sizeof(TSM_FileHeader);
 					// Write Vertices
-					FileSystem::write(data->vertices, sizeof(Vertex), data->header.m_VertexCount, Offset);
+					filesystem::write(data->vertices, sizeof(Vertex), data->header.m_VertexCount, Offset);
 					Offset += sizeof(Vertex) * data->header.m_VertexCount;
 					// Write Indices
-					FileSystem::write(data->indices, sizeof(uint), data->header.m_IndexCount, Offset);
+					filesystem::write(data->indices, sizeof(uint), data->header.m_IndexCount, Offset);
 					Offset += sizeof(uint) * data->header.m_IndexCount;
 					// Write Mesh Headers
-					FileSystem::write(data->meshes, sizeof(TSM_MeshHeader), data->header.m_MeshCount, Offset);
+					filesystem::write(data->meshes, sizeof(TSM_MeshHeader), data->header.m_MeshCount, Offset);
 					Offset += sizeof(TSM_MeshHeader) * data->header.m_MeshCount;
 					// Write Materials
-					FileSystem::write(mats, sizeof(TSM_Material_Final), data->header.m_MaterialCount, Offset);
+					filesystem::write(mats, sizeof(TSM_Material_Final), data->header.m_MaterialCount, Offset);
 
-					FileSystem::write_end();
+					filesystem::write_end();
 				}
 
 				T_SAFE_DELETE_ARRAY(mats);
@@ -156,6 +156,7 @@ namespace Terminus { namespace Utility {
 		}
 	}
 
-} }
+    }
+}
 
 #endif

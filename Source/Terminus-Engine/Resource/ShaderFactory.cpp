@@ -1,6 +1,6 @@
 #include "ShaderFactory.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	ShaderFactory::ShaderFactory()
 	{

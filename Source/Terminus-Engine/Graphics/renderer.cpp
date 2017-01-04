@@ -1,9 +1,10 @@
 #include "renderer.h"
 #include "../Core/Config.h"
 #include "../GUI/ImGuiBackend.h"
+#include <Core/context.h>
 
-namespace Terminus { namespace Graphics {
-  
+namespace terminus
+{
     Renderer::Renderer()
     {
         
@@ -14,16 +15,20 @@ namespace Terminus { namespace Graphics {
         
     }
     
-    void Renderer::initialize(RenderDevice& device)
+    void Renderer::initialize()
     {
+        RenderDevice& device = context::get_render_device();
+        
         _per_frame_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerFrameUniforms), BufferUsageType::STATIC);
         _per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::STATIC);
         _per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::STATIC);
         _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
     }
     
-    void Renderer::submit(RenderDevice& device)
+    void Renderer::submit()
     {
+        RenderDevice& device = context::get_render_device();
+        
         GraphicsQueue& queue = graphics_queue_back();
         
         for (int i = 0; i < queue.m_num_cmd_buf; i++)
@@ -159,4 +164,4 @@ namespace Terminus { namespace Graphics {
         return _graphics_queues[_front_queue_index].m_allocator;
     }
     
-} }
+}

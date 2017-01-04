@@ -5,11 +5,11 @@
 
 #include "../Graphics/RenderCommon.h"
 #include "AssetCommon.h"
-#include "../Graphics/RenderDevice.h"
+#include "../Graphics/render_device.h"
 #include "../Global.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
     struct TextureGPUResourceCreateTask
     {
         uint16 width;
@@ -20,22 +20,21 @@ namespace Terminus { namespace Resource {
 	class TextureFactory
 	{
 	private:
-		Graphics::RenderDevice* m_device;
-        Graphics::Texture* m_texture;
+		RenderDevice* m_device;
+        Texture* m_texture;
         ThreadPool* m_rendering_thread_pool;
         TextureGPUResourceCreateTask m_task_data;
 
 	public:
 		TextureFactory();
 		~TextureFactory();
-		void Initialize(Graphics::RenderDevice* device);
+		void Initialize(RenderDevice* device);
 
-		Graphics::Texture* Create(AssetCommon::ImageLoadData* _data);
+		Texture* Create(AssetCommon::ImageLoadData* _data);
         
     private:
         TASK_METHOD_DECLARATION(CreateGPUResourcesTask);
 	};
-
-} }
+}
 
 #endif

@@ -7,8 +7,8 @@
 #include "../Utility/SlotMap.h"
 #include <unordered_map>
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 #define MAX_COMPONENTS 1024
 
 	using EntityMap = std::unordered_map<Entity, ID>;
@@ -59,6 +59,6 @@ namespace Terminus { namespace ECS {
 		}
 	};
 
-} }
+}
 
 #endif

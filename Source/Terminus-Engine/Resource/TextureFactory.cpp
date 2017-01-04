@@ -1,6 +1,6 @@
 #include "TextureFactory.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	TextureFactory::TextureFactory()
 	{

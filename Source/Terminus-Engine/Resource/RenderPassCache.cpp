@@ -2,7 +2,7 @@
 #include <iostream>
 #include "../IO/FileSystem.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	RenderPassCache::RenderPassCache()
 	{
@@ -24,7 +24,7 @@ namespace Terminus { namespace Resource {
 		if (m_RenderPassMap.find(key) == m_RenderPassMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
-			std::string extension = FileSystem::get_file_extention(key);
+			std::string extension = filesystem::get_file_extention(key);
 
 			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 			{

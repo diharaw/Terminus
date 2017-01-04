@@ -1,5 +1,4 @@
-#ifndef D3D11RENDERDEVICE_H
-#define D3D11RENDERDEVICE_H
+#pragma once
 
 #include "../Core/Config.h"
 
@@ -12,7 +11,7 @@
 #include "../Utility/SlotMap.h"
 #include "../Platform/PlatformBackend.h"
 #include "../Memory/PoolAllocator.h"
-#include "D3D11Types.h"
+#include <Graphics/graphics_types_d3d11.h>
 
 #define MAX_TEXTURE_1D 1
 #define MAX_TEXTURE_2D 1
@@ -29,8 +28,8 @@
 #define MAX_RASTERIZER_STATE 16
 #define MAX_DEPTH_STENCIL_STATE 16
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 		class RenderDevice
 		{
 
@@ -238,9 +237,6 @@ namespace Terminus { namespace Graphics {
 			ID3D11DeviceContext*	 m_device_context;
 			IDXGISwapChain*			 m_swap_chain;
 		};
-
-} }
-
-#endif
+} // namespace terminus
 
 #endif

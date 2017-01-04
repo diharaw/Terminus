@@ -5,8 +5,8 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 using ComponentID = uint16_t;
 
 #define INVALID_COMPONENT 0;
@@ -16,6 +16,6 @@ using ComponentID = uint16_t;
 		static const ComponentID _id = INVALID_COMPONENT;
 	};
 
-} }
+}
 
 #endif

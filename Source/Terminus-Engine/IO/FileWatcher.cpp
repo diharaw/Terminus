@@ -2,7 +2,7 @@
 #include "FileSystem.h"
 #include <iostream>
 
-namespace Terminus { namespace IO {
+namespace terminus { namespace IO {
 
 	class UpdateListener : public FW::FileWatchListener
 	{

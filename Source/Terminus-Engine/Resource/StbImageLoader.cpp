@@ -5,7 +5,7 @@
 #include <stb_image.h>
 #include <iostream>
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	StbImageLoader::StbImageLoader()
 	{
@@ -22,7 +22,7 @@ namespace Terminus { namespace Resource {
 
 	void* StbImageLoader::Load(std::string _id)
 	{
-		FileHandle handle = FileSystem::read_file(_id);
+		FileHandle handle = filesystem::read_file(_id);
 
 		if (handle.buffer)
 		{

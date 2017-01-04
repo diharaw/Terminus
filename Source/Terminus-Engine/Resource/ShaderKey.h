@@ -4,8 +4,8 @@
 #include "AssetCommon.h"
 #include "../Graphics/DrawItem.h"
 
-namespace Terminus { namespace Resource {
-  
+namespace terminus
+{
     struct ShaderKey
     {
         // |            |        |
@@ -19,7 +19,7 @@ namespace Terminus { namespace Resource {
             _key = 0;
         }
         
-        ShaderKey(Graphics::RenderableType type, bool albedo, bool normal, bool metalness, bool roughness, bool parallax)
+        ShaderKey(RenderableType type, bool albedo, bool normal, bool metalness, bool roughness, bool parallax)
         {
             EncodeMeshType(type);
             EncodeAlbedo(albedo);
@@ -59,43 +59,43 @@ namespace Terminus { namespace Resource {
             _key |= temp << 60;
         }
         
-        inline void EncodeMeshType(Graphics::RenderableType type)
+        inline void EncodeMeshType(RenderableType type)
         {
             uint64 temp = 0;
 
             switch(type)
             {
-                case Graphics::RenderableType::StaticMesh:
+                case RenderableType::StaticMesh:
                 {
                     temp = 0;
                     break;
                 }
                     
-                case Graphics::RenderableType::SkeletalMesh:
+                case RenderableType::SkeletalMesh:
                 {
                     temp = 1;
                     break;
                 }
                     
-                case Graphics::RenderableType::Terrain:
+                case RenderableType::Terrain:
                 {
                     temp = 2;
                     break;
                 }
                     
-                case Graphics::RenderableType::Ocean:
+                case RenderableType::Ocean:
                 {
                     temp = 3;
                     break;
                 }
                     
-                case Graphics::RenderableType::Particle:
+                case RenderableType::Particle:
                 {
                     temp = 4;
                     break;
                 }
                     
-                case Graphics::RenderableType::Skybox:
+                case RenderableType::Skybox:
                 {
                     temp = 5;
                     break;
@@ -141,7 +141,6 @@ namespace Terminus { namespace Resource {
         }
         
     };
-    
-} }
+}
 
 #endif

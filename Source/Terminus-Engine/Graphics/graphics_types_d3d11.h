@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef D3D11TYPES_H
-#define D3D11TYPES_H
-
 #include "Config.h"
 
 #ifdef TERMINUS_DIRECT3D11
@@ -21,8 +18,8 @@
 #define D3D11_CHECK_ERROR(x)	x; 
 #endif
 
-namespace Terminus { namespace Graphics {
-    
+namespace terminus
+{
 	struct Texture;
 
 	using RenderTargetViewList = std::vector<ID3D11RenderTargetView*>;
@@ -137,9 +134,6 @@ namespace Terminus { namespace Graphics {
 		ID3D11DepthStencilView* m_depthStecilView;
 		Texture* m_depthStencilTarget;
     };
-    
-} }
-
-#endif
+}
 
 #endif

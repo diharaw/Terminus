@@ -8,8 +8,8 @@
 #include "../Types.h"
 #include "RenderCommon.h"
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 	using TextureHandle = uint16_t;
 
 	struct RenderSubPass;
@@ -156,7 +156,6 @@ namespace Terminus { namespace Graphics {
 		FramebufferList		framebuffers;
 		FramebufferInfoList framebuffer_info_list;
 	};
-
-} }
+}
 
 #endif

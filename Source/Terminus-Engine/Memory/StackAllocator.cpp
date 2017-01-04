@@ -8,7 +8,7 @@
 
 #include "StackAllocator.h"
 
-namespace Terminus
+namespace terminus
 {
     StackAllocator::StackAllocator(size_t _Size, void* _StartAddress) : Allocator(_Size, _StartAddress), m_CurrentPosition(_StartAddress)
     {

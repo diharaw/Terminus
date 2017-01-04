@@ -4,7 +4,7 @@
 #include "../Utility/Remotery.h"
 #endif
 
-namespace Terminus {
+namespace terminus {
     
     TERMINUS_PROFILER_INSTANCE
 
@@ -31,7 +31,7 @@ namespace Terminus {
         
         TERMINUS_CREATE_PROFILER
 
-		if (!platform::initialize())
+		if (!context::get_platform().initialize())
 			return false;
 
 		initialize_input();
@@ -47,19 +47,22 @@ namespace Terminus {
 
 	void Application::run()
 	{
-		while (!platform::shutdown_requested())
+        Platform& platform = context::get_platform();
+        Renderer& renderer = context::get_renderer();
+        
+		while (!platform.shutdown_requested())
 		{
             TERMINUS_BEGIN_CPU_PROFILE(GameLoop)
             
             submit_rendering();
-			platform::update();
+			platform.update();
             EventHandler::Update();
             
             // Synchronize Rendering Thread
             m_rendering_thread_pool->Wait();
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
-            m_renderer.swap();
+            renderer.swap();
             
 			Global::GetPerFrameAllocator()->Clear();
             
@@ -70,7 +73,7 @@ namespace Terminus {
 	void Application::shutdown()
 	{
         shutdown_graphics();
-		platform::shutdown();
+        context::get_platform().shutdown();
         
         TERMINUS_DESTROY_PROFILER
 	}
@@ -99,22 +102,22 @@ namespace Terminus {
 
         // TEST TEST TEST
         
-        Graphics::CommandBuffer& cmd_buf = m_renderer.command_buffer(cmd_buf_idx);
-        
-        Graphics::BindFramebufferCmdData cmd1;
-        cmd1.framebuffer = nullptr;
-    
-        cmd_buf.Write(Graphics::CommandType::BindFramebuffer);
-        cmd_buf.Write(&cmd1, sizeof(cmd1));
-        
-        Graphics::ClearFramebufferCmdData cmd2;
-        cmd2.clear_target = FramebufferClearTarget::COLOR;
-        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-        
-        cmd_buf.Write(Graphics::CommandType::ClearFramebuffer);
-        cmd_buf.Write(&cmd2, sizeof(cmd2));
-        
-        cmd_buf.WriteEnd();
+//        CommandBuffer& cmd_buf = m_renderer.command_buffer(cmd_buf_idx);
+//        
+//        BindFramebufferCmdData cmd1;
+//        cmd1.framebuffer = nullptr;
+//    
+//        cmd_buf.Write(CommandType::BindFramebuffer);
+//        cmd_buf.Write(&cmd1, sizeof(cmd1));
+//        
+//        ClearFramebufferCmdData cmd2;
+//        cmd2.clear_target = FramebufferClearTarget::COLOR;
+//        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+//        
+//        cmd_buf.Write(CommandType::ClearFramebuffer);
+//        cmd_buf.Write(&cmd2, sizeof(cmd2));
+//        
+//        cmd_buf.WriteEnd();
         
         // TEST TEST TEST
         
@@ -123,23 +126,23 @@ namespace Terminus {
         static bool testWin = true;
         ImGui::ShowTestWindow(&testWin);
 #endif
-        m_renderer.submit(m_render_device);
+        context::get_renderer().submit();
         
         TERMINUS_END_CPU_PROFILE
     }
     
     TASK_METHOD_DEFINITION(Application, graphics_initialize_task)
     {
-        m_render_device.Initialize();
-        m_renderer.initialize(m_render_device);
+        context::get_render_device().Initialize();
+        context::get_renderer().initialize();
         
 #if defined(TERMINUS_WITH_EDITOR)
-        ImGuiBackend::initialize(m_render_device);
+        ImGuiBackend::initialize();
 #endif
         
         // TEST TEST TEST
         
-        cmd_buf_idx = m_renderer.create_command_buffer();
+        //cmd_buf_idx = m_renderer.create_command_buffer();
         
         // TEST TEST TEST
     }
@@ -149,7 +152,7 @@ namespace Terminus {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::shutdown();
 #endif
-        m_render_device.Shutdown();
+        context::get_render_device().Shutdown();
     }
 
 	void Application::initialize_input()
@@ -159,11 +162,11 @@ namespace Terminus {
 
 	void Application::initialize_resources()
 	{
-		m_texture_cache.Initialize(&m_render_device);
-		m_material_cache.Initialize(&m_render_device, &m_texture_cache);
-		m_mesh_cache.Initialize(&m_render_device, &m_material_cache);
-		m_shader_cache.Initialize(&m_render_device);
-        m_scene_cache.Initialize(&m_mesh_cache);
+        context::get_texture_cache().Initialize();
+		context::get_material_cache().Initialize()
+		context::get_mesh_cache().Initialize();
+		context::get_shader_cache().Initialize();
+        context::get_scene_cache().Initialize();
 	}
 
 	void Application::initialize_graphics()
@@ -185,7 +188,7 @@ namespace Terminus {
 
 	void Application::initialize_ecs()
 	{
-		m_scene_manager.Initialize(&m_scene_cache, &m_render_device);
+        context::get_scene_manager().Initialize();
 	}
 
 	void Application::initialize_script()

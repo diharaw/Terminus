@@ -17,7 +17,7 @@
 #include <mach-o/dyld.h>
 #endif
 
-namespace FileSystem
+namespace filesystem
 {
     std::vector<std::string> m_directory_list;
     std::vector<std::string> m_archive_list;

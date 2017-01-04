@@ -6,8 +6,8 @@
 #include "../Types.h"
 #include "Component.h"
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	struct TransformComponent : IComponent
 	{
         static const ComponentID _id;
@@ -17,7 +17,6 @@ namespace Terminus { namespace ECS {
 		Vector3 rotation;
         String parent_entity_name;
 	};
-
-} }
+}
 
 #endif

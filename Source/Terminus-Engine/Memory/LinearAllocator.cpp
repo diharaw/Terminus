@@ -1,6 +1,6 @@
 #include "LinearAllocator.h"
 
-namespace Terminus
+namespace terminus
 {
     LinearAllocator::LinearAllocator(size_t _Size, void* _StartAddress) : Allocator(_Size, _StartAddress), m_CurrentPosition(_StartAddress)
     {

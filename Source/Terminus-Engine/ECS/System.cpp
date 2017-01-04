@@ -1,7 +1,7 @@
 #include "System.h"
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	ISystem::ISystem()
 	{
 		
@@ -36,5 +36,4 @@ namespace Terminus { namespace ECS {
 	{
 
 	}
-
-} }
+}

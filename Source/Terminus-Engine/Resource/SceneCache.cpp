@@ -1,7 +1,7 @@
 #include "SceneCache.h"
 #include "../IO/FileSystem.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	SceneCache::SceneCache()
 	{
@@ -24,7 +24,7 @@ namespace Terminus { namespace Resource {
 		if (m_AssetMap.find(_ID) == m_AssetMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
-			std::string extension = FileSystem::get_file_extention(_ID);
+			std::string extension = filesystem::get_file_extention(_ID);
 
 			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 			{

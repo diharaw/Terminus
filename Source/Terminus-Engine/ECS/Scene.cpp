@@ -2,8 +2,8 @@
 #include "TransformComponent.h"
 #include "../Types.h"
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	Scene::Scene()
 	{
 		m_last_entity_id = 0;
@@ -95,5 +95,4 @@ namespace Terminus { namespace ECS {
 
 		m_component_pools[id]->RemoveComponent(entity);;
 	}
-
-} }
+}

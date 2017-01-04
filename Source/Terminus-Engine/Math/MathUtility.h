@@ -7,7 +7,7 @@
 #include "../Core/Config.h"
 #include "../Types.h"
 
-namespace Terminus { namespace Math {
+namespace terminus { namespace Math {
 
 	inline Matrix4 Perspective(float fov, float aspectRatio, float nearPlane, float farPlane)
 	{

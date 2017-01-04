@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "../Platform/platform.h"
 
-namespace Terminus { namespace Graphics {
+namespace terminus { namespace Graphics {
 
 	Camera::Camera()
 	{

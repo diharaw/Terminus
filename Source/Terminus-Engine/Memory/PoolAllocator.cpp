@@ -1,6 +1,6 @@
 #include "PoolAllocator.h"
 
-namespace Terminus
+namespace terminus
 {
     PoolAllocator::PoolAllocator(size_t _ObjectSize, uint8 _ObjectAlignment, size_t _Size, void* _StartAddress) : Allocator(_Size, _StartAddress), m_object_size(_ObjectSize), m_object_alignment(_ObjectAlignment)
     {

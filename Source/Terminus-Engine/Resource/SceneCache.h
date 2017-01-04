@@ -6,22 +6,21 @@
 #include "AssetCache.h"
 #include "SceneFactory.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 		class SceneCache : public IAssetCache<SceneFactory>
 		{
 		private:
-			std::unordered_map<String, ECS::Scene*> m_AssetMap;
+			std::unordered_map<String, Scene*> m_AssetMap;
             MeshCache* m_mesh_cache;
 
 		public:
 			SceneCache();
 			~SceneCache();
             void Initialize(MeshCache* meshCache);
-			ECS::Scene* Load(String _ID);
-			void Unload(ECS::Scene* scene);
+			Scene* Load(String _ID);
+			void Unload(Scene* scene);
 		};
-
-} }
+}
 
 #endif

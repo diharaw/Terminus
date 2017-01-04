@@ -1,13 +1,10 @@
 #pragma once
 
-#ifndef RENDERER_H
-#define RENDERER_H
-
-#include "RenderDevice.h"
+#include "render_device.h"
 #include "GraphicsQueue.h"
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
     // Uniform Slots
     
 #define PER_FRAME_UNIFORM_SLOT 1
@@ -53,16 +50,16 @@ namespace Terminus { namespace Graphics {
         GraphicsQueue _graphics_queues[2];
         
     public:
-        Graphics::UniformBuffer* _per_frame_buffer;
-        Graphics::UniformBuffer* _per_draw_buffer;
-        Graphics::UniformBuffer* _per_draw_material_buffer;
-        Graphics::UniformBuffer* _per_draw_bone_offsets_buffer;
+        UniformBuffer* _per_frame_buffer;
+        UniformBuffer* _per_draw_buffer;
+        UniformBuffer* _per_draw_material_buffer;
+        UniformBuffer* _per_draw_bone_offsets_buffer;
         
     public:
         Renderer();
         ~Renderer();
-        void initialize(RenderDevice& device);
-        void submit(RenderDevice& device);
+        void initialize();
+        void submit();
         void swap();
         uint32 create_command_buffer();
         CommandBuffer& command_buffer(uint32 index);
@@ -74,6 +71,4 @@ namespace Terminus { namespace Graphics {
         
 	};
 
-} }
-
-#endif
+}

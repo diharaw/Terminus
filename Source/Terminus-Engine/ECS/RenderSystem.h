@@ -14,8 +14,8 @@
 #define MAX_VIEWS 10
 #define MAX_RENDERABLES 1024
 
-namespace Terminus { namespace ECS {
-    
+namespace terminus
+{
     // Forward Declarations
     
     struct SceneView;
@@ -23,7 +23,7 @@ namespace Terminus { namespace ECS {
     
     // Type Definitions
     
-    using DrawItemArray   = std::array<Graphics::DrawItem, MAX_DRAW_ITEMS>;
+    using DrawItemArray   = std::array<DrawItem, MAX_DRAW_ITEMS>;
     using SceneViewArray  = std::array<SceneView, MAX_VIEWS>;
     using RenderableArray = std::array<Renderable, MAX_RENDERABLES>;
     
@@ -38,7 +38,7 @@ namespace Terminus { namespace ECS {
         bool                     _sub_mesh_cull;
         float                    _radius;
         TransformComponent*      _transform;
-        Graphics::RenderableType _type;
+        RenderableType _type;
         // TODO : Accomodate material overrides.
         // TODO : Union containing Renderable type (Mesh, Ocean, Terrain etc)
     };
@@ -53,7 +53,7 @@ namespace Terminus { namespace ECS {
         Vector4                  _screen_rect;
         bool                     _is_shadow;
         uint32                   _cmd_buf_idx;
-        Graphics::RenderingPath* _rendering_path;
+        RenderingPath* _rendering_path;
     };
     
     class RenderSystem : public ISystem
@@ -64,14 +64,14 @@ namespace Terminus { namespace ECS {
         RenderableArray         m_renderables;
         uint16                  m_renderable_count;
         ThreadPool*             m_thread_pool;
-        Graphics::Renderer*     m_renderer;
-        Resource::ShaderCache*  m_shader_cache;
+        Renderer*     m_renderer;
+        ShaderCache*  m_shader_cache;
         
     public:
         RenderSystem();
         ~RenderSystem();
-        void SetRenderDevice(Graphics::Renderer* renderer);
-        void SetShaderCache(Resource::ShaderCache* shaderCache);
+        void SetRenderDevice(Renderer* renderer);
+        void SetShaderCache(ShaderCache* shaderCache);
         virtual void Initialize();
         virtual void Update(double delta);
         virtual void Shutdown();
@@ -81,7 +81,6 @@ namespace Terminus { namespace ECS {
     private:
         TASK_METHOD_DECLARATION(RenderPrepareTask);
     };
-    
-} }
+}
 
 #endif

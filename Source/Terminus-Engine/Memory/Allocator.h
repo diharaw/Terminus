@@ -17,7 +17,7 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
-namespace Terminus
+namespace terminus
 {
     namespace AllocatorUtility
     {

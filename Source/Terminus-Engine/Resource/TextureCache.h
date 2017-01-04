@@ -8,23 +8,22 @@
 #include "TextureFactory.h"
 #include "../Global.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class TextureCache : public IAssetCache<TextureFactory>
 	{
 	private:
-		std::unordered_map<std::string, Graphics::Texture*> m_AssetMap;
-		Graphics::RenderDevice* m_device;
+		std::unordered_map<std::string, Texture*> m_AssetMap;
+		RenderDevice* m_device;
 
 	public:
 		TextureCache();
 		~TextureCache();
-		void Initialize(Graphics::RenderDevice* device);
+		void Initialize(RenderDevice* device);
 
-		Graphics::Texture* Load(std::string _ID);
-		void Unload(Graphics::Texture* texture);
+		Texture* Load(std::string _ID);
+		void Unload(Texture* texture);
 	};
-
-} }
+}
 
 #endif

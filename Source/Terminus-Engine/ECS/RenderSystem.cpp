@@ -3,11 +3,11 @@
 #include "../Resource/ShaderCache.h"
 #include "CameraComponent.h"
 
-namespace Terminus { namespace ECS {
-    
+namespace terminus
+{    
     // Sort Method
     
-    bool DrawItemSort(Graphics::DrawItem i, Graphics::DrawItem j)
+    bool DrawItemSort(DrawItem i, DrawItem j)
     {
         return i.sort_key.key > j.sort_key.key;
     }
@@ -24,12 +24,12 @@ namespace Terminus { namespace ECS {
         
     }
     
-    void RenderSystem::SetRenderDevice(Graphics::Renderer* renderer)
+    void RenderSystem::SetRenderDevice(Renderer* renderer)
     {
         m_renderer = renderer;
     }
     
-    void RenderSystem::SetShaderCache(Resource::ShaderCache* shaderCache)
+    void RenderSystem::SetShaderCache(ShaderCache* shaderCache)
     {
         m_shader_cache = shaderCache;
     }
@@ -64,15 +64,15 @@ namespace Terminus { namespace ECS {
                 renderable._transform = transform_component;
                 
                 if(mesh_component->mesh->IsSkeletal)
-                    renderable._type = Graphics::RenderableType::SkeletalMesh;
+                    renderable._type = RenderableType::SkeletalMesh;
                 else if(mesh_component->mesh->IsSkeletal)
-                    renderable._type = Graphics::RenderableType::StaticMesh;
+                    renderable._type = RenderableType::StaticMesh;
                 
                 
                 // TODO: Create task for generating Shader permutations per view, per renderables
                 for (int i = 0; i < renderable._mesh->MeshCount; i++)
                 {
-                    Resource::ShaderKey key;
+                    ShaderKey key;
                     
                     key.EncodeAlbedo(true);
                     key.EncodeMeshType(renderable._type);
@@ -177,11 +177,11 @@ namespace Terminus { namespace ECS {
         
         // Set up Per frame uniforms
         
-        Graphics::PerFrameUniforms* per_frame = uniform_allocator->NewPerFrame<Graphics::PerFrameUniforms>();
+        PerFrameUniforms* per_frame = uniform_allocator->NewPerFrame<PerFrameUniforms>();
         per_frame->projection = *scene_view._projection_matrix;
         per_frame->view       = *scene_view._view_matrix;
         
-        Graphics::CommandBuffer& cmd_buf = m_renderer->command_buffer(scene_view._cmd_buf_idx);
+        CommandBuffer& cmd_buf = m_renderer->command_buffer(scene_view._cmd_buf_idx);
         
         // Frustum cull Renderable array and fill DrawItem array
         
@@ -192,9 +192,9 @@ namespace Terminus { namespace ECS {
             for (int j = 0; j < renderable._mesh->MeshCount; j++)
             {
                 int index = scene_view._num_items;
-                Graphics::DrawItem& draw_item = scene_view._draw_items[index];
+                DrawItem& draw_item = scene_view._draw_items[index];
                 
-                draw_item.uniforms = uniform_allocator->NewPerFrame<Graphics::PerDrawUniforms>();
+                draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
                 draw_item.uniforms->model = renderable._transform->global_transform;
                 draw_item.uniforms->position = renderable._transform->position;
                 draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
@@ -219,50 +219,50 @@ namespace Terminus { namespace ECS {
         
         for (int i = 0; i < scene_view._rendering_path->_num_render_passes; i++)
         {
-            Graphics::RenderPass& render_pass = scene_view._rendering_path->_render_passes[i];
+            RenderPass& render_pass = scene_view._rendering_path->_render_passes[i];
             
             for (auto sub_pass : render_pass.sub_passes)
             {
                 // Bind Framebuffer Command
                 
-                cmd_buf.Write(Graphics::CommandType::BindFramebuffer);
+                cmd_buf.Write(CommandType::BindFramebuffer);
                 
-                Graphics::BindFramebufferCmdData cmd1;
+                BindFramebufferCmdData cmd1;
                 cmd1.framebuffer = sub_pass.framebuffer_target;
                 
-                cmd_buf.Write<Graphics::BindFramebufferCmdData>(&cmd1);
+                cmd_buf.Write<BindFramebufferCmdData>(&cmd1);
                 
                 // Clear Framebuffer
                 
-                cmd_buf.Write(Graphics::CommandType::ClearFramebuffer);
+                cmd_buf.Write(CommandType::ClearFramebuffer);
                 
-                Graphics::ClearFramebufferCmdData cmd2;
+                ClearFramebufferCmdData cmd2;
                 cmd2.clear_target = FramebufferClearTarget::ALL;
                 cmd2.clear_color  = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
                 
-                cmd_buf.Write<Graphics::ClearFramebufferCmdData>(&cmd2);
+                cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
                 
                 // Bind Per Frame Globle Uniforms
                 
-                cmd_buf.Write(Graphics::CommandType::BindUniformBuffer);
+                cmd_buf.Write(CommandType::BindUniformBuffer);
                 
-                Graphics::BindUniformBufferCmdData cmd3;
+                BindUniformBufferCmdData cmd3;
                 cmd3.buffer = m_renderer->_per_frame_buffer;
                 cmd3.slot = PER_FRAME_UNIFORM_SLOT;
                 
-                cmd_buf.Write<Graphics::BindUniformBufferCmdData>(&cmd3);
+                cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
                 
                 // Copy Per Frame data
                 
-                cmd_buf.Write(Graphics::CommandType::CopyUniformData);
+                cmd_buf.Write(CommandType::CopyUniformData);
                 
-                Graphics::CopyUniformCmdData cmd4;
+                CopyUniformCmdData cmd4;
                 cmd4.buffer = m_renderer->_per_frame_buffer;
                 cmd4.data   = per_frame;
-                cmd4.size   = sizeof(Graphics::PerFrameUniforms);
+                cmd4.size   = sizeof(PerFrameUniforms);
                 cmd4.map_type = BufferMapType::WRITE;
                 
-                cmd_buf.Write<Graphics::CopyUniformCmdData>(&cmd4);
+                cmd_buf.Write<CopyUniformCmdData>(&cmd4);
                 
                 if(render_pass.geometry_type == GeometryType::SCENE)
                 {
@@ -273,7 +273,7 @@ namespace Terminus { namespace ECS {
                     
                     for (int j = 0; j < scene_view._num_items; j++)
                     {
-                        Graphics::DrawItem& draw_item = scene_view._draw_items[j];
+                        DrawItem& draw_item = scene_view._draw_items[j];
                         
                         if(last_vao != draw_item.vertex_array->m_resource_id)
                         {
@@ -281,15 +281,15 @@ namespace Terminus { namespace ECS {
                             
                             // Bind Vertex Array
                             
-                            cmd_buf.Write(Graphics::CommandType::BindVertexArray);
+                            cmd_buf.Write(CommandType::BindVertexArray);
                             
-                            Graphics::BindVertexArrayCmdData cmd5;
+                            BindVertexArrayCmdData cmd5;
                             cmd5.vertex_array = draw_item.vertex_array;
                             
-                            cmd_buf.Write<Graphics::BindVertexArrayCmdData>(&cmd5);
+                            cmd_buf.Write<BindVertexArrayCmdData>(&cmd5);
                         }
                         
-                        Resource::ShaderKey key;
+                        ShaderKey key;
                         
                         key.EncodeAlbedo(true);
                         key.EncodeMeshType(draw_item.type);
@@ -299,7 +299,7 @@ namespace Terminus { namespace ECS {
                         key.EncodeParallaxOcclusion(false);
                         
                         // Send to rendering thread pool
-                        Graphics::ShaderProgram* program = m_shader_cache->Load(key);
+                        ShaderProgram* program = m_shader_cache->Load(key);
                         
                         if(last_program != program->m_resource_id)
                         {
@@ -307,36 +307,36 @@ namespace Terminus { namespace ECS {
                             
                             // Bind Shader Program
                             
-                            cmd_buf.Write(Graphics::CommandType::BindShaderProgram);
+                            cmd_buf.Write(CommandType::BindShaderProgram);
                             
-                            Graphics::BindShaderProgramCmdData cmd6;
+                            BindShaderProgramCmdData cmd6;
                             cmd6.program = program;
                             
-                            cmd_buf.Write<Graphics::BindShaderProgramCmdData>(&cmd6);
+                            cmd_buf.Write<BindShaderProgramCmdData>(&cmd6);
                         }
                         
                         // Bind Per Frame Globle Uniforms
                         
-                        cmd_buf.Write(Graphics::CommandType::BindUniformBuffer);
+                        cmd_buf.Write(CommandType::BindUniformBuffer);
                         
-                        Graphics::BindUniformBufferCmdData cmd7;
+                        BindUniformBufferCmdData cmd7;
                         cmd7.buffer = m_renderer->_per_draw_buffer;
                         cmd7.slot = PER_DRAW_UNIFORM_SLOT;
                         
-                        cmd_buf.Write<Graphics::BindUniformBufferCmdData>(&cmd7);
+                        cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
 
                         
                         // Copy Per Draw Uniforms
                         
-                        cmd_buf.Write(Graphics::CommandType::CopyUniformData);
+                        cmd_buf.Write(CommandType::CopyUniformData);
                         
-                        Graphics::CopyUniformCmdData cmd8;
+                        CopyUniformCmdData cmd8;
                         cmd8.buffer = m_renderer->_per_draw_buffer;
                         cmd8.data   = draw_item.uniforms;
-                        cmd8.size   = sizeof(Graphics::PerDrawUniforms);
+                        cmd8.size   = sizeof(PerDrawUniforms);
                         cmd8.map_type = BufferMapType::WRITE;
                         
-                        cmd_buf.Write<Graphics::CopyUniformCmdData>(&cmd8);
+                        cmd_buf.Write<CopyUniformCmdData>(&cmd8);
                         
                         for (int k = 0; k < 5 ; k++)
                         {
@@ -348,14 +348,14 @@ namespace Terminus { namespace ECS {
                                     
                                     // Bind Sampler State
                                     
-                                    cmd_buf.Write(Graphics::CommandType::BindSamplerState);
+                                    cmd_buf.Write(CommandType::BindSamplerState);
                                     
-                                    Graphics::BindSamplerStateCmdData cmd9;
+                                    BindSamplerStateCmdData cmd9;
                                     cmd9.state = draw_item.material->sampler;
                                     cmd9.slot = k;
                                     cmd9.shader_type = ShaderType::PIXEL;
                                     
-                                    cmd_buf.Write<Graphics::BindSamplerStateCmdData>(&cmd9);
+                                    cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
                                 }
                                 
                                 if(last_texture != draw_item.material->texture_maps[k]->m_resource_id)
@@ -364,14 +364,14 @@ namespace Terminus { namespace ECS {
                                     
                                     // Bind Textures
                                     
-                                    cmd_buf.Write(Graphics::CommandType::BindTexture2D);
+                                    cmd_buf.Write(CommandType::BindTexture2D);
                                     
-                                    Graphics::BindTexture2DCmdData cmd10;
+                                    BindTexture2DCmdData cmd10;
                                     cmd10.texture = draw_item.material->texture_maps[k];
                                     cmd10.slot = k;
                                     cmd10.shader_type = ShaderType::PIXEL;
                                     
-                                    cmd_buf.Write<Graphics::BindTexture2DCmdData>(&cmd10);
+                                    cmd_buf.Write<BindTexture2DCmdData>(&cmd10);
                                 }
                             }
                             
@@ -379,14 +379,14 @@ namespace Terminus { namespace ECS {
                         
                         // Draw
                         
-                        cmd_buf.Write(Graphics::CommandType::DrawIndexedBaseVertex);
+                        cmd_buf.Write(CommandType::DrawIndexedBaseVertex);
                         
-                        Graphics::DrawIndexedBaseVertexCmdData cmd11;
+                        DrawIndexedBaseVertexCmdData cmd11;
                         cmd11.base_index = draw_item.base_index;
                         cmd11.base_vertex = draw_item.base_vertex;
                         cmd11.index_count = draw_item.index_count;
                         
-                        cmd_buf.Write<Graphics::DrawIndexedBaseVertexCmdData>(&cmd11);
+                        cmd_buf.Write<DrawIndexedBaseVertexCmdData>(&cmd11);
                     }
                 }
                 else if(render_pass.geometry_type == GeometryType::QUAD)
@@ -400,6 +400,5 @@ namespace Terminus { namespace ECS {
         
         cmd_buf.WriteEnd();
     }
-    
-} }
+} // namespace terminus
 

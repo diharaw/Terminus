@@ -7,16 +7,15 @@
 #include "../Resource/TextureCache.h"
 #include <string>
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class MaterialFactory
 	{
 	public:
 		MaterialFactory();
 		~MaterialFactory();
-		Graphics::Material* Create(AssetCommon::TextLoadData* data, TextureCache* textureCache);
+		Material* Create(AssetCommon::TextLoadData* data, TextureCache* textureCache);
 	};
-
-} }
+}
 
 #endif

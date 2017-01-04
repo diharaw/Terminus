@@ -3,7 +3,7 @@
 #include "../IO/FileSystem.h"
 #include <iostream>
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 		ShaderCache::ShaderCache()
 		{
@@ -81,7 +81,7 @@ namespace Terminus { namespace Resource {
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
-						std::string extension = FileSystem::get_file_extention(id);
+						std::string extension = filesystem::get_file_extention(id);
 
 						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 						{
@@ -111,7 +111,7 @@ namespace Terminus { namespace Resource {
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
-						std::string extension = FileSystem::get_file_extention(id);
+						std::string extension = filesystem::get_file_extention(id);
 
 						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 						{
@@ -141,7 +141,7 @@ namespace Terminus { namespace Resource {
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
-						std::string extension = FileSystem::get_file_extention(id);
+						std::string extension = filesystem::get_file_extention(id);
 
 						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 						{
@@ -171,7 +171,7 @@ namespace Terminus { namespace Resource {
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
-						std::string extension = FileSystem::get_file_extention(id);
+						std::string extension = filesystem::get_file_extention(id);
 
 						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 						{
@@ -201,7 +201,7 @@ namespace Terminus { namespace Resource {
 
 					if (m_ShaderMap.find(id) == m_ShaderMap.end())
 					{
-						std::string extension = FileSystem::get_file_extention(id);
+						std::string extension = filesystem::get_file_extention(id);
 
 						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 						{

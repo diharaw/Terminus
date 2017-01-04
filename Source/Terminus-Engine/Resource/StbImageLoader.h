@@ -5,8 +5,8 @@
 
 #include "AssetLoader.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class StbImageLoader : public IAssetLoader
 	{
 	public:
@@ -14,7 +14,6 @@ namespace Terminus { namespace Resource {
 		~StbImageLoader();
 		void* Load(std::string _id);
 	};
-
-} }
+}
 
 #endif

@@ -7,8 +7,8 @@
 #define COMMAND_BUFFER_SIZE 1
 #define COMMAND_BUFFER_SIZE_BYTES COMMAND_BUFFER_SIZE*MB_IN_BYTES
 
-namespace Terminus { namespace Graphics {
-  
+namespace terminus
+{
     enum class CommandType
     {
         Draw = 0,
@@ -173,7 +173,6 @@ namespace Terminus { namespace Graphics {
         }
         
     };
-    
-} }
+}
 
 #endif

@@ -1,13 +1,12 @@
 #ifndef DRAWITEM_H
 #define DRAWITEM_H
 
-#include "RenderDevice.h"
+#include "render_device.h"
 #include "Material.h"
 #include "Renderer.h"
 
-namespace Terminus { namespace Graphics {
-    
-    
+namespace terminus
+{
     // in a 64-bit key
     // 5-bits | 4-bits | 10-bits | 10-bits | 1-bit | 1-bit   | 2-bits | 24-bits
     // Pass	  |	Subpass|  Mat Id | VAO	   | Z-Buf | Stencil | Cull   | Depth
@@ -47,7 +46,6 @@ namespace Terminus { namespace Graphics {
         unsigned int   base_index;
         unsigned int   base_vertex;
     };
-    
-} }
+} // namespace terminus
 
 #endif

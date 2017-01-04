@@ -4,14 +4,14 @@
 #define IMGUIBACKEND_H
 
 #include "imgui.h"
-#include "../Graphics/RenderDevice.h"
+#include "../Graphics/render_device.h"
 #include <SDL.h>
 
-namespace Terminus { namespace ImGuiBackend {
+namespace terminus { namespace ImGuiBackend {
 	/**
 	* Initializes ImGui and creates Graphics Devices. Must be called after initializing Platform and RenderBackends.
 	*/
-	extern void initialize(Graphics::RenderDevice& device);
+	extern void initialize();
 	/**
 	* Shuts down ImGui and frees Graphics resources.
 	*/

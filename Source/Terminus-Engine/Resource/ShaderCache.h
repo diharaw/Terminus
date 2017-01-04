@@ -18,32 +18,30 @@
 #define SHADER_DEF_APPLE			  "APPLE"
 #define SHADER_DEF_SKELETAL_MESH	  "SKELETAL_VERTEX"
 
-namespace Terminus { namespace Resource {
-
-	
+namespace terminus
+{
 
 	class ShaderCache : public IAssetCache<ShaderFactory>
 	{
 	private:
-		std::unordered_map<std::string, Graphics::Shader*> m_ShaderMap;
-		std::unordered_map<Graphics::Shader*, Graphics::ShaderProgram*> m_ShaderProgramMap;
-        std::unordered_map<uint64, Graphics::ShaderProgram*> m_ShaderProgramKeyMap;
-		Graphics::RenderDevice* m_device;
+		std::unordered_map<std::string, Shader*> m_ShaderMap;
+		std::unordered_map<Shader*, ShaderProgram*> m_ShaderProgramMap;
+        std::unordered_map<uint64, ShaderProgram*> m_ShaderProgramKeyMap;
+		RenderDevice* m_device;
 
 	public:
 		ShaderCache();
 		~ShaderCache();
-		void Initialize(Graphics::RenderDevice* device);
+		void Initialize(RenderDevice* device);
 
-		Graphics::ShaderProgram* Load(const char* _vertexID,
+		ShaderProgram* Load(const char* _vertexID,
 									  const char* _pixelID,
 									  const char* _geometryID = nullptr,
 									  const char* _tessevalID = nullptr,
 									  const char* _tesscontrolID = nullptr);
-		Graphics::ShaderProgram* Load(ShaderKey key);
-		void Unload(Graphics::ShaderProgram* program);
+		ShaderProgram* Load(ShaderKey key);
+		void Unload(ShaderProgram* program);
 	};
-
-} }
+}
 
 #endif

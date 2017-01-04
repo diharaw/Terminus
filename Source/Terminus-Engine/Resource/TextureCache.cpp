@@ -3,7 +3,7 @@
 #include "../Types.h"
 #include <iostream>
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	TextureCache::TextureCache()
 	{
@@ -30,7 +30,7 @@ namespace Terminus { namespace Resource {
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
 
-			std::string extension = FileSystem::get_file_extention(_ID);
+			std::string extension = filesystem::get_file_extention(_ID);
 
 			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 			{

@@ -5,7 +5,7 @@
 
 #include "Allocator.h"
 
-namespace Terminus
+namespace terminus
 {
     class PoolAllocator : public Allocator
     {

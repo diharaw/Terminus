@@ -1,5 +1,4 @@
-#ifndef GLRENDERDEVICE_H
-#define GLRENDERDEVICE_H
+#pragma once
 
 #include "../Core/Config.h"
 
@@ -12,7 +11,7 @@
 #include "../Utility/SlotMap.h"
 #include "../Platform/platform.h"
 #include "../Memory/PoolAllocator.h"
-#include "GLTypes.h"
+#include <Graphics/graphics_types_gl.h>
 #include "../Global.h"
 
 #define MAX_TEXTURE_1D 1
@@ -30,8 +29,8 @@
 #define MAX_RASTERIZER_STATE 16
 #define MAX_DEPTH_STENCIL_STATE 16
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 		class RenderDevice
 		{
 
@@ -228,9 +227,6 @@ namespace Terminus { namespace Graphics {
 			std::unordered_map<String, Texture2D*> m_render_target_map;
 			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
 		};
-
-} }
-
-#endif
+} // namespace terminus
 
 #endif

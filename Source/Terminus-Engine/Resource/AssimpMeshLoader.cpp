@@ -3,7 +3,7 @@
 #include "AssimpMeshLoader.h"
 #include <iostream>
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	AssimpMeshLoader::AssimpMeshLoader()
 	{

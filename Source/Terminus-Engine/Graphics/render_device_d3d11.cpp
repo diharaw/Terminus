@@ -1,10 +1,10 @@
-#include "D3D11RenderDevice.h"
+#include <Graphics/render_device_d3d11.h>
 #include "../Global.h"
 #include <algorithm>
 
 #if defined(TERMINUS_DIRECT3D11) && defined(WIN32)
 
-namespace Terminus { namespace Graphics {
+namespace terminus { namespace Graphics {
 
 	RenderDevice::RenderDevice()
 	{

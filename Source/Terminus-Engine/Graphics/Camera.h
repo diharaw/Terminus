@@ -2,8 +2,8 @@
 
 #include "../Math/MathUtility.h"
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 	enum class ProjectionType
 	{
 		PERSPECTIVE = 0,
@@ -75,5 +75,4 @@ namespace Terminus { namespace Graphics {
 	private:
 		void CreateProjectionMatrix();
 	};
-
-} }
+}

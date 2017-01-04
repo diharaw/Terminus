@@ -15,7 +15,7 @@
 
 extern void* operator new (size_t size, unsigned line, const char* file);
 
-namespace Terminus
+namespace terminus
 {
     namespace Global
     {

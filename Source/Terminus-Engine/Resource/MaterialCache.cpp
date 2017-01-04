@@ -3,7 +3,7 @@
 #include <iostream>
 #include <rapidjson.h>
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	MaterialCache::MaterialCache()
 	{

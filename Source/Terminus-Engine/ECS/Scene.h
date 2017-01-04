@@ -1,7 +1,7 @@
 #pragma once
 
 #include "System.h"
-#include "../Graphics/RenderDevice.h"
+#include "../Graphics/render_device.h"
 #include "../Types.h"
 #include "ComponentPool.h"
 #include "TransformSystem.h"
@@ -12,8 +12,8 @@
 #include <vector>
 #include <iostream>
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	using SystemList				   = std::vector<ISystem*>;
 	using EntityList					   = std::vector<Entity>;
 	using ComponentPoolMap = std::unordered_map<ComponentID, IComponentPool*>;
@@ -74,5 +74,4 @@ namespace Terminus { namespace ECS {
 		} 
 
 	};
-    
-} }
+}

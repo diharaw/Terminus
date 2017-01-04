@@ -9,8 +9,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	template<class FactoryType>
 	class IAssetCache
 	{
@@ -34,7 +34,6 @@ namespace Terminus { namespace Resource {
 				m_LoaderMap[ext] = loader;
 		}
 	};
-
-} }
+}
 
 #endif

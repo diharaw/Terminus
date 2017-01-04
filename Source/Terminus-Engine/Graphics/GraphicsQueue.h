@@ -8,8 +8,8 @@
 #define PER_FRAME_UNIFORM_MEMORY 1
 #define PER_FRAME_UNIFORM_MEMORY_BYTES PER_FRAME_UNIFORM_MEMORY*MB_IN_BYTES
 
-namespace Terminus { namespace Graphics {
-    
+namespace terminus
+{
     struct GraphicsQueue
     {
         CommandBuffer m_cmd_buf[MAX_COMMAND_BUFFERS];
@@ -43,7 +43,6 @@ namespace Terminus { namespace Graphics {
         }
         
     };
-    
-} }
+}
 
 #endif

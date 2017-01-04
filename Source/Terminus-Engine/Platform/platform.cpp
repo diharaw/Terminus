@@ -7,19 +7,9 @@
 #include "../IO/FileSystem.h"
 #include <SDL_syswm.h>
 
-namespace platform
+namespace terminus
 {
-    SDL_Window*            _window;
-	int					   _width;
-	int					   _height;
-	WindowMode             _window_mode;
-	bool				   _vsync;
-	int					   _refresh_rate;
-    bool                   _resizable;
-	String				   _title;
-    bool                   _is_running;
-
-    bool create_platform_window()
+    bool Platform::create_platform_window()
     {
         Uint32 window_flags = 0;
         
@@ -70,7 +60,7 @@ namespace platform
         return true;
     }
     
-    bool initialize()
+    bool Platform::initialize()
     {
         Uint32 flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK;
         _is_running = true;
@@ -79,7 +69,7 @@ namespace platform
             return false;
 
 		JsonDocument config;
-		FileHandle handle = FileSystem::read_file("TerminusConfig.json", true);
+		FileHandle handle = filesystem::read_file("TerminusConfig.json", true);
 
 		if (handle.buffer)
 		{
@@ -153,18 +143,18 @@ namespace platform
         return true;
     }
     
-    void shutdown()
+    void Platform::shutdown()
     {
         SDL_DestroyWindow(_window);
     }
     
-    void update()
+    void Platform::update()
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             Input::ProcessWindowEvents(event);
-            Terminus::ImGuiBackend::process_window_events(&event);
+            terminus::ImGuiBackend::process_window_events(&event);
             
             switch (event.type) {
                 case SDL_QUIT:
@@ -177,13 +167,13 @@ namespace platform
         }
     }
 
-    void set_window_mode(WindowMode mode)
+    void Platform::set_window_mode(WindowMode mode)
 	{
         _window_mode = mode;
 		create_platform_window();
 	}
 
-	void set_window_size(uint width, uint height)
+	void Platform::set_window_size(uint width, uint height)
 	{
 		_width = width;
 		_height = height;
@@ -191,33 +181,33 @@ namespace platform
         SDL_SetWindowSize(_window, width, height);
 	}
     
-    void request_shutdown()
+    void Platform::request_shutdown()
     {
         _is_running = false;
     }
     
-    bool shutdown_requested()
+    bool Platform::shutdown_requested()
     {
         return !_is_running;
     }
     
-    SDL_Window* get_window()
+    SDL_Window* Platform::get_window()
     {
         return _window;
     }
 
-	int get_width()
+	int Platform::get_width()
 	{
 		return _width;
 	}
 
-	int get_height()
+	int Platform::get_height()
 	{
 		return _height;
 	}
 
 #if defined(WIN32)
-	HWND get_handle_win32()
+	HWND Platform::get_handle_win32()
 	{
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);
@@ -225,4 +215,4 @@ namespace platform
         return wmInfo.info.win.window;
 	}
 #endif
-}
+} // namespace terminus

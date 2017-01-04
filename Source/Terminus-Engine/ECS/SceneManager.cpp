@@ -1,7 +1,7 @@
 #include "SceneManager.h"
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	SceneManager::SceneManager()
 	{
 		m_thread_pool.Initialize(1);
@@ -16,7 +16,7 @@ namespace Terminus { namespace ECS {
 
 	}
     
-	void SceneManager::Initialize(Resource::SceneCache* sceneCache, Graphics::RenderDevice* device)
+	void SceneManager::Initialize(SceneCache* sceneCache, RenderDevice* device)
 	{
 		m_scene_cache = sceneCache;
         m_render_device = device;
@@ -97,5 +97,4 @@ namespace Terminus { namespace ECS {
         ScenePreloadEvent* event_data = (ScenePreloadEvent*)event;
         InitializeScene(event_data->GetScene());
     }
-
-} }
+}

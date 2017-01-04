@@ -4,8 +4,8 @@
 #include "Component.h"
 #include "../Resource/Mesh.h"
 
-namespace Terminus {  namespace ECS {
-    
+namespace terminus
+{
     struct MeshComponent : IComponent
     {
         static const ComponentID _id;
@@ -14,7 +14,6 @@ namespace Terminus {  namespace ECS {
         bool casts_shadow;
         bool is_visible;
     };
-    
-} }
+}
 
 #endif

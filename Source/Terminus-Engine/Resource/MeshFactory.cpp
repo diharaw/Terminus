@@ -1,6 +1,6 @@
 #include "MeshFactory.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 		MeshFactory::MeshFactory()
 		{

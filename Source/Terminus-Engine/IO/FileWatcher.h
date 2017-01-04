@@ -2,8 +2,8 @@
 #include <string>
 #include <include/FileWatcher/FileWatcher.h>
 
-namespace Terminus { namespace IO {
-
+namespace terminus
+{
 	class FileWatcher
 	{
 	private:
@@ -34,7 +34,4 @@ namespace Terminus { namespace IO {
 		*/
 		void Update();
 	};
-
-	
-
-} }
+} // namespace terminus

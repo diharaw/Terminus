@@ -2,7 +2,7 @@
 #include "AssetCommon.h"
 #include "../IO/FileSystem.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	TextLoader::TextLoader()
 	{
@@ -22,7 +22,7 @@ namespace Terminus { namespace Resource {
 
 	void* TextLoader::Load(std::string _id)
 	{
-		FileHandle handle = FileSystem::read_file(_id, true);
+		FileHandle handle = filesystem::read_file(_id, true);
 
 		if (handle.buffer)
 		{

@@ -1,7 +1,7 @@
 #include "RenderPassCache.h"
 #include "../Platform/platform.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	RenderPassFactory::RenderPassFactory()
 	{

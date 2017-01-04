@@ -1,8 +1,9 @@
 #include "Global.h"
 #include "Types.h"
+#include "Core/context.h"
 #include <iostream>
 
-namespace Terminus
+namespace terminus
 {
     namespace Global
     {
@@ -12,6 +13,7 @@ namespace Terminus
         LinearAllocator* g_per_frame_allocator = nullptr;
         ThreadPool*   g_thread_pool = nullptr;
         ThreadPool*   g_rendering_thread_pool = nullptr;
+        Context* g_context = nullptr;
         
         void Initialize()
         {
@@ -26,6 +28,13 @@ namespace Terminus
             
             g_rendering_thread_pool = T_NEW ThreadPool();
             g_rendering_thread_pool->Initialize(1);
+            
+            g_context = T_NEW Context();
+        }
+        
+        Context& get_context()
+        {
+            return *g_context;
         }
         
         LinearAllocator* GetDefaultAllocator()
@@ -74,5 +83,5 @@ namespace Terminus
 void* operator new (size_t size, unsigned line, const char* file)
 {
     std::cout << "Performing Allocation of size " << size << " in File " << file << " at line number " << line << std::endl;
-    return Terminus::Global::g_allocator->Allocate(size, MEMORY_ALIGNMENT);
+    return terminus::Global::g_allocator->Allocate(size, MEMORY_ALIGNMENT);
 }

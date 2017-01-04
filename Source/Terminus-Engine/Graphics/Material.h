@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Types.h"
-#include "RenderDevice.h"
+#include "render_device.h"
 
 // Material Key Options
 
@@ -11,8 +11,8 @@
 // Roughness Maps or value
 // Metalness Maps or value
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 	// Forward Declaration
 	struct Texture2D;
 
@@ -41,5 +41,4 @@ namespace Terminus { namespace Graphics {
 		float            roughness_value;
 		float            metalness_value;
 	};
-
-} }
+} // namespace terminus

@@ -6,8 +6,8 @@
 #include "Component.h"
 #include "../Types.h"
 
-namespace Terminus { namespace ECS {
-
+namespace terminus
+{
 	using Entity = uint32;
 
 	struct ScriptComponent : IComponent
@@ -17,7 +17,6 @@ namespace Terminus { namespace ECS {
 		virtual void Update(double delta, Entity entity) = 0;
 		virtual void Shutdown() = 0;
 	};
-
-} }
+}
 
 #endif

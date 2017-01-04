@@ -5,7 +5,7 @@
 #include "../GUI/ImGuiBackend.h"
 #include "../IO/FileSystem.h"
 
-namespace Terminus { namespace ImGuiBackend {
+namespace terminus { namespace ImGuiBackend {
 
 	static SDL_Window*  g_Window = NULL;
 	static double       g_Time = 0.0f;

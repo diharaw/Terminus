@@ -1,6 +1,6 @@
 #include "MaterialFactory.h"
 
-namespace Terminus { namespace Resource {
+namespace terminus { namespace Resource {
 
 	MaterialFactory::MaterialFactory()
 	{

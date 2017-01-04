@@ -5,8 +5,8 @@
 
 #include "../Types.h"
 
-namespace Terminus { namespace Graphics {
-
+namespace terminus
+{
 	struct Light
 	{
 		Vector4 color;
@@ -29,7 +29,6 @@ namespace Terminus { namespace Graphics {
 	{
 		Vector3 direction;
 	};
-
-} }
+}
 
 #endif

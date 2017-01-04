@@ -9,8 +9,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 	class AssimpMeshLoader : public IAssetLoader
 	{
 	public:
@@ -22,7 +22,6 @@ namespace Terminus { namespace Resource {
 		const char* GetTexturePath(aiMaterial* a_Material, aiTextureType a_TextureType);
 		bool DoesMaterialExist(std::vector<unsigned int> &_Materials, unsigned int &_CurrentMaterial);
 	};
-
-} }
+}
 
 #endif

@@ -12,7 +12,7 @@
 
 class TaskQueue;
 
-typedef Terminus::Delegate<void(void*)> WorkerFunction;
+typedef terminus::Delegate<void(void*)> WorkerFunction;
 typedef std::vector<TaskQueue*> TaskQueueList;
 typedef std::thread Thread;
 typedef std::mutex Mutex;

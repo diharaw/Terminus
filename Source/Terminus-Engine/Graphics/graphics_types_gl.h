@@ -1,14 +1,11 @@
 #pragma once
 
-#ifndef GLTYPES_H
-#define GLTYPES_H
-
 #include "../Core/Config.h"
 #include <unordered_map>
 
 #ifdef TERMINUS_OPENGL
 
-#include "../../Third Party/glew/include/GL/glew.h"
+#include <GL/glew.h>
 
 #ifdef TERMINUS_ENABLE_ERROR_CHECK
 #define GL_CHECK_ERROR(x)																				  \
@@ -50,7 +47,8 @@ namespace std
     };
 }
         
-namespace Terminus { namespace Graphics {
+namespace terminus
+{
     
 	struct Texture;
 	struct Shader;
@@ -186,8 +184,7 @@ namespace Terminus { namespace Graphics {
         
     };
     
-} }
+} // namespace terminus
 
 #endif
 
-#endif

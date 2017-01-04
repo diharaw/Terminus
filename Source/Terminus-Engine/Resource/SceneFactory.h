@@ -1,14 +1,11 @@
 #pragma once
 
-#ifndef SCENEFACTORY_H
-#define SCENEFACTORY_H
-
 #include "../ECS/Scene.h"
 #include "AssetCommon.h"
 #include "MeshCache.h"
 
-namespace Terminus { namespace Resource {
-
+namespace terminus
+{
 		class SceneFactory
 		{
         private:
@@ -18,14 +15,11 @@ namespace Terminus { namespace Resource {
 			SceneFactory();
 			~SceneFactory();
             void Initialize(MeshCache* meshCache);
-			ECS::Scene* Create(AssetCommon::TextLoadData* _data);
+			Scene* Create(AssetCommon::TextLoadData* _data);
             
         private:
-            void CreateTransformComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene);
-            void CreateCameraComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene);
-            void CreateMeshComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene);
+            void CreateTransformComponent(rapidjson::Value& value, Entity entity, Scene* scene);
+            void CreateCameraComponent(rapidjson::Value& value, Entity entity, Scene* scene);
+            void CreateMeshComponent(rapidjson::Value& value, Entity entity, Scene* scene);
 		};
-
-} }
-
-#endif
+} // namespace terminus

@@ -13,7 +13,7 @@ class IAssetFactory
 public:
     IAssetFactory() {}
     virtual ~IAssetFactory() {}
-    virtual IAsset* create(void* _load_data, Terminus::Allocator* _allocator = nullptr) = 0;
+    virtual IAsset* create(void* _load_data, terminus::Allocator* _allocator = nullptr) = 0;
 };
 
 #endif

@@ -11,7 +11,7 @@ struct FileHandle
     size_t size;
 };
 
-namespace FileSystem
+namespace filesystem
 {
     /**
      * Reads file from directory or zip file, depending on selected type.

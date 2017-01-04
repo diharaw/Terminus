@@ -6,7 +6,7 @@
 #include "Core/Config.h"
 #include "Platform/platform.h"
 #include "GUI/ImGuiBackend.h"
-#include "Graphics/Renderer.h"
+#include "Graphics/renderer.h"
 #include "Memory/PoolAllocator.h"
 #include "Memory/StackAllocator.h"
 #include "Global.h"
@@ -25,12 +25,13 @@
 #include "Resource/TextureCache.h"
 #include "Resource/AssetCommon.h"
 #include "Resource/SceneCache.h"
-#include "Graphics/RenderDevice.h"
+#include "Graphics/render_device.h"
 #include "ECS/SceneManager.h"
 #include "Math/MathUtility.h"
 #include "Utility/MeshImporter.h"
 #include "ECS/Scene.h"
 #include "ECS/TransformSystem.h"
+#include "context.h"
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 #define TERMINUS_DECLARE_MAIN(x)							\
@@ -39,14 +40,14 @@ int WINAPI WinMain(HINSTANCE hinstance,			    \
 								     LPSTR lpcmdline,							\
 									 int ncmdshow)								\
 {																							\
-	Terminus::Global::Initialize();											\
-	Terminus::Application* app = T_NEW x();					\
+	terminus::Global::Initialize();											\
+	terminus::Application* app = T_NEW x();					\
 	if(app->initialize())														\
 	{																						\
 		app->run();																\
 	}																						\
 	app->shutdown();															\
-	Terminus::Global::Shutdown();										\
+	terminus::Global::Shutdown();										\
 	return 0;																			\
 }																							\
 
@@ -55,45 +56,25 @@ int WINAPI WinMain(HINSTANCE hinstance,			    \
 #define TERMINUS_DECLARE_MAIN(x)			\
 int main()															\
 {																			\
-	Terminus::Global::Initialize();							\
-	Terminus::Application* app = T_NEW x();	\
+	terminus::Global::Initialize();							\
+	terminus::Application* app = T_NEW x();	\
 	if(app->initialize())										\
 	{																		\
 		app->run();												\
 	}																		\
 	app->shutdown();											\
-	Terminus::Global::Shutdown();						\
+	terminus::Global::Shutdown();						\
 	return 0;															\
 }																			\
 
 #endif
 
 
-namespace Terminus {
+namespace terminus {
 
 	class Application
 	{
 	private:
-		// Entity-Component-System
-		//ECS::Sc 			 			   m_world;
-		ECS::SceneManager		    m_scene_manager;
-
-		// Graphics
-		Graphics::RenderDevice   m_render_device;
-        Graphics::Renderer       m_renderer;
-
-		// Resource Caches
-		Resource::MeshCache	    m_mesh_cache;
-		Resource::ShaderCache    m_shader_cache;
-		Resource::TextureCache    m_texture_cache;
-		Resource::SceneCache	    m_scene_cache ;
-		Resource::MaterialCache  m_material_cache;
-
-		// Resource Factories
-		Resource::MeshFactory     m_mesh_factory;
-		Resource::ShaderFactory  m_shader_factory;
-		Resource::TextureFactory  m_texture_factory;
-
 		ThreadPool*					   m_main_thread_pool;
         ThreadPool*                    m_rendering_thread_pool;
         
