@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include <Core/context.h>
 
 namespace terminus
 {
@@ -16,10 +17,10 @@ namespace terminus
 
 	}
     
-	void SceneManager::Initialize(SceneCache* sceneCache, RenderDevice* device)
+	void SceneManager::Initialize()
 	{
-		m_scene_cache = sceneCache;
-        m_render_device = device;
+		
+        
 	}
 
 	void SceneManager::Load(String scene)
@@ -57,7 +58,7 @@ namespace terminus
 	void SceneManager::SceneLoadTask(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = m_scene_cache->Load(load_data->scene_name);
+		Scene* loaded = context::get_scene_cache().Load(load_data->scene_name);
         
         // Fire Scene Load Complete Event
         
@@ -68,7 +69,7 @@ namespace terminus
 	void SceneManager::ScenePreloadTask(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = m_scene_cache->Load(load_data->scene_name);
+		Scene* loaded = context::get_scene_cache().Load(load_data->scene_name);
         
         // Fire Scene Preload Complete Event
         
@@ -97,4 +98,4 @@ namespace terminus
         ScenePreloadEvent* event_data = (ScenePreloadEvent*)event;
         InitializeScene(event_data->GetScene());
     }
-}
+} // namespace terminus

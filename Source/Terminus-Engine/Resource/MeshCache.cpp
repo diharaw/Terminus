@@ -1,9 +1,10 @@
 #include "MeshCache.h"
 #include "../IO/FileSystem.h"
 #include <iostream>
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	MeshCache::MeshCache()
 	{
         
@@ -17,11 +18,9 @@ namespace terminus { namespace Resource {
 		}
 	}
 
-	void MeshCache::Initialize(Graphics::RenderDevice* device, MaterialCache* materialCache)
+	void MeshCache::Initialize()
 	{
-		m_device = device;
-		m_material_cache = materialCache;
-		m_Factory.Initialize(m_device);
+
 	}
 
 	Mesh* MeshCache::Load(std::string _ID)
@@ -92,10 +91,9 @@ namespace terminus { namespace Resource {
 	{
 		if (m_AssetMap.find(mesh->id) != m_AssetMap.end())
 		{
-			m_device->DestroyVertexArray(mesh->VertexArray);
+            context::get_render_device().DestroyVertexArray(mesh->VertexArray);
 			T_SAFE_DELETE_ARRAY(mesh->SubMeshes);
 			T_SAFE_DELETE(mesh);
 		}
 	}
-
-} }
+}

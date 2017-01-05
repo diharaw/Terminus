@@ -1,8 +1,9 @@
 #include "RenderPassCache.h"
 #include "../Platform/platform.h"
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	RenderPassFactory::RenderPassFactory()
 	{
 
@@ -13,17 +14,20 @@ namespace terminus { namespace Resource {
 
 	}
 
-	void RenderPassFactory::Initialize(Graphics::RenderDevice* device)
+	void RenderPassFactory::Initialize()
 	{
-		m_device = device;
+		
 	}
 
-	Graphics::RenderPass* RenderPassFactory::Create(AssetCommon::TextLoadData* _data)
+	RenderPass* RenderPassFactory::Create(AssetCommon::TextLoadData* _data)
 	{
+        RenderDevice& device = context::get_render_device();
+        Platform& platform = context::get_platform();
+        
 		JsonDocument doc;
 		doc.Parse(_data->buffer);
 
-		Graphics::RenderPass* render_pass = new Graphics::RenderPass();
+		RenderPass* render_pass = new RenderPass();
 
 		if (doc.HasMember("name"))
 		{
@@ -35,17 +39,17 @@ namespace terminus { namespace Resource {
 			String type = std::string(doc["render_pass_type"].GetString());
 
 			if (type == "SHADOW_MAP")
-				render_pass->render_pass_type = Graphics::RenderPassType::SHADOW_MAP;
+				render_pass->render_pass_type = RenderPassType::SHADOW_MAP;
 			if (type == "GAME_WORLD")
-				render_pass->render_pass_type = Graphics::RenderPassType::GAME_WORLD;
+				render_pass->render_pass_type = RenderPassType::GAME_WORLD;
 			if (type == "POST_PROCESS")
-				render_pass->render_pass_type = Graphics::RenderPassType::POST_PROCESS;
+				render_pass->render_pass_type = RenderPassType::POST_PROCESS;
 			if (type == "UI")
-				render_pass->render_pass_type = Graphics::RenderPassType::UI;
+				render_pass->render_pass_type = RenderPassType::UI;
 			if (type == "DEBUG")
-				render_pass->render_pass_type = Graphics::RenderPassType::DEBUG;
+				render_pass->render_pass_type = RenderPassType::DEBUG;
 			if (type == "COMPOSITION")
-				render_pass->render_pass_type = Graphics::RenderPassType::COMPOSITION;
+				render_pass->render_pass_type = RenderPassType::COMPOSITION;
 		}
 
 		if (doc.HasMember("global_resources"))
@@ -57,8 +61,8 @@ namespace terminus { namespace Resource {
 				for (rapidjson::SizeType i = 0; i < framebuffers.Size(); i++)
 				{
 					rapidjson::Value& value = framebuffers[i]["render_targets"];
-					Graphics::Framebuffer* framebuffer = m_device->CreateFramebuffer();
-					Graphics::FramebufferInfo fb_info;
+					Framebuffer* framebuffer = device.CreateFramebuffer();
+					FramebufferInfo fb_info;
 
 					fb_info.name = String(framebuffers[i]["name"].GetString());
 
@@ -68,7 +72,7 @@ namespace terminus { namespace Resource {
 						int height = 600;
 						String target_name = "default_target";
 						TextureFormat format = TextureFormat::R8G8B8A8_UNORM;
-						Graphics::RenderTargetInfo target_info;
+						RenderTargetInfo target_info;
 
 						if (value[i].HasMember("name"))
 						{
@@ -113,30 +117,30 @@ namespace terminus { namespace Resource {
 						if (value[i].HasMember("width_divisor"))
 						{
 							float divisor = value[i]["width_divisor"].GetFloat();
-							width = static_cast<float>(platform::get_width()) / divisor;
+							width = static_cast<float>(platform.get_width()) / divisor;
 							target_info.width_divisor = divisor;
 						}
 						if (value[i].HasMember("height_divisor"))
 						{
 							float divisor = value[i]["height_divisor"].GetFloat();
-							height = static_cast<float>(platform::get_height()) / divisor;
+							height = static_cast<float>(platform.get_height()) / divisor;
 							target_info.height_divisor = divisor;
 						}
 
-						Graphics::Texture2D* render_target = m_device->CreateTexture2D(width, height, nullptr, format, true);
+						Texture2D* render_target = device.CreateTexture2D(width, height, nullptr, format, true);
 
 						if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
-							m_device->AttachDepthStencilTarget(framebuffer, render_target);
+							device.AttachDepthStencilTarget(framebuffer, render_target);
 						else
-							m_device->AttachRenderTarget(framebuffer, render_target);
+							device.AttachRenderTarget(framebuffer, render_target);
 
-						m_device->AddToRenderTargetPool(target_name, render_target);
+						device.AddToRenderTargetPool(target_name, render_target);
 						fb_info.render_target_info.push_back(target_info);
 					}
 
 					render_pass->framebuffers.push_back(framebuffer);
 					render_pass->framebuffer_info_list.push_back(fb_info);
-					m_device->AddToFramebufferPool(fb_info.name, framebuffer);
+					device.AddToFramebufferPool(fb_info.name, framebuffer);
 				}
 			}
 		}
@@ -147,9 +151,9 @@ namespace terminus { namespace Resource {
 
 			for (rapidjson::SizeType i = 0; i < sub_passes.Size(); i++)
 			{
-				Graphics::RenderSubPass sub_pass;
+				RenderSubPass sub_pass;
 				String framebuffer_id = String(sub_passes[i]["framebuffer_target"].GetString());
-				sub_pass.framebuffer_target = m_device->GetFramebufferFromPool(framebuffer_id);
+				sub_pass.framebuffer_target = device.GetFramebufferFromPool(framebuffer_id);
 
 				render_pass->sub_passes.push_back(sub_pass);
 			}
@@ -157,5 +161,4 @@ namespace terminus { namespace Resource {
 
 		return render_pass;
 	}
-
-} }
+} // namespace terminus

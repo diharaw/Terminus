@@ -9,6 +9,16 @@
 
 namespace terminus
 {
+    Platform::Platform()
+    {
+        
+    }
+    
+    Platform::~Platform()
+    {
+        
+    }
+    
     bool Platform::create_platform_window()
     {
         Uint32 window_flags = 0;

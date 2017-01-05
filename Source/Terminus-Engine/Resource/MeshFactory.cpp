@@ -1,7 +1,8 @@
 #include "MeshFactory.h"
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 		MeshFactory::MeshFactory()
 		{
             m_rendering_thread_pool = Global::GetRenderingThreadPool();
@@ -12,9 +13,9 @@ namespace terminus { namespace Resource {
 
 		}
 
-		void MeshFactory::Initialize(Graphics::RenderDevice* device)
+		void MeshFactory::Initialize()
 		{
-			m_device = device;
+			
 		}
 
 		Mesh* MeshFactory::Create(AssetCommon::MeshLoadData* _Data)
@@ -73,9 +74,10 @@ namespace terminus { namespace Resource {
     
         TASK_METHOD_DEFINITION(MeshFactory, CreateGPUResourcesTask)
         {
+            RenderDevice& device = context::get_render_device();
             MeshGPUResourcesTaskData* task_data = (MeshGPUResourcesTaskData*)data;
             
-            Graphics::IndexBuffer* indexBuffer = m_device->CreateIndexBuffer(task_data->index_buffer_data, task_data->index_buffer_size, task_data->usageType);
+            IndexBuffer* indexBuffer = device.CreateIndexBuffer(task_data->index_buffer_data, task_data->index_buffer_size, task_data->usageType);
             
             if(!indexBuffer)
             {
@@ -83,7 +85,7 @@ namespace terminus { namespace Resource {
                 return;
             }
             
-            Graphics::VertexBuffer* vertexBuffer = m_device->CreateVertexBuffer(task_data->vertex_buffer_data, task_data->vertex_buffer_size, task_data->usageType);
+            VertexBuffer* vertexBuffer = device.CreateVertexBuffer(task_data->vertex_buffer_data, task_data->vertex_buffer_size, task_data->usageType);
             
             if(!vertexBuffer)
             {
@@ -91,7 +93,7 @@ namespace terminus { namespace Resource {
                 return;
             }
             
-            m_mesh_vertex_array = m_device->CreateVertexArray(vertexBuffer, indexBuffer, task_data->layoutType);
+            m_mesh_vertex_array = device.CreateVertexArray(vertexBuffer, indexBuffer, task_data->layoutType);
             
             if(!m_mesh_vertex_array)
             {
@@ -99,4 +101,4 @@ namespace terminus { namespace Resource {
                 return;
             }
         }
-} }
+} // namespace termnus

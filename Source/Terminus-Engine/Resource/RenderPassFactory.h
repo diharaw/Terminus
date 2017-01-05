@@ -10,13 +10,10 @@ namespace terminus
 {
 	class RenderPassFactory
 	{
-	private:
-		RenderDevice* m_device;
-
 	public:
 		RenderPassFactory();
 		~RenderPassFactory();
-		void Initialize(RenderDevice* device);
+		void Initialize();
 
 		RenderPass* Create(AssetCommon::TextLoadData* _data);
 	};

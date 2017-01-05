@@ -14,12 +14,11 @@ namespace terminus
 	{
 	private:
 		std::unordered_map<std::string, Texture*> m_AssetMap;
-		RenderDevice* m_device;
 
 	public:
 		TextureCache();
 		~TextureCache();
-		void Initialize(RenderDevice* device);
+		void Initialize();
 
 		Texture* Load(std::string _ID);
 		void Unload(Texture* texture);

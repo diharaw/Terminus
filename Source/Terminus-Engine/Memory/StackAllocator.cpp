@@ -31,13 +31,13 @@ namespace terminus
     void* StackAllocator::Allocate(size_t _AllocationSize, uint8 _Alignment)
     {
         assert(_AllocationSize != 0);
-        uint8 adjustment = Terminus::AllocatorUtility::AlignFowardAdjustmentWithHeader(m_CurrentPosition, _Alignment, sizeof(AllocationHeader));
+        uint8 adjustment = terminus::AllocatorUtility::AlignFowardAdjustmentWithHeader(m_CurrentPosition, _Alignment, sizeof(AllocationHeader));
         
         if(m_UsedMemory + adjustment + _AllocationSize > m_TotalMemory)
             return nullptr;
         
-        void* alignedAddress = Terminus::AllocatorUtility::Add(m_CurrentPosition, adjustment);
-        AllocationHeader* header = (AllocationHeader*)(Terminus::AllocatorUtility::Subtract(alignedAddress, sizeof(AllocationHeader)));
+        void* alignedAddress = terminus::AllocatorUtility::Add(m_CurrentPosition, adjustment);
+        AllocationHeader* header = (AllocationHeader*)(terminus::AllocatorUtility::Subtract(alignedAddress, sizeof(AllocationHeader)));
         
         header->m_Adjustment = adjustment;
         
@@ -46,7 +46,7 @@ namespace terminus
         m_PreviousPosition = alignedAddress;
         #endif
         
-        m_CurrentPosition = Terminus::AllocatorUtility::Add(alignedAddress, _AllocationSize);
+        m_CurrentPosition = terminus::AllocatorUtility::Add(alignedAddress, _AllocationSize);
         m_UsedMemory += _AllocationSize + adjustment;
         m_NumAllocations++;
         
@@ -55,10 +55,10 @@ namespace terminus
     
     void  StackAllocator::Deallocate(void* _Address)
     {
-        AllocationHeader* header = (AllocationHeader*)(Terminus::AllocatorUtility::Subtract(_Address, sizeof(AllocationHeader)));        
+        AllocationHeader* header = (AllocationHeader*)(terminus::AllocatorUtility::Subtract(_Address, sizeof(AllocationHeader)));
         m_UsedMemory -= (uintptr_t)m_CurrentPosition - (uintptr_t)_Address + header->m_Adjustment;
         
-        m_CurrentPosition = Terminus::AllocatorUtility::Subtract(_Address, header->m_Adjustment);
+        m_CurrentPosition = terminus::AllocatorUtility::Subtract(_Address, header->m_Adjustment);
         
         #ifdef _DEBUG
         m_PreviousPosition = header->m_PreviousAddress;

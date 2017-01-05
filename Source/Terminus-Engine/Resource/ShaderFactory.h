@@ -14,14 +14,13 @@ namespace terminus
 	class ShaderFactory
 	{
 	private:
-		RenderDevice* m_device;
         String m_vertex_template;
         String m_pixel_template;
 
 	public:
 		ShaderFactory();
 		~ShaderFactory();
-		void Initialize(RenderDevice* device, String vertex_template, String pixel_template);
+		void Initialize(String vertex_template, String pixel_template);
 
 		Shader* Create(AssetCommon::TextLoadData* _data);
         Shader* Create(StringList& _defines, ShaderType _type);

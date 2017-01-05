@@ -35,24 +35,27 @@ namespace terminus
         TextureCache  _texture_cache;
     };
     
-    namespace context
+    namespace Global
     {
         extern Context& get_context();
-        
-        T_FORCE_INLINE Platform&       get_platform() 			{ return get_context()._platform; }
+    }
+    
+    namespace context
+    {
+        T_FORCE_INLINE Platform&       get_platform() 			{ return Global::get_context()._platform; }
         //T_FORCE_INLINE FileSystem&   get_filesystem() 			{ return get_context()._filesystem; }
-        T_FORCE_INLINE Renderer&       get_renderer() 			{ return get_context()._renderer; }
-        T_FORCE_INLINE RenderDevice&   get_render_device()      { return get_context()._render_device; }
-        T_FORCE_INLINE SceneManager&   get_scene_manager()      { return get_context()._scene_manager; }
-        T_FORCE_INLINE SceneCache&     get_scene_cache()        { return get_context()._scene_cache; }
-        T_FORCE_INLINE ShaderCache&    get_shader_cache()       { return get_context()._shader_cache; }
-        T_FORCE_INLINE MeshCache&      get_mesh_cache()         { return get_context()._mesh_cache; }
-        T_FORCE_INLINE MaterialCache&  get_material_cache()     { return get_context()._material_cache; }
-        T_FORCE_INLINE TextureCache&   get_texture_cache()      { return get_context()._texture_cache; }
+        T_FORCE_INLINE Renderer&       get_renderer() 			{ return Global::get_context()._renderer; }
+        T_FORCE_INLINE RenderDevice&   get_render_device()      { return Global::get_context()._render_device; }
+        T_FORCE_INLINE SceneManager&   get_scene_manager()      { return Global::get_context()._scene_manager; }
+        T_FORCE_INLINE SceneCache&     get_scene_cache()        { return Global::get_context()._scene_cache; }
+        T_FORCE_INLINE ShaderCache&    get_shader_cache()       { return Global::get_context()._shader_cache; }
+        T_FORCE_INLINE MeshCache&      get_mesh_cache()         { return Global::get_context()._mesh_cache; }
+        T_FORCE_INLINE MaterialCache&  get_material_cache()     { return Global::get_context()._material_cache; }
+        T_FORCE_INLINE TextureCache&   get_texture_cache()      { return Global::get_context()._texture_cache; }
         
-        T_FORCE_INLINE Platform*     get_platform_ptr() 		{ return &get_context()._platform; }
-        T_FORCE_INLINE Renderer*     get_renderer_ptr()         { return &get_context()._renderer; }
-        T_FORCE_INLINE RenderDevice* get_render_device_ptr()    { return &get_context()._render_device; }
-        T_FORCE_INLINE SceneManager* get_scene_manager_ptr()    { return &get_context()._scene_manager; }
+        T_FORCE_INLINE Platform*     get_platform_ptr() 		{ return &Global::get_context()._platform; }
+        T_FORCE_INLINE Renderer*     get_renderer_ptr()         { return &Global::get_context()._renderer; }
+        T_FORCE_INLINE RenderDevice* get_render_device_ptr()    { return &Global::get_context()._render_device; }
+        T_FORCE_INLINE SceneManager* get_scene_manager_ptr()    { return &Global::get_context()._scene_manager; }
     }
 }

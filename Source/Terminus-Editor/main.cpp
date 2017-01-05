@@ -2,7 +2,7 @@
 
 namespace Terminus {
 
-	class Editor : public Application
+	class Editor : public terminus::Application
 	{
 
 	};

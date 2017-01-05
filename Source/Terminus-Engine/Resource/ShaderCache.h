@@ -20,19 +20,17 @@
 
 namespace terminus
 {
-
 	class ShaderCache : public IAssetCache<ShaderFactory>
 	{
 	private:
 		std::unordered_map<std::string, Shader*> m_ShaderMap;
 		std::unordered_map<Shader*, ShaderProgram*> m_ShaderProgramMap;
         std::unordered_map<uint64, ShaderProgram*> m_ShaderProgramKeyMap;
-		RenderDevice* m_device;
 
 	public:
 		ShaderCache();
 		~ShaderCache();
-		void Initialize(RenderDevice* device);
+		void Initialize();
 
 		ShaderProgram* Load(const char* _vertexID,
 									  const char* _pixelID,

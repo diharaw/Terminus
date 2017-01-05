@@ -8,13 +8,10 @@ namespace terminus
 {
 		class SceneFactory
 		{
-        private:
-            MeshCache* m_mesh_cache;
-            
 		public:
 			SceneFactory();
 			~SceneFactory();
-            void Initialize(MeshCache* meshCache);
+            void Initialize();
 			Scene* Create(AssetCommon::TextLoadData* _data);
             
         private:

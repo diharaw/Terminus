@@ -14,7 +14,7 @@ namespace terminus
 	public:
 		MaterialFactory();
 		~MaterialFactory();
-		Material* Create(AssetCommon::TextLoadData* data, TextureCache* textureCache);
+		Material* Create(AssetCommon::TextLoadData* data);
 	};
 }
 

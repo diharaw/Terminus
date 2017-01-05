@@ -1,8 +1,8 @@
 #include "SceneCache.h"
 #include "../IO/FileSystem.h"
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	SceneCache::SceneCache()
 	{
 
@@ -13,13 +13,12 @@ namespace terminus { namespace Resource {
 
 	}
     
-    void SceneCache::Initialize(MeshCache* meshCache)
+    void SceneCache::Initialize()
     {
-        m_mesh_cache = meshCache;
-        m_Factory.Initialize(meshCache);
+
     }
 
-	ECS::Scene* SceneCache::Load(String _ID)
+	Scene* SceneCache::Load(String _ID)
 	{
 		if (m_AssetMap.find(_ID) == m_AssetMap.end())
 		{
@@ -33,7 +32,7 @@ namespace terminus { namespace Resource {
 			else
 			{
 				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(_ID));
-				ECS::Scene* scene = m_Factory.Create(data);
+				Scene* scene = m_Factory.Create(data);
 				m_AssetMap[_ID] = scene;
 				return scene;
 			}
@@ -45,9 +44,8 @@ namespace terminus { namespace Resource {
 		}
 	}
 
-	void SceneCache::Unload(ECS::Scene* scene)
+	void SceneCache::Unload(Scene* scene)
 	{
 
 	}
-
-} }
+} // namespace terminus

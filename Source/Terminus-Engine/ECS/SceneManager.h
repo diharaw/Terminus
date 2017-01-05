@@ -24,14 +24,12 @@ namespace terminus
 		SceneMap 						 m_scene_map;
 		Scene* 							 m_active_scene;
 		Scene* 							 m_preload_scene;
-		SceneCache*                      m_scene_cache;
 		ThreadPool						 m_thread_pool;
-        RenderDevice*                    m_render_device;
 
 	public:
 		SceneManager();
 		~SceneManager();
-        void Initialize(SceneCache* sceneCache, RenderDevice* device);
+        void Initialize();
 		void Load(String scene);
 		void Preload(String scene);
 		void SetActiveScene(String scene);

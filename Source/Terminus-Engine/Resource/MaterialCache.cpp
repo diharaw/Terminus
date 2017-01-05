@@ -3,8 +3,8 @@
 #include <iostream>
 #include <rapidjson.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	MaterialCache::MaterialCache()
 	{
 
@@ -15,18 +15,17 @@ namespace terminus { namespace Resource {
 
 	}
 
-	void MaterialCache::Initialize(Graphics::RenderDevice* device, TextureCache* textureCache)
+	void MaterialCache::Initialize()
 	{
-		m_device = device;
-		m_TextureCache = textureCache;
+	
 	}
 
-	Graphics::Material* MaterialCache::Load(String key)
+    Material* MaterialCache::Load(String key)
 	{
 		if (m_MaterialMap.find(key) == m_MaterialMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
-			std::string extension = FileSystem::get_file_extention(key);
+			std::string extension = filesystem::get_file_extention(key);
 
 			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
 			{
@@ -36,7 +35,7 @@ namespace terminus { namespace Resource {
 			{
 				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(key));
 
-				Graphics::Material* material = m_Factory.Create(data, m_TextureCache);
+				Material* material = m_Factory.Create(data);
 				m_MaterialMap[key] = material;
 				return material;
 			}
@@ -48,9 +47,8 @@ namespace terminus { namespace Resource {
 		}
 	}
 
-	void MaterialCache::Unload(Graphics::Material* material)
+	void MaterialCache::Unload(Material* material)
 	{
 
 	}
-
-} }
+}

@@ -26,17 +26,15 @@ namespace terminus
 	class MeshFactory
 	{
 	private:
-		RenderDevice* m_device;
         VertexArray* m_mesh_vertex_array;
         ThreadPool* m_rendering_thread_pool;
-        
         MeshGPUResourcesTaskData m_task_data;
         bool m_task_sucess;
 
 	public:
 		MeshFactory();
 		~MeshFactory();
-		void Initialize(RenderDevice* device);
+		void Initialize();
 		Mesh* Create(AssetCommon::MeshLoadData* _Data);
         
     private:

@@ -1,13 +1,16 @@
 #include "Camera.h"
+#include <Core/context.h>
 #include "../Platform/platform.h"
 
-namespace terminus { namespace Graphics {
-
+namespace terminus
+{
 	Camera::Camera()
 	{
+        Platform& platform = context::get_platform();
+        
 		m_Position = Vector3(0.0f, 0.0f, 0.0f);
 		m_Forward = Vector3(0.0f, 0.0f, -1.0f);
-		m_AspectRatio = static_cast<float>(platform::get_width()) / static_cast<float>(platform::get_height());
+		m_AspectRatio = static_cast<float>(platform.get_width()) / static_cast<float>(platform.get_height());
 	}
 
 	Camera::Camera(Vector3 _Position, Vector3 _Forward, float _FoV, float _AspectRatio, float _NearPlane, float _FarPlane)
@@ -127,5 +130,4 @@ namespace terminus { namespace Graphics {
 			m_ProjectionMatrix = Math::Ortho(m_LeftOrtho, m_RightOrtho, m_DownOrtho, m_UpOrtho, m_NearPlane, m_FarPlane);
 		}
 	}
-
-} }
+} // namespace terminus

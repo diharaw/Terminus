@@ -2,8 +2,8 @@
 #include "AssetCommon.h"
 #include "../IO/FileSystem.h"
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	TSMLoader::TSMLoader()
 	{
 		REGISTER_EXTENSION("tsm");
@@ -51,5 +51,4 @@ namespace terminus { namespace Resource {
 
 		return nullptr;
 	}
-
-} }
+}

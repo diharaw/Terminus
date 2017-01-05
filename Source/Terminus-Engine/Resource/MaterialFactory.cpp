@@ -1,7 +1,8 @@
 #include "MaterialFactory.h"
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	MaterialFactory::MaterialFactory()
 	{
 
@@ -12,17 +13,18 @@ namespace terminus { namespace Resource {
 
 	}
 
-	Graphics::Material* MaterialFactory::Create(AssetCommon::TextLoadData* data, TextureCache* textureCache)
+	Material* MaterialFactory::Create(AssetCommon::TextLoadData* data)
 	{
+        TextureCache& cache = context::get_texture_cache();
 		JsonDocument doc;
 		doc.Parse(data->buffer);
 
-		Graphics::Material* material = new Graphics::Material();
+		Material* material = new Material();
 
 		if (doc.HasMember("diffuse_map"))
 		{
 			String key = std::string(doc["diffuse_map"].GetString());
-			material->texture_maps[Graphics::DIFFUSE] = (Graphics::Texture2D*)textureCache->Load(key);
+            material->texture_maps[DIFFUSE] = (Texture2D*)cache.Load(key);
 		}
 		else
 		{
@@ -41,13 +43,13 @@ namespace terminus { namespace Resource {
 		if (doc.HasMember("normal_map"))
 		{
 			String key = std::string(doc["normal_map"].GetString());
-			material->texture_maps[Graphics::NORMAL] = (Graphics::Texture2D*)textureCache->Load(key);
+			material->texture_maps[NORMAL] = (Texture2D*)cache.Load(key);
 		}
 
 		if (doc.HasMember("roughness_map"))
 		{
 			String key = std::string(doc["roughness_map"].GetString());
-			material->texture_maps[Graphics::ROUGHNESS] = (Graphics::Texture2D*)textureCache->Load(key);
+			material->texture_maps[ROUGHNESS] = (Texture2D*)cache.Load(key);
 		}
 		else
 		{
@@ -58,7 +60,7 @@ namespace terminus { namespace Resource {
 		if (doc.HasMember("metalness_map"))
 		{
 			String key = std::string(doc["metalness_map"].GetString());
-			material->texture_maps[Graphics::METALNESS] = (Graphics::Texture2D*)textureCache->Load(key);
+			material->texture_maps[METALNESS] = (Texture2D*)cache.Load(key);
 		}
 		else
 		{
@@ -69,10 +71,9 @@ namespace terminus { namespace Resource {
 		if (doc.HasMember("displacement_map"))
 		{
 			String key = std::string(doc["displacement_map"].GetString());
-			material->texture_maps[Graphics::DISPLACEMENT] = (Graphics::Texture2D*)textureCache->Load(key);
+			material->texture_maps[DISPLACEMENT] = (Texture2D*)cache.Load(key);
 		}
 
 		return material;
 	}
-
-} }
+}

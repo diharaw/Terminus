@@ -9,4 +9,4 @@ namespace terminus
     const ComponentID CameraComponent::_id = 1;
     const ComponentID ScriptComponent::_id = 2;
     const ComponentID MeshComponent::_id = 3;
-}
+} // namespace terminus

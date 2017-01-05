@@ -2,8 +2,8 @@
 #include "FileSystem.h"
 #include <iostream>
 
-namespace terminus { namespace IO {
-
+namespace terminus
+{
 	class UpdateListener : public FW::FileWatchListener
 	{
 	public:
@@ -36,7 +36,7 @@ namespace terminus { namespace IO {
 	void FileWatcher::AddDirectory(std::string _directory)
 	{
 #ifdef __APPLE__
-		std::string cwd = FileSystem::get_current_working_directory();
+		std::string cwd = filesystem::get_current_working_directory();
 		cwd += "/";
 		std::string dir = cwd + _directory;
 		m_Watcher.addWatch(dir, new UpdateListener(), true);
@@ -65,5 +65,4 @@ namespace terminus { namespace IO {
 	{
 		return m_TicksPerUpdate;
 	}
-
-} }
+} // namespace terminus

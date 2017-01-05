@@ -1,7 +1,8 @@
 #include "ShaderFactory.h"
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	ShaderFactory::ShaderFactory()
 	{
         // Load up template source
@@ -12,16 +13,15 @@ namespace terminus { namespace Resource {
 
 	}
 
-	void ShaderFactory::Initialize(Terminus::Graphics::RenderDevice* device, String vertex_template, String pixel_template)
+	void ShaderFactory::Initialize(String vertex_template, String pixel_template)
 	{
-		m_device = device;
         m_vertex_template = vertex_template;
         m_pixel_template = pixel_template;
 	}
 
-	Graphics::Shader* ShaderFactory::Create(AssetCommon::TextLoadData* _data)
+	Shader* ShaderFactory::Create(AssetCommon::TextLoadData* _data)
 	{
-		Graphics::Shader* shader = m_device->CreateShader(_data->shader_type, _data->buffer);
+		Shader* shader = context::get_render_device().CreateShader(_data->shader_type, _data->buffer);
 
 		if (!shader)
 			return nullptr;
@@ -29,7 +29,7 @@ namespace terminus { namespace Resource {
 		return shader;
 	}
     
-    Graphics::Shader* ShaderFactory::Create(StringList& _defines, ShaderType _type)
+    Shader* ShaderFactory::Create(StringList& _defines, ShaderType _type)
     {
         String original_source;
         
@@ -55,12 +55,11 @@ namespace terminus { namespace Resource {
         
         String pre_processed_source = StringUtility::GenerateSource(original_source, _defines);
         
-        Graphics::Shader* shader = m_device->CreateShader(_type, pre_processed_source.c_str());
+        Shader* shader = context::get_render_device().CreateShader(_type, pre_processed_source.c_str());
         
         if (!shader)
             return nullptr;
         
         return shader;
     }
-
-} }
+}

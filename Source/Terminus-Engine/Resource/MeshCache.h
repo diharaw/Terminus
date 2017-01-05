@@ -13,13 +13,11 @@ namespace terminus
 	{
 	private:
 		std::unordered_map<std::string, Mesh*> m_AssetMap;
-		RenderDevice* m_device;
-		MaterialCache* m_material_cache;
 
 	public:
 		MeshCache();
 		~MeshCache();
-		void Initialize(RenderDevice* device, MaterialCache* materialCache);
+		void Initialize();
 
 		Mesh* Load(std::string _ID);
 		void Unload(Mesh* mesh);

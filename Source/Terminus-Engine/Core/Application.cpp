@@ -102,22 +102,22 @@ namespace terminus {
 
         // TEST TEST TEST
         
-//        CommandBuffer& cmd_buf = m_renderer.command_buffer(cmd_buf_idx);
-//        
-//        BindFramebufferCmdData cmd1;
-//        cmd1.framebuffer = nullptr;
-//    
-//        cmd_buf.Write(CommandType::BindFramebuffer);
-//        cmd_buf.Write(&cmd1, sizeof(cmd1));
-//        
-//        ClearFramebufferCmdData cmd2;
-//        cmd2.clear_target = FramebufferClearTarget::COLOR;
-//        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-//        
-//        cmd_buf.Write(CommandType::ClearFramebuffer);
-//        cmd_buf.Write(&cmd2, sizeof(cmd2));
-//        
-//        cmd_buf.WriteEnd();
+        CommandBuffer& cmd_buf = context::get_renderer().command_buffer(cmd_buf_idx);
+        
+        BindFramebufferCmdData cmd1;
+        cmd1.framebuffer = nullptr;
+    
+        cmd_buf.Write(CommandType::BindFramebuffer);
+        cmd_buf.Write(&cmd1, sizeof(cmd1));
+        
+        ClearFramebufferCmdData cmd2;
+        cmd2.clear_target = FramebufferClearTarget::COLOR;
+        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+        
+        cmd_buf.Write(CommandType::ClearFramebuffer);
+        cmd_buf.Write(&cmd2, sizeof(cmd2));
+        
+        cmd_buf.WriteEnd();
         
         // TEST TEST TEST
         
@@ -142,7 +142,7 @@ namespace terminus {
         
         // TEST TEST TEST
         
-        //cmd_buf_idx = m_renderer.create_command_buffer();
+        cmd_buf_idx = context::get_renderer().create_command_buffer();
         
         // TEST TEST TEST
     }
@@ -162,8 +162,9 @@ namespace terminus {
 
 	void Application::initialize_resources()
 	{
+        filesystem::add_directory("assets");
         context::get_texture_cache().Initialize();
-		context::get_material_cache().Initialize()
+        context::get_material_cache().Initialize();
 		context::get_mesh_cache().Initialize();
 		context::get_shader_cache().Initialize();
         context::get_scene_cache().Initialize();

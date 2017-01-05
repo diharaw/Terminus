@@ -1,6 +1,8 @@
 #include "TextureFactory.h"
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
+namespace terminus
+{
 
 	TextureFactory::TextureFactory()
 	{
@@ -12,12 +14,12 @@ namespace terminus { namespace Resource {
 
 	}
 
-	void TextureFactory::Initialize(Terminus::Graphics::RenderDevice* device)
+	void TextureFactory::Initialize()
 	{
-		m_device = device;
+
 	}
 
-	Terminus::Graphics::Texture* TextureFactory::Create(AssetCommon::ImageLoadData* _data)
+	Texture* TextureFactory::Create(AssetCommon::ImageLoadData* _data)
 	{
         m_texture = nullptr;
         
@@ -39,7 +41,7 @@ namespace terminus { namespace Resource {
     TASK_METHOD_DEFINITION(TextureFactory, CreateGPUResourcesTask)
     {
         TextureGPUResourceCreateTask* task_data = (TextureGPUResourceCreateTask*)data;
-        m_texture = m_device->CreateTexture2D(task_data->width, task_data->height, task_data->data, TextureFormat::R8G8B8A8_UNORM, false);
+        m_texture = context::get_render_device().CreateTexture2D(task_data->width, task_data->height, task_data->data, TextureFormat::R8G8B8A8_UNORM, false);
     }
     
-} }
+}

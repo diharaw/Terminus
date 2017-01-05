@@ -3,9 +3,10 @@
 #include "../ECS/CameraComponent.h"
 #include "../ECS/MeshComponent.h"
 #include "../ECS/ScriptComponent.h"
+#include <Core/context.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	SceneFactory::SceneFactory()
 	{
 
@@ -16,17 +17,17 @@ namespace terminus { namespace Resource {
 
 	}
     
-    void SceneFactory::Initialize(MeshCache* meshCache)
+    void SceneFactory::Initialize()
     {
-        m_mesh_cache = meshCache;
+        
     }
 
-	ECS::Scene* SceneFactory::Create(AssetCommon::TextLoadData* _data)
+	Scene* SceneFactory::Create(AssetCommon::TextLoadData* _data)
 	{
 		JsonDocument doc;
 		doc.Parse(_data->buffer);
         
-        ECS::Scene* scene = new ECS::Scene();
+        Scene* scene = new Scene();
         
         if (doc.HasMember("scene_name"))
         {
@@ -39,7 +40,7 @@ namespace terminus { namespace Resource {
             for (rapidjson::SizeType i = 0; i < entities.Size(); i++)
             {
                 String entity_name = std::string(entities[i]["entity_name"].GetString());
-                ECS::Entity new_entity = scene->CreateEntity(entity_name);
+                Entity new_entity = scene->CreateEntity(entity_name);
                 
                 rapidjson::Value& components = doc["componentss"];
                 
@@ -70,9 +71,9 @@ namespace terminus { namespace Resource {
 		return nullptr;
 	}
     
-    void SceneFactory::CreateTransformComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene)
+    void SceneFactory::CreateTransformComponent(rapidjson::Value& value, Entity entity, Scene* scene)
     {
-        ECS::TransformComponent* component = (ECS::TransformComponent*)scene->AttachComponent(entity, ECS::TransformComponent::_id);
+        TransformComponent* component = (TransformComponent*)scene->AttachComponent(entity, TransformComponent::_id);
         rapidjson::Value& position = value["position"];
         
         component->position.x = position["x"].GetFloat();
@@ -97,9 +98,9 @@ namespace terminus { namespace Resource {
         }
     }
     
-    void SceneFactory::CreateCameraComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene)
+    void SceneFactory::CreateCameraComponent(rapidjson::Value& value, Entity entity, Scene* scene)
     {
-        ECS::CameraComponent* component = (ECS::CameraComponent*)scene->AttachComponent(entity, ECS::CameraComponent::_id);
+        CameraComponent* component = (CameraComponent*)scene->AttachComponent(entity, CameraComponent::_id);
         
         rapidjson::Value& projection_info = value["projection_info"];
         
@@ -110,9 +111,9 @@ namespace terminus { namespace Resource {
             String proj_type = String(projection_info["projection_type"].GetString());
             
             if(proj_type == "PERSPECTIVE")
-                component->camera.SetProjectionType(Terminus::Graphics::ProjectionType::PERSPECTIVE);
+                component->camera.SetProjectionType(ProjectionType::PERSPECTIVE);
             else
-                component->camera.SetProjectionType(Terminus::Graphics::ProjectionType::ORTHOGRAPHIC);
+                component->camera.SetProjectionType(ProjectionType::ORTHOGRAPHIC);
             
             component->camera.SetFoV(projection_info["field_of_view"].GetFloat());
             
@@ -135,13 +136,12 @@ namespace terminus { namespace Resource {
         }
     }
     
-    void SceneFactory::CreateMeshComponent(rapidjson::Value& value, ECS::Entity entity, ECS::Scene* scene)
+    void SceneFactory::CreateMeshComponent(rapidjson::Value& value, Entity entity, Scene* scene)
     {
-        ECS::MeshComponent* component = (ECS::MeshComponent*)scene->AttachComponent(entity, ECS::MeshComponent::_id);
+        MeshComponent* component = (MeshComponent*)scene->AttachComponent(entity, MeshComponent::_id);
         
-        component->mesh = m_mesh_cache->Load(std::string(value["mesh"].GetString()));
+        component->mesh = context::get_mesh_cache().Load(std::string(value["mesh"].GetString()));
         
         // TODO: Material Overrides
     }
-
-} }
+}

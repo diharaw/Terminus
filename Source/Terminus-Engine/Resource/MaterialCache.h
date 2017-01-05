@@ -13,13 +13,11 @@ namespace terminus
 	{
 	private:
 		std::unordered_map<std::string, Material*> m_MaterialMap;
-		TextureCache* m_TextureCache;
-		RenderDevice* m_device;
 
 	public:
 		MaterialCache();
 		~MaterialCache();
-		void Initialize(RenderDevice* device, TextureCache* textureCache);
+		void Initialize();
 		Material* Load(String key);
 		void Unload(Material* material);
 	};

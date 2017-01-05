@@ -50,4 +50,4 @@ namespace terminus
     {
         m_CallbackMap[_Type].push_back(_Callback);
     }
-}
+} // namespace terminus

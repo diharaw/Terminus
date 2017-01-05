@@ -2,8 +2,8 @@
 #include "AssetCommon.h"
 #include "../IO/FileSystem.h"
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	TextLoader::TextLoader()
 	{
 		REGISTER_EXTENSION("as");
@@ -35,5 +35,4 @@ namespace terminus { namespace Resource {
 
 		return nullptr;
 	}
-
-} }
+} // namespace terminus

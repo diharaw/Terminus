@@ -20,7 +20,6 @@ namespace terminus
 	class TextureFactory
 	{
 	private:
-		RenderDevice* m_device;
         Texture* m_texture;
         ThreadPool* m_rendering_thread_pool;
         TextureGPUResourceCreateTask m_task_data;
@@ -28,7 +27,7 @@ namespace terminus
 	public:
 		TextureFactory();
 		~TextureFactory();
-		void Initialize(RenderDevice* device);
+		void Initialize();
 
 		Texture* Create(AssetCommon::ImageLoadData* _data);
         

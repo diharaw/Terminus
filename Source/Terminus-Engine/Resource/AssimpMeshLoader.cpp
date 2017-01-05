@@ -3,8 +3,8 @@
 #include "AssimpMeshLoader.h"
 #include <iostream>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	AssimpMeshLoader::AssimpMeshLoader()
 	{
 		REGISTER_EXTENSION("obj");
@@ -196,5 +196,4 @@ namespace terminus { namespace Resource {
 
 		return false;
 	}
-
-} }
+} // namespace terminus

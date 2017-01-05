@@ -3,8 +3,8 @@
 #include "../Types.h"
 #include <iostream>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	TextureCache::TextureCache()
 	{
 
@@ -18,13 +18,12 @@ namespace terminus { namespace Resource {
 		}
 	}
 
-	void TextureCache::Initialize(Graphics::RenderDevice* device)
+	void TextureCache::Initialize()
 	{
-		m_device = device;
-		m_Factory.Initialize(device);
+	
 	}
 
-	Graphics::Texture* TextureCache::Load(std::string _ID)
+	Texture* TextureCache::Load(std::string _ID)
 	{
 		if (m_AssetMap.find(_ID) == m_AssetMap.end())
 		{
@@ -40,7 +39,7 @@ namespace terminus { namespace Resource {
 			{
 				AssetCommon::ImageLoadData* data = static_cast<AssetCommon::ImageLoadData*>(m_LoaderMap[extension]->Load(_ID));
 
-				Graphics::Texture* texture = m_Factory.Create(data);
+				Texture* texture = m_Factory.Create(data);
 				m_AssetMap[_ID] = texture;
 
 				free(data->bytes);
@@ -58,9 +57,8 @@ namespace terminus { namespace Resource {
 		}
 	}
 
-	void TextureCache::Unload(Graphics::Texture* texture)
+	void TextureCache::Unload(Texture* texture)
 	{
 
 	}
-
-} }
+}

@@ -12,12 +12,11 @@ namespace terminus
 		{
 		private:
 			std::unordered_map<String, Scene*> m_AssetMap;
-            MeshCache* m_mesh_cache;
 
 		public:
 			SceneCache();
 			~SceneCache();
-            void Initialize(MeshCache* meshCache);
+            void Initialize();
 			Scene* Load(String _ID);
 			void Unload(Scene* scene);
 		};

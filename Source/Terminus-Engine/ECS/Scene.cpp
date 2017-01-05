@@ -95,4 +95,4 @@ namespace terminus
 
 		m_component_pools[id]->RemoveComponent(entity);;
 	}
-}
+} // namespace terminus

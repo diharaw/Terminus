@@ -2,8 +2,8 @@
 #include "TransformComponent.h"
 #include "Scene.h"
 
-namespace terminus { namespace ECS {
-
+namespace terminus
+{
 	TransformSystem::TransformSystem() : ISystem()
 	{
 		
@@ -43,5 +43,4 @@ namespace terminus { namespace ECS {
 	{
 
 	}
-
-} }
+} // namespace terminus

@@ -2,8 +2,8 @@
 #include <iostream>
 #include "../IO/FileSystem.h"
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	RenderPassCache::RenderPassCache()
 	{
 
@@ -14,12 +14,12 @@ namespace terminus { namespace Resource {
 
 	}
 
-	void RenderPassCache::Initialize(Graphics::RenderDevice* device)
+	void RenderPassCache::Initialize()
 	{
-		m_Factory.Initialize(device);
+		
 	}
 
-	Graphics::RenderPass* RenderPassCache::Load(String key)
+	RenderPass* RenderPassCache::Load(String key)
 	{
 		if (m_RenderPassMap.find(key) == m_RenderPassMap.end())
 		{
@@ -33,7 +33,7 @@ namespace terminus { namespace Resource {
 			else
 			{
 				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(key));
-				Graphics::RenderPass* render_pass = m_Factory.Create(data);
+				RenderPass* render_pass = m_Factory.Create(data);
 				m_RenderPassMap[key] = render_pass;
 				return render_pass;
 			}
@@ -45,9 +45,9 @@ namespace terminus { namespace Resource {
 		}
 	}
 
-	void RenderPassCache::Unload(Graphics::RenderPass* renderPass)
+	void RenderPassCache::Unload(RenderPass* renderPass)
 	{
 		T_SAFE_DELETE(renderPass);
 	}
 
-} }
+} // namespace terminus

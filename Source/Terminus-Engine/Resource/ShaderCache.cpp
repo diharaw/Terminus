@@ -2,12 +2,14 @@
 #include "ShaderCache.h"
 #include "../IO/FileSystem.h"
 #include <iostream>
+#include <Core/context.h>
+#include <Resource/TextLoader.h>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 		ShaderCache::ShaderCache()
 		{
-
+            RegisterLoader<TextLoader>();
 		}
 
 		ShaderCache::~ShaderCache()
@@ -15,10 +17,9 @@ namespace terminus { namespace Resource {
 
 		}
 
-		void ShaderCache::Initialize(Graphics::RenderDevice* device)
+		void ShaderCache::Initialize()
 		{
-			m_device = device;
-            
+         
 #if defined(TERMINUS_OPENGL)
             std::string extension = "glsl";
 #else defined(TERMINUS_DIRECT3D11)
@@ -36,14 +37,14 @@ namespace terminus { namespace Resource {
             else
             {
                 // Vertex Template
-                name = "vertex_template.";
+                name = "shader/vs_template.";
                 name += extension;
                 
                 data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
                 vertex_template = String(data->buffer);
 
                 // Pixel Template
-                name = "pixel_template.";
+                name = "shader/ps_template.";
                 name += extension;
                 
                 data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
@@ -51,20 +52,20 @@ namespace terminus { namespace Resource {
             }
             
             
-			m_Factory.Initialize(device, vertex_template, pixel_template);
+			m_Factory.Initialize(vertex_template, pixel_template);
 		}
 
-		Graphics::ShaderProgram* ShaderCache::Load(const char* _vertexID,
+		ShaderProgram* ShaderCache::Load(const char* _vertexID,
 												   const char* _pixelID,
 												   const char* _geometryID,
 												   const char* _tessevalID,
 												   const char* _tesscontrolID)
 		{
-			Graphics::Shader* vertex;
-			Graphics::Shader* pixel; 
-			Graphics::Shader* geometry;
-			Graphics::Shader* tess_eval;
-			Graphics::Shader* tess_control;
+			Shader* vertex;
+			Shader* pixel;
+			Shader* geometry;
+			Shader* tess_eval;
+			Shader* tess_control;
 
 #if defined(TERMINUS_OPENGL)
 			std::string extension = ".glsl";
@@ -222,7 +223,7 @@ namespace terminus { namespace Resource {
 					tess_control = nullptr;
 			}
 			
-			Graphics::ShaderProgram* program = m_device->CreateShaderProgram(vertex, pixel, geometry, tess_control, tess_eval);
+			ShaderProgram* program = context::get_render_device().CreateShaderProgram(vertex, pixel, geometry, tess_control, tess_eval);
 
 			if (program)
 			{
@@ -242,7 +243,7 @@ namespace terminus { namespace Resource {
 				return nullptr;
 		}
 
-		Graphics::ShaderProgram* ShaderCache::Load(ShaderKey key)
+		ShaderProgram* ShaderCache::Load(ShaderKey key)
 		{
             if (m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
             {
@@ -277,17 +278,17 @@ namespace terminus { namespace Resource {
                 defines.push_back(SHADER_DEF_APPLE);
             #endif
                 
-                Graphics::Shader* vertex = m_Factory.Create(defines, ShaderType::VERTEX);
+                Shader* vertex = m_Factory.Create(defines, ShaderType::VERTEX);
                 
                 if(!vertex)
                     return nullptr;
                 
-                Graphics::Shader* pixel = m_Factory.Create(defines, ShaderType::PIXEL);
+                Shader* pixel = m_Factory.Create(defines, ShaderType::PIXEL);
                 
                 if(!pixel)
                     return nullptr;
                 
-                Graphics::ShaderProgram* program = m_device->CreateShaderProgram(vertex, pixel, nullptr, nullptr, nullptr);
+                ShaderProgram* program = context::get_render_device().CreateShaderProgram(vertex, pixel, nullptr, nullptr, nullptr);
                 
                 if(!program)
                     return program;
@@ -298,10 +299,10 @@ namespace terminus { namespace Resource {
                 return m_ShaderProgramKeyMap[key._key];
 		}
 
-		void ShaderCache::Unload(Graphics::ShaderProgram* program)
+		void ShaderCache::Unload(ShaderProgram* program)
 		{
 			// TODO : erase from map
-			m_device->DestoryShaderProgram(program);
+			context::get_render_device().DestoryShaderProgram(program);
 		}
 
-} }
+} // namespace terminus

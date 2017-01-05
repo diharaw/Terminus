@@ -36,4 +36,4 @@ namespace terminus
 	{
 
 	}
-}
+} // namespace terminus

@@ -5,8 +5,8 @@
 #include <stb_image.h>
 #include <iostream>
 
-namespace terminus { namespace Resource {
-
+namespace terminus
+{
 	StbImageLoader::StbImageLoader()
 	{
 		REGISTER_EXTENSION("png");
@@ -46,5 +46,4 @@ namespace terminus { namespace Resource {
 
 		return nullptr;
 	}
-
-} }
+}

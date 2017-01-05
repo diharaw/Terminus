@@ -1,4 +1,5 @@
 #include <Graphics/render_device_gl.h>
+#include <Core/context.h>
 #include <Utility/StringUtility.h>
 #include <iostream>
 
@@ -28,7 +29,7 @@ namespace terminus
 
 	void RenderDevice::Initialize()
 	{
-		m_window = platform::get_window();
+        m_window = context::get_platform().get_window();
         
 #ifdef __APPLE__
         SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -1648,8 +1649,9 @@ namespace terminus
 
 	void RenderDevice::SetViewport(int width, int height, int topLeftX, int topLeftY)
 	{
+        // TODO : Cache pointer.
 		glViewport(topLeftX,
-			      (platform::get_height() - (height + topLeftY)),
+			      (context::get_platform().get_height() - (height + topLeftY)),
 				   width,
 				   height);
 	}
