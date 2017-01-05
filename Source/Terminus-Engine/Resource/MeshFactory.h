@@ -12,6 +12,7 @@ namespace terminus
 {
     struct MeshGPUResourcesTaskData
     {
+        Mesh* mesh;
         VertexBuffer* vertexBuffer;
         IndexBuffer* indexBuffer;
         InputLayoutType layoutType;
@@ -26,10 +27,8 @@ namespace terminus
 	class MeshFactory
 	{
 	private:
-        VertexArray* m_mesh_vertex_array;
         ThreadPool* m_rendering_thread_pool;
         MeshGPUResourcesTaskData m_task_data;
-        bool m_task_sucess;
 
 	public:
 		MeshFactory();

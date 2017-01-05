@@ -110,15 +110,14 @@ namespace terminus
 #endif
         }
         
-        inline String* open_file_dialog(String _Extensions, String _DefaultPath = "")
+        inline String open_file_dialog(String _Extensions, String _DefaultPath = "")
         {
 #if !defined(TERMINUS_PLATFORM_IOS)
             char* openPath = NULL;
             nfdresult_t result = NFD_OpenDialog(_Extensions.c_str(), _DefaultPath.c_str(), &openPath);
             if (result == NFD_OKAY)
             {
-                String* openPathStr = new String(openPath);
-                return openPathStr;
+                return String(openPath);
             }
             else
                 return nullptr;
@@ -127,15 +126,14 @@ namespace terminus
 #endif
         }
         
-        inline String* save_file_dialog(String _Extensions, String _DefaultPath = "")
+        inline String save_file_dialog(String _Extensions, String _DefaultPath = "")
         {
 #if !defined(TERMINUS_PLATFORM_IOS)
             char* savePath = NULL;
             nfdresult_t result = NFD_SaveDialog(_Extensions.c_str(), _DefaultPath.c_str(), &savePath);
             if (result == NFD_OKAY)
             {
-                String* savePathStr = new String(savePath);
-                return savePathStr;
+                return String(savePath);
             }
             else
                 return nullptr;

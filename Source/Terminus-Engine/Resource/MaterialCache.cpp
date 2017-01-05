@@ -7,7 +7,7 @@ namespace terminus
 {
 	MaterialCache::MaterialCache()
 	{
-
+        filesystem::add_directory("assets/material");
 	}
 
 	MaterialCache::~MaterialCache()

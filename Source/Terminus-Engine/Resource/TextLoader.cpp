@@ -13,6 +13,7 @@ namespace terminus
 		REGISTER_EXTENSION("cfg");
 		REGISTER_EXTENSION("ini");
 		REGISTER_EXTENSION("txt");
+        REGISTER_EXTENSION("json");
 	}
 
 	TextLoader::~TextLoader()

@@ -40,9 +40,6 @@ namespace terminus
 
 	public:
 		void InitializeScene(Scene* scene);
-        EVENT_METHOD_DECLARATION(OnSceneLoad);
-        EVENT_METHOD_DECLARATION(OnScenePreload);
-
 	};
 
 }

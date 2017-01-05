@@ -6,10 +6,6 @@ namespace terminus
 	SceneManager::SceneManager()
 	{
 		m_thread_pool.Initialize(1);
-        
-        EventCallback callback;
-        callback.Bind<SceneManager, &SceneManager::OnSceneLoad>(this);
-        EventHandler::RegisterListener(SceneLoadEvent::sk_Type, callback);
 	}
 
 	SceneManager::~SceneManager()
@@ -38,9 +34,11 @@ namespace terminus
 	{
 		TaskData* task = m_thread_pool.CreateTask();
 
-		task->function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
 		SceneLoadData* data = new SceneLoadData();
 		data->scene_name = scene;
+        
+        task->function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
+        task->data = data;
 
 		m_thread_pool.Submit();
 	}
@@ -86,16 +84,4 @@ namespace terminus
 	{
 
 	}
-    
-    EVENT_METHOD_DEFINITION(SceneManager, OnSceneLoad)
-    {
-        SceneLoadEvent* event_data = (SceneLoadEvent*)event;
-        InitializeScene(event_data->GetScene());
-    }
-    
-    EVENT_METHOD_DEFINITION(SceneManager, OnScenePreload)
-    {
-        ScenePreloadEvent* event_data = (ScenePreloadEvent*)event;
-        InitializeScene(event_data->GetScene());
-    }
 } // namespace terminus

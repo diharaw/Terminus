@@ -7,7 +7,10 @@
 namespace terminus {
     
     TERMINUS_PROFILER_INSTANCE
-
+    
+    String scene_path = "";
+    bool file_dialog = false;
+    
     // TEST TEST TEST
     
     int cmd_buf_idx;
@@ -16,8 +19,16 @@ namespace terminus {
     
 	Application::Application()
 	{
-        
+        EventCallback callback;
+        callback.Bind<Application, &Application::OnScenePreload>(this);
+        EventHandler::RegisterListener(ScenePreloadEvent::sk_Type, callback);
 	}
+    
+    EVENT_METHOD_DEFINITION(Application, OnScenePreload)
+    {
+        ScenePreloadEvent* event_data = (ScenePreloadEvent*)event;
+        std::cout << "Scene Load Complete" << std::endl;
+    }
 
 	Application::~Application()
 	{
@@ -57,6 +68,12 @@ namespace terminus {
             submit_rendering();
 			platform.update();
             EventHandler::Update();
+            
+            if(file_dialog)
+            {
+                scene_path = platform::open_file_dialog("json");
+                file_dialog = false;
+            }
             
             // Synchronize Rendering Thread
             m_rendering_thread_pool->Wait();
@@ -124,7 +141,38 @@ namespace terminus {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::new_frame();
         static bool testWin = true;
-        ImGui::ShowTestWindow(&testWin);
+        //ImGui::ShowTestWindow(&testWin);
+        
+        // TEST
+
+        ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
+        ImGui::Begin("Scene Load", &testWin, 0);
+        
+        ImGui::Text("%s", scene_path.c_str());
+        
+        ImGui::SameLine();
+        
+        if(ImGui::Button("Browse..."))
+        {
+            file_dialog = true;
+        }
+        if(ImGui::Button("Load Scene"))
+        {
+            if(scene_path != "")
+            {
+                String trimmed_path = filesystem::get_file_name_and_extention(scene_path);
+                std::cout << "Trimmed Path : " << trimmed_path << std::endl;
+                context::get_scene_manager().Preload(trimmed_path);
+            }
+            else
+            {
+                std::cout << "Invalid Path" << std::endl;
+            }
+        }
+        
+        ImGui::End();
+        // TEST
+        
 #endif
         context::get_renderer().submit();
         
@@ -162,7 +210,6 @@ namespace terminus {
 
 	void Application::initialize_resources()
 	{
-        filesystem::add_directory("assets");
         context::get_texture_cache().Initialize();
         context::get_material_cache().Initialize();
 		context::get_mesh_cache().Initialize();

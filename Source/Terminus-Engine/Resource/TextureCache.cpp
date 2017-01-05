@@ -7,7 +7,7 @@ namespace terminus
 {
 	TextureCache::TextureCache()
 	{
-
+        filesystem::add_directory("assets/texture");
 	}
 
 	TextureCache::~TextureCache()

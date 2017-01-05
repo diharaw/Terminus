@@ -42,23 +42,23 @@ namespace terminus
                 String entity_name = std::string(entities[i]["entity_name"].GetString());
                 Entity new_entity = scene->CreateEntity(entity_name);
                 
-                rapidjson::Value& components = doc["componentss"];
+                rapidjson::Value& components = entities[i]["components"];
                 
-                for (rapidjson::SizeType j = 0; i < components.Size(); j++)
+                for (rapidjson::SizeType j = 0; j < components.Size(); j++)
                 {
-                    String component_type = std::string(components[i]["component_type"].GetString());
+                    String component_type = std::string(components[j]["component_type"].GetString());
                     
                     if(component_type == "TRANSFORM")
                     {
-                        CreateTransformComponent(components[i], new_entity,scene);
+                        CreateTransformComponent(components[j], new_entity,scene);
                     }
                     else if(component_type == "CAMERA")
                     {
-                        CreateCameraComponent(components[i], new_entity, scene);
+                        CreateCameraComponent(components[j], new_entity, scene);
                     }
                     else if(component_type == "MESH")
                     {
-                        CreateMeshComponent(components[i], new_entity, scene);
+                        CreateMeshComponent(components[j], new_entity, scene);
                     }
                 }
                 
@@ -120,7 +120,7 @@ namespace terminus
             float aspect_x = projection_info["aspect_ratio_x"].GetFloat();
             float aspect_y = projection_info["aspect_ratio_y"].GetFloat();
             
-            component->camera.SetAspectRatio(aspect_x / aspect_y);
+            //component->camera.SetAspectRatio(aspect_x / aspect_y);
         }
         
         component->is_active = value["is_active"].GetBool();

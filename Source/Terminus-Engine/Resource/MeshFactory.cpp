@@ -1,5 +1,6 @@
 #include "MeshFactory.h"
 #include <Core/context.h>
+#include <Utility/Remotery.h>
 
 namespace terminus
 {
@@ -15,14 +16,16 @@ namespace terminus
 
 		void MeshFactory::Initialize()
 		{
-			
+            
 		}
 
 		Mesh* MeshFactory::Create(AssetCommon::MeshLoadData* _Data)
 		{
-            m_mesh_vertex_array = nullptr;
-            m_task_sucess = true;
+            TERMINUS_BEGIN_CPU_PROFILE(CreateMesh);
             
+            Mesh* mesh = new Mesh();
+            
+            m_task_data.mesh = mesh;
             m_task_data.index_buffer_data = &_Data->indices[0];
             m_task_data.index_buffer_size = sizeof(uint) * _Data->header.m_IndexCount;
             m_task_data.usageType = BufferUsageType::STATIC;
@@ -45,31 +48,27 @@ namespace terminus
             TaskData* task = m_rendering_thread_pool->CreateTask();
             task->data = (void*)&m_task_data;
             task->function.Bind<MeshFactory, &MeshFactory::CreateGPUResourcesTask>(this);
-            m_rendering_thread_pool->SubmitAndWait();
+            m_rendering_thread_pool->Submit();
 
-            if(m_task_sucess)
+
+            mesh->SubMeshes = new SubMesh[_Data->header.m_MeshCount];
+            mesh->m_MinExtents = _Data->header.m_MinExtents;
+            mesh->m_MaxExtents = _Data->header.m_MaxExtents;
+                
+            for (int i = 0; i < _Data->header.m_MeshCount; i++)
             {
-                Mesh* mesh = new Mesh();
-                mesh->SubMeshes = new SubMesh[_Data->header.m_MeshCount];
-                mesh->m_MinExtents = _Data->header.m_MinExtents;
-                mesh->m_MaxExtents = _Data->header.m_MaxExtents;
-                
-                for (int i = 0; i < _Data->header.m_MeshCount; i++)
-                {
-                    mesh->SubMeshes[i].m_BaseIndex = _Data->meshes[i].m_BaseIndex;
-                    mesh->SubMeshes[i].m_IndexCount = _Data->meshes[i].m_IndexCount;
-                    mesh->SubMeshes[i].m_BaseVertex = _Data->meshes[i].m_BaseVertex;
-                    mesh->SubMeshes[i].m_MinExtents = _Data->meshes[i].m_MinExtents;
-                    mesh->SubMeshes[i].m_MaxExtents = _Data->meshes[i].m_MaxExtents;
-                }
-                
-                mesh->VertexArray = m_mesh_vertex_array;
-                T_SAFE_DELETE(_Data);
-                
-                return mesh;
+                mesh->SubMeshes[i].m_BaseIndex = _Data->meshes[i].m_BaseIndex;
+                mesh->SubMeshes[i].m_IndexCount = _Data->meshes[i].m_IndexCount;
+                mesh->SubMeshes[i].m_BaseVertex = _Data->meshes[i].m_BaseVertex;
+                mesh->SubMeshes[i].m_MinExtents = _Data->meshes[i].m_MinExtents;
+                mesh->SubMeshes[i].m_MaxExtents = _Data->meshes[i].m_MaxExtents;
             }
             
-			return nullptr;
+            T_SAFE_DELETE(_Data);
+            
+            TERMINUS_END_CPU_PROFILE;
+            
+            return mesh;
 		}
     
         TASK_METHOD_DEFINITION(MeshFactory, CreateGPUResourcesTask)
@@ -81,7 +80,6 @@ namespace terminus
             
             if(!indexBuffer)
             {
-                m_task_sucess = false;
                 return;
             }
             
@@ -89,15 +87,13 @@ namespace terminus
             
             if(!vertexBuffer)
             {
-                m_task_sucess = false;
                 return;
             }
             
-            m_mesh_vertex_array = device.CreateVertexArray(vertexBuffer, indexBuffer, task_data->layoutType);
+            task_data->mesh->VertexArray = device.CreateVertexArray(vertexBuffer, indexBuffer, task_data->layoutType);
             
-            if(!m_mesh_vertex_array)
+            if(!task_data->mesh->VertexArray)
             {
-                m_task_sucess = false;
                 return;
             }
         }

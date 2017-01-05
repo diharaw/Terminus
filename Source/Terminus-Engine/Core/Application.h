@@ -100,6 +100,8 @@ namespace terminus {
         TASK_METHOD_DECLARATION(graphics_initialize_task);
         TASK_METHOD_DECLARATION(graphics_shutdown_task);
         TASK_METHOD_DECLARATION(rendering_task);
+        
+        EVENT_METHOD_DECLARATION(OnScenePreload);
 	};
 
 }

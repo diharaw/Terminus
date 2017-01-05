@@ -2,12 +2,14 @@
 #include "../IO/FileSystem.h"
 #include <iostream>
 #include <Core/context.h>
+#include <Resource/TSMLoader.h>
 
 namespace terminus
 {
 	MeshCache::MeshCache()
 	{
-        
+        RegisterLoader<TSMLoader>();
+        filesystem::add_directory("assets/mesh");
 	}
 
 	MeshCache::~MeshCache()
@@ -72,8 +74,6 @@ namespace terminus
 
 				if (data->materials)
 					free(data->materials);
-
-				free(data);
 
 				std::cout << "Asset successfully loaded" << std::endl;
 

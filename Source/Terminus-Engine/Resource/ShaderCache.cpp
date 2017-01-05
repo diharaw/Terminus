@@ -10,6 +10,7 @@ namespace terminus
 		ShaderCache::ShaderCache()
 		{
             RegisterLoader<TextLoader>();
+            filesystem::add_directory("assets/shader");
 		}
 
 		ShaderCache::~ShaderCache()
@@ -37,14 +38,14 @@ namespace terminus
             else
             {
                 // Vertex Template
-                name = "shader/vs_template.";
+                name = "vs_template.";
                 name += extension;
                 
                 data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
                 vertex_template = String(data->buffer);
 
                 // Pixel Template
-                name = "shader/ps_template.";
+                name = "ps_template.";
                 name += extension;
                 
                 data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));

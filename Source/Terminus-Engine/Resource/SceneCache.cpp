@@ -1,11 +1,13 @@
 #include "SceneCache.h"
 #include "../IO/FileSystem.h"
+#include <Resource/TextLoader.h>
 
 namespace terminus
 {
 	SceneCache::SceneCache()
 	{
-
+        RegisterLoader<TextLoader>();
+        filesystem::add_directory("assets/scene");
 	}
 
 	SceneCache::~SceneCache()
