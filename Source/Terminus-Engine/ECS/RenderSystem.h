@@ -63,7 +63,7 @@ namespace terminus
         uint16                  m_view_count;
         RenderableArray         m_renderables;
         uint16                  m_renderable_count;
-        ThreadPool*             m_thread_pool;
+        DefaultThreadPool*      m_thread_pool;
         Renderer*     m_renderer;
         ShaderCache*  m_shader_cache;
         

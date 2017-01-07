@@ -21,7 +21,7 @@ namespace terminus
 	{
 	private:
         Texture* m_texture;
-        ThreadPool* m_rendering_thread_pool;
+        RenderingThreadPool* m_rendering_thread_pool;
         TextureGPUResourceCreateTask m_task_data;
 
 	public:

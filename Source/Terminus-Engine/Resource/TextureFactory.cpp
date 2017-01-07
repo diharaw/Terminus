@@ -27,15 +27,14 @@ namespace terminus
         m_task_data.width = _data->width;
         m_task_data.height = _data->height;
         
-        TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->data = (void*)&m_task_data;
-        task->function.Bind<TextureFactory, &TextureFactory::CreateGPUResourcesTask>(this);
-        m_rendering_thread_pool->SubmitAndWait();
+        Task task;
         
-        if(m_texture)
-            return m_texture;
+        TextureGPUResourceCreateTask* data = task_data<TextureGPUResourceCreateTask>(task);
+        data = &m_task_data;
+        task._function.Bind<TextureFactory, &TextureFactory::CreateGPUResourcesTask>(this);
+        m_rendering_thread_pool->enqueue(task);
         
-        return nullptr;
+        return m_texture;
 	}
 
     TASK_METHOD_DEFINITION(TextureFactory, CreateGPUResourcesTask)

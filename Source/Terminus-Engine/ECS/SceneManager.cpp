@@ -5,7 +5,7 @@ namespace terminus
 {
 	SceneManager::SceneManager()
 	{
-		m_thread_pool.Initialize(1);
+		
 	}
 
 	SceneManager::~SceneManager()
@@ -21,26 +21,29 @@ namespace terminus
 
 	void SceneManager::Load(String scene)
 	{
-		TaskData* task = m_thread_pool.CreateTask();
+        Task task;
 
-		task->function.Bind<SceneManager, &SceneManager::SceneLoadTask>(this);
-		SceneLoadData* data = new SceneLoadData();
+        ResourceThreadPool* thread_pool = Global::GetResourceThreadPool();
+        
+		task._function.Bind<SceneManager, &SceneManager::SceneLoadTask>(this);
+        SceneLoadData* data = task_data<SceneLoadData>(task);
 		data->scene_name = scene;
 		
-		m_thread_pool.Submit();
+		thread_pool->enqueue(task);
 	}
 
 	void SceneManager::Preload(String scene)
 	{
-		TaskData* task = m_thread_pool.CreateTask();
+        Task task;
+        
+        ResourceThreadPool* thread_pool = Global::GetResourceThreadPool();
 
-		SceneLoadData* data = new SceneLoadData();
+        SceneLoadData* data = task_data<SceneLoadData>(task);
 		data->scene_name = scene;
         
-        task->function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
-        task->data = data;
+        task._function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
 
-		m_thread_pool.Submit();
+		thread_pool->enqueue(task);
 	}
 
 	void SceneManager::SetActiveScene(String scene)

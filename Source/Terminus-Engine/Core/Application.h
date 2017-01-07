@@ -75,8 +75,8 @@ namespace terminus {
 	class Application
 	{
 	private:
-		ThreadPool*					   m_main_thread_pool;
-        ThreadPool*                    m_rendering_thread_pool;
+		DefaultThreadPool*   _main_thread_pool;
+        RenderingThreadPool* _rendering_thread_pool;
         
 	public:
 		Application();

@@ -37,8 +37,8 @@ namespace terminus {
     
 	bool Application::initialize()
 	{
-		m_main_thread_pool = Global::GetDefaultThreadPool();
-        m_rendering_thread_pool = Global::GetRenderingThreadPool();
+		_main_thread_pool = Global::GetDefaultThreadPool();
+        _rendering_thread_pool = Global::GetRenderingThreadPool();
         
         TERMINUS_CREATE_PROFILER
 
@@ -76,7 +76,7 @@ namespace terminus {
             }
             
             // Synchronize Rendering Thread
-            m_rendering_thread_pool->Wait();
+            _rendering_thread_pool->wait();
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
@@ -99,18 +99,19 @@ namespace terminus {
     {
         TERMINUS_BEGIN_CPU_PROFILE(submit_rendering);
 
-        TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->function.Bind<Application, &Application::rendering_task>(this);
-        m_rendering_thread_pool->Submit();
+        Task task;
+        task._function.Bind<Application, &Application::rendering_task>(this);
+        _rendering_thread_pool->enqueue(task);
 
         TERMINUS_END_CPU_PROFILE
     }
     
     void Application::shutdown_graphics()
     {
-        TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->function.Bind<Application, &Application::graphics_shutdown_task>(this);
-        m_rendering_thread_pool->SubmitAndWait();
+        Task task;
+        task._function.Bind<Application, &Application::graphics_shutdown_task>(this);
+        _rendering_thread_pool->enqueue(task);
+        _rendering_thread_pool->wait();
     }
     
     TASK_METHOD_DEFINITION(Application, rendering_task)
@@ -219,9 +220,10 @@ namespace terminus {
 
 	void Application::initialize_graphics()
 	{
-        TaskData* task = m_rendering_thread_pool->CreateTask();
-        task->function.Bind<Application, &Application::graphics_initialize_task>(this);
-        m_rendering_thread_pool->SubmitAndWait();
+        Task task;
+        task._function.Bind<Application, &Application::graphics_initialize_task>(this);
+        _rendering_thread_pool->enqueue(task);
+        _rendering_thread_pool->wait();
 	}
 
 	void Application::initialize_physics()

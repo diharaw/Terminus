@@ -24,7 +24,6 @@ namespace terminus
 		SceneMap 						 m_scene_map;
 		Scene* 							 m_active_scene;
 		Scene* 							 m_preload_scene;
-		ThreadPool						 m_thread_pool;
 
 	public:
 		SceneManager();

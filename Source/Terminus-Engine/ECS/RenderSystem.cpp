@@ -114,8 +114,7 @@ namespace terminus
     {
         m_renderer->uniform_allocator()->Clear();
         
-        int worker_count = m_thread_pool->WorkerThreadCount();
-        LinearAllocator* per_frame_alloc = Global::GetPerFrameAllocator();
+        int worker_count = m_thread_pool->get_num_worker_threads();
         
         // Assign views to threads and frustum cull, sort and fill command buffers in parallel.
         
@@ -138,18 +137,19 @@ namespace terminus
                 items_per_thread = remaining_items;
             }
             
-            TaskData* task = m_thread_pool->CreateTask();
-            RenderPrepareTaskData* data = per_frame_alloc->NewPerFrame<RenderPrepareTaskData>();
+            Task task;
+            RenderPrepareTaskData* data = task_data<RenderPrepareTaskData>(task);
     
             data->_scene_index = scene_index++;
             
-            task->data = data;
-            task->function.Bind<RenderSystem, &RenderSystem::RenderPrepareTask>(this);
+            task._function.Bind<RenderSystem, &RenderSystem::RenderPrepareTask>(this);
             
             submitted_items += items_per_thread;
+            
+            m_thread_pool->enqueue(task);
         }
         
-        m_thread_pool->SubmitAndWait();
+        m_thread_pool->wait();
     }
     
     void RenderSystem::Shutdown()

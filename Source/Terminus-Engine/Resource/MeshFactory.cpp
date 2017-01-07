@@ -23,32 +23,34 @@ namespace terminus
 		{
             TERMINUS_BEGIN_CPU_PROFILE(CreateMesh);
             
+            Task task;
+            MeshGPUResourcesTaskData* data = task_data<MeshGPUResourcesTaskData>(task);
+            
             Mesh* mesh = new Mesh();
             
-            m_task_data.mesh = mesh;
-            m_task_data.index_buffer_data = &_Data->indices[0];
-            m_task_data.index_buffer_size = sizeof(uint) * _Data->header.m_IndexCount;
-            m_task_data.usageType = BufferUsageType::STATIC;
+            data->mesh = mesh;
+            data->index_buffer_data = &_Data->indices[0];
+            data->index_buffer_size = sizeof(uint) * _Data->header.m_IndexCount;
+            data->usageType = BufferUsageType::STATIC;
             
 			if (_Data->IsSkeletal)
 			{
-                m_task_data.vertex_buffer_data = &_Data->skeletalVertices[0];
-                m_task_data.vertex_buffer_size = sizeof(SkeletalVertex) * _Data->header.m_VertexCount;
-                m_task_data.layout = nullptr;
-                m_task_data.layoutType = InputLayoutType::STANDARD_SKINNED_VERTEX;
+                data->vertex_buffer_data = &_Data->skeletalVertices[0];
+                data->vertex_buffer_size = sizeof(SkeletalVertex) * _Data->header.m_VertexCount;
+                data->layout = nullptr;
+                data->layoutType = InputLayoutType::STANDARD_SKINNED_VERTEX;
 			}
 			else
 			{
-                m_task_data.vertex_buffer_data = &_Data->vertices[0];
-                m_task_data.vertex_buffer_size = sizeof(Vertex) * _Data->header.m_VertexCount;
-                m_task_data.layout = nullptr;
-                m_task_data.layoutType = InputLayoutType::STANDARD_VERTEX;
+                data->vertex_buffer_data = &_Data->vertices[0];
+                data->vertex_buffer_size = sizeof(Vertex) * _Data->header.m_VertexCount;
+                data->layout = nullptr;
+                data->layoutType = InputLayoutType::STANDARD_VERTEX;
 			}
+        
             
-            TaskData* task = m_rendering_thread_pool->CreateTask();
-            task->data = (void*)&m_task_data;
-            task->function.Bind<MeshFactory, &MeshFactory::CreateGPUResourcesTask>(this);
-            m_rendering_thread_pool->Submit();
+            task._function.Bind<MeshFactory, &MeshFactory::CreateGPUResourcesTask>(this);
+            m_rendering_thread_pool->enqueue(task);
 
 
             mesh->SubMeshes = new SubMesh[_Data->header.m_MeshCount];

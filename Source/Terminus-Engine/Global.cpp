@@ -11,8 +11,9 @@ namespace terminus
         void* g_per_frame_memory = nullptr;
         LinearAllocator* g_allocator = nullptr;
         LinearAllocator* g_per_frame_allocator = nullptr;
-        ThreadPool*   g_thread_pool = nullptr;
-        ThreadPool*   g_rendering_thread_pool = nullptr;
+        DefaultThreadPool*   g_thread_pool = nullptr;
+        RenderingThreadPool* g_rendering_thread_pool = nullptr;
+        ResourceThreadPool*  g_resource_thread_pool = nullptr;
         Context* g_context = nullptr;
         
         void Initialize()
@@ -23,11 +24,11 @@ namespace terminus
             g_per_frame_memory = malloc(MAX_PER_FRAME_MEMORY);
             g_per_frame_allocator = new LinearAllocator(MAX_PER_FRAME_MEMORY, g_per_frame_memory);
             
-			g_thread_pool = T_NEW ThreadPool();
-			g_thread_pool->Initialize();
+			g_thread_pool = T_NEW DefaultThreadPool();
             
-            g_rendering_thread_pool = T_NEW ThreadPool();
-            g_rendering_thread_pool->Initialize(1);
+            g_rendering_thread_pool = T_NEW RenderingThreadPool();
+            
+            g_resource_thread_pool = T_NEW ResourceThreadPool();
             
             g_context = T_NEW Context();
         }
@@ -47,14 +48,19 @@ namespace terminus
             return g_per_frame_allocator;
         }
         
-        ThreadPool* GetDefaultThreadPool()
+        DefaultThreadPool* GetDefaultThreadPool()
         {
             return g_thread_pool;
         }
         
-        ThreadPool* GetRenderingThreadPool()
+        RenderingThreadPool* GetRenderingThreadPool()
         {
             return g_rendering_thread_pool;
+        }
+        
+        ResourceThreadPool* GetResourceThreadPool()
+        {
+            return g_resource_thread_pool;
         }
         
         void Shutdown()

@@ -4,7 +4,7 @@
 #define TERMINUS_GLOBAL_H
 
 #include "Memory/LinearAllocator.h"
-#include "Thread/ThreadPool.h"
+#include "Thread/thread_pool.h"
 
 #define MB_IN_BYTES 1024*1024
 #define MAX_MEMORY_MB 200
@@ -17,13 +17,18 @@ extern void* operator new (size_t size, unsigned line, const char* file);
 
 namespace terminus
 {
+    using DefaultThreadPool = ThreadPool<0, 1000>;
+    using ResourceThreadPool = ThreadPool<1, 200>;
+    using RenderingThreadPool = ThreadPool<1, 100>;
+    
     namespace Global
     {
         extern void Initialize();
         extern LinearAllocator* GetDefaultAllocator();
         extern LinearAllocator* GetPerFrameAllocator();
-        extern ThreadPool*   GetDefaultThreadPool();
-        extern ThreadPool*   GetRenderingThreadPool();
+        extern DefaultThreadPool*   GetDefaultThreadPool();
+        extern RenderingThreadPool*   GetRenderingThreadPool();
+        extern ResourceThreadPool*   GetResourceThreadPool();
         extern void Shutdown();
     }
 }
