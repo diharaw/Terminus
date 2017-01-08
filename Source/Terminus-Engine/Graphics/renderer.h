@@ -59,6 +59,7 @@ namespace terminus
         Renderer();
         ~Renderer();
         void initialize();
+        void shutdown();
         void submit();
         void swap();
         uint32 create_command_buffer();

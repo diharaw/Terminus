@@ -25,6 +25,16 @@ namespace terminus
         _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
     }
     
+    void Renderer::shutdown()
+    {
+        RenderDevice& device = context::get_render_device();
+        
+        device.DestroyUniformBuffer(_per_frame_buffer);
+        device.DestroyUniformBuffer(_per_draw_buffer);
+        device.DestroyUniformBuffer(_per_draw_material_buffer);
+        device.DestroyUniformBuffer(_per_draw_bone_offsets_buffer);
+    }
+    
     void Renderer::submit()
     {
         RenderDevice& device = context::get_render_device();
