@@ -15,7 +15,7 @@ namespace terminus
 
 	struct SceneLoadData
 	{
-		String scene_name;
+		char scene_name[100];
 	};
 
 	class SceneManager

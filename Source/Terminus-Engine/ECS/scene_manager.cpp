@@ -27,7 +27,7 @@ namespace terminus
         
 		task._function.Bind<SceneManager, &SceneManager::SceneLoadTask>(this);
         SceneLoadData* data = task_data<SceneLoadData>(task);
-		data->scene_name = scene;
+		strcpy(data->scene_name, scene.c_str());
 		
 		thread_pool->enqueue(task);
 	}
@@ -39,8 +39,10 @@ namespace terminus
         ResourceThreadPool* thread_pool = Global::GetResourceThreadPool();
 
         SceneLoadData* data = task_data<SceneLoadData>(task);
-		data->scene_name = scene;
-        
+
+		const char* name = scene.c_str();
+		strcpy(&data->scene_name[0], name);
+
         task._function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
 
 		thread_pool->enqueue(task);
@@ -59,7 +61,7 @@ namespace terminus
 	void SceneManager::SceneLoadTask(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = context::get_scene_cache().Load(load_data->scene_name);
+		Scene* loaded = context::get_scene_cache().Load(String(load_data->scene_name));
         
         // Fire Scene Load Complete Event
         
@@ -70,7 +72,7 @@ namespace terminus
 	void SceneManager::ScenePreloadTask(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = context::get_scene_cache().Load(load_data->scene_name);
+		Scene* loaded = context::get_scene_cache().Load(String(load_data->scene_name));
         
         // Fire Scene Preload Complete Event
         

@@ -26,7 +26,13 @@ namespace terminus
 
 	void TransformSystem::Update(double delta)
 	{
-        
+		SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<TransformComponent>();
+
+		for (int i = 0; i < component_list._num_objects; i++)
+		{
+			// Generate World Matrix
+
+		}
 	}
 
 	void TransformSystem::Shutdown()

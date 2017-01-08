@@ -121,6 +121,7 @@ namespace terminus
                     // execute task
                     task._function.Invoke(&task._data);
                     
+					std::lock_guard<std::mutex> lock(_mutex);
                     //if(_pending_tasks > 0)
                     _pending_tasks--;
                     

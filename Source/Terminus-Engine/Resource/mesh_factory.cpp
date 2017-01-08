@@ -66,7 +66,7 @@ namespace terminus
                 mesh->SubMeshes[i].m_MaxExtents = _Data->meshes[i].m_MaxExtents;
             }
             
-            T_SAFE_DELETE(_Data);
+            //T_SAFE_DELETE(_Data);
             
             TERMINUS_END_CPU_PROFILE;
             

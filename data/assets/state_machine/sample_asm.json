@@ -1,0 +1,140 @@
+{
+	"variables" :
+	[
+		{
+			"name" : "forward_speed",
+			"type" : "FLOAT",
+			"min"  : -100.0,
+			"max"  :  200.0,
+			"default" : 0.0
+		},
+		{
+			"name" : "sideways_speed",
+			"type" : "FLOAT",
+			"min"  : -100.0,
+			"max"  :  100.0,
+			"default" : 0.0
+		}
+	],
+	"states" :
+	[
+		{
+			"type" : "STATE",
+			"name" :"on_ground",
+			"transitions" :
+			[
+				{
+					"state_name" : "ragdoll",
+					"event"		 : "ragdoll_event"
+				}
+			],
+			"states" : 
+			[
+				{
+					"type" : "STATE",
+					"name" :"unarmed",
+					"transitions" :
+					[
+						{
+							"state_name" : "rifle",
+							"event"		 : "rifle_equip_event"
+						}
+					],
+					"states" : 
+					[
+						{
+							"type" : "STATE",
+							"name" :"unarmed_idle",
+							"animation" : "idle.tsa",
+							"transitions" :
+							[
+								{
+									"state_name" : "unarmed_movement",
+									"event"		 : "movement_event"
+								}
+							],
+							"states" : []
+						},
+						{
+							"type" : "STATE",
+							"name" :"unarmed_movement",
+							"transitions" :
+							[
+								{
+									"state_name" : "unarmed_idle",
+									"event"		 : "idle_event"
+								}
+							],
+							"blend_state" :
+							[
+								{
+									"animation" : "walk_fwd.tsa",
+									"variable" : 
+									{
+										"forward_speed" : 0.0,
+										"rotation_speed" : 0.0
+									}
+								},
+								{
+									"animation" : "jog_fwd.tsa",
+									"variable" : 
+									{
+										"forward_speed" : 100.0,
+										"rotation_speed" : 0.0
+									}
+								},
+								{
+									"animation" : "run_fwd.tsa",
+									"variable" : 
+									{
+										"forward_speed" : 200.0,
+										"rotation_speed" : 0.0
+									}
+								},
+								,
+								{
+									"animation" : "walk_bwd.tsa",
+									"variable" : 
+									{
+										"forward_speed" : -100.0,
+										"rotation_speed" : 0.0
+									}
+								}
+							],
+							"states" : []
+						}
+					]
+				},
+				{
+					"type" : "STATE",
+					"name" :"rifle",
+					"transitions" :
+					[
+						{
+							"state_name" : "unarmed",
+							"event"		 : "rifle_unequip_event"
+						}
+					],
+					"states" : 
+					[
+						{
+							
+						}
+					]
+				}
+			]
+		},
+		{
+			"type" : "STATE",
+			"name" :"ragdoll",
+			"transitions" :
+			[
+				{
+					"state_name" : "on_ground",
+					"event"		 : "reset_event"
+				}
+			],
+			"states" : []
+		}		
+	]
+}

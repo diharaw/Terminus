@@ -4,11 +4,11 @@
 
 namespace terminus
 {
-	class TransformSystem : public ISystem
+	class CameraSystem : public ISystem
 	{
 	public:
-		TransformSystem();
-		~TransformSystem();
+		CameraSystem();
+		~CameraSystem();
 		virtual void Initialize();
 		virtual void Update(double delta);
 		virtual void Shutdown();
@@ -16,5 +16,3 @@ namespace terminus
 		void OnEntityDestroyed(Entity entity);
 	};
 } // namespace terminus
-
-

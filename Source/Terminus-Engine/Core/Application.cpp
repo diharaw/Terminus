@@ -1,11 +1,11 @@
 #include <Core/application.h>
 
 #if defined(TERMINUS_PROFILING)
-#include "../Utility/Remotery.h"
+#include <Utility/Remotery.h>
 #endif
 
-namespace terminus {
-    
+namespace terminus 
+{    
     TERMINUS_PROFILER_INSTANCE
     
     String scene_path = "";
@@ -129,7 +129,7 @@ namespace terminus {
         cmd_buf.Write(&cmd1, sizeof(cmd1));
         
         ClearFramebufferCmdData cmd2;
-        cmd2.clear_target = FramebufferClearTarget::COLOR;
+        cmd2.clear_target = FramebufferClearTarget::ALL;
         cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
         
         cmd_buf.Write(CommandType::ClearFramebuffer);
@@ -142,7 +142,7 @@ namespace terminus {
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::new_frame();
         static bool testWin = true;
-        //ImGui::ShowTestWindow(&testWin);
+        ImGui::ShowTestWindow(&testWin);
         
         // TEST
 
@@ -245,5 +245,4 @@ namespace terminus {
 	{
 
 	}
-
 }

@@ -64,7 +64,7 @@ namespace terminus
 				m_AssetMap[_ID] = mesh;
 
 				// Will have to keep vertices and indices around until Physics shape is generated.
-				if(data->skeletalVertices)
+				/*if(data->skeletalVertices)
 					free(data->skeletalVertices);
 
 				if (data->meshes)
@@ -74,7 +74,7 @@ namespace terminus
 					free(data->vertices);
 
 				if (data->materials)
-					free(data->materials);
+					free(data->materials);*/
 
 				std::cout << "Asset successfully loaded" << std::endl;
 
