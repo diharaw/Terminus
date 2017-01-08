@@ -1,0 +1,7 @@
+{
+    "diffuse_map": "Texture/arm_dif.png",
+    "normal_map": "Texture/arm_showroom_ddn.png",
+    "roughness_value": 0.5,
+    "metalness_value": 0.5,
+    "backface_cull": true
+}
