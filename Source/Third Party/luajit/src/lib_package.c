@@ -1,6 +1,6 @@
 /*
 ** Package library.
-** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2016 Mike Pall. See Copyright Notice in luajit.h
 **
 ** Major portions taken verbatim or adapted from the Lua interpreter.
 ** Copyright (C) 1994-2012 Lua.org, PUC-Rio. See Copyright Notice in lua.h
@@ -399,8 +399,7 @@ static int lj_cf_package_loader_preload(lua_State *L)
 
 /* ------------------------------------------------------------------------ */
 
-static const int sentinel_ = 0;
-#define sentinel	((void *)&sentinel_)
+#define sentinel	((void *)0x4004)
 
 static int lj_cf_package_require(lua_State *L)
 {

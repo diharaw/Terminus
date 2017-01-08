@@ -1,10 +1,11 @@
 #include <iostream>
-#include "platform.h"
-#include "../Input/Input.h"
-#include "../Core/Config.h"
+#include <Platform/platform.h>
+#include <Input/input.h>
+#include <Core/config.h>
+#include <Graphics/imgui_backend.h>
+#include <IO/filesystem.h>
+
 #include <string>
-#include "../GUI/ImGuiBackend.h"
-#include "../IO/FileSystem.h"
 #include <SDL_syswm.h>
 
 namespace terminus
@@ -221,7 +222,7 @@ namespace terminus
 	{
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(m_Window, &wmInfo);
+        SDL_GetWindowWMInfo(_window, &wmInfo);
         return wmInfo.info.win.window;
 	}
 #endif

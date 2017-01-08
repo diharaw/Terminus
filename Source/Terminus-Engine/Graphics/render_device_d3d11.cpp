@@ -1,11 +1,12 @@
 #include <Graphics/render_device_d3d11.h>
-#include "../Global.h"
+#include <Core/context.h>
+#include <global.h>
 #include <algorithm>
 
 #if defined(TERMINUS_DIRECT3D11) && defined(WIN32)
 
-namespace terminus { namespace Graphics {
-
+namespace terminus
+{
 	RenderDevice::RenderDevice()
 	{
 
@@ -32,7 +33,7 @@ namespace terminus { namespace Graphics {
 
 	void RenderDevice::InitializeTask(void* data)
 	{
-		m_window = PlatformBackend::GetWindow();
+		m_window = context::get_platform().get_window();
 		assert(InitializeAPI());
 	}
 
@@ -127,9 +128,9 @@ namespace terminus { namespace Graphics {
 
 		for (i = 0; i < numModes; i++)
 		{
-			if (displayModeList[i].Width == (unsigned int)PlatformBackend::GetWidth())
+			if (displayModeList[i].Width == (unsigned int)context::get_platform().get_width())
 			{
-				if (displayModeList[i].Width == (unsigned int)PlatformBackend::GetHeight())
+				if (displayModeList[i].Width == (unsigned int)context::get_platform().get_height())
 				{
 					numerator = displayModeList[i].RefreshRate.Numerator;
 					denominator = displayModeList[i].RefreshRate.Denominator;
@@ -167,8 +168,8 @@ namespace terminus { namespace Graphics {
 
 		swapChainDesc.BufferCount = 1;
 
-		swapChainDesc.BufferDesc.Width = PlatformBackend::GetWidth();
-		swapChainDesc.BufferDesc.Height = PlatformBackend::GetHeight();
+		swapChainDesc.BufferDesc.Width = context::get_platform().get_width();
+		swapChainDesc.BufferDesc.Height = context::get_platform().get_height();
 
 		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -184,7 +185,7 @@ namespace terminus { namespace Graphics {
 		}
 
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.OutputWindow = PlatformBackend::GetHandleWin32();
+		swapChainDesc.OutputWindow = context::get_platform().get_handle_win32();
 		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.SampleDesc.Quality = 0;
 
@@ -242,8 +243,8 @@ namespace terminus { namespace Graphics {
 
 		ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 
-		depthBufferDesc.Width = PlatformBackend::GetWidth();
-		depthBufferDesc.Height = PlatformBackend::GetHeight();
+		depthBufferDesc.Width = context::get_platform().get_width();
+		depthBufferDesc.Height = context::get_platform().get_height();
 		depthBufferDesc.MipLevels = 1;
 		depthBufferDesc.ArraySize = 1;
 		depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -2187,7 +2188,6 @@ namespace terminus { namespace Graphics {
 
 		return vertexShaderByteCode;
 	}
-
-} }
+}
 
 #endif

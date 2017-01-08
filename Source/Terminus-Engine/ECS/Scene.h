@@ -1,14 +1,14 @@
 #pragma once
 
-#include "System.h"
-#include "../Graphics/render_device.h"
-#include "../Types.h"
-#include "ComponentPool.h"
-#include "TransformSystem.h"
-#include "RenderSystem.h"
-#include "CameraComponent.h"
-#include "MeshComponent.h"
-#include "ScriptComponent.h"
+#include <ECS/system.h>
+#include <Graphics/render_device.h>
+#include <types.h>
+#include <ECS/component_pool.h>
+#include <ECS/transform_system.h>
+#include <ECS/render_system.h>
+#include <ECS/camera_component.h>
+#include <ECS/mesh_component.h>
+#include <ECS/script_component.h>
 #include <vector>
 #include <iostream>
 

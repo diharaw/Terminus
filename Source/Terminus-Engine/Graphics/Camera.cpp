@@ -1,6 +1,6 @@
-#include "Camera.h"
+#include <Graphics/camera.h>
 #include <Core/context.h>
-#include "../Platform/platform.h"
+#include <Platform/platform.h>
 
 namespace terminus
 {

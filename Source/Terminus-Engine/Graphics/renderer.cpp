@@ -1,6 +1,6 @@
-#include "renderer.h"
-#include "../Core/Config.h"
-#include "../GUI/ImGuiBackend.h"
+#include <Graphics/renderer.h>
+#include <Graphics/imgui_backend.h>
+#include <Core/config.h>
 #include <Core/context.h>
 
 namespace terminus

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include <Core/config.h>
 
 #ifdef TERMINUS_DIRECT3D11
 
@@ -27,6 +27,7 @@ namespace terminus
 
     struct Texture
     {
+		uint16					m_resource_id;
 		TextureTarget			 m_type;
 		ID3D11ShaderResourceView* m_textureView;
 		ID3D11DepthStencilView* m_depthView;
@@ -63,6 +64,7 @@ namespace terminus
     
     struct Buffer
     {
+		uint16 m_resource_id;
 		ID3D11Buffer* m_BufferD3D;
 		D3D11_BUFFER_DESC m_BufferDescD3D;
 		BufferType m_type;
@@ -88,6 +90,7 @@ namespace terminus
     
     struct VertexArray
     {
+		uint16 m_resource_id;
 		VertexBuffer* m_vertexBuffer;
 		IndexBuffer* m_indexBuffer;
 		ID3D11InputLayout* m_inputLayoutD3D;
@@ -107,6 +110,7 @@ namespace terminus
     
     struct ShaderProgram
     {
+		uint16 m_resource_id;
 		std::unordered_map<ShaderType, Shader*> m_shaderMap;
     };
     
@@ -123,12 +127,14 @@ namespace terminus
     
     struct SamplerState
     {
+		uint16 m_resource_id;
 		ID3D11SamplerState* m_D3D11SamplerState;
 		D3D11_SAMPLER_DESC m_samplerDesc;
     };
     
     struct Framebuffer
     {
+		uint16 m_resource_id;
 		RenderTargetViewList m_renderTargetViews;
 		RenderTargetList m_renderTargets;
 		ID3D11DepthStencilView* m_depthStecilView;

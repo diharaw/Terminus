@@ -1,7 +1,7 @@
-#include "CameraComponent.h"
-#include "MeshComponent.h"
-#include "ScriptComponent.h"
-#include "TransformComponent.h"
+#include <ECS/camera_component.h>
+#include <ECS/mesh_component.h>
+#include <ECS/script_component.h>
+#include <ECS/transform_component.h>
 
 namespace terminus
 {

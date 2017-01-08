@@ -1,6 +1,6 @@
-#include "Global.h"
-#include "Types.h"
-#include "Core/context.h"
+#include <global.h>
+#include <types.h>
+#include <Core/context.h>
 #include <iostream>
 
 namespace terminus

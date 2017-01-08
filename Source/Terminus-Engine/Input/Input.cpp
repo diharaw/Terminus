@@ -1,7 +1,8 @@
-#include "Input.h"
-#include "../Core/Event/Event.h"
-#include "../Core/Event/EventHandler.h"
-#include "PlayerContext.h"
+#include <Input/input.h>
+#include <Input/player_context.h>
+#include <Core/Event/event.h>
+#include <Core/Event/event_handler.h>
+
 #include <vector>
 
 #define MAX_PLAYERS 8

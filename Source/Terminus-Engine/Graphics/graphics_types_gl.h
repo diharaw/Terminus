@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Core/Config.h"
+#include <Core/config.h>
 #include <unordered_map>
 
 #ifdef TERMINUS_OPENGL

@@ -1,4 +1,4 @@
-#include "Terminus.h"
+#include "terminus.h"
 
 namespace Terminus {
 

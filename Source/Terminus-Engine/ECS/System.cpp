@@ -1,4 +1,4 @@
-#include "System.h"
+#include <ECS/system.h>
 
 namespace terminus
 {

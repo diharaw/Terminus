@@ -3,7 +3,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "Component.h"
+#include <ECS/component.h>
 #include <vector>
 
 namespace terminus

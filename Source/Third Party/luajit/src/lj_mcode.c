@@ -1,6 +1,6 @@
 /*
 ** Machine code management.
-** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2016 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_mcode_c
@@ -206,6 +206,9 @@ static void mcode_protect(jit_State *J, int prot)
 
 #if LJ_TARGET_X64
 #define mcode_validptr(p)	((p) && (uintptr_t)(p) < (uintptr_t)1<<47)
+#elif LJ_TARGET_ARM64
+/* We have no clue about the valid VA range. It could be 39 - 52 bits. */
+#define mcode_validptr(p)	(p)
 #else
 #define mcode_validptr(p)	((p) && (uintptr_t)(p) < 0xffff0000)
 #endif

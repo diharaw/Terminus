@@ -1,6 +1,6 @@
 #include <Graphics/render_device_gl.h>
 #include <Core/context.h>
-#include <Utility/StringUtility.h>
+#include <Utility/string_utility.h>
 #include <iostream>
 
 #if defined(TERMINUS_OPENGL)

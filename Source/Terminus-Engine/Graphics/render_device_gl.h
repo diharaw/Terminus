@@ -1,18 +1,18 @@
 #pragma once
 
-#include "../Core/Config.h"
+#include <Core/config.h>
 
 #if defined(TERMINUS_OPENGL)
 
 #include <vector>
-#include "RenderCommon.h"
-#include "../Resource/AssetCommon.h"
-#include "../Types.h"
-#include "../Utility/SlotMap.h"
-#include "../Platform/platform.h"
-#include "../Memory/PoolAllocator.h"
+#include <Graphics/render_common.h>
+#include <Resource/asset_common.h>
+#include <types.h>
+#include <container/packed_array.h>
+#include <Platform/platform.h>
+#include <Memory/pool_allocator.h>
 #include <Graphics/graphics_types_gl.h>
-#include "../Global.h"
+#include <global.h>
 
 #define MAX_TEXTURE_1D 1
 #define MAX_TEXTURE_2D 1

@@ -3,8 +3,8 @@
 #ifndef TERMINUS_GLOBAL_H
 #define TERMINUS_GLOBAL_H
 
-#include "Memory/LinearAllocator.h"
-#include "Thread/thread_pool.h"
+#include <Memory/linear_allocator.h>
+#include <Thread/thread_pool.h>
 
 #define MB_IN_BYTES 1024*1024
 #define MAX_MEMORY_MB 200

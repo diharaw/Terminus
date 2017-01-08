@@ -3,11 +3,11 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "../Types.h"
-#include "AssetCommon.h"
-#include "../Graphics/render_device.h"
-#include "../Graphics/RenderCommon.h"
-#include "../Graphics/Material.h"
+#include <types.h>
+#include <Resource/asset_common.h>
+#include <Graphics/render_device.h>
+#include <Graphics/render_common.h>
+#include <Graphics/material.h>
 #include <string>
 
 struct VertexArray;

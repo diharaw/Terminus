@@ -1,6 +1,6 @@
-#include "Scene.h"
-#include "TransformComponent.h"
-#include "../Types.h"
+#include <ECS/scene.h>
+#include <ECS/transform_component.h>
+#include <types.h>
 
 namespace terminus
 {

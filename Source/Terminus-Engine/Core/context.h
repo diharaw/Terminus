@@ -4,13 +4,13 @@
 #include <Graphics/renderer.h>
 #include <Graphics/render_device.h>
 #include <Platform/platform.h>
-#include <IO/FileSystem.h>
-#include <ECS/SceneManager.h>
-#include <Resource/SceneCache.h>
-#include <Resource/ShaderCache.h>
-#include <Resource/TextureCache.h>
-#include <Resource/MeshCache.h>
-#include <Resource/MaterialCache.h>
+#include <IO/filesystem.h>
+#include <ECS/scene_manager.h>
+#include <Resource/scene_cache.h>
+#include <Resource/shader_cache.h>
+#include <Resource/texture_cache.h>
+#include <Resource/mesh_cache.h>
+#include <Resource/material_cache.h>
 
 namespace terminus
 {

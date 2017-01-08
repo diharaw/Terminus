@@ -3,7 +3,7 @@
 
 #include <string>
 #include <SDL.h>
-#include "../Types.h"
+#include <types.h>
 
 #define MAX_MOUSE_BUTTONS 5
 #define MAX_KEYBOARD_BUTTONS 512

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Types.h"
-#include "render_device.h"
+#include <types.h>
+#include <Graphics/render_device.h>
 
 // Material Key Options
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Core/Config.h"
+#include <Core/config.h>
 
 #if defined(TERMINUS_OPENGL)
 #include "render_device_gl.h"

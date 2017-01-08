@@ -1,9 +1,9 @@
 #ifndef PlatformBackend_h
 #define PlatformBackend_h
 
-#include "../Core/Config.h"
-#include "../../Third Party/glew/include/GL/glew.h"
-#include "../Types.h"
+#include <Core/config.h>
+#include <GL/glew.h>
+#include <types.h>
 #include <SDL.h>
 
 #if defined(TERMINUS_PLATFORM_WIN32)

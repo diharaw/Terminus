@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Math/MathUtility.h"
+#include <Math/math_utility.h>
 
 namespace terminus
 {
