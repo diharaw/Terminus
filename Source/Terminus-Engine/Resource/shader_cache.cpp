@@ -280,6 +280,8 @@ namespace terminus
                 defines.push_back(SHADER_DEF_APPLE);
             #endif
                 
+                // THE FOLLOWING BLOCK SHOULD BE SENT TO THE RENDERING THREAD
+                
                 Shader* vertex = m_Factory.Create(defines, ShaderType::VERTEX);
                 
                 if(!vertex)
@@ -291,6 +293,8 @@ namespace terminus
                     return nullptr;
                 
                 ShaderProgram* program = context::get_render_device().CreateShaderProgram(vertex, pixel, nullptr, nullptr, nullptr);
+                
+                // THE ABOVE BLOCK SHOULD BE SENT TO THE RENDERING THREAD
                 
                 if(!program)
                     return program;

@@ -195,8 +195,8 @@ namespace terminus
                 DrawItem& draw_item = scene_view._draw_items[index];
                 
                 draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
-                draw_item.uniforms->model = renderable._transform->global_transform;
-                draw_item.uniforms->position = renderable._transform->position;
+                draw_item.uniforms->model = renderable._transform->_global_transform;
+                draw_item.uniforms->position = renderable._transform->_position;
                 draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
                 draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
                 draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;

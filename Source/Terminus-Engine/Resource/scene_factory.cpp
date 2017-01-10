@@ -76,25 +76,25 @@ namespace terminus
         TransformComponent* component = (TransformComponent*)scene->AttachComponent(entity, TransformComponent::_id);
         rapidjson::Value& position = value["position"];
         
-        component->position.x = position["x"].GetFloat();
-        component->position.y = position["y"].GetFloat();
-        component->position.z = position["z"].GetFloat();
+        component->_position.x = position["x"].GetFloat();
+        component->_position.y = position["y"].GetFloat();
+        component->_position.z = position["z"].GetFloat();
         
         rapidjson::Value& rotation = value["rotation"];
         
-        component->rotation.x = rotation["x"].GetFloat();
-        component->rotation.y = rotation["y"].GetFloat();
-        component->rotation.z = rotation["z"].GetFloat();
+        component->_rotation.x = rotation["x"].GetFloat();
+        component->_rotation.y = rotation["y"].GetFloat();
+        component->_rotation.z = rotation["z"].GetFloat();
         
         rapidjson::Value& scale = value["scale"];
         
-        component->scale.x = scale["x"].GetFloat();
-        component->scale.y = scale["y"].GetFloat();
-        component->scale.z = scale["z"].GetFloat();
+        component->_scale.x = scale["x"].GetFloat();
+        component->_scale.y = scale["y"].GetFloat();
+        component->_scale.z = scale["z"].GetFloat();
         
         if(!value["parent_entity"].IsNull())
         {
-            component->parent_entity_name = std::string(value["parent_entity"].GetString());
+            component->_parent_entity_name = std::string(value["parent_entity"].GetString());
         }
     }
     
@@ -120,7 +120,13 @@ namespace terminus
             float aspect_x = projection_info["aspect_ratio_x"].GetFloat();
             float aspect_y = projection_info["aspect_ratio_y"].GetFloat();
             
-            //component->camera.SetAspectRatio(aspect_x / aspect_y);
+            if(aspect_x == 0 && aspect_y == 0)
+            {
+                aspect_x = context::get_platform().get_width();
+                aspect_y = context::get_platform().get_height();
+            }
+            
+            component->camera.SetAspectRatio(aspect_x / aspect_y);
         }
         
         component->is_active = value["is_active"].GetBool();
