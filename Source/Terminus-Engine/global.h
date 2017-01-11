@@ -18,8 +18,6 @@ extern void* operator new (size_t size, unsigned line, const char* file);
 namespace terminus
 {
     using DefaultThreadPool = ThreadPool<0, 1000>;
-    using ResourceThreadPool = ThreadPool<1, 200>;
-    using RenderingThreadPool = ThreadPool<1, 100>;
     
     namespace Global
     {
@@ -27,8 +25,6 @@ namespace terminus
         extern LinearAllocator* GetDefaultAllocator();
         extern LinearAllocator* GetPerFrameAllocator();
         extern DefaultThreadPool*   GetDefaultThreadPool();
-        extern RenderingThreadPool*   GetRenderingThreadPool();
-        extern ResourceThreadPool*   GetResourceThreadPool();
         extern void Shutdown();
     }
 }

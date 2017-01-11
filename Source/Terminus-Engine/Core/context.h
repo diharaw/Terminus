@@ -6,15 +6,18 @@
 #include <Platform/platform.h>
 #include <IO/filesystem.h>
 #include <Thread/semaphore.h>
+#include <Thread/thread_pool.h>
 #include <ECS/scene_manager.h>
 #include <Resource/scene_cache.h>
 #include <Resource/shader_cache.h>
 #include <Resource/texture_cache.h>
 #include <Resource/mesh_cache.h>
 #include <Resource/material_cache.h>
+#include <Core/rendering_thread.h>
+#include <Core/loading_thread.h>
 
 namespace terminus
-{
+{    
     struct Context
     {
         // Platform
@@ -39,6 +42,10 @@ namespace terminus
         Semaphore _main_ready_sema;
         Semaphore _render_done_sema;
         Semaphore _swap_done_sema;
+        
+        // Threads
+        RenderingThread _rendering_thread;
+        LoadingThread   _loading_thread;
         
         bool      _shutdown;
     };

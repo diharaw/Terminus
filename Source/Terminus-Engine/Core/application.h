@@ -32,8 +32,6 @@
 #include <ECS/scene.h>
 #include <ECS/transform_system.h>
 #include <Core/context.h>
-#include <Core/rendering_thread.h>
-#include <Core/loading_thread.h>
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 #define TERMINUS_DECLARE_MAIN(x)							\
@@ -78,9 +76,6 @@ namespace terminus {
 	{
 	private:
 		DefaultThreadPool*   _main_thread_pool;
-        // Threads
-        RenderingThread _rendering_thread;
-        LoadingThread   _loading_thread;
         
 	public:
 		Application();

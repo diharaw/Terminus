@@ -12,8 +12,6 @@ namespace terminus
         LinearAllocator* g_allocator = nullptr;
         LinearAllocator* g_per_frame_allocator = nullptr;
         DefaultThreadPool*   g_thread_pool = nullptr;
-        RenderingThreadPool* g_rendering_thread_pool = nullptr;
-        ResourceThreadPool*  g_resource_thread_pool = nullptr;
         Context* g_context = nullptr;
         
         void Initialize()
@@ -26,12 +24,10 @@ namespace terminus
             
 			g_thread_pool = T_NEW DefaultThreadPool();
             
-            g_rendering_thread_pool = T_NEW RenderingThreadPool();
-            
-            g_resource_thread_pool = T_NEW ResourceThreadPool();
-            
             g_context = T_NEW Context();
             g_context->_shutdown = false;
+            
+            concurrent_queue::clear(g_context->_graphics_upload_queue);
         }
         
         Context& get_context()
@@ -52,16 +48,6 @@ namespace terminus
         DefaultThreadPool* GetDefaultThreadPool()
         {
             return g_thread_pool;
-        }
-        
-        RenderingThreadPool* GetRenderingThreadPool()
-        {
-            return g_rendering_thread_pool;
-        }
-        
-        ResourceThreadPool* GetResourceThreadPool()
-        {
-            return g_resource_thread_pool;
         }
         
         void Shutdown()

@@ -58,9 +58,12 @@ namespace terminus
 
 	void Application::run()
 	{
+        Context& context = Global::get_context();
         Platform& platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
-        Context& context = Global::get_context();
+        
+        context._rendering_thread.run();
+        context._loading_thread.run();
         
         context._main_ready_sema.notify();
         context._render_ready_sema.wait();
