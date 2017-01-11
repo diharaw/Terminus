@@ -30,7 +30,7 @@
 				},
 				{
 					"component_type" : "MESH",
-					"mesh" : "sphere.tsm",
+					"mesh" : "cube.tsm",
 					"material_overrides" : []
 				}
 			]
@@ -63,7 +63,7 @@
 				},
 				{
 					"component_type" : "MESH",
-					"mesh" : "sphere.tsm",
+					"mesh" : "nanosuit.tsm",
 					"material_overrides" : []
 				},
 				{
