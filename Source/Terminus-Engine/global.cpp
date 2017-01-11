@@ -31,6 +31,7 @@ namespace terminus
             g_resource_thread_pool = T_NEW ResourceThreadPool();
             
             g_context = T_NEW Context();
+            g_context->_shutdown = false;
         }
         
         Context& get_context()

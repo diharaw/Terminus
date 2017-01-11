@@ -60,12 +60,15 @@ namespace terminus
 	{
         Platform& platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
+        Context& context = Global::get_context();
         
-		while (!platform.shutdown_requested())
+        context._main_ready_sema.notify();
+        context._render_ready_sema.wait();
+        
+		while (!context._shutdown)
 		{
             TERMINUS_BEGIN_CPU_PROFILE(GameLoop)
             
-            submit_rendering();
 			platform.update();
             EventHandler::Update();
             
@@ -76,12 +79,14 @@ namespace terminus
             }
             
             // Synchronize Rendering Thread
-            _rendering_thread_pool->wait();
+            context._render_done_sema.wait();
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
             
 			Global::GetPerFrameAllocator()->Clear();
+            
+            context._swap_done_sema.notify();
             
             TERMINUS_END_CPU_PROFILE
 		}

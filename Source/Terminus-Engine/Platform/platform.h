@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <types.h>
 #include <SDL.h>
+#include <mutex>
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 #include <Windows.h>
@@ -70,8 +71,6 @@ namespace terminus
         
         void set_window_size(uint width, uint height);
         
-        bool shutdown_requested();
-        
         SDL_Window* get_window();
         
         int get_width();
@@ -94,7 +93,7 @@ namespace terminus
         int					   _refresh_rate;
         bool                   _resizable;
         String				   _title;
-        bool                   _is_running;
+        std::mutex             _mutex;
         
     };
     

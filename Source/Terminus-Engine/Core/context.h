@@ -5,6 +5,7 @@
 #include <Graphics/render_device.h>
 #include <Platform/platform.h>
 #include <IO/filesystem.h>
+#include <Thread/semaphore.h>
 #include <ECS/scene_manager.h>
 #include <Resource/scene_cache.h>
 #include <Resource/shader_cache.h>
@@ -18,7 +19,6 @@ namespace terminus
     {
         // Platform
         Platform	 _platform;
-        //FileSystem   _filesystem;
         
         // Graphics Systems
         Renderer 	 _renderer;
@@ -33,6 +33,14 @@ namespace terminus
         MeshCache     _mesh_cache;
         MaterialCache _material_cache;
         TextureCache  _texture_cache;
+        
+        // Thread Syncs
+        Semaphore _render_ready_sema;
+        Semaphore _main_ready_sema;
+        Semaphore _render_done_sema;
+        Semaphore _swap_done_sema;
+        
+        bool      _shutdown;
     };
     
     namespace Global

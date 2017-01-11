@@ -4,6 +4,7 @@
 #include <Core/config.h>
 #include <Graphics/imgui_backend.h>
 #include <IO/filesystem.h>
+#include <Core/context.h>
 
 #include <string>
 #include <SDL_syswm.h>
@@ -74,7 +75,6 @@ namespace terminus
     bool Platform::initialize()
     {
         Uint32 flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK;
-        _is_running = true;
         
         if (SDL_Init(flags) != 0)
             return false;
@@ -169,7 +169,7 @@ namespace terminus
             
             switch (event.type) {
                 case SDL_QUIT:
-                    _is_running = false;
+                    Global::get_context()._shutdown = true;
                     break;
                     
                 default:
@@ -194,12 +194,8 @@ namespace terminus
     
     void Platform::request_shutdown()
     {
-        _is_running = false;
-    }
-    
-    bool Platform::shutdown_requested()
-    {
-        return !_is_running;
+        std::lock_guard<std::mutex> lock(_mutex);
+        Global::get_context()._shutdown = true;
     }
     
     SDL_Window* Platform::get_window()
