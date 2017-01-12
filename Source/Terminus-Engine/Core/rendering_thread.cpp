@@ -5,15 +5,6 @@
 
 namespace terminus
 {
-    // TEST TEST TEST
-    
-    int cmd_buf_idx;
-    
-    String scene_path = "";
-    bool file_dialog = false;
-    
-    // TEST TEST TEST
-    
     RenderingThread::RenderingThread()
     {
         
@@ -55,78 +46,13 @@ namespace terminus
         
 #if defined(TERMINUS_WITH_EDITOR)
         ImGuiBackend::initialize();
+        ImGuiBackend::new_frame();
 #endif
-        
-        // TEST TEST TEST
-        
-        cmd_buf_idx = context::get_renderer().create_command_buffer();
-        
-        // TEST TEST TEST
         
         context._render_ready_sema.notify();
         
         while (!context._shutdown)
-        {
-            // temp
-            // TEST TEST TEST
-            
-            CommandBuffer& cmd_buf = context::get_renderer().command_buffer(cmd_buf_idx);
-            
-            BindFramebufferCmdData cmd1;
-            cmd1.framebuffer = nullptr;
-            
-            cmd_buf.Write(CommandType::BindFramebuffer);
-            cmd_buf.Write(&cmd1, sizeof(cmd1));
-            
-            ClearFramebufferCmdData cmd2;
-            cmd2.clear_target = FramebufferClearTarget::ALL;
-            cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-            
-            cmd_buf.Write(CommandType::ClearFramebuffer);
-            cmd_buf.Write(&cmd2, sizeof(cmd2));
-            
-            cmd_buf.WriteEnd();
-            
-            // TEST TEST TEST
-            
-#if defined(TERMINUS_WITH_EDITOR)
-            ImGuiBackend::new_frame();
-            static bool testWin = true;
-            ImGui::ShowTestWindow(&testWin);
-            
-            // TEST
-            
-            ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
-            ImGui::Begin("Scene Load", &testWin, 0);
-            
-            ImGui::Text("%s", scene_path.c_str());
-            
-            ImGui::SameLine();
-            
-            if(ImGui::Button("Browse..."))
-            {
-                file_dialog = true;
-            }
-            if(ImGui::Button("Load Scene"))
-            {
-                if(scene_path != "")
-                {
-                    String trimmed_path = filesystem::get_file_name_and_extention(scene_path);
-                    std::cout << "Trimmed Path : " << trimmed_path << std::endl;
-                    context::get_scene_manager().Preload(trimmed_path);
-                }
-                else
-                {
-                    std::cout << "Invalid Path" << std::endl;
-                }
-            }
-            
-            ImGui::End();
-            // TEST
-            
-#endif
-
-            
+        {            
             // submit api calls
             context._renderer.submit();
             

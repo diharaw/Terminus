@@ -26,8 +26,6 @@ namespace terminus
             
             g_context = T_NEW Context();
             g_context->_shutdown = false;
-            
-            concurrent_queue::clear(g_context->_graphics_upload_queue);
         }
         
         Context& get_context()

@@ -5,7 +5,16 @@
 #endif
 
 namespace terminus 
-{    
+{
+    // TEST TEST TEST
+    
+    int cmd_buf_idx;
+    
+    String scene_path = "";
+    bool file_dialog = false;
+    
+    // TEST TEST TEST
+    
     TERMINUS_PROFILER_INSTANCE
     
 	Application::Application()
@@ -51,6 +60,12 @@ namespace terminus
         Platform& platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
         
+        // TEST TEST TEST
+        
+        cmd_buf_idx = context::get_renderer().create_command_buffer();
+        
+        // TEST TEST TEST
+        
         context._rendering_thread.run();
         context._loading_thread.run();
         
@@ -77,6 +92,65 @@ namespace terminus
             TERMINUS_END_CPU_PROFILE
 		}
 	}
+    
+    void Application::temp_render()
+    {
+        // temp
+        // TEST TEST TEST
+        
+        CommandBuffer& cmd_buf = context::get_renderer().command_buffer(cmd_buf_idx);
+        
+        BindFramebufferCmdData cmd1;
+        cmd1.framebuffer = nullptr;
+        
+        cmd_buf.Write(CommandType::BindFramebuffer);
+        cmd_buf.Write(&cmd1, sizeof(cmd1));
+        
+        ClearFramebufferCmdData cmd2;
+        cmd2.clear_target = FramebufferClearTarget::ALL;
+        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+        
+        cmd_buf.Write(CommandType::ClearFramebuffer);
+        cmd_buf.Write(&cmd2, sizeof(cmd2));
+        
+        cmd_buf.WriteEnd();
+        
+        // TEST TEST TEST
+        
+#if defined(TERMINUS_WITH_EDITOR)
+        static bool testWin = true;
+        ImGui::ShowTestWindow(&testWin);
+        
+        // TEST
+        
+        ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
+        ImGui::Begin("Scene Load", &testWin, 0);
+        
+        ImGui::Text("%s", scene_path.c_str());
+        
+        ImGui::SameLine();
+        
+        if(ImGui::Button("Browse..."))
+        {
+            file_dialog = true;
+        }
+        if(ImGui::Button("Load Scene"))
+        {
+            if(scene_path != "")
+            {
+                String trimmed_path = filesystem::get_file_name_and_extention(scene_path);
+                std::cout << "Trimmed Path : " << trimmed_path << std::endl;
+                context::get_scene_manager().Preload(trimmed_path);
+            }
+            else
+            {
+                std::cout << "Invalid Path" << std::endl;
+            }
+        }
+        
+        // TEST
+#endif
+    }
 
 	void Application::shutdown()
 	{

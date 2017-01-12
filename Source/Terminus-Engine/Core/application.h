@@ -93,6 +93,8 @@ namespace terminus {
 		void initialize_script();
 
         EVENT_METHOD_DECLARATION(OnScenePreload);
+        
+        void temp_render();
 	};
 
 }

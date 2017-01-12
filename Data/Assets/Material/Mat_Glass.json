@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "Texture/glass_dif.png",
-    "normal_map": "Texture/glass_ddn.png",
-    "roughness_value": 0.5,
-    "metalness_value": 0.5,
-    "backface_cull": true
-}
