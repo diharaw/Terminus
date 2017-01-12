@@ -1,0 +1,94 @@
+{
+	"scene_name" : "sandbox",
+	"entities" :
+	[
+		{
+			"entity_name" : "sphere",
+			"components" :
+			[
+				{
+					"component_type" : "TRANSFORM",
+					"position" : 
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"rotation" : 
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"scale" : 
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"parent_entity" : null
+				},
+				{
+					"component_type" : "MESH",
+					"mesh" : "cube.tsm",
+					"material_overrides" : []
+				}
+			]
+		},
+		{
+			"entity_name" : "player",
+			"components" :
+			[
+				{
+					"component_type" : "TRANSFORM",
+					"position" : 
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"rotation" : 
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"scale" : 
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"parent_entity" : null
+				},
+				{
+					"component_type" : "MESH",
+					"mesh" : "nanosuit.tsm",
+					"material_overrides" : []
+				},
+				{
+					"component_type" : "CAMERA",
+					"projection_info" :
+					{
+						"projection_type" : "PERSPECTIVE",
+						"field_of_view" : 60.0,
+						"aspect_ratio_x" : 0,
+						"aspect_ratio_y" : 0,
+						"near_plane" : 5.0,
+						"far_plane" : 500.0
+					},
+					"rendering_path" : "deferred",
+					"is_active" : true,
+					"is_offscreen" : false,
+					"viewport_rect" :
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"w" : 1.0,
+						"h" : 1.0
+					}
+				}
+			]
+		}
+	]
+}
