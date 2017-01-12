@@ -21,10 +21,15 @@ namespace terminus
     void LoadingThread::enqueue_load_task(Task& task)
     {
         concurrent_queue::push(_loading_queue, task);
-        _work_available_sema.notify();
+        Global::get_context()._load_wakeup_sema.notify();
     }
     
     void LoadingThread::shutdown()
+    {
+        
+    }
+    
+    void LoadingThread::exit()
     {
         _thread.join();
     }
@@ -33,7 +38,7 @@ namespace terminus
     {
         Context& context = Global::get_context();
         
-        context._main_ready_sema.wait();
+        context._load_wakeup_sema.wait();
         
         while (!context._shutdown)
         {
@@ -43,7 +48,9 @@ namespace terminus
                 load_task._function.Invoke(&load_task._data[0]);
             }
             
-            _work_available_sema.wait();
+            context._load_wakeup_sema.wait();
         }
+        
+        context._load_exit_sema.notify();
     }
 }

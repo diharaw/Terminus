@@ -69,6 +69,7 @@ namespace terminus
         context._loading_thread.run();
         
         context._main_ready_sema.notify();
+        context._load_wakeup_sema.notify();
         context._render_ready_sema.wait();
         
 		while (!context._shutdown)
@@ -157,6 +158,15 @@ namespace terminus
 
 	void Application::shutdown()
 	{
+        Context& context = Global::get_context();
+        
+        context._load_wakeup_sema.notify();
+        context._load_exit_sema.wait();
+        context._render_exit_sema.wait();
+        
+        context._loading_thread.exit();
+        context._rendering_thread.exit();
+        
         context::get_platform().shutdown();
         
         TERMINUS_DESTROY_PROFILER

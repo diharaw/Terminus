@@ -65,7 +65,7 @@ namespace terminus
                                    SDL_WINDOWPOS_CENTERED,
                                    _width,
                                    _height,
-                                   window_flags);
+                                   window_flags | SDL_WINDOW_ALLOW_HIGHDPI);
         if(!_window)
             return false;
         

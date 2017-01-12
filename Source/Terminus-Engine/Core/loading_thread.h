@@ -16,13 +16,13 @@ namespace terminus
         void run();
         void enqueue_load_task(Task& task);
         void shutdown();
+        void exit();
         
     private:
         void load_loop();
         
     private:
         std::thread  _thread;
-        Semaphore    _work_available_sema;
         LoadingQueue _loading_queue;
     };
 }

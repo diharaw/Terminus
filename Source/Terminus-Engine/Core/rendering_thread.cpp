@@ -33,7 +33,10 @@ namespace terminus
         
         context._renderer.shutdown();
         context._render_device.Shutdown();
-        
+    }
+    
+    void RenderingThread::exit()
+    {
         _thread.join();
     }
     
@@ -73,5 +76,9 @@ namespace terminus
             context._swap_done_sema.wait();
             TERMINUS_END_CPU_PROFILE
         }
+        
+        shutdown();
+        
+        context._render_exit_sema.notify();
     }
 }
