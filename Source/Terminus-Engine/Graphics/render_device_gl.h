@@ -83,6 +83,14 @@ namespace terminus
 				bool createRenderTargetView,
 				bool generateMipmaps = true,
 				uint mipMapLevels = 10);
+            void		 CreateTexture2D(Texture2D* texture,
+                                         uint16 width,
+                                         uint16 height,
+                                         void* data,
+                                         TextureFormat format,
+                                         bool createRenderTargetView,
+                                         bool generateMipmaps = true,
+                                         uint mipMapLevels = 10);
 			Texture3D*		 CreateTexture3D(uint16 width,
 				uint16 height,
 				uint16 depth,

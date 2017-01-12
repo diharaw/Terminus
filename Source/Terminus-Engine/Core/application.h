@@ -87,19 +87,11 @@ namespace terminus {
 	private:
 		void initialize_input();
 		void initialize_resources();
-		void initialize_graphics();
 		void initialize_physics();
 		void initialize_audio();
 		void initialize_ecs();
 		void initialize_script();
-        
-        void submit_rendering();
-        void shutdown_graphics();
-        
-        TASK_METHOD_DECLARATION(graphics_initialize_task);
-        TASK_METHOD_DECLARATION(graphics_shutdown_task);
-        TASK_METHOD_DECLARATION(rendering_task);
-        
+
         EVENT_METHOD_DECLARATION(OnScenePreload);
 	};
 

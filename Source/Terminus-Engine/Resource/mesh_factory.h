@@ -26,10 +26,6 @@ namespace terminus
     
 	class MeshFactory
 	{
-	private:
-        RenderingThreadPool* m_rendering_thread_pool;
-        MeshGPUResourcesTaskData m_task_data;
-
 	public:
 		MeshFactory();
 		~MeshFactory();

@@ -301,6 +301,124 @@ namespace terminus
 
 		return texture;
 	}
+    
+    void RenderDevice::CreateTexture2D(Texture2D* texture,
+                                 uint16 width,
+                                 uint16 height,
+                                 void* data,
+                                 TextureFormat format,
+                                 bool createRenderTargetView,
+                                 bool generateMipmaps,
+                                 uint mipMapLevels)
+    {
+        texture->m_resource_id = m_texture_res_id++;
+        
+        GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
+        texture->m_glTextureTarget = GL_TEXTURE_2D;
+        
+        GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texture->m_id));
+        
+        GLenum texformat, textype;
+        
+        switch (format)
+        {
+            case TextureFormat::R32G32B32_FLOAT:
+            {
+                texformat = GL_RGB;
+                textype = GL_FLOAT;
+            }
+                break;
+            case TextureFormat::R32G32B32A32_FLOAT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_FLOAT;
+            }
+                break;
+            case TextureFormat::R32G32B32_UINT:
+            {
+                texformat = GL_RGB;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::R32G32B32A32_UINT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::R32G32B32_INT:
+            {
+                texformat = GL_RGB;
+                textype = GL_INT;
+            }
+                break;
+            case TextureFormat::R32G32B32A32_INT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_INT;
+            }
+                break;
+            case TextureFormat::R16G16B16A16_FLOAT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_FLOAT;
+            }
+                break;
+            case TextureFormat::R16G16B16A16_UINT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::R16G16B16A16_INT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_INT;
+            }
+                break;
+            case TextureFormat::R8G8B8A8_UNORM:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_BYTE;
+            }
+                break;
+            case TextureFormat::R8G8B8A8_UINT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::D32_FLOAT_S8_UINT:
+            {
+                texformat = GL_DEPTH_STENCIL;
+                textype = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+            }
+                break;
+            case TextureFormat::D24_FLOAT_S8_UINT:
+            {
+                texformat = GL_DEPTH_STENCIL;
+                textype = GL_UNSIGNED_INT_24_8;
+            }
+                break;
+            case TextureFormat::D16_FLOAT:
+            {
+                texformat = GL_DEPTH_COMPONENT;
+                textype = GL_FLOAT;
+            }
+                break;
+            default:
+                break;
+        }
+        
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, texformat, width, height,  0, texformat, textype, data));
+        
+        if (generateMipmaps)
+        {
+            GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+        }
+        
+        GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
+    }
 
 	Texture3D* RenderDevice::CreateTexture3D(uint16 width,
 											 uint16 height,

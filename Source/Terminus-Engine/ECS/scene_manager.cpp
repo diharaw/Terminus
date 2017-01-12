@@ -23,20 +23,20 @@ namespace terminus
 	{
         Task task;
 
-        ResourceThreadPool* thread_pool = Global::GetResourceThreadPool();
+        LoadingThread& loading_thread = Global::get_context()._loading_thread;
         
 		task._function.Bind<SceneManager, &SceneManager::SceneLoadTask>(this);
         SceneLoadData* data = task_data<SceneLoadData>(task);
 		strcpy(data->scene_name, scene.c_str());
 		
-		thread_pool->enqueue(task);
+		loading_thread.enqueue_load_task(task);
 	}
 
 	void SceneManager::Preload(String scene)
 	{
         Task task;
         
-        ResourceThreadPool* thread_pool = Global::GetResourceThreadPool();
+        LoadingThread& loading_thread = Global::get_context()._loading_thread;
 
         SceneLoadData* data = task_data<SceneLoadData>(task);
 
@@ -45,7 +45,7 @@ namespace terminus
 
         task._function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
 
-		thread_pool->enqueue(task);
+        loading_thread.enqueue_load_task(task);
 	}
 
 	void SceneManager::SetActiveScene(String scene)

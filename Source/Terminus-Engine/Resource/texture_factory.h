@@ -12,19 +12,15 @@ namespace terminus
 {
     struct TextureGPUResourceCreateTask
     {
-        uint16 width;
-        uint16 height;
-        void* data;
+        uint16     width;
+        uint16     height;
+        void*      data;
+        Texture2D* existing_texture;
     };
     
 	class TextureFactory
 	{
-	private:
-        Texture* m_texture;
-        RenderingThreadPool* m_rendering_thread_pool;
-        TextureGPUResourceCreateTask m_task_data;
-
-	public:
+    public:
 		TextureFactory();
 		~TextureFactory();
 		void Initialize();

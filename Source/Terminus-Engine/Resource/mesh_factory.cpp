@@ -6,7 +6,7 @@ namespace terminus
 {
 		MeshFactory::MeshFactory()
 		{
-            m_rendering_thread_pool = Global::GetRenderingThreadPool();
+            
 		}
 
 		MeshFactory::~MeshFactory()
@@ -50,7 +50,7 @@ namespace terminus
         
             
             task._function.Bind<MeshFactory, &MeshFactory::CreateGPUResourcesTask>(this);
-            m_rendering_thread_pool->enqueue(task);
+            Global::get_context()._rendering_thread.enqueue_upload_task(task);
 
 
             mesh->SubMeshes = new SubMesh[_Data->header.m_MeshCount];
