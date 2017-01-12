@@ -42,6 +42,7 @@ namespace terminus
         Semaphore _main_ready_sema;
         Semaphore _render_done_sema;
         Semaphore _swap_done_sema;
+        Semaphore _exit_ready_sema;
         
         // Threads
         RenderingThread _rendering_thread;

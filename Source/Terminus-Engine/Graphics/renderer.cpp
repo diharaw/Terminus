@@ -137,7 +137,6 @@ namespace terminus
         }
         
 #if defined(TERMINUS_WITH_EDITOR)
-        ImGui::End();
         ImGuiBackend::render();
         ImGuiBackend::new_frame();
 #endif

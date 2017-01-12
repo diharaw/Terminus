@@ -20,7 +20,7 @@ namespace terminus
         {
             std::unique_lock<std::mutex> lock(_mutex);
             _signal = true;
-            _condition.notify_one();
+            _condition.notify_all();
         }
         
         inline void wait()

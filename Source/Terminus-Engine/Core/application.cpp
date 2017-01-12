@@ -11,8 +11,7 @@ namespace terminus
     int cmd_buf_idx;
     
     String scene_path = "";
-    bool file_dialog = false;
-    
+
     // TEST TEST TEST
     
     TERMINUS_PROFILER_INSTANCE
@@ -74,7 +73,7 @@ namespace terminus
         
 		while (!context._shutdown)
 		{
-            TERMINUS_BEGIN_CPU_PROFILE(GameLoop)
+            TERMINUS_BEGIN_CPU_PROFILE(update_loop)
             
 			platform.update();
             EventHandler::Update();
@@ -84,6 +83,8 @@ namespace terminus
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
+            
+            temp_render();
             
 			Global::GetPerFrameAllocator()->Clear();
             
@@ -132,7 +133,7 @@ namespace terminus
         
         if(ImGui::Button("Browse..."))
         {
-            file_dialog = true;
+            scene_path = platform::open_file_dialog("json");
         }
         if(ImGui::Button("Load Scene"))
         {
@@ -147,6 +148,8 @@ namespace terminus
                 std::cout << "Invalid Path" << std::endl;
             }
         }
+        
+        ImGui::End();
         
         // TEST
 #endif

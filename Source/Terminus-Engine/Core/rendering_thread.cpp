@@ -3,6 +3,8 @@
 #include <Graphics/imgui_backend.h>
 #include <Core/config.h>
 
+#include <Utility/Remotery.h>
+
 namespace terminus
 {
     RenderingThread::RenderingThread()
@@ -52,7 +54,8 @@ namespace terminus
         context._render_ready_sema.notify();
         
         while (!context._shutdown)
-        {            
+        {
+            TERMINUS_BEGIN_CPU_PROFILE(render_loop)
             // submit api calls
             context._renderer.submit();
             
@@ -68,9 +71,7 @@ namespace terminus
             
             // wait for swap done
             context._swap_done_sema.wait();
-            
+            TERMINUS_END_CPU_PROFILE
         }
-        
-        shutdown();
     }
 }
