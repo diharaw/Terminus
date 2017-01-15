@@ -1,5 +1,4 @@
-#ifndef SLOTMAP_H
-#define SLOTMAP_H
+#pragma once
 
 #include <stdint.h>
 #include <climits>
@@ -9,6 +8,7 @@ typedef unsigned ID;
 #define MAX_OBJECTS 64*1024
 #define INDEX_MASK 0xffff
 #define NEW_OBJECT_ID_ADD 0x10000
+#define INDEX_FROM_ID(x) x & INDEX_MASK
 
 struct Index
 {
@@ -18,7 +18,7 @@ struct Index
 };
 
 template<class T, size_t N>
-struct SlotMap
+struct PackedArray
 {
     unsigned _num_objects;
     T _objects[N];
@@ -71,5 +71,3 @@ struct SlotMap
         _freelist_enqueue = id & INDEX_MASK;
     }
 };
-
-#endif

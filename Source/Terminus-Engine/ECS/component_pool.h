@@ -1,64 +1,85 @@
 #pragma once
 
-#ifndef COMPONENTPOOL_H
-#define COMPONENTPOOL_H
-
-#include <ECS/system.h>
 #include <container/packed_array.h>
-#include <unordered_map>
+#include <ECS/entity.h>
+
+#include <iostream>
+#include <array>
 
 namespace terminus
 {
-#define MAX_COMPONENTS 1024
-
-	using EntityMap = std::unordered_map<Entity, ID>;
-
-	class IComponentPool
-	{
-	protected:
-		EntityMap m_entity_map;
-
-	public:
-		IComponentPool() {}
-		virtual ~IComponentPool() {}
-		virtual IComponent* AttachComponent(Entity entity) = 0;
-		virtual IComponent* GetComponent(Entity entity) = 0;
-		virtual void RemoveComponent(Entity entity) = 0;
-	};
-
 	template <typename T>
-	class ComponentPool : public IComponentPool
+	class ComponentPool
 	{
-    public:
-		SlotMap<T, MAX_COMPONENTS> m_components;
+	public:
+		PackedArray<T, MAX_ENTITIES> _pool;
+	private:
+		std::array<ID, MAX_ENTITIES> _cmp_entity_ref;
 
 	public:
-		ComponentPool() {}
-		~ComponentPool() {}
-
-		inline IComponent* AttachComponent(Entity entity)
+		ComponentPool()
 		{
-			ID component_id = m_components.add();
-			IComponent* component = &m_components.lookup(component_id);
-			m_entity_map[entity] = component_id;
-
-			return component;
+			for (ID& entity_id : _cmp_entity_ref)
+			{
+				entity_id = INVALID_ID;
+			}
 		}
 
-		inline IComponent* GetComponent(Entity entity)
+		~ComponentPool()
 		{
-			if (m_entity_map.find(entity) == m_entity_map.end())
-				return nullptr;
+
+		}
+
+		inline T& create(Entity& entity)
+		{
+			// currently only one instance of a component can be attached to an entity. if already attached, return that instance.
+
+			ID cmp_id = 0;
+
+			if (has(entity))
+			{
+				cmp_id = _cmp_entity_ref[INDEX_FROM_ID(entity._id)];
+			}
 			else
-				return &m_components.lookup(m_entity_map[entity]);
+			{
+				cmp_id = _pool.add();
+				_cmp_entity_ref[INDEX_FROM_ID(entity._id)] = cmp_id;
+			}
+
+			return _pool.lookup(cmp_id);
 		}
 
-		inline void RemoveComponent(Entity entity)
+		inline T& lookup(Entity& entity)
 		{
-			m_components.remove(m_entity_map[entity]);
+			assert(has(entity));
+
+			return _pool.lookup(_cmp_entity_ref[INDEX_FROM_ID(entity._id)]);
+		}
+
+		inline void remove(Entity& entity)
+		{
+			if (has(entity))
+			{
+				ID cmp_id = _cmp_entity_ref[INDEX_FROM_ID(entity._id)];
+				_pool.remove(cmp_id);
+				_cmp_entity_ref[INDEX_FROM_ID(entity._id)] = INVALID_ID;
+			}
+		}
+
+		inline bool has(Entity& entity)
+		{
+			return (_cmp_entity_ref[INDEX_FROM_ID(entity._id)] != INVALID_ID);
+		}
+
+		inline T* get_array()
+		{
+			return &_pool._objects[0];
+		}
+
+		inline int get_num_objects()
+		{
+			return _pool._num_objects;
 		}
 	};
-
 }
 
-#endif

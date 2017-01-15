@@ -1,14 +1,13 @@
 #ifndef RENDERSYSTEM_H
 #define RENDERSYSTEM_H
 
-#include <ECS/system.h>
-#include <ECS/mesh_component.h>
-#include <ECS/transform_component.h>
+#include <ECS/component_types.h>
 #include <global.h>
 #include <Graphics/rendering_path.h>
 #include <Graphics/draw_item.h>
 #include <Graphics/renderer.h>
 #include <Resource/shader_cache.h>
+#include <ECS/scene.h>
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10
@@ -34,47 +33,49 @@ namespace terminus
     
     struct Renderable
     {
-        Mesh*                    _mesh;
-        bool                     _sub_mesh_cull;
-        float                    _radius;
-        TransformComponent*      _transform;
-        RenderableType _type;
+        Mesh*               _mesh;
+        bool                _sub_mesh_cull;
+        float               _radius;
+		Matrix4*			_transform;
+		Vector3*			_position;
+        RenderableType		_type;
         // TODO : Accomodate material overrides.
         // TODO : Union containing Renderable type (Mesh, Ocean, Terrain etc)
     };
     
     struct SceneView
     {
-        DrawItemArray            _draw_items;
-        int                      _num_items;
-        Matrix4*                 _view_matrix;
-        Matrix4*                 _projection_matrix;
-        Matrix4*                 _view_projection_matrix;
-        Vector4                  _screen_rect;
-        bool                     _is_shadow;
-        uint32                   _cmd_buf_idx;
+        DrawItemArray  _draw_items;
+        int            _num_items;
+        Matrix4*       _view_matrix;
+        Matrix4*       _projection_matrix;
+        Matrix4*       _view_projection_matrix;
+        Vector4        _screen_rect;
+        bool           _is_shadow;
+        uint32         _cmd_buf_idx;
         RenderingPath* _rendering_path;
     };
     
-    class RenderSystem : public ISystem
+    class RenderSystem
     {
     private:
-        SceneViewArray          m_views;
-        uint16                  m_view_count;
-        RenderableArray         m_renderables;
-        uint16                  m_renderable_count;
-        DefaultThreadPool*      m_thread_pool;
-        Renderer*     m_renderer;
-        ShaderCache*  m_shader_cache;
+        SceneViewArray	   _views;
+        uint16			   _view_count;
+        RenderableArray	   _renderables;
+        uint16			   _renderable_count;
+        DefaultThreadPool* _thread_pool;
+        Renderer*		   _renderer;
+        ShaderCache*	   _shader_cache;
+		Scene*			   _scene;
         
     public:
         RenderSystem();
         ~RenderSystem();
         void SetRenderDevice(Renderer* renderer);
         void SetShaderCache(ShaderCache* shaderCache);
-        virtual void Initialize();
-        virtual void Update(double delta);
-        virtual void Shutdown();
+        void Initialize();
+        void Update(double delta);
+        void Shutdown();
         void OnEntityCreated(Entity entity);
         void OnEntityDestroyed(Entity entity);
         

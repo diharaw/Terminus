@@ -15,6 +15,7 @@
 #include <Resource/material_cache.h>
 #include <Core/rendering_thread.h>
 #include <Core/loading_thread.h>
+#include <script/script_engine.h>
 
 namespace terminus
 {    
@@ -50,6 +51,9 @@ namespace terminus
         RenderingThread _rendering_thread;
         LoadingThread   _loading_thread;
         
+		// Script
+		ScriptEngine	_script_engine;
+
         bool      _shutdown;
     };
     
@@ -70,6 +74,7 @@ namespace terminus
         T_FORCE_INLINE MeshCache&      get_mesh_cache()         { return Global::get_context()._mesh_cache; }
         T_FORCE_INLINE MaterialCache&  get_material_cache()     { return Global::get_context()._material_cache; }
         T_FORCE_INLINE TextureCache&   get_texture_cache()      { return Global::get_context()._texture_cache; }
+		T_FORCE_INLINE ScriptEngine&   get_script_engine()		{ return Global::get_context()._script_engine; }
         
         T_FORCE_INLINE Platform*     get_platform_ptr() 		{ return &Global::get_context()._platform; }
         T_FORCE_INLINE Renderer*     get_renderer_ptr()         { return &Global::get_context()._renderer; }

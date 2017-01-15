@@ -1,5 +1,4 @@
 #include <ECS/render_system.h>
-#include <ECS/camera_component.h>
 #include <ECS/scene.h>
 #include <Resource/shader_cache.h>
 
@@ -14,9 +13,8 @@ namespace terminus
 
     RenderSystem::RenderSystem()
     {
-        m_view_count = 0;
-        
-        m_thread_pool = Global::GetDefaultThreadPool();
+        _view_count = 0;
+        _thread_pool = Global::GetDefaultThreadPool();
     }
     
     RenderSystem::~RenderSystem()
@@ -26,46 +24,50 @@ namespace terminus
     
     void RenderSystem::SetRenderDevice(Renderer* renderer)
     {
-        m_renderer = renderer;
+        _renderer = renderer;
     }
     
     void RenderSystem::SetShaderCache(ShaderCache* shaderCache)
     {
-        m_shader_cache = shaderCache;
+        _shader_cache = shaderCache;
     }
     
     void RenderSystem::Initialize()
     {
-        SlotMap<CameraComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<CameraComponent>();
+		CameraComponent* camera_array = _scene->_camera_pool.get_array();
+		int num_cameras = _scene->_camera_pool.get_num_objects();
         
         // For each Scene Camera
-        for (int i = 0; i < component_list._num_objects; i++)
+        for (int i = 0; i < num_cameras; i++)
         {
-            SceneView& view = m_views[m_view_count++];
-            view._screen_rect = component_list._objects[i].screen_rect;
+            SceneView& view = _views[_view_count++];
+            view._screen_rect = camera_array[i].screen_rect;
             view._is_shadow = false;
-            view._cmd_buf_idx = m_renderer->create_command_buffer();
+            view._cmd_buf_idx = _renderer->create_command_buffer();
         }
         
         // TODO : For each Shadow Camera, add SceneView
 
-        for (Entity entity : m_scene->m_entities)
+        for (int i = 0; i < _scene->_entities._num_objects; i++)
         {
-            if(m_scene->HasComponent(entity, TransformComponent::_id) && m_scene->HasComponent(entity, MeshComponent::_id))
+			Entity& entity = _scene->_entities._objects[i];
+
+            if(_scene->has_transform_component(entity) && _scene->has_mesh_component(entity))
             {
-                MeshComponent* mesh_component = (MeshComponent*)m_scene->GetComponent(entity, MeshComponent::_id);
-                TransformComponent* transform_component = (TransformComponent*)m_scene->GetComponent(entity, TransformComponent::_id);
+                MeshComponent& mesh_component = _scene->get_mesh_component(entity);
+                TransformComponent& transform_component = _scene->get_transform_component(entity);
                 
-                Renderable& renderable = m_renderables[m_renderable_count++];
+                Renderable& renderable = _renderables[_renderable_count++];
                 
-                renderable._mesh = mesh_component->mesh;
-                renderable._sub_mesh_cull = mesh_component->cull_submeshes;
+                renderable._mesh = mesh_component.mesh;
+                renderable._sub_mesh_cull = mesh_component.cull_submeshes;
                 // TODO : assign Radius. Add to MeshImporter.
-                renderable._transform = transform_component;
+                renderable._transform = &transform_component._global_transform;
+				renderable._position = &transform_component._position;
                 
-                if(mesh_component->mesh->IsSkeletal)
+                if(mesh_component.mesh->IsSkeletal)
                     renderable._type = RenderableType::SkeletalMesh;
-                else if(mesh_component->mesh->IsSkeletal)
+                else if(mesh_component.mesh->IsSkeletal)
                     renderable._type = RenderableType::StaticMesh;
                 
                 
@@ -82,7 +84,7 @@ namespace terminus
                     key.EncodeParallaxOcclusion(false);
                     
                     // Send to rendering thread pool
-                    m_shader_cache->Load(key);
+					_shader_cache->Load(key);
                 }
                 
             }
@@ -112,16 +114,16 @@ namespace terminus
     
     void RenderSystem::Update(double delta)
     {
-        m_renderer->uniform_allocator()->Clear();
+        _renderer->uniform_allocator()->Clear();
         
-        int worker_count = m_thread_pool->get_num_worker_threads();
+        int worker_count = _thread_pool->get_num_worker_threads();
         
         // Assign views to threads and frustum cull, sort and fill command buffers in parallel.
         
-        int items_per_thread = std::floor((float)m_view_count / (float)worker_count);
+        int items_per_thread = std::floor((float)_view_count / (float)worker_count);
         
         if(items_per_thread == 0)
-            items_per_thread = m_view_count;
+            items_per_thread = _view_count;
         
         int submitted_items = 0;
         int scene_index = 0;
@@ -129,7 +131,7 @@ namespace terminus
         
         while(!is_done)
         {
-            int remaining_items = m_view_count - submitted_items;
+            int remaining_items = _view_count - submitted_items;
             
             if(remaining_items <= items_per_thread)
             {
@@ -146,10 +148,10 @@ namespace terminus
             
             submitted_items += items_per_thread;
             
-            m_thread_pool->enqueue(task);
+            _thread_pool->enqueue(task);
         }
         
-        m_thread_pool->wait();
+        _thread_pool->wait();
     }
     
     void RenderSystem::Shutdown()
@@ -170,9 +172,9 @@ namespace terminus
     TASK_METHOD_DEFINITION(RenderSystem, RenderPrepareTask)
     {
         RenderPrepareTaskData* _data = static_cast<RenderPrepareTaskData*>(data);
-        SceneView& scene_view = m_views[_data->_scene_index];
+        SceneView& scene_view = _views[_data->_scene_index];
      
-        LinearAllocator* uniform_allocator = m_renderer->uniform_allocator();
+        LinearAllocator* uniform_allocator = _renderer->uniform_allocator();
         uniform_allocator->Clear();
         
         // Set up Per frame uniforms
@@ -181,13 +183,13 @@ namespace terminus
         per_frame->projection = *scene_view._projection_matrix;
         per_frame->view       = *scene_view._view_matrix;
         
-        CommandBuffer& cmd_buf = m_renderer->command_buffer(scene_view._cmd_buf_idx);
+        CommandBuffer& cmd_buf = _renderer->command_buffer(scene_view._cmd_buf_idx);
         
         // Frustum cull Renderable array and fill DrawItem array
         
-        for (int i = 0; i < m_renderable_count; i++)
+        for (int i = 0; i < _renderable_count; i++)
         {
-            Renderable& renderable = m_renderables[i];
+            Renderable& renderable = _renderables[i];
             
             for (int j = 0; j < renderable._mesh->MeshCount; j++)
             {
@@ -195,8 +197,8 @@ namespace terminus
                 DrawItem& draw_item = scene_view._draw_items[index];
                 
                 draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
-                draw_item.uniforms->model = renderable._transform->_global_transform;
-                draw_item.uniforms->position = renderable._transform->_position;
+                draw_item.uniforms->model = *renderable._transform;
+                draw_item.uniforms->position = *renderable._position;
                 draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
                 draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
                 draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;
@@ -247,7 +249,7 @@ namespace terminus
                 cmd_buf.Write(CommandType::BindUniformBuffer);
                 
                 BindUniformBufferCmdData cmd3;
-                cmd3.buffer = m_renderer->_per_frame_buffer;
+                cmd3.buffer = _renderer->_per_frame_buffer;
                 cmd3.slot = PER_FRAME_UNIFORM_SLOT;
                 
                 cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
@@ -257,7 +259,7 @@ namespace terminus
                 cmd_buf.Write(CommandType::CopyUniformData);
                 
                 CopyUniformCmdData cmd4;
-                cmd4.buffer = m_renderer->_per_frame_buffer;
+                cmd4.buffer = _renderer->_per_frame_buffer;
                 cmd4.data   = per_frame;
                 cmd4.size   = sizeof(PerFrameUniforms);
                 cmd4.map_type = BufferMapType::WRITE;
@@ -299,7 +301,7 @@ namespace terminus
                         key.EncodeParallaxOcclusion(false);
                         
                         // Send to rendering thread pool
-                        ShaderProgram* program = m_shader_cache->Load(key);
+                        ShaderProgram* program = _shader_cache->Load(key);
                         
                         if(last_program != program->m_resource_id)
                         {
@@ -320,7 +322,7 @@ namespace terminus
                         cmd_buf.Write(CommandType::BindUniformBuffer);
                         
                         BindUniformBufferCmdData cmd7;
-                        cmd7.buffer = m_renderer->_per_draw_buffer;
+                        cmd7.buffer = _renderer->_per_draw_buffer;
                         cmd7.slot = PER_DRAW_UNIFORM_SLOT;
                         
                         cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
@@ -331,7 +333,7 @@ namespace terminus
                         cmd_buf.Write(CommandType::CopyUniformData);
                         
                         CopyUniformCmdData cmd8;
-                        cmd8.buffer = m_renderer->_per_draw_buffer;
+                        cmd8.buffer = _renderer->_per_draw_buffer;
                         cmd8.data   = draw_item.uniforms;
                         cmd8.size   = sizeof(PerDrawUniforms);
                         cmd8.map_type = BufferMapType::WRITE;

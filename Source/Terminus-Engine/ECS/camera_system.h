@@ -1,10 +1,11 @@
 #pragma once
 
-#include <ECS/system.h>
+#include <ECS/entity.h>
+#include <ECS/component_types.h>
 
 namespace terminus
 {
-	class CameraSystem : public ISystem
+	class CameraSystem
 	{
 	public:
 		CameraSystem();

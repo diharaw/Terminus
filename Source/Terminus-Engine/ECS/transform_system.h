@@ -1,17 +1,17 @@
 #pragma once
 
-#include <ECS/system.h>
+#include <ECS/component_types.h>
 
 namespace terminus
 {
-	class TransformSystem : public ISystem
+	class TransformSystem
 	{
 	public:
 		TransformSystem();
 		~TransformSystem();
-		virtual void Initialize();
-		virtual void Update(double delta);
-		virtual void Shutdown();
+		void Initialize();
+		void Update(double delta);
+		void Shutdown();
 		void OnEntityCreated(Entity entity);
 		void OnEntityDestroyed(Entity entity);
 	};

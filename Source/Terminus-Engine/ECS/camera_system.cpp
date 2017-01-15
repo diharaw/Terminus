@@ -2,7 +2,7 @@
 
 namespace terminus
 {
-	CameraSystem::CameraSystem() : ISystem()
+	CameraSystem::CameraSystem()
 	{
 
 	}
