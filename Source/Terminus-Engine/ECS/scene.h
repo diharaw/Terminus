@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ECS/system.h>
 #include <Graphics/render_device.h>
 #include <types.h>
 #include <container/packed_array.h>
@@ -30,6 +29,7 @@ namespace terminus
 		ComponentPool<ColliderComponent>  _collider_pool;
 		ComponentPool<CameraComponent>	  _camera_pool;
 		ComponentPool<LuaScriptComponent> _lua_script_pool;
+        ComponentPool<CppScriptComponent> _cpp_script_pool;
 
 		// systems
 
@@ -80,6 +80,11 @@ namespace terminus
 		{
 			return _lua_script_pool.create(entity);
 		}
+        
+        inline CppScriptComponent& attach_cpp_script_component(Entity& entity)
+        {
+            return _cpp_script_pool.create(entity);
+        }
 
 		// get methods
 
@@ -107,6 +112,11 @@ namespace terminus
 		{
 			return _lua_script_pool.lookup(entity);
 		}
+        
+        inline CppScriptComponent& get_cpp_script_component(Entity& entity)
+        {
+            return _cpp_script_pool.lookup(entity);
+        }
 
 		// has methods
 
@@ -134,6 +144,11 @@ namespace terminus
 		{
 			return _lua_script_pool.has(entity);
 		}
+        
+        inline bool has_cpp_script_component(Entity& entity)
+        {
+            return _cpp_script_pool.has(entity);
+        }
 
 		inline Entity& create_entity(std::string name = "")
 		{

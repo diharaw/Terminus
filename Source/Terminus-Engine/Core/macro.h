@@ -25,3 +25,9 @@
     #define TERMINUS_API_IMPORT
     #pragma warning Unknown dynamic link import/export semantics.
 #endif
+
+#define DECLARE_FACTORY_FUNC(class_name, base_class)			 \
+extern "C" TERMINUS_API base_class* __cdecl Create##class_name() \
+{																 \
+return new class_name();                                         \
+}

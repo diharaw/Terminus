@@ -3,6 +3,7 @@
 #include <Graphics/camera.h>
 #include <Resource/mesh.h>
 #include <script/script_engine.h>
+#include <script/cpp_script.h>
 #include <ECS/entity.h>
 #include <types.h>
 #include <string>
@@ -78,6 +79,15 @@ namespace terminus
 			_shutdown(_object);
 		}
 	};
+    
+    struct CppScriptComponent
+    {
+        String      _class_name;
+        String      _file_name;
+        Entity		_entity;
+        Scene*		_scene;
+        CppScript*  _script;
+    };
 
 	// Transform helpers
 
