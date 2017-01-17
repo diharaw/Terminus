@@ -26,7 +26,7 @@ struct PackedArray
     unsigned short _freelist_enqueue;
     unsigned short _freelist_dequeue;
     
-    SlotMap()
+    PackedArray()
     {
         _num_objects = 0;
         for (unsigned i=0; i<N; ++i)

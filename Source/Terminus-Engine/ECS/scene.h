@@ -36,6 +36,8 @@ namespace terminus
 		CameraSystem	_camera_system;
 		TransformSystem _transform_system;
 		RenderSystem    _render_system;
+        
+        String          _name;
 
 	private:
 		std::array<int, MAX_ENTITIES> _versions;
@@ -54,6 +56,11 @@ namespace terminus
 
 		}
 
+        void update(double dt)
+        {
+            
+        }
+        
 		// attach methods
 
 		inline TransformComponent& attach_transform_component(Entity& entity)

@@ -52,8 +52,8 @@ namespace terminus
 			PoolAllocator* m_SamplerStateAllocator;
 
 			// Stateful Object References for Window mode switching. GL only.
-			SlotMap<VertexArray*, MAX_VERTEX_ARRAY>	m_VertexArrayPool;
-			SlotMap<Framebuffer*, MAX_FRAMEBUFFER> 	m_FramebufferPool;
+			PackedArray<VertexArray*, MAX_VERTEX_ARRAY>	m_VertexArrayPool;
+			PackedArray<Framebuffer*, MAX_FRAMEBUFFER> 	m_FramebufferPool;
             
             // Resource IDs
             

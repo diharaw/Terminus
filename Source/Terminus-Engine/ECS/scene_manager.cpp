@@ -13,26 +13,34 @@ namespace terminus
 
 	}
     
-	void SceneManager::Initialize()
+	void SceneManager::initialize()
 	{
 		
         
 	}
+    
+    void SceneManager::update(double dt)
+    {
+        for (auto scene : _active_scenes)
+        {
+            scene->update(dt);
+        }
+    }
 
-	void SceneManager::Load(String scene)
+	void SceneManager::load(String scene)
 	{
         Task task;
 
         LoadingThread& loading_thread = Global::get_context()._loading_thread;
         
-		task._function.Bind<SceneManager, &SceneManager::SceneLoadTask>(this);
+		task._function.Bind<SceneManager, &SceneManager::scene_load_task>(this);
         SceneLoadData* data = task_data<SceneLoadData>(task);
 		strcpy(data->scene_name, scene.c_str());
 		
 		loading_thread.enqueue_load_task(task);
 	}
 
-	void SceneManager::Preload(String scene)
+	void SceneManager::preload(String scene)
 	{
         Task task;
         
@@ -43,22 +51,22 @@ namespace terminus
 		const char* name = scene.c_str();
 		strcpy(&data->scene_name[0], name);
 
-        task._function.Bind<SceneManager, &SceneManager::ScenePreloadTask>(this);
+        task._function.Bind<SceneManager, &SceneManager::scene_preload_task>(this);
 
         loading_thread.enqueue_load_task(task);
 	}
 
-	void SceneManager::SetActiveScene(String scene)
+	void SceneManager::set_active_scene(String scene)
 	{
 		
 	}
 
-	void SceneManager::Unload(String scene)
+	void SceneManager::unload(String scene)
 	{
 
 	}
 
-	void SceneManager::SceneLoadTask(void* data)
+	void SceneManager::scene_load_task(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
 		Scene* loaded = context::get_scene_cache().Load(String(load_data->scene_name));
@@ -69,7 +77,7 @@ namespace terminus
         EventHandler::QueueEvent(event);
 	}
 
-	void SceneManager::ScenePreloadTask(void* data)
+	void SceneManager::scene_preload_task(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
 		Scene* loaded = context::get_scene_cache().Load(String(load_data->scene_name));
@@ -79,14 +87,19 @@ namespace terminus
         ScenePreloadEvent* event = new ScenePreloadEvent(loaded);
         EventHandler::QueueEvent(event);
 	}
-
-	void SceneManager::RegisterSystem(ISystem* system)
+    
+	void SceneManager::initialize_scene(Scene* scene)
 	{
 
 	}
-
-	void SceneManager::InitializeScene(Scene* scene)
-	{
-
-	}
+    
+    EVENT_METHOD_DEFINITION(SceneManager, on_scene_load_complete)
+    {
+        
+    }
+    
+    EVENT_METHOD_DEFINITION(SceneManager, on_scene_preload_complete)
+    {
+        
+    }
 } // namespace terminus

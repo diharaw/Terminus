@@ -9,9 +9,12 @@
 #include <Resource/scene_cache.h>
 #include <Core/Event/event_handler.h>
 
+#include <vector>
+
 namespace terminus
 {
     using SceneMap = std::unordered_map<String, Scene*>;
+    using SceneVector = std::vector<Scene*>;
 
 	struct SceneLoadData
 	{
@@ -21,24 +24,26 @@ namespace terminus
 	class SceneManager
 	{
 	private:
-		SceneMap 						 m_scene_map;
-		Scene* 							 m_active_scene;
-		Scene* 							 m_preload_scene;
+		SceneMap 	_scene_map;
+        SceneVector _active_scenes;
+        SceneVector _queued_scenes;
 
 	public:
 		SceneManager();
 		~SceneManager();
-        void Initialize();
-		void Load(String scene);
-		void Preload(String scene);
-		void SetActiveScene(String scene);
-		void Unload(String scene);
-		void SceneLoadTask(void* data);
-		void ScenePreloadTask(void* data);
-		void RegisterSystem(ISystem* system);
+        void initialize();
+        void update(double dt);
+		void load(String scene);
+		void preload(String scene);
+		void set_active_scene(String scene);
+		void unload(String scene);
+		void scene_load_task(void* data);
+		void scene_preload_task(void* data);
 
-	public:
-		void InitializeScene(Scene* scene);
+	private:
+		void initialize_scene(Scene* scene);
+        EVENT_METHOD_DECLARATION(on_scene_load_complete);
+        EVENT_METHOD_DECLARATION(on_scene_preload_complete);
 	};
 
 }
