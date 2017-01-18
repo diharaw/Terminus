@@ -10,16 +10,9 @@
 
 namespace terminus
 {
-    struct CreateTextureTaskData
-    {
-        asset_common::ImageLoadData* load_data;
-        Texture2D*                   existing_texture;
-    };
-    
 	namespace texture_factory
 	{
-		extern Texture* create(asset_common::ImageLoadData* data);
-        extern TASK_METHOD_DECLARATION(create_texture_task);
+		extern Texture* create(String image_name);
 	};
 }
 

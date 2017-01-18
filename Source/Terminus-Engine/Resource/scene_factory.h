@@ -8,6 +8,6 @@ namespace terminus
 {
     namespace scene_factory
     {
-        Scene* create(AssetCommon::TextLoadData* _data);
+        Scene* create(asset_common::TextLoadData* _data);
     };
 } // namespace terminus

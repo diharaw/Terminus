@@ -1,0 +1,7 @@
+{
+	"name" : "test",
+	"render_passes" :
+	[
+		"test_render_pass"
+	]
+}

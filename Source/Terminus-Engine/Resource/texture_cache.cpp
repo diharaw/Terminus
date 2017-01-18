@@ -21,11 +21,9 @@ namespace terminus
 	{
 		if (m_AssetMap.find(id) == m_AssetMap.end())
 		{
-			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
+            std::cout << "Asset not in Cache. Loading Asset." << std::endl;
 
-            asset_common::ImageLoadData* data = stb_image_loader::load(id);
-
-            Texture* texture = texture_factory::create(data);
+            Texture* texture = texture_factory::create(id);
             m_AssetMap[id] = texture;
 
             std::cout << "Asset successfully loaded" << std::endl;

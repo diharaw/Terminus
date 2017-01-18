@@ -1,4 +1,5 @@
 #include <Resource/material_factory.h>
+#include <Resource/text_loader.h>
 #include <Resource/texture_cache.h>
 #include <Core/context.h>
 
@@ -6,9 +7,15 @@ namespace terminus
 {
 	namespace material_factory
     {
-        Material* create(AssetCommon::TextLoadData* data)
+        Material* create(String material_name)
         {
             TextureCache& cache = context::get_texture_cache();
+            
+            asset_common::TextLoadData* data = text_loader::load(material_name);
+            
+            if(!data)
+                return nullptr;
+            
             JsonDocument doc;
             doc.Parse(data->buffer);
             
@@ -17,7 +24,7 @@ namespace terminus
             if (doc.HasMember("diffuse_map"))
             {
                 String key = std::string(doc["diffuse_map"].GetString());
-                material->texture_maps[DIFFUSE] = (Texture2D*)cache.Load(key);
+                material->texture_maps[DIFFUSE] = (Texture2D*)cache.load(key);
             }
             else
             {
@@ -36,13 +43,13 @@ namespace terminus
             if (doc.HasMember("normal_map"))
             {
                 String key = std::string(doc["normal_map"].GetString());
-                material->texture_maps[NORMAL] = (Texture2D*)cache.Load(key);
+                material->texture_maps[NORMAL] = (Texture2D*)cache.load(key);
             }
             
             if (doc.HasMember("roughness_map"))
             {
                 String key = std::string(doc["roughness_map"].GetString());
-                material->texture_maps[ROUGHNESS] = (Texture2D*)cache.Load(key);
+                material->texture_maps[ROUGHNESS] = (Texture2D*)cache.load(key);
             }
             else
             {
@@ -53,7 +60,7 @@ namespace terminus
             if (doc.HasMember("metalness_map"))
             {
                 String key = std::string(doc["metalness_map"].GetString());
-                material->texture_maps[METALNESS] = (Texture2D*)cache.Load(key);
+                material->texture_maps[METALNESS] = (Texture2D*)cache.load(key);
             }
             else
             {
@@ -64,7 +71,7 @@ namespace terminus
             if (doc.HasMember("displacement_map"))
             {
                 String key = std::string(doc["displacement_map"].GetString());
-                material->texture_maps[DISPLACEMENT] = (Texture2D*)cache.Load(key);
+                material->texture_maps[DISPLACEMENT] = (Texture2D*)cache.load(key);
             }
             
             return material;

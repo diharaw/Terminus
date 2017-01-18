@@ -32,6 +32,11 @@
 					"component_type" : "MESH",
 					"mesh" : "cube.tsm",
 					"material_overrides" : []
+				},
+				{
+					"component_type" : "CPP_SCRIPT",
+					"script_file" : "test_cpp_script.cpp",
+					"class_name" : "TestCppScript"	
 				}
 			]
 		},
@@ -90,7 +95,7 @@
 				},
 				{
 					"component_type" : "LUA_SCRIPT",
-					"lua_script" : "test_script.lua",
+					"script_file" : "test_script.lua",
 					"class_name" : "TestScript"	
 				}
 			]

@@ -1,22 +1,13 @@
 #pragma once
 
-#ifndef  RENDERPASSFACTORY_H
-#define RENDERPASSFACTORY_H
-
 #include <Graphics/render_pass.h>
 #include <Graphics/render_device.h>
+#include <types.h>
 
 namespace terminus
 {
-	class RenderPassFactory
+	namespace render_pass_factory
 	{
-	public:
-		RenderPassFactory();
-		~RenderPassFactory();
-		void Initialize();
-
-		RenderPass* Create(AssetCommon::TextLoadData* _data);
+		extern RenderPass* create(String render_pass_name);
 	};
-}
-
-#endif
+} // namespace terminus

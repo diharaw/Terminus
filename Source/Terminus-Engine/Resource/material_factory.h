@@ -4,13 +4,13 @@
 #define MATERIALFACTORY_H
 
 #include <Graphics/material.h>
-#include <string>
+#include <types.h>
 
 namespace terminus
 {
 	namespace material_factory
 	{
-		extern Material* create(asset_common::TextLoadData* data);
+		extern Material* create(String material_name);
 	};
 }
 

@@ -21,11 +21,8 @@ namespace terminus
 		if (m_MaterialMap.find(key) == m_MaterialMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
-			std::string extension = filesystem::get_file_extention(key);
-
-            asset_common::TextLoadData* data = text_loader::load(key);
             
-            Material* material = material_factory::create(data);
+            Material* material = material_factory::create(key);
             m_MaterialMap[key] = material;
             return material;
 		}
