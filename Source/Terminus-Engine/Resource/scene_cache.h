@@ -3,12 +3,11 @@
 #ifndef  SCENECACHE_H
 #define SCENECACHE_H
 
-#include <Resource/asset_cache.h>
 #include <Resource/scene_factory.h>
 
 namespace terminus
 {
-		class SceneCache : public IAssetCache<SceneFactory>
+		class SceneCache
 		{
 		private:
 			std::unordered_map<String, Scene*> m_AssetMap;

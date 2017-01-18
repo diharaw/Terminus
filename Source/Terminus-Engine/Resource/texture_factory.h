@@ -10,25 +10,16 @@
 
 namespace terminus
 {
-    struct TextureGPUResourceCreateTask
+    struct CreateTextureTaskData
     {
-        uint16     width;
-        uint16     height;
-        void*      data;
-        Texture2D* existing_texture;
+        asset_common::ImageLoadData* load_data;
+        Texture2D*                   existing_texture;
     };
     
-	class TextureFactory
+	namespace texture_factory
 	{
-    public:
-		TextureFactory();
-		~TextureFactory();
-		void Initialize();
-
-		Texture* Create(AssetCommon::ImageLoadData* _data);
-        
-    private:
-        TASK_METHOD_DECLARATION(CreateGPUResourcesTask);
+		extern Texture* create(asset_common::ImageLoadData* data);
+        extern TASK_METHOD_DECLARATION(create_texture_task);
 	};
 }
 

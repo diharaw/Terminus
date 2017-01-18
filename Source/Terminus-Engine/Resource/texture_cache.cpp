@@ -1,4 +1,5 @@
 #include <Resource/texture_cache.h>
+#include <Resource/stb_image_loader.h>
 #include <IO/filesystem.h>
 #include <types.h>
 
@@ -13,52 +14,32 @@ namespace terminus
 
 	TextureCache::~TextureCache()
 	{
-		for (auto it : m_LoaderList)
-		{
-			T_SAFE_DELETE(it);
-		}
+
 	}
 
-	void TextureCache::Initialize()
+	Texture* TextureCache::load(std::string id)
 	{
-	
-	}
-
-	Texture* TextureCache::Load(std::string _ID)
-	{
-		if (m_AssetMap.find(_ID) == m_AssetMap.end())
+		if (m_AssetMap.find(id) == m_AssetMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
 
-			std::string extension = filesystem::get_file_extention(_ID);
+            asset_common::ImageLoadData* data = stb_image_loader::load(id);
 
-			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-			{
-				return nullptr;
-			}
-			else
-			{
-				AssetCommon::ImageLoadData* data = static_cast<AssetCommon::ImageLoadData*>(m_LoaderMap[extension]->Load(_ID));
+            Texture* texture = texture_factory::create(data);
+            m_AssetMap[id] = texture;
 
-				Texture* texture = m_Factory.Create(data);
-				m_AssetMap[_ID] = texture;
+            std::cout << "Asset successfully loaded" << std::endl;
 
-				free(data->bytes);
-				free(data);
-
-				std::cout << "Asset successfully loaded" << std::endl;
-
-				return texture;
-			}
-		}
+            return texture;
+        }
 		else
 		{
 			std::cout << "Asset already loaded. Returning reference." << std::endl;
-			return m_AssetMap[_ID];
+			return m_AssetMap[id];
 		}
 	}
 
-	void TextureCache::Unload(Texture* texture)
+	void TextureCache::unload(Texture* texture)
 	{
 
 	}

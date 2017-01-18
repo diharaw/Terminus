@@ -67,6 +67,8 @@ namespace terminus
             {
                 Task upload_task = concurrent_queue::pop(_graphics_upload_queue);
                 upload_task._function.Invoke(&upload_task._data[0]);
+                
+                context._load_wakeup_sema.notify();
             }
             
             // notify done

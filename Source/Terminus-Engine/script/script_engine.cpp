@@ -41,9 +41,14 @@ namespace terminus
 	{
 
 	}
+    
+    void ScriptEngine::execute_file(String script)
+    {
+        
+    }
 
-	void ScriptEngine::execute_string(String _script)
+	void ScriptEngine::execute_string(String script)
 	{
-		_lua_state.script(_script);
+		_lua_state.script(script);
 	}
 }

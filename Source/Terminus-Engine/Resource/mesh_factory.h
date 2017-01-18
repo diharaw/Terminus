@@ -10,7 +10,7 @@
 
 namespace terminus
 {
-    struct MeshGPUResourcesTaskData
+    struct CreateMeshTaskData
     {
         Mesh* mesh;
         VertexBuffer* vertexBuffer;
@@ -24,16 +24,10 @@ namespace terminus
         BufferUsageType usageType;
     };
     
-	class MeshFactory
+	namespace mesh_factory
 	{
-	public:
-		MeshFactory();
-		~MeshFactory();
-		void Initialize();
-		Mesh* Create(AssetCommon::MeshLoadData* _Data);
-        
-    private:
-        TASK_METHOD_DECLARATION(CreateGPUResourcesTask);
+		extern Mesh* create(asset_common::MeshLoadData* _Data);
+        extern TASK_METHOD_DECLARATION(create_mesh_task);
 	};
 }
 

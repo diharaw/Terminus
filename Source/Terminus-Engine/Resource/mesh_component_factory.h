@@ -12,7 +12,7 @@ namespace terminus
 		void create(JsonValue& json, Entity& entity, Scene* scene)
 		{
             MeshComponent& component = scene->attach_mesh_component(entity);
-            component.mesh = context::get_mesh_cache().Load(std::string(json["mesh"].GetString()));
+            component.mesh = context::get_mesh_cache().load(std::string(json["mesh"].GetString()));
             
             // TODO: Material Overrides
 		}

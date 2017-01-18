@@ -9,86 +9,59 @@ namespace terminus
 {
 	MeshCache::MeshCache()
 	{
-        RegisterLoader<TSMLoader>();
         filesystem::add_directory("assets/mesh");
 	}
 
 	MeshCache::~MeshCache()
 	{
-		for (auto it : m_LoaderList)
-		{
-			T_SAFE_DELETE(it);
-		}
+        
 	}
 
-	void MeshCache::Initialize()
+	Mesh* MeshCache::load(std::string id)
 	{
-
-	}
-
-	Mesh* MeshCache::Load(std::string _ID)
-	{
-		if (m_AssetMap.find(_ID) == m_AssetMap.end())
+		if (m_AssetMap.find(id) == m_AssetMap.end())
 		{
 			std::cout << "Asset not in cache, loading" << std::endl;
 
-			std::string extension = filesystem::get_file_extention(_ID);
+			std::string extension = filesystem::get_file_extention(id);
 
-			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-			{
-				std::cout << "No loader found" << std::endl;
-				return nullptr;
-			}
-			else
-			{
-				AssetCommon::MeshLoadData* data = static_cast<AssetCommon::MeshLoadData*>(m_LoaderMap[extension]->Load(_ID));
-
-				Mesh* mesh = m_Factory.Create(data);
-				mesh->SubMeshes = new SubMesh[data->header.m_MeshCount];
-
-				for (int i = 0; i < data->header.m_MeshCount; i++)
-				{
-					mesh->SubMeshes[i].m_BaseIndex = data->meshes[i].m_BaseIndex;
-					mesh->SubMeshes[i].m_BaseVertex = data->meshes[i].m_BaseVertex;
-					mesh->SubMeshes[i].m_IndexCount = data->meshes[i].m_IndexCount;
-				}
-
-				for (int i = 0; i < data->header.m_MaterialCount; i++)
-				{
-					String mat_path = std::string(data->materials[i].material);
-					std::cout <<  mat_path << std::endl;
-				}
-
-				mesh->MeshCount = data->header.m_MeshCount;
-				mesh->id = _ID;
-				m_AssetMap[_ID] = mesh;
-
-				// Will have to keep vertices and indices around until Physics shape is generated.
-				/*if(data->skeletalVertices)
-					free(data->skeletalVertices);
-
-				if (data->meshes)
-					free(data->meshes);
-
-				if (data->vertices)
-					free(data->vertices);
-
-				if (data->materials)
-					free(data->materials);*/
-
-				std::cout << "Asset successfully loaded" << std::endl;
-
-				return mesh;
-			}
+            asset_common::MeshLoadData* data = tsm_loader::load(id);
+            
+            SubMesh* submeshes = new SubMesh[data->header.m_MeshCount];
+            
+            for (int i = 0; i < data->header.m_MeshCount; i++)
+            {
+                submeshes[i].m_BaseIndex = data->meshes[i].m_BaseIndex;
+                submeshes[i].m_BaseVertex = data->meshes[i].m_BaseVertex;
+                submeshes[i].m_IndexCount = data->meshes[i].m_IndexCount;
+                
+                int mat_index = (int)data->meshes[i].m_MaterialIndex;
+                String mat_path = std::string(data->materials[mat_index].material);
+                
+                submeshes[i]._material = context::get_material_cache().load(mat_path);
+            }
+            
+            int mesh_count = data->header.m_MeshCount;
+            
+            Mesh* mesh = mesh_factory::create(data);
+            mesh->SubMeshes = submeshes;
+            
+            mesh->MeshCount = mesh_count;
+            mesh->id = id;
+            m_AssetMap[id] = mesh;
+            
+            std::cout << "Asset successfully loaded" << std::endl;
+            
+            return mesh;
 		}
 		else
 		{
 			std::cout << "Asset already in cache, returning reference." << std::endl;
-			return m_AssetMap[_ID];
+			return m_AssetMap[id];
 		}
 	}
 
-	void MeshCache::Unload(Mesh* mesh)
+	void MeshCache::unload(Mesh* mesh)
 	{
 		if (m_AssetMap.find(mesh->id) != m_AssetMap.end())
 		{

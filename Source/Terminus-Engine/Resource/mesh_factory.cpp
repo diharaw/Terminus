@@ -4,27 +4,14 @@
 
 namespace terminus
 {
-		MeshFactory::MeshFactory()
-		{
-            
-		}
-
-		MeshFactory::~MeshFactory()
-		{
-
-		}
-
-		void MeshFactory::Initialize()
-		{
-            
-		}
-
-		Mesh* MeshFactory::Create(AssetCommon::MeshLoadData* _Data)
-		{
+    namespace mesh_factory
+    {
+        Mesh* create(AssetCommon::MeshLoadData* _Data)
+        {
             TERMINUS_BEGIN_CPU_PROFILE(CreateMesh);
             
             Task task;
-            MeshGPUResourcesTaskData* data = task_data<MeshGPUResourcesTaskData>(task);
+            CreateMeshTaskData* data = task_data<CreateMeshTaskData>(task);
             
             Mesh* mesh = new Mesh();
             
@@ -33,30 +20,30 @@ namespace terminus
             data->index_buffer_size = sizeof(uint) * _Data->header.m_IndexCount;
             data->usageType = BufferUsageType::STATIC;
             
-			if (_Data->IsSkeletal)
-			{
+            if (_Data->IsSkeletal)
+            {
                 data->vertex_buffer_data = &_Data->skeletalVertices[0];
                 data->vertex_buffer_size = sizeof(SkeletalVertex) * _Data->header.m_VertexCount;
                 data->layout = nullptr;
                 data->layoutType = InputLayoutType::STANDARD_SKINNED_VERTEX;
-			}
-			else
-			{
+            }
+            else
+            {
                 data->vertex_buffer_data = &_Data->vertices[0];
                 data->vertex_buffer_size = sizeof(Vertex) * _Data->header.m_VertexCount;
                 data->layout = nullptr;
                 data->layoutType = InputLayoutType::STANDARD_VERTEX;
-			}
-        
+            }
             
-            task._function.Bind<MeshFactory, &MeshFactory::CreateGPUResourcesTask>(this);
+            
+            task._function.Bind<&create_mesh_task>();
             Global::get_context()._rendering_thread.enqueue_upload_task(task);
-
-
+            
+            
             mesh->SubMeshes = new SubMesh[_Data->header.m_MeshCount];
             mesh->m_MinExtents = _Data->header.m_MinExtents;
             mesh->m_MaxExtents = _Data->header.m_MaxExtents;
-                
+            
             for (int i = 0; i < _Data->header.m_MeshCount; i++)
             {
                 mesh->SubMeshes[i].m_BaseIndex = _Data->meshes[i].m_BaseIndex;
@@ -71,12 +58,12 @@ namespace terminus
             TERMINUS_END_CPU_PROFILE;
             
             return mesh;
-		}
-    
-        TASK_METHOD_DEFINITION(MeshFactory, CreateGPUResourcesTask)
+        }
+        
+        void create_mesh_task(void* data)
         {
             RenderDevice& device = context::get_render_device();
-            MeshGPUResourcesTaskData* task_data = (MeshGPUResourcesTaskData*)data;
+            CreateMeshTaskData* task_data = (CreateMeshTaskData*)data;
             
             IndexBuffer* indexBuffer = device.CreateIndexBuffer(task_data->index_buffer_data, task_data->index_buffer_size, task_data->usageType);
             
@@ -99,4 +86,5 @@ namespace terminus
                 return;
             }
         }
+    }
 } // namespace termnus

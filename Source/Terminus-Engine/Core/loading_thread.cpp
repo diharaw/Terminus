@@ -46,6 +46,14 @@ namespace terminus
             {
                 Task load_task = concurrent_queue::pop(_loading_queue);
                 load_task._function.Invoke(&load_task._data[0]);
+                
+                while(true)
+                {
+                    if(concurrent_queue::empty(context._rendering_thread._graphics_upload_queue))
+                        break;
+                    else
+                        context._load_wakeup_sema.wait();
+                }
             }
             
             context._load_wakeup_sema.wait();

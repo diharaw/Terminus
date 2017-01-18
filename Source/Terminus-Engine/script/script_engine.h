@@ -22,7 +22,8 @@ namespace terminus
 		~ScriptEngine();
 		void initialize();
 		void shutdown();
-		void execute_string(String _script);
+        void execute_file(String script);
+		void execute_string(String script);
 
 	private:
 		sol::state _lua_state;

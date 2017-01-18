@@ -3,16 +3,14 @@
 #ifndef STBIMAGELOADER_H
 #define STBIMAGELOADER_H
 
-#include <Resource/asset_loader.h>
+#include <Resource/asset_common.h>
+#include <types.h>
 
 namespace terminus
 {
-	class StbImageLoader : public IAssetLoader
+	namespace stb_image_loader
 	{
-	public:
-		StbImageLoader();
-		~StbImageLoader();
-		void* Load(std::string _id);
+		extern asset_common::ImageLoadData* load(std::string id);
 	};
 }
 

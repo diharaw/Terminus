@@ -16,8 +16,6 @@ namespace terminus
     {
 	inline void ImportMesh(String filename)
 	{
-		AssimpMeshLoader loader;
-		
 		String extension = filesystem::get_file_extention(filename);
 		String meshPath = filesystem::get_file_path(filename);
 
@@ -25,7 +23,7 @@ namespace terminus
 		{
 			if (extension == ext)
 			{
-				AssetCommon::AssimpMeshLoadData* data = (AssetCommon::AssimpMeshLoadData*)loader.Load(filename);
+				asset_common::AssimpMeshLoadData* data = assimp_mesh_loader::load(filename);
 
 				std::string fileName = filesystem::get_filename(filename);
 				std::string outputPath = "Assets/Mesh/";

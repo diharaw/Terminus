@@ -4,17 +4,13 @@
 #define MATERIALFACTORY_H
 
 #include <Graphics/material.h>
-#include <Resource/texture_cache.h>
 #include <string>
 
 namespace terminus
 {
-	class MaterialFactory
+	namespace material_factory
 	{
-	public:
-		MaterialFactory();
-		~MaterialFactory();
-		Material* Create(AssetCommon::TextLoadData* data);
+		extern Material* create(asset_common::TextLoadData* data);
 	};
 }
 

@@ -4,13 +4,14 @@
 #define TEXTURECACHE_H
 
 #include <Graphics/render_common.h>
-#include <Resource/asset_cache.h>
 #include <Resource/texture_factory.h>
 #include <global.h>
 
+#include <unordered_map>
+
 namespace terminus
 {
-	class TextureCache : public IAssetCache<TextureFactory>
+	class TextureCache
 	{
 	private:
 		std::unordered_map<std::string, Texture*> m_AssetMap;
@@ -18,10 +19,8 @@ namespace terminus
 	public:
 		TextureCache();
 		~TextureCache();
-		void Initialize();
-
-		Texture* Load(std::string _ID);
-		void Unload(Texture* texture);
+		Texture* load(std::string id);
+		void unload(Texture* texture);
 	};
 }
 

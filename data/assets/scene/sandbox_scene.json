@@ -87,6 +87,11 @@
 						"w" : 1.0,
 						"h" : 1.0
 					}
+				},
+				{
+					"component_type" : "LUA_SCRIPT",
+					"lua_script" : "test_script.lua",
+					"class_name" : "TestScript"	
 				}
 			]
 		}

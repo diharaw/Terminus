@@ -5,6 +5,8 @@
 
 namespace terminus
 {
+    class Scene;
+    
 	class CppScript : public Serializable
 	{
     public:

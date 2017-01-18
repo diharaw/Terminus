@@ -110,7 +110,7 @@ typedef struct
 	String m_MeshName;
 }Assimp_Material;
 
-namespace AssetCommon
+namespace asset_common
 {
     struct MeshLoadData
     {

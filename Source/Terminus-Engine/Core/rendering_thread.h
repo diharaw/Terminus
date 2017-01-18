@@ -20,8 +20,10 @@ namespace terminus
     private:
         void render_loop();
         
+    public:
+        GraphicsUploadQueue _graphics_upload_queue;
+        
     private:
         std::thread         _thread;
-        GraphicsUploadQueue _graphics_upload_queue;
     };
 }

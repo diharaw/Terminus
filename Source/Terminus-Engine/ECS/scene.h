@@ -56,7 +56,7 @@ namespace terminus
 
 		}
 
-        void update(double dt)
+        inline void update(double dt)
         {
             
         }

@@ -3,8 +3,6 @@
 #ifndef SHADERCACHE_H
 #define SHADERCACHE_H
 
-#include <Resource/asset_cache.h>
-#include <Resource/asset_loader.h>
 #include <Resource/shader_factory.h>
 #include <Resource/shader_key.h>
 #include <types.h>
@@ -21,7 +19,7 @@
 
 namespace terminus
 {
-	class ShaderCache : public IAssetCache<ShaderFactory>
+	class ShaderCache
 	{
 	private:
 		std::unordered_map<std::string, Shader*> m_ShaderMap;
@@ -31,15 +29,14 @@ namespace terminus
 	public:
 		ShaderCache();
 		~ShaderCache();
-		void Initialize();
 
-		ShaderProgram* Load(const char* _vertexID,
+		ShaderProgram* load(const char* _vertexID,
 									  const char* _pixelID,
 									  const char* _geometryID = nullptr,
 									  const char* _tessevalID = nullptr,
 									  const char* _tesscontrolID = nullptr);
-		ShaderProgram* Load(ShaderKey key);
-		void Unload(ShaderProgram* program);
+		ShaderProgram* load(ShaderKey key);
+		void unload(ShaderProgram* program);
 	};
 }
 

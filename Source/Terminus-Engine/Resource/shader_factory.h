@@ -11,20 +11,11 @@
 
 namespace terminus
 {
-	class ShaderFactory
-	{
-	private:
-        String m_vertex_template;
-        String m_pixel_template;
-
-	public:
-		ShaderFactory();
-		~ShaderFactory();
-		void Initialize(String vertex_template, String pixel_template);
-
-		Shader* Create(AssetCommon::TextLoadData* _data);
-        Shader* Create(StringList& _defines, ShaderType _type);
-	};
+    namespace shader_factory
+    {
+        extern Shader* create(asset_common::TextLoadData* data);
+        extern Shader* create(StringList& defines, ShaderType type);
+    }
 }
 
 #endif

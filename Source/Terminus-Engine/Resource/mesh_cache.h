@@ -1,15 +1,14 @@
 #pragma once
 
-#ifndef MESHCACHE_H
-#define MESHCACHE_H
-
-#include <Resource/asset_cache.h>
 #include <Resource/mesh_factory.h>
 #include <Resource/material_cache.h>
+#include <types.h>
+
+#include <unordered_map>
 
 namespace terminus
 {
-	class MeshCache : public IAssetCache<MeshFactory>
+	class MeshCache
 	{
 	private:
 		std::unordered_map<std::string, Mesh*> m_AssetMap;
@@ -17,11 +16,8 @@ namespace terminus
 	public:
 		MeshCache();
 		~MeshCache();
-		void Initialize();
 
-		Mesh* Load(std::string _ID);
-		void Unload(Mesh* mesh);
+		Mesh* load(String id);
+		void unload(Mesh* mesh);
 	};
-}
-
-#endif
+} // namespace terminus

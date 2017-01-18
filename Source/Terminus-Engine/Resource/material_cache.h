@@ -3,13 +3,15 @@
 #ifndef MATERIALCACHE_H
 #define MATERIALCACHE_H
 
-#include <Resource/asset_cache.h>
 #include <Resource/material_factory.h>
 #include <Resource/texture_cache.h>
+#include <types.h>
+
+#include <unordered_map>
 
 namespace terminus
 {
-	class MaterialCache : public IAssetCache<MaterialFactory>
+	class MaterialCache
 	{
 	private:
 		std::unordered_map<std::string, Material*> m_MaterialMap;
@@ -17,9 +19,8 @@ namespace terminus
 	public:
 		MaterialCache();
 		~MaterialCache();
-		void Initialize();
-		Material* Load(String key);
-		void Unload(Material* material);
+		Material* load(String key);
+		void unload(Material* material);
 	};
 }
 

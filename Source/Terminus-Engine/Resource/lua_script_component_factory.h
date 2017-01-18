@@ -9,7 +9,7 @@ namespace terminus
 	{
 		void create(JsonValue& json, Entity& entity, Scene* scene)
 		{
-
+            
 		}
 	}
 }

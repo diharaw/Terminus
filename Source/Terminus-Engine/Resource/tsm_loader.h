@@ -1,19 +1,12 @@
 #pragma once
 
-#ifndef TSMLOADER_H
-#define TSMLOADER_H
-
-#include <Resource/asset_loader.h>
+#include <Resource/asset_common.h>
+#include <types.h>
 
 namespace terminus
 {
-	class TSMLoader : public IAssetLoader
-	{
-	public:
-		TSMLoader();
-		~TSMLoader();
-		void* Load(std::string _id);
+	namespace tsm_loader
+    {
+		extern asset_common::MeshLoadData* load(String filename);
 	};
 }
-
-#endif

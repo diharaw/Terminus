@@ -10,7 +10,6 @@ namespace terminus
 {
 		ShaderCache::ShaderCache()
 		{
-            RegisterLoader<TextLoader>();
             filesystem::add_directory("assets/shader");
 		}
 
@@ -19,45 +18,9 @@ namespace terminus
 
 		}
 
-		void ShaderCache::Initialize()
-		{
-         
-#if defined(TERMINUS_OPENGL)
-            std::string extension = "glsl";
-#else defined(TERMINUS_DIRECT3D11)
-            std::string extension = "hlsl";
-#endif
-      
-            AssetCommon::TextLoadData* data;
-            String name;
-            String vertex_template, pixel_template;
-            
-            if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-            {
-                assert(false);
-            }
-            else
-            {
-                // Vertex Template
-                name = "vs_template.";
-                name += extension;
-                
-                data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
-                vertex_template = String(data->buffer);
 
-                // Pixel Template
-                name = "ps_template.";
-                name += extension;
-                
-                data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(name));
-                pixel_template = String(data->buffer);
-            }
-            
-            
-			m_Factory.Initialize(vertex_template, pixel_template);
-		}
 
-		ShaderProgram* ShaderCache::Load(const char* _vertexID,
+		ShaderProgram* ShaderCache::load(const char* _vertexID,
 												   const char* _pixelID,
 												   const char* _geometryID,
 												   const char* _tessevalID,
@@ -86,17 +49,10 @@ namespace terminus
 					{
 						std::string extension = filesystem::get_file_extention(id);
 
-						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-						{
-							return nullptr;
-						}
-						else
-						{
-							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-							data->shader_type = ShaderType::VERTEX;
-
-							vertex = m_Factory.Create(data);
-						}
+                        asset_common::TextLoadData* data = text_loader::load(id);
+                        data->shader_type = ShaderType::VERTEX;
+                        
+                        vertex = shader_factory::create(data);
 					}
 					else
 						vertex = m_ShaderMap[id];
@@ -116,17 +72,10 @@ namespace terminus
 					{
 						std::string extension = filesystem::get_file_extention(id);
 
-						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-						{
-							return nullptr;
-						}
-						else
-						{
-							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-							data->shader_type = ShaderType::PIXEL;
-
-							pixel = m_Factory.Create(data);
-						}
+                        asset_common::TextLoadData* data = text_loader::load(id);
+                        data->shader_type = ShaderType::PIXEL;
+                        
+                        pixel = shader_factory::create(data);
 					}
 					else
 						pixel = m_ShaderMap[id];
@@ -146,17 +95,10 @@ namespace terminus
 					{
 						std::string extension = filesystem::get_file_extention(id);
 
-						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-						{
-							return nullptr;
-						}
-						else
-						{
-							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-							data->shader_type = ShaderType::GEOMETRY;
-
-							geometry = m_Factory.Create(data);
-						}
+                        asset_common::TextLoadData* data = text_loader::load(id);
+                        data->shader_type = ShaderType::GEOMETRY;
+                        
+                        geometry = shader_factory::create(data);
 					}
 					else
 						geometry = m_ShaderMap[id];
@@ -176,17 +118,10 @@ namespace terminus
 					{
 						std::string extension = filesystem::get_file_extention(id);
 
-						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-						{
-							return nullptr;
-						}
-						else
-						{
-							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-							data->shader_type = ShaderType::TESSELLATION_EVALUATION;
-
-							tess_eval = m_Factory.Create(data);
-						}
+                        asset_common::TextLoadData* data = text_loader::load(id);
+                        data->shader_type = ShaderType::TESSELLATION_EVALUATION;
+                        
+                        tess_eval = shader_factory::create(data);
 					}
 					else
 						tess_eval = m_ShaderMap[id];
@@ -206,17 +141,10 @@ namespace terminus
 					{
 						std::string extension = filesystem::get_file_extention(id);
 
-						if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-						{
-							return nullptr;
-						}
-						else
-						{
-							AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(id));
-							data->shader_type = ShaderType::TESSELLATION_CONTROL;
-
-							tess_control = m_Factory.Create(data);
-						}
+                        asset_common::TextLoadData* data = text_loader::load(id);
+                        data->shader_type = ShaderType::TESSELLATION_CONTROL;
+                        
+                        tess_control = shader_factory::create(data);
 					}
 					else
 						tess_control = m_ShaderMap[id];
@@ -245,7 +173,7 @@ namespace terminus
 				return nullptr;
 		}
 
-		ShaderProgram* ShaderCache::Load(ShaderKey key)
+		ShaderProgram* ShaderCache::load(ShaderKey key)
 		{
             if (m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
             {
@@ -282,12 +210,12 @@ namespace terminus
                 
                 // THE FOLLOWING BLOCK SHOULD BE SENT TO THE RENDERING THREAD
                 
-                Shader* vertex = m_Factory.Create(defines, ShaderType::VERTEX);
+                Shader* vertex = shader_factory::create(defines, ShaderType::VERTEX);
                 
                 if(!vertex)
                     return nullptr;
                 
-                Shader* pixel = m_Factory.Create(defines, ShaderType::PIXEL);
+                Shader* pixel = shader_factory::create(defines, ShaderType::PIXEL);
                 
                 if(!pixel)
                     return nullptr;
@@ -305,7 +233,7 @@ namespace terminus
                 return m_ShaderProgramKeyMap[key._key];
 		}
 
-		void ShaderCache::Unload(ShaderProgram* program)
+		void ShaderCache:unload(ShaderProgram* program)
 		{
 			// TODO : erase from map
 			context::get_render_device().DestoryShaderProgram(program);

@@ -1,5 +1,6 @@
 #include <Resource/material_cache.h>
 #include <IO/filesystem.h>
+#include <Resource/text_loader.h>
 #include <iostream>
 #include <rapidjson.h>
 
@@ -15,30 +16,18 @@ namespace terminus
 
 	}
 
-	void MaterialCache::Initialize()
-	{
-	
-	}
-
-    Material* MaterialCache::Load(String key)
+    Material* MaterialCache::load(String key)
 	{
 		if (m_MaterialMap.find(key) == m_MaterialMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
 			std::string extension = filesystem::get_file_extention(key);
 
-			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-			{
-				return nullptr;
-			}
-			else
-			{
-				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(key));
-
-				Material* material = m_Factory.Create(data);
-				m_MaterialMap[key] = material;
-				return material;
-			}
+            asset_common::TextLoadData* data = text_loader::load(key);
+            
+            Material* material = material_factory::create(data);
+            m_MaterialMap[key] = material;
+            return material;
 		}
 		else
 		{
@@ -47,7 +36,7 @@ namespace terminus
 		}
 	}
 
-	void MaterialCache::Unload(Material* material)
+	void MaterialCache::unload(Material* material)
 	{
 
 	}

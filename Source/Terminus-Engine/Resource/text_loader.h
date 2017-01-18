@@ -3,16 +3,14 @@
 #ifndef TEXTLOADER_H
 #define TEXTLOADER_H
 
-#include <Resource/asset_loader.h>
+#include <Resource/asset_common.h>
+#include <types.h>
 
 namespace terminus
 {
-	class TextLoader : public IAssetLoader
+	namespace text_loader
 	{
-	public:
-		TextLoader();
-		~TextLoader();
-		void* Load(std::string _id);
+		extern asset_common::TextLoadData* load(String id);
 	};
 }
 
