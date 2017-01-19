@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ECS/component_types.h>
 #include <Graphics/render_device.h>
 #include <types.h>
 #include <container/packed_array.h>
@@ -8,7 +9,6 @@
 #include <ECS/transform_system.h>
 #include <ECS/render_system.h>
 #include <ECS/camera_system.h>
-#include <ECS/component_types.h>
 
 #include <vector>
 #include <iostream>

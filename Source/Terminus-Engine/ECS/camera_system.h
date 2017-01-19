@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ECS/entity.h>
-#include <ECS/component_types.h>
 
 namespace terminus
 {

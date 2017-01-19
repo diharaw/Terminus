@@ -12,6 +12,7 @@
 #include <gtx/transform.hpp>
 #include <gtc/quaternion.hpp>
 #include <gtx/quaternion.hpp>
+#include <sol.hpp>
 #include <atomic>
 #include "document.h"
 #include "stringbuffer.h"
@@ -51,6 +52,8 @@ using ResourceHandle = unsigned;
 using String = std::string;
 using JsonDocument = rapidjson::Document;
 using JsonValue = rapidjson::Value;
+using LuaObject	  = sol::table;
+using LuaFunction = sol::function;
 
 namespace Atomic
 {

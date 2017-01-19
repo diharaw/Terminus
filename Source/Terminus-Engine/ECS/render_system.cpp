@@ -1,6 +1,7 @@
 #include <ECS/render_system.h>
 #include <ECS/scene.h>
 #include <Resource/shader_cache.h>
+#include <ECS/component_types.h>
 
 namespace terminus
 {    
@@ -84,7 +85,7 @@ namespace terminus
                     key.EncodeParallaxOcclusion(false);
                     
                     // Send to rendering thread pool
-					_shader_cache->Load(key);
+					_shader_cache->load(key);
                 }
                 
             }
@@ -301,7 +302,7 @@ namespace terminus
                         key.EncodeParallaxOcclusion(false);
                         
                         // Send to rendering thread pool
-                        ShaderProgram* program = _shader_cache->Load(key);
+                        ShaderProgram* program = _shader_cache->load(key);
                         
                         if(last_program != program->m_resource_id)
                         {

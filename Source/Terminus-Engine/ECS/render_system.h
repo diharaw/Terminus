@@ -1,13 +1,12 @@
 #ifndef RENDERSYSTEM_H
 #define RENDERSYSTEM_H
 
-#include <ECS/component_types.h>
 #include <global.h>
 #include <Graphics/rendering_path.h>
 #include <Graphics/draw_item.h>
 #include <Graphics/renderer.h>
 #include <Resource/shader_cache.h>
-#include <ECS/scene.h>
+#include <Resource/mesh.h>
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10
@@ -16,7 +15,8 @@
 namespace terminus
 {
     // Forward Declarations
-    
+    class  Scene;
+    struct Entity;
     struct SceneView;
     struct Renderable;
     

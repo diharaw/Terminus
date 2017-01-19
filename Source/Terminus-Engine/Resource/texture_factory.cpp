@@ -27,7 +27,8 @@ namespace terminus
         
         Texture* create(String image_name)
         {
-            asset_common::ImageLoadData* data = stb_image_loader::load(image_name);
+            String file_name = filesystem::get_file_name_and_extention(image_name);
+            asset_common::ImageLoadData* data = stb_image_loader::load(file_name);
             
             if(!data)
                 return nullptr;
@@ -45,6 +46,8 @@ namespace terminus
             
             context._rendering_thread.enqueue_upload_task(task);
             context._load_wakeup_sema.wait();
+            
+            std::cout << "Loaded Texture : " << image_name << std::endl;
             
             return texture;
         }

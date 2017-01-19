@@ -1,4 +1,5 @@
 #include <Resource/scene_cache.h>
+#include <Resource/scene_factory.h>
 #include <Resource/text_loader.h>
 #include <IO/filesystem.h>
 
@@ -6,7 +7,6 @@ namespace terminus
 {
 	SceneCache::SceneCache()
 	{
-        RegisterLoader<TextLoader>();
         filesystem::add_directory("assets/scene");
 	}
 
@@ -15,29 +15,22 @@ namespace terminus
 
 	}
     
-    void SceneCache::Initialize()
+    void SceneCache::initialize()
     {
 
     }
 
-	Scene* SceneCache::Load(String _ID)
+	Scene* SceneCache::load(String _ID)
 	{
 		if (m_AssetMap.find(_ID) == m_AssetMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
 			std::string extension = filesystem::get_file_extention(_ID);
 
-			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-			{
-				return nullptr;
-			}
-			else
-			{
-				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(_ID));
-				Scene* scene = m_Factory.Create(data);
-				m_AssetMap[_ID] = scene;
-				return scene;
-			}
+            asset_common::TextLoadData* data = text_loader::load(_ID);
+            Scene* scene = scene_factory::create(data);
+            m_AssetMap[_ID] = scene;
+            return scene;
 		}
 		else
 		{
@@ -46,7 +39,7 @@ namespace terminus
 		}
 	}
 
-	void SceneCache::Unload(Scene* scene)
+	void SceneCache::unload(Scene* scene)
 	{
 
 	}

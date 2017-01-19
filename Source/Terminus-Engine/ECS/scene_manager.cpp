@@ -69,7 +69,7 @@ namespace terminus
 	void SceneManager::scene_load_task(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = context::get_scene_cache().Load(String(load_data->scene_name));
+		Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
         
         // Fire Scene Load Complete Event
         
@@ -80,7 +80,7 @@ namespace terminus
 	void SceneManager::scene_preload_task(void* data)
 	{
 		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = context::get_scene_cache().Load(String(load_data->scene_name));
+		Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
         
         // Fire Scene Preload Complete Event
         

@@ -15,29 +15,20 @@ namespace terminus
 
 	}
 
-	void RenderPassCache::Initialize()
+	void RenderPassCache::initialize()
 	{
 		
 	}
 
-	RenderPass* RenderPassCache::Load(String key)
+	RenderPass* RenderPassCache::load(String key)
 	{
 		if (m_RenderPassMap.find(key) == m_RenderPassMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
-			std::string extension = filesystem::get_file_extention(key);
-
-			if (m_LoaderMap.find(extension) == m_LoaderMap.end())
-			{
-				return nullptr;
-			}
-			else
-			{
-				AssetCommon::TextLoadData* data = static_cast<AssetCommon::TextLoadData*>(m_LoaderMap[extension]->Load(key));
-				RenderPass* render_pass = m_Factory.Create(data);
-				m_RenderPassMap[key] = render_pass;
-				return render_pass;
-			}
+            
+            RenderPass* render_pass = render_pass_factory::create(key);
+            m_RenderPassMap[key] = render_pass;
+            return render_pass;
 		}
 		else
 		{
@@ -46,7 +37,7 @@ namespace terminus
 		}
 	}
 
-	void RenderPassCache::Unload(RenderPass* renderPass)
+	void RenderPassCache::unload(RenderPass* renderPass)
 	{
 		T_SAFE_DELETE(renderPass);
 	}

@@ -142,7 +142,7 @@ namespace terminus
             {
                 String trimmed_path = filesystem::get_file_name_and_extention(scene_path);
                 std::cout << "Trimmed Path : " << trimmed_path << std::endl;
-                context::get_scene_manager().Preload(trimmed_path);
+                context::get_scene_manager().preload(trimmed_path);
             }
             else
             {
@@ -179,11 +179,7 @@ namespace terminus
 
 	void Application::initialize_resources()
 	{
-        context::get_texture_cache().Initialize();
-        context::get_material_cache().Initialize();
-		context::get_mesh_cache().Initialize();
-		context::get_shader_cache().Initialize();
-        context::get_scene_cache().Initialize();
+        context::get_scene_cache().initialize();
 	}
 
 	void Application::initialize_physics()
@@ -198,7 +194,7 @@ namespace terminus
 
 	void Application::initialize_ecs()
 	{
-        context::get_scene_manager().Initialize();
+        context::get_scene_manager().initialize();
 	}
 
 	void Application::initialize_script()

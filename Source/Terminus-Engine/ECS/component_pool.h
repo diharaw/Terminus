@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <array>
+#include <cassert>
 
 namespace terminus
 {

@@ -15,9 +15,9 @@ namespace terminus
 		public:
 			SceneCache();
 			~SceneCache();
-            void Initialize();
-			Scene* Load(String _ID);
-			void Unload(Scene* scene);
+            void initialize();
+			Scene* load(String _ID);
+			void unload(Scene* scene);
 		};
 }
 

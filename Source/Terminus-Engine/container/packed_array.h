@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <climits>
+#include <stdio.h>
 
 typedef unsigned ID;
 

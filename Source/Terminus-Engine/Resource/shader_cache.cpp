@@ -233,7 +233,7 @@ namespace terminus
                 return m_ShaderProgramKeyMap[key._key];
 		}
 
-		void ShaderCache:unload(ShaderProgram* program)
+        void ShaderCache::unload(ShaderProgram* program)
 		{
 			// TODO : erase from map
 			context::get_render_device().DestoryShaderProgram(program);

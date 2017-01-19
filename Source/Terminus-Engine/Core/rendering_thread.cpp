@@ -24,7 +24,7 @@ namespace terminus
     
     void RenderingThread::enqueue_upload_task(Task& task)
     {
-        
+        concurrent_queue::push(_graphics_upload_queue, task);
     }
     
     void RenderingThread::shutdown()
@@ -67,6 +67,8 @@ namespace terminus
             {
                 Task upload_task = concurrent_queue::pop(_graphics_upload_queue);
                 upload_task._function.Invoke(&upload_task._data[0]);
+                
+                std::cout << "Upload task executed" << std::endl;
                 
                 context._load_wakeup_sema.notify();
             }

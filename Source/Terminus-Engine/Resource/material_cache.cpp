@@ -18,6 +18,9 @@ namespace terminus
 
     Material* MaterialCache::load(String key)
 	{
+        if(key == "")
+            return nullptr;
+        
 		if (m_MaterialMap.find(key) == m_MaterialMap.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;

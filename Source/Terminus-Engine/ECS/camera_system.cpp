@@ -1,4 +1,5 @@
 #include <ECS/camera_system.h>
+#include <ECS/component_types.h>
 
 namespace terminus
 {

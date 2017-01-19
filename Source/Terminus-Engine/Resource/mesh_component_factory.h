@@ -2,6 +2,7 @@
 
 #include <types.h>
 #include <ECS/entity.h>
+#include <ECS/scene.h>
 #include <ECS/component_types.h>
 #include <Core/context.h>
 

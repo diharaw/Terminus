@@ -1,14 +1,13 @@
 #pragma once
 
-#ifndef  RENDERPASSCACHE_H
+#ifndef RENDERPASSCACHE_H
 #define RENDERPASSCACHE_H
 
-#include <Resource/asset_cache.h>
 #include <Resource/render_pass_factory.h>
 
 namespace terminus
 {
-	class RenderPassCache : public IAssetCache<RenderPassFactory>
+	class RenderPassCache
 	{
 	private:
 		std::unordered_map<std::string, RenderPass*> m_RenderPassMap;
@@ -16,9 +15,9 @@ namespace terminus
 	public:
 		RenderPassCache();
 		~RenderPassCache();
-		void Initialize();
-		RenderPass* Load(String key);
-		void Unload(RenderPass* renderPass);
+		void initialize();
+		RenderPass* load(String key);
+		void unload(RenderPass* renderPass);
 	};
 }
 

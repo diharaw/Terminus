@@ -1,10 +1,10 @@
 #include <ECS/transform_system.h>
-#include <ECS/transform_component.h>
+#include <ECS/component_types.h>
 #include <ECS/scene.h>
 
 namespace terminus
 {
-	TransformSystem::TransformSystem() : ISystem()
+	TransformSystem::TransformSystem()
 	{
 		
 	}
@@ -16,9 +16,9 @@ namespace terminus
 
 	void TransformSystem::Initialize()
 	{
-        SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<TransformComponent>();
+        //SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<TransformComponent>();
         
-        for (int i = 0; i < component_list._num_objects; i++)
+        //for (int i = 0; i < component_list._num_objects; i++)
         {
             // Generate World Matrix
         }
@@ -26,9 +26,9 @@ namespace terminus
 
 	void TransformSystem::Update(double delta)
 	{
-		SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<TransformComponent>();
+		//SlotMap<TransformComponent, MAX_COMPONENTS>& component_list = m_scene->GetComponentArray<TransformComponent>();
 
-		for (int i = 0; i < component_list._num_objects; i++)
+		//for (int i = 0; i < component_list._num_objects; i++)
 		{
 			// Generate World Matrix
 

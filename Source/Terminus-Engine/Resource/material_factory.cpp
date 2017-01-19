@@ -10,8 +10,9 @@ namespace terminus
         Material* create(String material_name)
         {
             TextureCache& cache = context::get_texture_cache();
+            String file_name = filesystem::get_file_name_and_extention(material_name);
             
-            asset_common::TextLoadData* data = text_loader::load(material_name);
+            asset_common::TextLoadData* data = text_loader::load(file_name);
             
             if(!data)
                 return nullptr;
