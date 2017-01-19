@@ -1,6 +1,9 @@
 #pragma once
 
 #include <Core/config.h>
+
+#include <Graphics/render_common.h>
+#include <types.h>
 #include <unordered_map>
 
 #ifdef TERMINUS_OPENGL

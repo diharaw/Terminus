@@ -5,6 +5,7 @@
 
 #include <Memory/linear_allocator.h>
 #include <Thread/thread_pool.h>
+#include <IO/logger.h>
 
 #define MB_IN_BYTES 1024*1024
 #define MAX_MEMORY_MB 200

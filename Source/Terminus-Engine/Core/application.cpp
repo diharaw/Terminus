@@ -26,7 +26,7 @@ namespace terminus
     EVENT_METHOD_DEFINITION(Application, OnScenePreload)
     {
         ScenePreloadEvent* event_data = (ScenePreloadEvent*)event;
-        std::cout << "Scene Load Complete" << std::endl;
+        T_LOG_INFO("Scene Load Complete");
     }
 
 	Application::~Application()
@@ -124,6 +124,10 @@ namespace terminus
         ImGui::ShowTestWindow(&testWin);
         
         // TEST
+        ImGui::SetNextWindowSize(ImVec2(900,400), ImGuiSetCond_FirstUseEver);
+        ImGui::Begin("Console", &testWin, 0);
+        imgui_console::draw();
+        ImGui::End();
         
         ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
         ImGui::Begin("Scene Load", &testWin, 0);

@@ -1,6 +1,7 @@
 #include <global.h>
 #include <types.h>
 #include <Core/context.h>
+#include <Graphics/imgui_console.h>
 #include <iostream>
 
 namespace terminus
@@ -16,6 +17,10 @@ namespace terminus
         
         void Initialize()
         {
+            logger::initialize();
+            
+            logger::open_file_stream();
+            
             g_memory = malloc(MAX_MEMORY);
             g_allocator = new LinearAllocator(MAX_MEMORY, g_memory);
             
@@ -26,6 +31,11 @@ namespace terminus
             
             g_context = T_NEW Context();
             g_context->_shutdown = false;
+            
+        #if defined(TERMINUS_WITH_EDITOR)
+            imgui_console::initialize();
+            logger::open_custom_stream(&imgui_console::logger_callback);
+        #endif
         }
         
         Context& get_context()
@@ -67,6 +77,13 @@ namespace terminus
             }
             
             free(g_memory);
+            
+        #if defined(TERMINUS_WITH_EDITOR)
+            logger::close_custom_stream();
+            imgui_console::shutdown();
+        #endif
+            
+            logger::close_file_stream();
         }
     }
 }

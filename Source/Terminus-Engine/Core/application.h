@@ -7,11 +7,14 @@
 #include <Platform/platform.h>
 #include <Graphics/imgui_backend.h>
 #include <Graphics/renderer.h>
+#include <Graphics/imgui_helpers.h>
+#include <Graphics/imgui_console.h>
 #include <Memory/pool_allocator.h>
 #include <Memory/stack_allocator.h>
 #include <global.h>
 #include <IO/filesystem.h>
 #include <IO/file_watcher.h>
+#include <IO/logger.h>
 #include <Input/input.h>
 #include <Input/input_context.h>
 #include <Core/Event/event_handler.h>
