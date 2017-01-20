@@ -51,6 +51,7 @@ namespace terminus
         Matrix4*       _projection_matrix;
         Matrix4*       _view_projection_matrix;
         Vector4        _screen_rect;
+        Texture*       _render_target;
         bool           _is_shadow;
         uint32         _cmd_buf_idx;
         RenderingPath* _rendering_path;
@@ -71,13 +72,11 @@ namespace terminus
     public:
         RenderSystem();
         ~RenderSystem();
-        void SetRenderDevice(Renderer* renderer);
-        void SetShaderCache(ShaderCache* shaderCache);
-        void Initialize();
-        void Update(double delta);
-        void Shutdown();
-        void OnEntityCreated(Entity entity);
-        void OnEntityDestroyed(Entity entity);
+        void initialize();
+        void update(double delta);
+        void shutdown();
+        void on_entity_created(Entity entity);
+        void on_entity_destroyed(Entity entity);
         
     private:
         TASK_METHOD_DECLARATION(RenderPrepareTask);

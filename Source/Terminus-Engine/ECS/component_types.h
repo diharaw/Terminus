@@ -28,6 +28,7 @@ namespace terminus
 		bool is_offscreen;
 		bool is_active;
 		Vector4 screen_rect;
+        Texture* render_target;
 	};
 
 	struct MeshComponent

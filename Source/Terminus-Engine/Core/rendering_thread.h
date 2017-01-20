@@ -26,4 +26,6 @@ namespace terminus
     private:
         std::thread         _thread;
     };
+    
+    extern void submit_gpu_upload_task(Task& task);
 }

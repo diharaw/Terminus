@@ -2,6 +2,7 @@
 #include <ECS/scene.h>
 #include <Resource/shader_cache.h>
 #include <ECS/component_types.h>
+#include <Core/context.h>
 
 namespace terminus
 {    
@@ -16,6 +17,8 @@ namespace terminus
     {
         _view_count = 0;
         _thread_pool = Global::GetDefaultThreadPool();
+        _renderer = &context::get_renderer();
+        _shader_cache = &context::get_shader_cache();
     }
     
     RenderSystem::~RenderSystem()
@@ -23,17 +26,7 @@ namespace terminus
         
     }
     
-    void RenderSystem::SetRenderDevice(Renderer* renderer)
-    {
-        _renderer = renderer;
-    }
-    
-    void RenderSystem::SetShaderCache(ShaderCache* shaderCache)
-    {
-        _shader_cache = shaderCache;
-    }
-    
-    void RenderSystem::Initialize()
+    void RenderSystem::initialize()
     {
 		CameraComponent* camera_array = _scene->_camera_pool.get_array();
 		int num_cameras = _scene->_camera_pool.get_num_objects();
@@ -53,42 +46,7 @@ namespace terminus
         {
 			Entity& entity = _scene->_entities._objects[i];
 
-            if(_scene->has_transform_component(entity) && _scene->has_mesh_component(entity))
-            {
-                MeshComponent& mesh_component = _scene->get_mesh_component(entity);
-                TransformComponent& transform_component = _scene->get_transform_component(entity);
-                
-                Renderable& renderable = _renderables[_renderable_count++];
-                
-                renderable._mesh = mesh_component.mesh;
-                renderable._sub_mesh_cull = mesh_component.cull_submeshes;
-                // TODO : assign Radius. Add to MeshImporter.
-                renderable._transform = &transform_component._global_transform;
-				renderable._position = &transform_component._position;
-                
-                if(mesh_component.mesh->IsSkeletal)
-                    renderable._type = RenderableType::SkeletalMesh;
-                else if(mesh_component.mesh->IsSkeletal)
-                    renderable._type = RenderableType::StaticMesh;
-                
-                
-                // TODO: Create task for generating Shader permutations per view, per renderables
-                for (int i = 0; i < renderable._mesh->MeshCount; i++)
-                {
-                    ShaderKey key;
-                    
-                    key.EncodeAlbedo(true);
-                    key.EncodeMeshType(renderable._type);
-                    key.EncodeNormal(true);
-                    key.EncodeMetalness(true);
-                    key.EncodeRoughness(true);
-                    key.EncodeParallaxOcclusion(false);
-                    
-                    // Send to rendering thread pool
-					_shader_cache->load(key);
-                }
-                
-            }
+            on_entity_created(entity);
             
             // Commented for now.
             
@@ -113,7 +71,7 @@ namespace terminus
         }
     }
     
-    void RenderSystem::Update(double delta)
+    void RenderSystem::update(double delta)
     {
         _renderer->uniform_allocator()->Clear();
         
@@ -155,17 +113,51 @@ namespace terminus
         _thread_pool->wait();
     }
     
-    void RenderSystem::Shutdown()
+    void RenderSystem::shutdown()
     {
         
     }
     
-    void RenderSystem::OnEntityCreated(Entity entity)
+    void RenderSystem::on_entity_created(Entity entity)
     {
-        
+        if(_scene->has_transform_component(entity) && _scene->has_mesh_component(entity))
+        {
+            MeshComponent& mesh_component = _scene->get_mesh_component(entity);
+            TransformComponent& transform_component = _scene->get_transform_component(entity);
+            
+            Renderable& renderable = _renderables[_renderable_count++];
+            
+            renderable._mesh = mesh_component.mesh;
+            renderable._sub_mesh_cull = mesh_component.cull_submeshes;
+            // TODO : assign Radius. Add to MeshImporter.
+            renderable._transform = &transform_component._global_transform;
+            renderable._position = &transform_component._position;
+            
+            if(mesh_component.mesh->IsSkeletal)
+                renderable._type = RenderableType::SkeletalMesh;
+            else if(mesh_component.mesh->IsSkeletal)
+                renderable._type = RenderableType::StaticMesh;
+            
+            
+            // TODO: Create task for generating Shader permutations per view, per renderables
+            for (int i = 0; i < renderable._mesh->MeshCount; i++)
+            {
+                ShaderKey key;
+                
+                key.EncodeAlbedo(true);
+                key.EncodeMeshType(renderable._type);
+                key.EncodeNormal(true);
+                key.EncodeMetalness(true);
+                key.EncodeRoughness(true);
+                key.EncodeParallaxOcclusion(false);
+                
+                // Send to rendering thread pool
+                _shader_cache->load(key);
+            }
+        }
     }
     
-    void RenderSystem::OnEntityDestroyed(Entity entity)
+    void RenderSystem::on_entity_destroyed(Entity entity)
     {
         
     }
@@ -245,7 +237,7 @@ namespace terminus
                 
                 cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
                 
-                // Bind Per Frame Globle Uniforms
+                // Bind Per Frame Global Uniforms
                 
                 cmd_buf.Write(CommandType::BindUniformBuffer);
                 
@@ -318,7 +310,7 @@ namespace terminus
                             cmd_buf.Write<BindShaderProgramCmdData>(&cmd6);
                         }
                         
-                        // Bind Per Frame Globle Uniforms
+                        // Bind Per Draw Uniforms
                         
                         cmd_buf.Write(CommandType::BindUniformBuffer);
                         

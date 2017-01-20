@@ -42,10 +42,8 @@ namespace terminus
             texture_task_data->texture = &texture;
             
             task._function.Bind<&create_texture_task>();
-            Context& context = Global::get_context();
             
-            context._rendering_thread.enqueue_upload_task(task);
-            context._load_wakeup_sema.wait();
+            submit_gpu_upload_task(task);
             
             std::cout << "Loaded Texture : " << image_name << std::endl;
             

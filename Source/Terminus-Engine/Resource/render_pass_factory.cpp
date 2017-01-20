@@ -2,31 +2,56 @@
 #include <Thread/thread_pool.h>
 #include <Resource/text_loader.h>
 #include <Platform/platform.h>
+#include <Graphics/render_target_pool.h>
+#include <Graphics/framebuffer_pool.h>
 #include <Core/context.h>
 
 namespace terminus
 {
-    struct RenderPassResourcesTaskData
+    struct AttahDepthStencilTargetTaskData
     {
-        asset_common::TextLoadData* _load_data;
-        RenderPass* _render_pass;
+        Framebuffer* _framebuffer;
+        Texture*   _ds_target;
+    };
+    
+    struct AttahRenderTargetTaskData
+    {
+        Framebuffer* _framebuffer;
+        Texture*   _render_target;
     };
     
 	namespace render_pass_factory
-    {
-        void create_renderpass_resources_task(void* data)
+    {   
+        void attach_depth_stencil_target_task(void* data)
         {
+            AttahDepthStencilTargetTaskData* task_data = (AttahDepthStencilTargetTaskData*)data;
             RenderDevice& device = context::get_render_device();
+            device.AttachDepthStencilTarget(task_data->_framebuffer, task_data->_ds_target);
+        }
+        
+        void attach_render_target_task(void* data)
+        {
+            AttahRenderTargetTaskData* task_data = (AttahRenderTargetTaskData*)data;
+            RenderDevice& device = context::get_render_device();
+            device.AttachRenderTarget(task_data->_framebuffer, task_data->_render_target);
+        }
+        
+        RenderPass* create(String render_pass_name)
+        {
             Platform& platform = context::get_platform();
+            RenderTargetPool& rt_pool = context::get_render_target_pool();
+            FramebufferPool& fb_pool = context::get_framebuffer_pool();
             
-            RenderPassResourcesTaskData* task_data = (RenderPassResourcesTaskData*)data;
+            asset_common::TextLoadData* load_data = text_loader::load(render_pass_name);
+            
+            RenderPass* render_pass = new RenderPass();
             
             JsonDocument doc;
-            doc.Parse(task_data->_load_data->buffer);
+            doc.Parse(load_data->buffer);
             
             if (doc.HasMember("name"))
             {
-                task_data->_render_pass->name = std::string(doc["name"].GetString());
+                render_pass->name = std::string(doc["name"].GetString());
             }
             
             if (doc.HasMember("render_pass_type"))
@@ -34,17 +59,17 @@ namespace terminus
                 String type = std::string(doc["render_pass_type"].GetString());
                 
                 if (type == "SHADOW_MAP")
-                    task_data->_render_pass->render_pass_type = RenderPassType::SHADOW_MAP;
+                    render_pass->render_pass_type = RenderPassType::SHADOW_MAP;
                 if (type == "GAME_WORLD")
-                    task_data->_render_pass->render_pass_type = RenderPassType::GAME_WORLD;
+                    render_pass->render_pass_type = RenderPassType::GAME_WORLD;
                 if (type == "POST_PROCESS")
-                    task_data->_render_pass->render_pass_type = RenderPassType::POST_PROCESS;
+                    render_pass->render_pass_type = RenderPassType::POST_PROCESS;
                 if (type == "UI")
-                    task_data->_render_pass->render_pass_type = RenderPassType::UI;
+                    render_pass->render_pass_type = RenderPassType::UI;
                 if (type == "DEBUG")
-                    task_data->_render_pass->render_pass_type = RenderPassType::DEBUG;
+                    render_pass->render_pass_type = RenderPassType::DEBUG;
                 if (type == "COMPOSITION")
-                    task_data->_render_pass->render_pass_type = RenderPassType::COMPOSITION;
+                    render_pass->render_pass_type = RenderPassType::COMPOSITION;
             }
             
             if (doc.HasMember("global_resources"))
@@ -56,10 +81,10 @@ namespace terminus
                     for (rapidjson::SizeType i = 0; i < framebuffers.Size(); i++)
                     {
                         rapidjson::Value& value = framebuffers[i]["render_targets"];
-                        Framebuffer* framebuffer = device.CreateFramebuffer();
-                        FramebufferInfo fb_info;
                         
+                        FramebufferInfo fb_info;
                         fb_info.name = String(framebuffers[i]["name"].GetString());
+                        Framebuffer* framebuffer = fb_pool.create(fb_info.name);
                         
                         for (rapidjson::SizeType j = 0; j < value.Size(); j++)
                         {
@@ -122,20 +147,34 @@ namespace terminus
                                 target_info.height_divisor = divisor;
                             }
                             
-                            Texture2D* render_target = device.CreateTexture2D(width, height, nullptr, format, true);
+                            Texture* render_target = rt_pool.create(target_name, width, height, format);
                             
                             if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
-                                device.AttachDepthStencilTarget(framebuffer, render_target);
+                            {
+                                Task ds_attach_task;
+                                AttahDepthStencilTargetTaskData* ds_task_data = task_data<AttahDepthStencilTargetTaskData>(ds_attach_task);
+                                ds_task_data->_ds_target = render_target;
+                                ds_task_data->_framebuffer = framebuffer;
+                                ds_attach_task._function.Bind<&attach_depth_stencil_target_task>();
+                                
+                                submit_gpu_upload_task(ds_attach_task);
+                            }
                             else
-                                device.AttachRenderTarget(framebuffer, render_target);
+                            {
+                                Task rt_attach_task;
+                                AttahRenderTargetTaskData* rt_task_data = task_data<AttahRenderTargetTaskData>(rt_attach_task);
+                                rt_task_data->_render_target = render_target;
+                                rt_task_data->_framebuffer = framebuffer;
+                                rt_attach_task._function.Bind<&attach_render_target_task>();
+                                
+                                submit_gpu_upload_task(rt_attach_task);
+                            }
                             
-                            device.AddToRenderTargetPool(target_name, render_target);
                             fb_info.render_target_info.push_back(target_info);
                         }
                         
-                        task_data->_render_pass->framebuffers.push_back(framebuffer);
-                        task_data->_render_pass->framebuffer_info_list.push_back(fb_info);
-                        device.AddToFramebufferPool(fb_info.name, framebuffer);
+                        render_pass->framebuffers.push_back(framebuffer);
+                        render_pass->framebuffer_info_list.push_back(fb_info);
                     }
                 }
             }
@@ -148,35 +187,11 @@ namespace terminus
                 {
                     RenderSubPass sub_pass;
                     String framebuffer_id = String(sub_passes[i]["framebuffer_target"].GetString());
-                    sub_pass.framebuffer_target = device.GetFramebufferFromPool(framebuffer_id);
+                    sub_pass.framebuffer_target = fb_pool.lookup(framebuffer_id);
                     
-                    task_data->_render_pass->sub_passes.push_back(sub_pass);
+                    render_pass->sub_passes.push_back(sub_pass);
                 }
             }
-        }
-        
-        RenderPass* create(String render_pass_name)
-        {
-            asset_common::TextLoadData* load_data = text_loader::load(render_pass_name);
-            
-            RenderPass* render_pass = new RenderPass();
-            
-            Task task;
-            
-            task._function.Bind<&create_renderpass_resources_task>();
-            
-            RenderPassResourcesTaskData* data = task_data<RenderPassResourcesTaskData>(task);
-            
-            data->_render_pass = render_pass;
-            data->_load_data = load_data;
-            
-            Context& context = Global::get_context();
-            
-            // queue task into rendering thread.
-            context._rendering_thread.enqueue_upload_task(task);
-            
-            // wait for queued task to complete.
-            context._load_wakeup_sema.wait();
             
             return render_pass;
         }

@@ -87,12 +87,7 @@ namespace terminus
             
             Context& context = Global::get_context();
             
-            std::cout << "Wait for upload task" << std::endl;
-            
-            context._rendering_thread.enqueue_upload_task(task);
-            context._load_wakeup_sema.wait();
-            
-            std::cout << "Upload task ended" << std::endl;
+            submit_gpu_upload_task(task);
             
             mesh->SubMeshes = new SubMesh[data->header.m_MeshCount];
             mesh->m_MinExtents = data->header.m_MinExtents;

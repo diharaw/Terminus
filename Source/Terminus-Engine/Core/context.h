@@ -3,6 +3,8 @@
 #include <Core/macro.h>
 #include <Graphics/renderer.h>
 #include <Graphics/render_device.h>
+#include <Graphics/render_target_pool.h>
+#include <Graphics/framebuffer_pool.h>
 #include <Platform/platform.h>
 #include <IO/filesystem.h>
 #include <Thread/semaphore.h>
@@ -25,8 +27,10 @@ namespace terminus
         Platform	 _platform;
         
         // Graphics Systems
-        Renderer 	 _renderer;
-        RenderDevice _render_device;
+        Renderer         _renderer;
+        RenderDevice     _render_device;
+        RenderTargetPool _render_target_pool;
+        FramebufferPool _framebuffer_pool;
         
         // Gameplay Systems
         SceneManager _scene_manager;
@@ -68,6 +72,8 @@ namespace terminus
         //T_FORCE_INLINE FileSystem&   get_filesystem() 			{ return get_context()._filesystem; }
         T_FORCE_INLINE Renderer&       get_renderer() 			{ return Global::get_context()._renderer; }
         T_FORCE_INLINE RenderDevice&   get_render_device()      { return Global::get_context()._render_device; }
+        T_FORCE_INLINE RenderTargetPool&   get_render_target_pool() { return Global::get_context()._render_target_pool; }
+        T_FORCE_INLINE FramebufferPool&   get_framebuffer_pool() { return Global::get_context()._framebuffer_pool; }
         T_FORCE_INLINE SceneManager&   get_scene_manager()      { return Global::get_context()._scene_manager; }
         T_FORCE_INLINE SceneCache&     get_scene_cache()        { return Global::get_context()._scene_cache; }
         T_FORCE_INLINE ShaderCache&    get_shader_cache()       { return Global::get_context()._shader_cache; }
