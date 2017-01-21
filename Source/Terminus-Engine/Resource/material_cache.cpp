@@ -1,6 +1,7 @@
 #include <Resource/material_cache.h>
 #include <IO/filesystem.h>
 #include <Resource/text_loader.h>
+#include <Core/context.h>
 #include <iostream>
 #include <rapidjson.h>
 
@@ -38,6 +39,16 @@ namespace terminus
 
 	void MaterialCache::unload(Material* material)
 	{
-
+        TextureCache& cache = context::get_texture_cache();
+        
+        for (int i = 0; i < 5; i++)
+        {
+            if(material->texture_maps[i])
+            {
+                cache.unload(material->texture_maps[i]);
+            }
+        }
+        
+        T_SAFE_DELETE(material);
 	}
 }

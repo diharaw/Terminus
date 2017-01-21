@@ -1,12 +1,25 @@
 #include <Resource/texture_cache.h>
 #include <Resource/stb_image_loader.h>
 #include <IO/filesystem.h>
+#include <Core/context.h>
 #include <types.h>
 
 #include <iostream>
 
 namespace terminus
 {
+    struct TextureUnloadTaskData
+    {
+        Texture* _texture;
+    };
+    
+    void texture_unload_task(void* data)
+    {
+        TextureUnloadTaskData* task_data = (TextureUnloadTaskData*)data;
+        RenderDevice& device = context::get_render_device();
+        device.DestroyTexture2D((Texture2D*)task_data->_texture);
+    }
+    
 	TextureCache::TextureCache()
 	{
         filesystem::add_directory("assets/texture");
@@ -39,6 +52,10 @@ namespace terminus
 
 	void TextureCache::unload(Texture* texture)
 	{
-
+        Task task;
+        TextureUnloadTaskData* data = task_data<TextureUnloadTaskData>(task);
+        data->_texture = texture;
+        task._function.Bind<&texture_unload_task>();
+        submit_gpu_upload_task(task);
 	}
 }

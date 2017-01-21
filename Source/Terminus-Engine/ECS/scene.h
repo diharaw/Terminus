@@ -55,6 +55,13 @@ namespace terminus
 		{
 
 		}
+        
+        inline void shutdown()
+        {
+            _camera_system.Shutdown();
+            _transform_system.Shutdown();
+            _render_system.shutdown();
+        }
 
         inline void update(double dt)
         {

@@ -643,6 +643,8 @@ namespace terminus
 	{
 		VertexArray* vertexArray = new VertexArray();
         vertexArray->m_resource_id = m_vertex_array_res_id++;
+        vertexArray->_ib = indexBuffer;
+        vertexArray->_vb = vertexBuffer;
 
 		GL_CHECK_ERROR(glGenVertexArrays(1, &vertexArray->m_id));
 		GL_CHECK_ERROR(glBindVertexArray(vertexArray->m_id));

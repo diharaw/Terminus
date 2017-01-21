@@ -117,6 +117,8 @@ namespace terminus
     {
         uint16 m_resource_id;
 		GLuint m_id;
+        VertexBuffer* _vb;
+        IndexBuffer*  _ib;
     };
     
     struct Shader

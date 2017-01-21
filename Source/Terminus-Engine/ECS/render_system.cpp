@@ -115,7 +115,12 @@ namespace terminus
     
     void RenderSystem::shutdown()
     {
-        
+        for (int i = 0; i < _renderable_count; i++)
+        {
+            // unload mesh
+            MeshCache& cache = context::get_mesh_cache();
+            cache.unload(_renderables[i]._mesh);
+        }
     }
     
     void RenderSystem::on_entity_created(Entity entity)
@@ -198,9 +203,9 @@ namespace terminus
         
         for (int i = 0; i < scene_view._rendering_path->_num_render_passes; i++)
         {
-            RenderPass& render_pass = scene_view._rendering_path->_render_passes[i];
+            RenderPass* render_pass = scene_view._rendering_path->_render_passes[i];
             
-            for (auto sub_pass : render_pass.sub_passes)
+            for (auto sub_pass : render_pass->sub_passes)
             {
                 // Bind Framebuffer Command
                 
@@ -243,7 +248,7 @@ namespace terminus
                 
                 cmd_buf.Write<CopyUniformCmdData>(&cmd4);
                 
-                if(render_pass.geometry_type == GeometryType::SCENE)
+                if(render_pass->geometry_type == GeometryType::SCENE)
                 {
                     uint16 last_vao = 0;
                     uint16 last_program = 0;
@@ -276,7 +281,7 @@ namespace terminus
                         key.encode_metalness(draw_item.material->texture_maps[METALNESS]);
                         key.encode_roughness(draw_item.material->texture_maps[ROUGHNESS]);
                         key.encode_parallax_occlusion(draw_item.material->texture_maps[DISPLACEMENT]);
-                        key.encode_renderpass_id(render_pass.pass_id);
+                        key.encode_renderpass_id(render_pass->pass_id);
                         
                         // Send to rendering thread pool
                         ShaderProgram* program = _shader_cache->load(key);
@@ -369,7 +374,7 @@ namespace terminus
                         cmd_buf.Write<DrawIndexedBaseVertexCmdData>(&cmd11);
                     }
                 }
-                else if(render_pass.geometry_type == GeometryType::QUAD)
+                else if(render_pass->geometry_type == GeometryType::QUAD)
                 {
                     
                 }

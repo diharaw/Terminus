@@ -63,7 +63,17 @@ namespace terminus
 
 	void SceneManager::unload(String scene)
 	{
-
+        for(auto active_scene : _active_scenes)
+        {
+            if(active_scene->_name == scene)
+            {
+                // is an active scene
+                // TODO: more graceful scene unload
+                
+                
+                break;
+            }
+        }
 	}
 
 	void SceneManager::scene_load_task(void* data)
