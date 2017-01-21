@@ -6,7 +6,7 @@ namespace terminus
 {
     RenderingPathCache::RenderingPathCache()
     {
-        
+        filesystem::add_directory("assets/rendering_path");
     }
     
     RenderingPathCache::~RenderingPathCache()
@@ -18,7 +18,7 @@ namespace terminus
     {
         if(_rendering_path_map.find(rendering_path) == _rendering_path_map.end())
         {
-            RenderingPath* rp = rendering_pass_factory::create(rendering_path);
+            RenderingPath* rp = rendering_path_factory::create(rendering_path);
             _rendering_path_map[rendering_path] = rp;
             return rp;
         }

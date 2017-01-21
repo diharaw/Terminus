@@ -1,5 +1,6 @@
 #include <Resource/render_pass_cache.h>
 #include <IO/filesystem.h>
+#include <IO/logger.h>
 
 #include <iostream>
 
@@ -24,7 +25,7 @@ namespace terminus
 	{
 		if (_render_pass_map.find(key) == _render_pass_map.end())
 		{
-			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
+            T_LOG_INFO("Render Pass not in Cache. Loading...");
             
             RenderPass* render_pass = render_pass_factory::create(key);
             render_pass->pass_id = _last_id++;
@@ -33,7 +34,7 @@ namespace terminus
 		}
 		else
 		{
-			std::cout << "Asset already in cache, returning reference.." << std::endl;
+			T_LOG_INFO("Render Pass already in cache, returning reference...");
 			return _render_pass_map[key];
 		}
 	}

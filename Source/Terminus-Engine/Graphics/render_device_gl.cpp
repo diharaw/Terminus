@@ -1477,7 +1477,7 @@ namespace terminus
 		std::vector<GLuint> drawBuffers;
 
 		for (int i = 0; i < framebuffer->m_render_targets.size(); i++)
-			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+			drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 
 		GL_CHECK_ERROR(glDrawBuffers(framebuffer->m_render_targets.size(), &drawBuffers[0]));
 

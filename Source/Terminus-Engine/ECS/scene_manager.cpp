@@ -3,6 +3,46 @@
 
 namespace terminus
 {
+    struct SceneLoadData
+    {
+        char scene_name[100];
+    };
+    
+    struct SceneUnloadData
+    {
+        Scene* _scene;
+    };
+    
+    void scene_load_task(void* data)
+    {
+        SceneLoadData* load_data = (SceneLoadData*)data;
+        Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
+        
+        // Fire Scene Load Complete Event
+        
+        SceneLoadEvent* event = new SceneLoadEvent(loaded);
+        EventHandler::QueueEvent(event);
+    }
+    
+    void scene_preload_task(void* data)
+    {
+        SceneLoadData* load_data = (SceneLoadData*)data;
+        Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
+        
+        // Fire Scene Preload Complete Event
+        
+        ScenePreloadEvent* event = new ScenePreloadEvent(loaded);
+        EventHandler::QueueEvent(event);
+    }
+    
+    void scene_unload_task(void* data)
+    {
+        SceneUnloadData* task_data = (SceneUnloadData*)data;
+        task_data->_scene->shutdown();
+        
+        T_SAFE_DELETE(task_data->_scene);
+    }
+    
 	SceneManager::SceneManager()
 	{
 		
@@ -33,7 +73,7 @@ namespace terminus
 
         LoadingThread& loading_thread = Global::get_context()._loading_thread;
         
-		task._function.Bind<SceneManager, &SceneManager::scene_load_task>(this);
+		task._function.Bind<&scene_load_task>();
         SceneLoadData* data = task_data<SceneLoadData>(task);
 		strcpy(data->scene_name, scene.c_str());
 		
@@ -51,7 +91,7 @@ namespace terminus
 		const char* name = scene.c_str();
 		strcpy(&data->scene_name[0], name);
 
-        task._function.Bind<SceneManager, &SceneManager::scene_preload_task>(this);
+        task._function.Bind<&scene_preload_task>();
 
         loading_thread.enqueue_load_task(task);
 	}
@@ -63,41 +103,27 @@ namespace terminus
 
 	void SceneManager::unload(String scene)
 	{
-        for(auto active_scene : _active_scenes)
+        for(int i = 0; i < _active_scenes.size(); i++)
         {
-            if(active_scene->_name == scene)
+            if(_active_scenes[i]->_name == scene)
             {
                 // is an active scene
                 // TODO: more graceful scene unload
+                Task task;
+                LoadingThread& loading_thread = Global::get_context()._loading_thread;
                 
+                SceneUnloadData* data = task_data<SceneUnloadData>(task);
+                data->_scene = _active_scenes[i];
+                task._function.Bind<&scene_unload_task>();
+                loading_thread.enqueue_load_task(task);
+                
+                _active_scenes.erase(_active_scenes.begin() + i);
                 
                 break;
             }
         }
 	}
 
-	void SceneManager::scene_load_task(void* data)
-	{
-		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
-        
-        // Fire Scene Load Complete Event
-        
-        SceneLoadEvent* event = new SceneLoadEvent(loaded);
-        EventHandler::QueueEvent(event);
-	}
-
-	void SceneManager::scene_preload_task(void* data)
-	{
-		SceneLoadData* load_data = (SceneLoadData*)data;
-		Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
-        
-        // Fire Scene Preload Complete Event
-        
-        ScenePreloadEvent* event = new ScenePreloadEvent(loaded);
-        EventHandler::QueueEvent(event);
-	}
-    
 	void SceneManager::initialize_scene(Scene* scene)
 	{
 

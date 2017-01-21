@@ -27,6 +27,8 @@ namespace terminus
             AttahDepthStencilTargetTaskData* task_data = (AttahDepthStencilTargetTaskData*)data;
             RenderDevice& device = context::get_render_device();
             device.AttachDepthStencilTarget(task_data->_framebuffer, task_data->_ds_target);
+            
+            T_LOG_INFO("Attached depth stencil target");
         }
         
         void attach_render_target_task(void* data)
@@ -34,6 +36,8 @@ namespace terminus
             AttahRenderTargetTaskData* task_data = (AttahRenderTargetTaskData*)data;
             RenderDevice& device = context::get_render_device();
             device.AttachRenderTarget(task_data->_framebuffer, task_data->_render_target);
+            
+            T_LOG_INFO("Attached render target");
         }
         
         RenderPass* create(String render_pass_name)
@@ -74,9 +78,11 @@ namespace terminus
             
             if (doc.HasMember("global_resources"))
             {
-                if (doc.HasMember("framebuffers"))
+                rapidjson::Value& global_resources = doc["global_resources"];
+                
+                if (global_resources.HasMember("framebuffers"))
                 {
-                    rapidjson::Value& framebuffers = doc["framebuffers"];
+                    rapidjson::Value& framebuffers = global_resources["framebuffers"];
                     
                     for (rapidjson::SizeType i = 0; i < framebuffers.Size(); i++)
                     {
@@ -86,22 +92,40 @@ namespace terminus
                         fb_info.name = String(framebuffers[i]["name"].GetString());
                         Framebuffer* framebuffer = fb_pool.create(fb_info.name);
                         
+                        int width = 800;
+                        int height = 600;
+                        
+                        float w_div = 1.0f;
+                        float h_div = 1.0f;
+                        
+                        if (framebuffers[i].HasMember("width_divisor"))
+                        {
+                            float divisor = framebuffers[i]["width_divisor"].GetFloat();
+                            width = static_cast<float>(platform.get_width()) / divisor;
+                            w_div = divisor;
+                        }
+                        if (framebuffers[i].HasMember("height_divisor"))
+                        {
+                            float divisor = framebuffers[i]["height_divisor"].GetFloat();
+                            height = static_cast<float>(platform.get_height()) / divisor;
+                            h_div = divisor;
+                        }
+                        
                         for (rapidjson::SizeType j = 0; j < value.Size(); j++)
                         {
-                            int width = 800;
-                            int height = 600;
+                            
                             String target_name = "default_target";
                             TextureFormat format = TextureFormat::R8G8B8A8_UNORM;
                             RenderTargetInfo target_info;
                             
-                            if (value[i].HasMember("name"))
+                            if (value[j].HasMember("name"))
                             {
-                                target_name = std::string(value[i]["name"].GetString());
+                                target_name = std::string(value[j]["name"].GetString());
                                 target_info.name = target_name;
                             }
-                            if (value[i].HasMember("format"))
+                            if (value[j].HasMember("format"))
                             {
-                                String formatStr = std::string(value[i]["format"].GetString());
+                                String formatStr = std::string(value[j]["format"].GetString());
                                 
                                 if (formatStr == "R32G32B32_FLOAT")
                                     format = TextureFormat::R32G32B32_FLOAT;
@@ -134,19 +158,10 @@ namespace terminus
                                 else
                                     assert(false);
                             }
-                            if (value[i].HasMember("width_divisor"))
-                            {
-                                float divisor = value[i]["width_divisor"].GetFloat();
-                                width = static_cast<float>(platform.get_width()) / divisor;
-                                target_info.width_divisor = divisor;
-                            }
-                            if (value[i].HasMember("height_divisor"))
-                            {
-                                float divisor = value[i]["height_divisor"].GetFloat();
-                                height = static_cast<float>(platform.get_height()) / divisor;
-                                target_info.height_divisor = divisor;
-                            }
                             
+                            target_info.width_divisor = w_div;
+                            target_info.height_divisor = h_div;
+
                             Texture* render_target = rt_pool.create(target_name, width, height, format);
                             
                             if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
@@ -198,6 +213,8 @@ namespace terminus
                     render_pass->sub_passes.push_back(sub_pass);
                 }
             }
+            
+            T_LOG_INFO("Successfully created render pass");
             
             return render_pass;
         }

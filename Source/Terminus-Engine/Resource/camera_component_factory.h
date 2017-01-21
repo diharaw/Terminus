@@ -51,6 +51,9 @@ namespace terminus
                 component.screen_rect.z = viewport_rect["w"].GetFloat();
                 component.screen_rect.w = viewport_rect["h"].GetFloat();
             }
+            
+            RenderingPathCache& rp_cache = context::get_rendering_path_cache();
+            component.rendering_path = rp_cache.load(String(json["rendering_path"].GetString()));
 		}
 	}
 }

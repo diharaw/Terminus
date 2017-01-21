@@ -5,7 +5,7 @@
 
 namespace terminus
 {
-    namespace rendering_pass_factory
+    namespace rendering_path_factory
     {
         extern RenderingPath* create(String rendering_path);
     }

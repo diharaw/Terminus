@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Graphics/camera.h>
+#include <Graphics/rendering_path.h>
 #include <Resource/mesh.h>
 #include <script/cpp_script.h>
 #include <ECS/entity.h>
@@ -29,6 +30,7 @@ namespace terminus
 		bool is_active;
 		Vector4 screen_rect;
         Texture* render_target;
+        RenderingPath* rendering_path;
 	};
 
 	struct MeshComponent

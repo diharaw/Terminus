@@ -8,29 +8,32 @@
 
 namespace terminus
 {
-    RenderingPath* create(String rendering_path)
+    namespace rendering_path_factory
     {
-        asset_common::TextLoadData* load_data = text_loader::load(rendering_path);
-        RenderingPath* rp = new RenderingPath();
-        
-        JsonDocument doc;
-        doc.Parse(load_data->buffer);
-        
-        if (doc.HasMember("name"))
-            rp->_name = String(doc["name"].GetString());
-        
-        rapidjson::Value& render_passes = doc["render_passes"];
-        
-        rp->_num_render_passes = 0;
-        RenderPassCache& cache = context::get_render_pass_cache();
-        
-        for (rapidjson::SizeType i = 0; i < render_passes.Size(); i++)
+        RenderingPath* create(String rendering_path)
         {
-            String render_pass_name = String(render_passes[i].GetString());
-            rp->_render_passes[rp->_num_render_passes] = cache.load(render_pass_name);
-            rp->_num_render_passes++;
+            asset_common::TextLoadData* load_data = text_loader::load(rendering_path);
+            RenderingPath* rp = new RenderingPath();
+            
+            JsonDocument doc;
+            doc.Parse(load_data->buffer);
+            
+            if (doc.HasMember("name"))
+                rp->_name = String(doc["name"].GetString());
+            
+            rapidjson::Value& render_passes = doc["render_passes"];
+            
+            rp->_num_render_passes = 0;
+            RenderPassCache& cache = context::get_render_pass_cache();
+            
+            for (rapidjson::SizeType i = 0; i < render_passes.Size(); i++)
+            {
+                String render_pass_name = String(render_passes[i].GetString());
+                rp->_render_passes[rp->_num_render_passes] = cache.load(render_pass_name);
+                rp->_num_render_passes++;
+            }
+            
+            return rp;
         }
-        
-        return rp;
     }
 }

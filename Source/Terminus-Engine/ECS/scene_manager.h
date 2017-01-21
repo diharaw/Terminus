@@ -16,11 +16,6 @@ namespace terminus
     using SceneMap = std::unordered_map<String, Scene*>;
     using SceneVector = std::vector<Scene*>;
 
-	struct SceneLoadData
-	{
-		char scene_name[100];
-	};
-
 	class SceneManager
 	{
 	private:
@@ -37,8 +32,6 @@ namespace terminus
 		void preload(String scene);
 		void set_active_scene(String scene);
 		void unload(String scene);
-		void scene_load_task(void* data);
-		void scene_preload_task(void* data);
 
 	private:
 		void initialize_scene(Scene* scene);
