@@ -149,12 +149,15 @@ namespace terminus
 
 	struct RenderPass
 	{
+        uint16              pass_id;
 		String				name;
 		RenderPassType	    render_pass_type;
         GeometryType        geometry_type;
 		RenderSubPassList   sub_passes;
 		FramebufferList		framebuffers;
 		FramebufferInfoList framebuffer_info_list;
+        String              vs_template;
+        String              ps_template;
 	};
 }
 

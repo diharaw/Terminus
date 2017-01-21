@@ -36,6 +36,7 @@ namespace terminus
 		Texture2D*       texture_maps[5];
         SamplerState*    sampler;
 		bool             backface_cull;
+        bool             alpha_discard;
         TessellationType tessellation;
 		Vector4          diffuse_value;
 		float            roughness_value;

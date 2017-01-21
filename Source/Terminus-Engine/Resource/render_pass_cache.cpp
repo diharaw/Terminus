@@ -7,7 +7,7 @@ namespace terminus
 {
 	RenderPassCache::RenderPassCache()
 	{
-
+        _last_id = 0;
 	}
 
 	RenderPassCache::~RenderPassCache()
@@ -22,18 +22,19 @@ namespace terminus
 
 	RenderPass* RenderPassCache::load(String key)
 	{
-		if (m_RenderPassMap.find(key) == m_RenderPassMap.end())
+		if (_render_pass_map.find(key) == _render_pass_map.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
             
             RenderPass* render_pass = render_pass_factory::create(key);
-            m_RenderPassMap[key] = render_pass;
+            render_pass->pass_id = _last_id++;
+            _render_pass_map[key] = render_pass;
             return render_pass;
 		}
 		else
 		{
 			std::cout << "Asset already in cache, returning reference.." << std::endl;
-			return m_RenderPassMap[key];
+			return _render_pass_map[key];
 		}
 	}
 

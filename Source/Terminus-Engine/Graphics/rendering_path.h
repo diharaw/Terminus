@@ -7,7 +7,7 @@
 
 namespace terminus
 {
-    using RenderPassArray = std::array<RenderPass, MAX_RENDER_PASSES>;
+    using RenderPassArray = std::array<RenderPass*, MAX_RENDER_PASSES>;
     
     struct RenderingPath
     {

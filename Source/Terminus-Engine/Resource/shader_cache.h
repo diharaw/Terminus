@@ -5,6 +5,9 @@
 
 #include <Resource/shader_factory.h>
 #include <Resource/shader_key.h>
+#include <Graphics/material.h>
+#include <Graphics/draw_item.h>
+#include <Graphics/render_pass.h>
 #include <types.h>
 
 #include <unordered_map>
@@ -16,6 +19,8 @@
 #define SHADER_DEF_PARALLAX_OCCLUSION "USE_PARALLAX_OCCLUSION"
 #define SHADER_DEF_APPLE			  "APPLE"
 #define SHADER_DEF_SKELETAL_MESH	  "SKELETAL_VERTEX"
+#define SHADER_DEF_QUAD_MESH          "QUAD_VERTEX"
+#define SHADER_DEF_ALPHA_DISCARD      "ALPHA_DISCARD"
 
 namespace terminus
 {
@@ -31,11 +36,12 @@ namespace terminus
 		~ShaderCache();
 
 		ShaderProgram* load(const char* _vertexID,
-									  const char* _pixelID,
-									  const char* _geometryID = nullptr,
-									  const char* _tessevalID = nullptr,
-									  const char* _tesscontrolID = nullptr);
+                            const char* _pixelID,
+                            const char* _geometryID = nullptr,
+                            const char* _tessevalID = nullptr,
+                            const char* _tesscontrolID = nullptr);
 		ShaderProgram* load(ShaderKey key);
+        ShaderProgram* load(RenderableType type, RenderPass* render_pass, Material* material);
 		void unload(ShaderProgram* program);
 	};
 }

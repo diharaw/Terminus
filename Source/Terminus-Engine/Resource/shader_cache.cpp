@@ -8,6 +8,7 @@
 
 namespace terminus
 {
+
 		ShaderCache::ShaderCache()
 		{
             filesystem::add_directory("assets/shader");
@@ -222,7 +223,7 @@ namespace terminus
                 
                 ShaderProgram* program = context::get_render_device().CreateShaderProgram(vertex, pixel, nullptr, nullptr, nullptr);
                 
-                // THE ABOVE BLOCK SHOULD BE SENT TO THE RENDERING THREAD
+                // TODO(dihara): THE ABOVE BLOCK SHOULD BE SENT TO THE RENDERING THREAD
                 
                 if(!program)
                     return program;
@@ -232,11 +233,81 @@ namespace terminus
             else
                 return m_ShaderProgramKeyMap[key._key];
 		}
+    
+    ShaderProgram* ShaderCache::load(RenderableType type, RenderPass* render_pass, Material* material)
+    {
+        ShaderKey  key;
+        StringList defines;
+        
+        if(material->texture_maps[DIFFUSE])
+        {
+            defines.push_back(SHADER_DEF_DIFFUSE_MAP);
+            key.encode_albedo(true);
+        }
+        else
+            key.encode_albedo(false);
+        
+        if(material->texture_maps[NORMAL])
+        {
+            defines.push_back(SHADER_DEF_NORMAL_MAP);
+            key.encode_normal(true);
+        }
+        else
+            key.encode_normal(false);
+        
+        if(material->texture_maps[METALNESS])
+        {
+            defines.push_back(SHADER_DEF_METALNESS_MAP);
+            key.encode_metalness(true);
+        }
+        else
+            key.encode_metalness(false);
+        
+        if(material->texture_maps[ROUGHNESS])
+        {
+            defines.push_back(SHADER_DEF_ROUGHNESS_MAP);
+            key.encode_roughness(true);
+        }
+        else
+            key.encode_roughness(false);
+        
+        if(material->texture_maps[DISPLACEMENT])
+        {
+            defines.push_back(SHADER_DEF_PARALLAX_OCCLUSION);
+            key.encode_parallax_occlusion(true);
+        }
+        else
+            key.encode_parallax_occlusion(false);
+        
+        key.encode_mesh_type(type);
+        key.encode_renderpass_id(render_pass->pass_id);
+        
+        if(type == RenderableType::SkeletalMesh)
+            defines.push_back(SHADER_DEF_SKELETAL_MESH);
+        else if(type == RenderableType::Quad)
+            defines.push_back(SHADER_DEF_QUAD_MESH);
+        
+        if(material->alpha_discard)
+            defines.push_back(SHADER_DEF_ALPHA_DISCARD);
+        
+        if(m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
+        {
+            Shader* vs = shader_factory::create(ShaderType::VERTEX, render_pass->vs_template, defines);
+            Shader* ps = shader_factory::create(ShaderType::PIXEL, render_pass->ps_template, defines);
+            
+            ShaderProgram* program = shader_factory::create_program(vs, ps, nullptr, nullptr, nullptr);
+            m_ShaderProgramKeyMap[key._key] = program;
+            
+            return program;
+        }
+        else
+            return m_ShaderProgramKeyMap[key._key];        
+    }
 
-        void ShaderCache::unload(ShaderProgram* program)
-		{
-			// TODO : erase from map
-			context::get_render_device().DestoryShaderProgram(program);
-		}
+    void ShaderCache::unload(ShaderProgram* program)
+    {
+        // TODO : erase from map
+        context::get_render_device().DestoryShaderProgram(program);
+    }
 
 } // namespace terminus

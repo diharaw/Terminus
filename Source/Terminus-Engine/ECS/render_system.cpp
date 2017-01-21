@@ -137,23 +137,7 @@ namespace terminus
                 renderable._type = RenderableType::SkeletalMesh;
             else if(mesh_component.mesh->IsSkeletal)
                 renderable._type = RenderableType::StaticMesh;
-            
-            
-            // TODO: Create task for generating Shader permutations per view, per renderables
-            for (int i = 0; i < renderable._mesh->MeshCount; i++)
-            {
-                ShaderKey key;
-                
-                key.EncodeAlbedo(true);
-                key.EncodeMeshType(renderable._type);
-                key.EncodeNormal(true);
-                key.EncodeMetalness(true);
-                key.EncodeRoughness(true);
-                key.EncodeParallaxOcclusion(false);
-                
-                // Send to rendering thread pool
-                _shader_cache->load(key);
-            }
+
         }
     }
     
@@ -286,12 +270,13 @@ namespace terminus
                         
                         ShaderKey key;
                         
-                        key.EncodeAlbedo(true);
-                        key.EncodeMeshType(draw_item.type);
-                        key.EncodeNormal(true);
-                        key.EncodeMetalness(true);
-                        key.EncodeRoughness(true);
-                        key.EncodeParallaxOcclusion(false);
+                        key.encode_mesh_type(draw_item.type);
+                        key.encode_albedo(draw_item.material->texture_maps[DIFFUSE]);
+                        key.encode_normal(draw_item.material->texture_maps[NORMAL]);
+                        key.encode_metalness(draw_item.material->texture_maps[METALNESS]);
+                        key.encode_roughness(draw_item.material->texture_maps[ROUGHNESS]);
+                        key.encode_parallax_occlusion(draw_item.material->texture_maps[DISPLACEMENT]);
+                        key.encode_renderpass_id(render_pass.pass_id);
                         
                         // Send to rendering thread pool
                         ShaderProgram* program = _shader_cache->load(key);

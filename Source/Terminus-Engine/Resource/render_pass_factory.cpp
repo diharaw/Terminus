@@ -186,8 +186,14 @@ namespace terminus
                 for (rapidjson::SizeType i = 0; i < sub_passes.Size(); i++)
                 {
                     RenderSubPass sub_pass;
-                    String framebuffer_id = String(sub_passes[i]["framebuffer_target"].GetString());
-                    sub_pass.framebuffer_target = fb_pool.lookup(framebuffer_id);
+                    
+                    if(sub_passes[i]["framebuffer_target"].IsNull())
+                        sub_pass.framebuffer_target = nullptr; // Default framebuffer
+                    else
+                    {
+                        String framebuffer_id = String(sub_passes[i]["framebuffer_target"].GetString());
+                        sub_pass.framebuffer_target = fb_pool.lookup(framebuffer_id);
+                    }
                     
                     render_pass->sub_passes.push_back(sub_pass);
                 }

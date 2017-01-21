@@ -1,0 +1,36 @@
+#pragma once
+
+#include <Resource/rendering_path_factory.h>
+#include <Resource/render_pass_cache.h>
+#include <Resource/text_loader.h>
+#include <Core/context.h>
+#include <types.h>
+
+namespace terminus
+{
+    RenderingPath* create(String rendering_path)
+    {
+        asset_common::TextLoadData* load_data = text_loader::load(rendering_path);
+        RenderingPath* rp = new RenderingPath();
+        
+        JsonDocument doc;
+        doc.Parse(load_data->buffer);
+        
+        if (doc.HasMember("name"))
+            rp->_name = String(doc["name"].GetString());
+        
+        rapidjson::Value& render_passes = doc["render_passes"];
+        
+        rp->_num_render_passes = 0;
+        RenderPassCache& cache = context::get_render_pass_cache();
+        
+        for (rapidjson::SizeType i = 0; i < render_passes.Size(); i++)
+        {
+            String render_pass_name = String(render_passes[i].GetString());
+            rp->_render_passes[rp->_num_render_passes] = cache.load(render_pass_name);
+            rp->_num_render_passes++;
+        }
+        
+        return rp;
+    }
+}

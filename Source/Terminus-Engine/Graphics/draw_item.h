@@ -32,7 +32,8 @@ namespace terminus
         Terrain,
         Ocean,
         Particle,
-        Skybox
+        Skybox,
+        Quad
     };
     
     struct DrawItem

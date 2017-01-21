@@ -19,47 +19,54 @@ namespace terminus
             _key = 0;
         }
         
-        ShaderKey(RenderableType type, bool albedo, bool normal, bool metalness, bool roughness, bool parallax)
+        ShaderKey(RenderableType type, bool albedo, bool normal, bool metalness, bool roughness, bool parallax, uint16 pass_id)
         {
-            EncodeMeshType(type);
-            EncodeAlbedo(albedo);
-            EncodeNormal(normal);
-            EncodeMetalness(metalness);
-            EncodeRoughness(roughness);
-            EncodeParallaxOcclusion(parallax);
+            encode_mesh_type(type);
+            encode_albedo(albedo);
+            encode_normal(normal);
+            encode_metalness(metalness);
+            encode_roughness(roughness);
+            encode_parallax_occlusion(parallax);
+            encode_renderpass_id(pass_id);
         }
         
-        inline void EncodeParallaxOcclusion(bool option)
+        inline void encode_renderpass_id(uint16 pass_id)
+        {
+            uint64 temp = pass_id;
+            _key |= temp << 55;
+        }
+        
+        inline void encode_parallax_occlusion(bool option)
         {
             uint64 temp = option;
             _key |= temp << 56;
         }
         
-        inline void EncodeMetalness(bool option)
+        inline void encode_metalness(bool option)
         {
             uint64 temp = option;
             _key |= temp << 57;
         }
         
-        inline void EncodeRoughness(bool option)
+        inline void encode_roughness(bool option)
         {
             uint64 temp = option;
             _key |= temp << 58;
         }
         
-        inline void EncodeNormal(bool option)
+        inline void encode_normal(bool option)
         {
             uint64 temp = option;
             _key |= temp << 59;
         }
         
-        inline void EncodeAlbedo(bool option)
+        inline void encode_albedo(bool option)
         {
             uint64 temp = option;
             _key |= temp << 60;
         }
         
-        inline void EncodeMeshType(RenderableType type)
+        inline void encode_mesh_type(RenderableType type)
         {
             uint64 temp = 0;
 
@@ -98,6 +105,11 @@ namespace terminus
                 case RenderableType::Skybox:
                 {
                     temp = 5;
+                    break;
+                }
+                case RenderableType::Quad:
+                {
+                    temp = 6;
                     break;
                 }
                 default:
