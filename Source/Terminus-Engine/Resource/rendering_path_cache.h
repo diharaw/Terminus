@@ -15,6 +15,6 @@ namespace terminus
         RenderingPathCache();
         ~RenderingPathCache();
         RenderingPath* load(String rendering_path);
-        void unload();
+        void unload(RenderingPath* rendering_path);
     };
 }
