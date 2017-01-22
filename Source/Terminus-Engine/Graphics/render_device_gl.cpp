@@ -992,11 +992,18 @@ namespace terminus
 
 		if (success == GL_FALSE)
 		{
-			GL_CHECK_ERROR(glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog));
-			std::cout << "Shader Compilation Failed" << std::endl;
+			glGetShaderInfoLog(shader->m_id, 512, NULL, infoLog);
+            
+            String log_error = "Shader compilation failed";
+            log_error       += String(infoLog);
+            
+            T_LOG_ERROR(log_error);
+            
 			return nullptr;
 		}
 
+        T_LOG_INFO("Shader successfully compiled.");
+        
 		return shader;
 	}
 
@@ -1037,6 +1044,12 @@ namespace terminus
 		if (!success)
 		{
 			glGetProgramInfoLog(shaderProgram->m_id, 512, NULL, infoLog);
+            
+            String log_error = "Shader program linking failed";
+            log_error       += String(infoLog);
+            
+            T_LOG_ERROR(log_error);
+            
 			return nullptr;
 		}
 
@@ -1073,6 +1086,8 @@ namespace terminus
 				it.second->m_sampler_bindings[binding] = location;
 			}
 		}
+        
+        T_LOG_ERROR("Shader program successfully linked.");
 
 		return shaderProgram;
 	}

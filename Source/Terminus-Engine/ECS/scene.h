@@ -56,6 +56,13 @@ namespace terminus
 
 		}
         
+        inline void initialize()
+        {
+            _camera_system.Initialize();
+            _transform_system.Initialize();
+            _render_system.initialize();
+        }
+        
         inline void shutdown()
         {
             _camera_system.Shutdown();

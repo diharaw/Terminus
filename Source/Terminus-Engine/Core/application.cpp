@@ -72,6 +72,8 @@ namespace terminus
         context._load_wakeup_sema.notify();
         context._render_ready_sema.wait();
         
+        // begin initial scene load here 
+        
 		while (!context._shutdown)
 		{
             TERMINUS_BEGIN_CPU_PROFILE(update_loop)

@@ -115,8 +115,6 @@ namespace filesystem
             
             FILE* currentFile = open_file_from_directory(currentDirectory, _text);
             
-            std::cout << get_current_working_directory() << std::endl;
-            
             if (currentFile)
             {
                 fseek(currentFile, 0, SEEK_END);

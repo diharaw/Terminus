@@ -234,53 +234,56 @@ namespace terminus
                 return m_ShaderProgramKeyMap[key._key];
 		}
     
-    ShaderProgram* ShaderCache::load(RenderableType type, RenderPass* render_pass, Material* material)
+    ShaderProgram* ShaderCache::load(RenderableType type, uint16 pass_id ,RenderSubPass* sub_pass, Material* material)
     {
         ShaderKey  key;
         StringList defines;
         
-        if(material->texture_maps[DIFFUSE])
+        if(material)
         {
-            defines.push_back(SHADER_DEF_DIFFUSE_MAP);
-            key.encode_albedo(true);
+            if(material->texture_maps[DIFFUSE])
+            {
+                defines.push_back(SHADER_DEF_DIFFUSE_MAP);
+                key.encode_albedo(true);
+            }
+            else
+                key.encode_albedo(false);
+            
+            if(material->texture_maps[NORMAL])
+            {
+                defines.push_back(SHADER_DEF_NORMAL_MAP);
+                key.encode_normal(true);
+            }
+            else
+                key.encode_normal(false);
+            
+            if(material->texture_maps[METALNESS])
+            {
+                defines.push_back(SHADER_DEF_METALNESS_MAP);
+                key.encode_metalness(true);
+            }
+            else
+                key.encode_metalness(false);
+            
+            if(material->texture_maps[ROUGHNESS])
+            {
+                defines.push_back(SHADER_DEF_ROUGHNESS_MAP);
+                key.encode_roughness(true);
+            }
+            else
+                key.encode_roughness(false);
+            
+            if(material->texture_maps[DISPLACEMENT])
+            {
+                defines.push_back(SHADER_DEF_PARALLAX_OCCLUSION);
+                key.encode_parallax_occlusion(true);
+            }
+            else
+                key.encode_parallax_occlusion(false);
         }
-        else
-            key.encode_albedo(false);
-        
-        if(material->texture_maps[NORMAL])
-        {
-            defines.push_back(SHADER_DEF_NORMAL_MAP);
-            key.encode_normal(true);
-        }
-        else
-            key.encode_normal(false);
-        
-        if(material->texture_maps[METALNESS])
-        {
-            defines.push_back(SHADER_DEF_METALNESS_MAP);
-            key.encode_metalness(true);
-        }
-        else
-            key.encode_metalness(false);
-        
-        if(material->texture_maps[ROUGHNESS])
-        {
-            defines.push_back(SHADER_DEF_ROUGHNESS_MAP);
-            key.encode_roughness(true);
-        }
-        else
-            key.encode_roughness(false);
-        
-        if(material->texture_maps[DISPLACEMENT])
-        {
-            defines.push_back(SHADER_DEF_PARALLAX_OCCLUSION);
-            key.encode_parallax_occlusion(true);
-        }
-        else
-            key.encode_parallax_occlusion(false);
         
         key.encode_mesh_type(type);
-        key.encode_renderpass_id(render_pass->pass_id);
+        key.encode_renderpass_id(pass_id);
         
         if(type == RenderableType::SkeletalMesh)
             defines.push_back(SHADER_DEF_SKELETAL_MESH);
@@ -292,8 +295,8 @@ namespace terminus
         
         if(m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
         {
-            Shader* vs = shader_factory::create(ShaderType::VERTEX, render_pass->vs_template, defines);
-            Shader* ps = shader_factory::create(ShaderType::PIXEL, render_pass->ps_template, defines);
+            Shader* vs = shader_factory::create(ShaderType::VERTEX, sub_pass->vs_template, defines);
+            Shader* ps = shader_factory::create(ShaderType::PIXEL, sub_pass->ps_template, defines);
             
             ShaderProgram* program = shader_factory::create_program(vs, ps, nullptr, nullptr, nullptr);
             m_ShaderProgramKeyMap[key._key] = program;

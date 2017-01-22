@@ -15,6 +15,7 @@ namespace terminus
 	struct RenderSubPass;
 	struct Texture2D;
 	struct Framebuffer;
+    struct ShaderProgram;
 	struct FramebufferInfo;
 	struct RenderTargetInfo;
 
@@ -131,7 +132,10 @@ namespace terminus
 
 	struct RenderSubPass
 	{
-		Framebuffer* framebuffer_target;
+        String          vs_template;
+        String          ps_template;
+		Framebuffer*    framebuffer_target;
+        ShaderProgram*  program;
 	};
 
 	struct RenderTargetInfo
@@ -156,8 +160,6 @@ namespace terminus
 		RenderSubPassList   sub_passes;
 		FramebufferList		framebuffers;
 		FramebufferInfoList framebuffer_info_list;
-        String              vs_template;
-        String              ps_template;
 	};
 }
 

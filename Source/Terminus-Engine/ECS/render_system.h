@@ -7,6 +7,8 @@
 #include <Graphics/renderer.h>
 #include <Resource/shader_cache.h>
 #include <Resource/mesh.h>
+#include <container/packed_array.h>
+#include <ECS/entity.h>
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10
@@ -24,7 +26,8 @@ namespace terminus
     
     using DrawItemArray   = std::array<DrawItem, MAX_DRAW_ITEMS>;
     using SceneViewArray  = std::array<SceneView, MAX_VIEWS>;
-    using RenderableArray = std::array<Renderable, MAX_RENDERABLES>;
+    using EntityArray     = std::array<ID, MAX_ENTITIES>;
+    using RenderableArray = PackedArray<Renderable, MAX_ENTITIES>;
     
     struct RenderPrepareTaskData
     {
@@ -62,8 +65,8 @@ namespace terminus
     private:
         SceneViewArray	   _views;
         uint16			   _view_count;
+        EntityArray        _entity_renderable_ref;
         RenderableArray	   _renderables;
-        uint16			   _renderable_count;
         DefaultThreadPool* _thread_pool;
         Renderer*		   _renderer;
         ShaderCache*	   _shader_cache;

@@ -10,7 +10,7 @@ namespace terminus
         {
             ShaderType      _type;
             char*           _buffer;
-            Shader**         _shader;
+            Shader**        _shader;
         };
         
         struct CreateProgramTaskData

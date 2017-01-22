@@ -41,7 +41,8 @@ namespace terminus
                             const char* _tessevalID = nullptr,
                             const char* _tesscontrolID = nullptr);
 		ShaderProgram* load(ShaderKey key);
-        ShaderProgram* load(RenderableType type, RenderPass* render_pass, Material* material);
+    
+        ShaderProgram* load(RenderableType type, uint16 pass_id ,RenderSubPass* sub_pass, Material* material);
 		void unload(ShaderProgram* program);
 	};
 }

@@ -210,6 +210,36 @@ namespace terminus
                         sub_pass.framebuffer_target = fb_pool.lookup(framebuffer_id);
                     }
                     
+#if defined(TERMINUS_OPENGL)
+                    String extension = ".glsl";
+#else defined(TERMINUS_DIRECT3D11)
+                    String extension = ".hlsl";
+#endif
+                    
+                    if(sub_passes[i].HasMember("vs_template"))
+                    {
+                        String vs_template = String(sub_passes[i]["vs_template"].GetString());
+                        String file_name = vs_template + extension;
+                        
+                        asset_common::TextLoadData* text_load_data = text_loader::load(file_name);
+                        
+                        sub_pass.vs_template = String(text_load_data->buffer);
+                        T_SAFE_DELETE(text_load_data);
+                    }
+                    
+                    if(sub_passes[i].HasMember("ps_template"))
+                    {
+                        String ps_template = String(sub_passes[i]["ps_template"].GetString());
+                        String file_name = ps_template + extension;
+                        
+                        asset_common::TextLoadData* text_load_data = text_loader::load(file_name);
+                        
+                        sub_pass.ps_template = String(text_load_data->buffer);
+                        T_SAFE_DELETE(text_load_data);
+                    }
+                    
+                    // TODO: if not a GAME_WORLD pass, generate shader and store in Render Subpass.
+                    
                     render_pass->sub_passes.push_back(sub_pass);
                 }
             }

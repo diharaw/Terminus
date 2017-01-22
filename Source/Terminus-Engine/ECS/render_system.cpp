@@ -19,6 +19,11 @@ namespace terminus
         _thread_pool = Global::GetDefaultThreadPool();
         _renderer = &context::get_renderer();
         _shader_cache = &context::get_shader_cache();
+        
+        for (ID& entity_id : _entity_renderable_ref)
+        {
+            entity_id = INVALID_ID;
+        }
     }
     
     RenderSystem::~RenderSystem()
@@ -47,27 +52,6 @@ namespace terminus
 			Entity& entity = _scene->_entities._objects[i];
 
             on_entity_created(entity);
-            
-            // Commented for now.
-            
-//            if(mesh_component && transform_component)
-//            {
-//                for (auto view : m_views)
-//                {
-//                    if((view._is_shadow && mesh_component->casts_shadow) || !view._is_shadow)
-//                    {
-//                        Graphics::DrawItem& draw_item = view._draw_items[view._num_items++];
-//                        draw_item.vertex_array = mesh_component->mesh->VertexArray;
-//                        
-//                        if(mesh_component->mesh->IsSkeletal)
-//                            draw_item.type = Graphics::RenderableType::SkeletalMesh;
-//                        else
-//                            draw_item.type = Graphics::RenderableType::StaticMesh;
-//                        
-//                        draw_item.transform = &transform_component->global_transform;
-//                    }
-//                }
-//            }
         }
     }
     
@@ -115,11 +99,11 @@ namespace terminus
     
     void RenderSystem::shutdown()
     {
-        for (int i = 0; i < _renderable_count; i++)
+        for (int i = 0; i < _renderables._num_objects; i++)
         {
             // unload mesh
             MeshCache& cache = context::get_mesh_cache();
-            cache.unload(_renderables[i]._mesh);
+            cache.unload(_renderables._objects[i]._mesh);
         }
     }
     
@@ -130,7 +114,10 @@ namespace terminus
             MeshComponent& mesh_component = _scene->get_mesh_component(entity);
             TransformComponent& transform_component = _scene->get_transform_component(entity);
             
-            Renderable& renderable = _renderables[_renderable_count++];
+            ID renderable_id = _renderables.add();
+            
+            _entity_renderable_ref[entity._id] = renderable_id;
+            Renderable& renderable = _renderables.lookup(renderable_id);
             
             renderable._mesh = mesh_component.mesh;
             renderable._sub_mesh_cull = mesh_component.cull_submeshes;
@@ -142,13 +129,42 @@ namespace terminus
                 renderable._type = RenderableType::SkeletalMesh;
             else if(mesh_component.mesh->IsSkeletal)
                 renderable._type = RenderableType::StaticMesh;
-
+            
+            for(int i = 0; i < _view_count; i++)
+            {
+                RenderingPath* path = _views[i]._rendering_path;
+                
+                for (int j = 0; j < path->_num_render_passes; j++)
+                {
+                    RenderPass* render_pass = path->_render_passes[j];
+                    
+                    if(render_pass->render_pass_type == RenderPassType::GAME_WORLD)
+                    {
+                        for(RenderSubPass& sub_pass : render_pass->sub_passes)
+                        {
+                            for (int x = 0; x < renderable._mesh->MeshCount; x++)
+                            {
+                                Material* mat = renderable._mesh->SubMeshes[x]._material;
+                                _shader_cache->load(renderable._type, render_pass->pass_id, &sub_pass, mat);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     
     void RenderSystem::on_entity_destroyed(Entity entity)
     {
-        
+        if(_entity_renderable_ref[entity._id] != INVALID_ID)
+        {
+            ID renderable_id = _entity_renderable_ref[entity._id];
+            
+            // TODO: should i clean up resources here?
+            
+            _renderables.remove(renderable_id);
+            _entity_renderable_ref[entity._id] = INVALID_ID;
+        }
     }
     
     TASK_METHOD_DEFINITION(RenderSystem, RenderPrepareTask)
@@ -169,9 +185,9 @@ namespace terminus
         
         // Frustum cull Renderable array and fill DrawItem array
         
-        for (int i = 0; i < _renderable_count; i++)
+        for (int i = 0; i < _renderables._num_objects; i++)
         {
-            Renderable& renderable = _renderables[i];
+            Renderable& renderable = _renderables._objects[i];
             
             for (int j = 0; j < renderable._mesh->MeshCount; j++)
             {

@@ -3,6 +3,7 @@
 #include <Core/config.h>
 
 #include <Graphics/render_common.h>
+#include <IO/logger.h>
 #include <types.h>
 #include <unordered_map>
 
@@ -12,8 +13,7 @@
 
 #ifdef TERMINUS_ENABLE_ERROR_CHECK
 #define GL_CHECK_ERROR(x)																				  \
-x; {int line = __LINE__;																				  \
-																										  \
+x; {                                                                                                      \
 	GLenum err(glGetError());																			  \
 																										  \
 	while (err != GL_NO_ERROR)																			  \
@@ -29,7 +29,9 @@ x; {int line = __LINE__;																				  \
 		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;		  \
 		}																								  \
 																										  \
-		std::cerr << "GL_" << error.c_str() << " - FILE:" << __FILE__ << " , LINE:" << line << std::endl; \
+		std::string formatted_error = "OPENGL ERROR : ";                                                  \
+        formatted_error += error;                                                                         \
+        T_LOG_ERROR(formatted_error);                                                                     \
 		err = glGetError();																				  \
 	}																									  \
 }																										  
