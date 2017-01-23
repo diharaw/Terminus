@@ -1,6 +1,6 @@
 {
 	"name" : "test_render_pass",
-	"render_pass_type" : "SCENE",
+	"render_pass_type" : "GAME_WORLD",
 	"global_resources" :
 	{
 		"framebuffers" :
@@ -26,9 +26,9 @@
 	"sub_passes" :
 	[
 		{
-			"vs_template" : "test_vs_template",
-			"ps_template" : "test_ps_template",
-			"dest_framebuffer" : "color_buffer"
+			"vs_template" : "vs_test_template",
+			"ps_template" : "ps_test_template",
+			"framebuffer_target" : null
 		}
 	]
 }

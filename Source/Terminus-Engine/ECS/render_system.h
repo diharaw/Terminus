@@ -75,7 +75,7 @@ namespace terminus
     public:
         RenderSystem();
         ~RenderSystem();
-        void initialize();
+        void initialize(Scene* scene);
         void update(double delta);
         void shutdown();
         void on_entity_created(Entity entity);

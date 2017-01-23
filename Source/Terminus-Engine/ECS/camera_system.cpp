@@ -1,5 +1,6 @@
 #include <ECS/camera_system.h>
 #include <ECS/component_types.h>
+#include <ECS/scene.h>
 
 namespace terminus
 {
@@ -13,9 +14,9 @@ namespace terminus
 
 	}
 
-	void CameraSystem::Initialize()
+	void CameraSystem::Initialize(Scene* scene)
 	{
-
+        _scene = scene;
 	}
 
 	void CameraSystem::Update(double delta)

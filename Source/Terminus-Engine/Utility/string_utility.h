@@ -138,10 +138,18 @@ namespace terminus
 		{
 			String result = "";
 			String remaining = source;
-
+            
 			while (true)
 			{
+                bool is_ifndef = false;
 				size_t pos = remaining.find("#ifdef ");
+                size_t ndef_pos = remaining.find("#ifndef ");
+                
+                if(ndef_pos < pos)
+                {
+                    is_ifndef = true;
+                    pos = ndef_pos;
+                }
 
 				if (pos != std::string::npos)
 				{
@@ -166,8 +174,15 @@ namespace terminus
 					{
 						has_else = true;
 					}
+                    
+                    bool cond;
+                    
+                    if(is_ifndef)
+                        cond = !DefineExists(tokens[1], defines);
+                    else
+                        cond = DefineExists(tokens[1], defines);
 
-					if (DefineExists(tokens[1], defines))
+					if (cond)
 					{
 						if (has_else)
 						{

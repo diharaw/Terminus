@@ -8,35 +8,33 @@
 // UNIFORM BUFFERS --------------------------------------------------
 // ------------------------------------------------------------------
 
-#ifndef USE_DIFFUSE_MAP
 layout (std140) uniform u_Material
 { 
-	vec4  diffuse;
-	float roughness;
-	float metalness;
+	vec4  u_diffuse_value;
+	float u_roughness_value;
+	float u_metalness_value;
 };
-#endif
 
 layout (std140) uniform u_PointLight
 { 
-	int   count;
-	vec3  position[10];
-	vec3  color[10];
-	float radius[10];
+	int   u_pl_count;
+	vec3  u_pl_position[10];
+	vec3  u_pl_color[10];
+	float u_pl_radius[10];
 };
 
 layout (std140) uniform u_SpotLight
 { 
-	int   count;
-	vec3  position[10];
-	vec3  direction[10];
-	vec3  color[10];
+	int   u_sl_count;
+	vec3  u_sl_position[10];
+	vec3  u_sl_direction[10];
+	vec3  u_sl_color[10];
 };
 
 layout (std140) uniform u_DirectionalLight
 { 
-	vec3  direction;
-	vec3  color;
+	vec3  u_dl_direction;
+	vec3  u_dl_color;
 };
 
 // ------------------------------------------------------------------
@@ -44,23 +42,23 @@ layout (std140) uniform u_DirectionalLight
 // ------------------------------------------------------------------
 
 #ifdef USE_DIFFUSE_MAP
-uniform sampler u_Diffuse;
+uniform sampler2D u_Diffuse;
 #endif
 
 #ifdef USE_NORMAL_MAP
-uniform sampler u_Normal;
+uniform sampler2D u_Normal;
 #endif
 
 #ifdef USE_ROUGHNESS_MAP
-uniform sampler u_Roughness;
+uniform sampler2D u_Roughness;
 #endif
 
 #ifdef USE_METALNESS_MAP
-uniform sampler u_Metalness;
+uniform sampler2D u_Metalness;
 #endif
 
 #ifdef USE_PARALLAX_OCCLUSION
-uniform sampler u_Displacement;
+uniform sampler2D u_Displacement;
 #endif
 
 // ------------------------------------------------------------------
@@ -72,12 +70,14 @@ in vec3 PS_IN_Position;
 in vec3 PS_IN_Normal;
 
 #ifdef USE_NORMAL_MAP
-out mat3 PS_IN_TBN;	
+in mat3 PS_IN_TBN;	
 #endif
 
 // ------------------------------------------------------------------
 // OUTPUT VARIABLES  ------------------------------------------------
 // ------------------------------------------------------------------
+
+out vec4 PS_OUT_Color;
 
 // ------------------------------------------------------------------
 // FUNCTIONS  -------------------------------------------------------
@@ -96,7 +96,7 @@ vec2 GetTexCoords()
 vec4 GetDiffuse(vec2 texCoords)
 {
 #ifndef USE_DIFFUSE_MAP
-	return u_Material.diffuse;
+	return u_diffuse_value;
 #else
 	return texture(u_Diffuse, texCoords);
 #endif
@@ -114,7 +114,7 @@ vec3 GetNormal(vec2 texCoords)
 float GetRoughness(vec2 texCoords)
 {
 #ifndef USE_ROUGHNESS_MAP
-	return u_Material.roughness;
+	return u_roughness_value;
 #else
 	return texture(u_Roughness, texCoords).r;
 #endif
@@ -123,10 +123,17 @@ float GetRoughness(vec2 texCoords)
 float GetMetalness(vec2 texCoords)
 {
 #ifndef USE_METALNESS_MAP
-	return u_Material.metalness;
+	return u_metalness_value;
 #else
 	return texture(u_Metalness, texCoords).r;
 #endif
+}
+
+vec4 GetFinalColor()
+{
+	vec2 texCoords = GetTexCoords();
+	vec4 color = GetDiffuse(texCoords);
+	return color;
 }
 
 // ------------------------------------------------------------------
@@ -135,6 +142,12 @@ float GetMetalness(vec2 texCoords)
 
 void main()
 {
-	vec2 texCoords = GetTexCoords();
+	vec4 final_color = GetFinalColor();
 
+#ifdef ALPHA_DISCARD
+	if(final_color.a < 0.1)
+		discard;
+#endif
+	
+	PS_OUT_Color = final_color;
 }

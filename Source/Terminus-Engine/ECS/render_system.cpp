@@ -31,8 +31,10 @@ namespace terminus
         
     }
     
-    void RenderSystem::initialize()
+    void RenderSystem::initialize(Scene* scene)
     {
+        _scene = scene;
+        
 		CameraComponent* camera_array = _scene->_camera_pool.get_array();
 		int num_cameras = _scene->_camera_pool.get_num_objects();
         
@@ -43,6 +45,7 @@ namespace terminus
             view._screen_rect = camera_array[i].screen_rect;
             view._is_shadow = false;
             view._cmd_buf_idx = _renderer->create_command_buffer();
+            view._rendering_path = camera_array[i].rendering_path;
         }
         
         // TODO : For each Shadow Camera, add SceneView

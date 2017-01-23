@@ -4,12 +4,17 @@
 
 namespace terminus
 {
+    class Scene;
+    
 	class TransformSystem
 	{
+    private:
+        Scene* _scene;
+        
 	public:
 		TransformSystem();
 		~TransformSystem();
-		void Initialize();
+		void Initialize(Scene* scene);
 		void Update(double delta);
 		void Shutdown();
 		void OnEntityCreated(Entity entity);

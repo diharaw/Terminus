@@ -280,6 +280,9 @@ namespace terminus
             }
             else
                 key.encode_parallax_occlusion(false);
+            
+            if(material->alpha_discard)
+                defines.push_back(SHADER_DEF_ALPHA_DISCARD);
         }
         
         key.encode_mesh_type(type);
@@ -290,8 +293,9 @@ namespace terminus
         else if(type == RenderableType::Quad)
             defines.push_back(SHADER_DEF_QUAD_MESH);
         
-        if(material->alpha_discard)
-            defines.push_back(SHADER_DEF_ALPHA_DISCARD);
+#if defined(TERMINUS_PLATFORM_MACOS)
+        defines.push_back(SHADER_DEF_APPLE);
+#endif
         
         if(m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
         {
