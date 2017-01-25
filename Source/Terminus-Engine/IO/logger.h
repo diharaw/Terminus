@@ -7,14 +7,6 @@
 #define T_LOG_ERROR(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::ERROR)
 #define T_LOG_FATAL(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::FATAL)
 
-// log verbosity options
-// - timestamp = 1
-// - level     = 2
-// - file      = 4
-// - line      = 8
-
-
-
 enum class LogLevel
 {
     INFO     = 0,

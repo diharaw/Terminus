@@ -7,7 +7,10 @@
 #include <Core/config.h>
 #include <types.h>
 
-namespace terminus { namespace Math {
+namespace terminus
+{
+    namespace Math
+    {
 
 	inline Matrix4 Perspective(float fov, float aspectRatio, float nearPlane, float farPlane)
 	{
@@ -18,7 +21,6 @@ namespace terminus { namespace Math {
 		glm::mat4 translate = glm::translate(glm::vec3(0.0f, 0.0f, 1.0f));
 		projection = scale * translate * projection;
 #endif
-
 		return projection;
 	}
 
@@ -31,10 +33,10 @@ namespace terminus { namespace Math {
 		glm::mat4 translate = glm::translate(glm::vec3(0.0f, 0.0f, 1.0f));
 		projection = scale * translate * projection;
 #endif
-
 		return projection;
 	}
 
-} }
+    }
+}
 
 #endif

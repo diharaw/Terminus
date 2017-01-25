@@ -1,5 +1,6 @@
 #include <Core/loading_thread.h>
 #include <Core/context.h>
+#include <Utility/Remotery.h>
 
 namespace terminus
 {
@@ -44,8 +45,12 @@ namespace terminus
         {
             while(!concurrent_queue::empty(_loading_queue))
             {
+                TERMINUS_BEGIN_CPU_PROFILE(load_loop);
+                
                 Task load_task = concurrent_queue::pop(_loading_queue);
                 load_task._function.Invoke(&load_task._data[0]);
+                
+                TERMINUS_END_CPU_PROFILE;
             }
             
             context._load_wakeup_sema.wait();

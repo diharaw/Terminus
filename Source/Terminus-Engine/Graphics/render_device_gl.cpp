@@ -1052,8 +1052,8 @@ namespace terminus
             
 			return nullptr;
 		}
-
-		// Bind Uniform Buffers
+        
+        // Bind Uniform Buffers
 		for (auto it : shaderProgram->m_shader_map)
 		{
 			StringList uboList = StringUtility::find_line("#binding", it.second->m_source);
@@ -1063,9 +1063,18 @@ namespace terminus
 				StringList tokens = StringUtility::delimit(" ", uboList[i]);
 				std::string uniformName = tokens[3];
 				GLuint binding = (GLuint)atoi(tokens[5].c_str());
-				const GLchar* uniformNameChar = uniformName.c_str();
-			    GLuint uboIndex = glGetUniformBlockIndex(shaderProgram->m_id, uniformNameChar);
-				glUniformBlockBinding(shaderProgram->m_id, uboIndex, binding);
+                const GLchar* uniformNameChar = uniformName.c_str();
+			    GL_CHECK_ERROR(GLuint uboIndex = glGetUniformBlockIndex(shaderProgram->m_id, uniformNameChar));
+                
+                if(uboIndex == GL_INVALID_INDEX)
+                {
+                    String uniform_error = "Failed to get Uniform Block Index for Uniform Buffer : ";
+                    uniform_error       += uniformName;
+                    
+                    T_LOG_ERROR(uniform_error);
+                }
+                else
+                    GL_CHECK_ERROR(glUniformBlockBinding(shaderProgram->m_id, uboIndex, binding));
 			}
 		}
 
@@ -1082,12 +1091,21 @@ namespace terminus
 
 				GLuint binding = (GLuint)atoi(tokens[4].c_str());
 				const GLchar* uniformNameChar = uniformName.c_str();
-				GLuint location = glGetUniformLocation(shaderProgram->m_id, uniformNameChar);
-				it.second->m_sampler_bindings[binding] = location;
+				GL_CHECK_ERROR(GLuint location = glGetUniformLocation(shaderProgram->m_id, uniformNameChar));
+                
+                if(location == GL_INVALID_INDEX)
+                {
+                    String uniform_error = "Failed to get Uniform Location for Uniform : ";
+                    uniform_error       += uniformName;
+                    
+                    T_LOG_ERROR(uniform_error);
+                }
+                else
+                    it.second->m_sampler_bindings[binding] = location;
 			}
 		}
         
-        T_LOG_ERROR("Shader program successfully linked.");
+        T_LOG_INFO("Shader program successfully linked.");
 
 		return shaderProgram;
 	}

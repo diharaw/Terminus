@@ -25,7 +25,7 @@ layout(location = 5) in vec4  VS_IN_BoneWeights;
 // UNIFORM BUFFERS --------------------------------------------------
 // ------------------------------------------------------------------
 
-layout (std140) uniform u_PerFrame
+layout (std140) uniform u_PerFrame //#binding 0
 { 
 	mat4 u_last_vp_mat;
 	mat4 u_vp_mat;
@@ -36,15 +36,15 @@ layout (std140) uniform u_PerFrame
 	vec3 u_view_dir;
 };
 
-layout (std140) uniform u_PerEntity
-{ 
+layout (std140) uniform u_PerEntity //#binding 1
+{
 	mat4 u_mvp_mat;
 	mat4 u_model_mat;	
 	vec3 u_pos;
 };
 
 #ifdef SKELETAL_VERTEX
-layout (std140) uniform u_Bones
+layout (std140) uniform u_Bones //#binding 2
 {
 	mat4 u_bone_offsets[100];
 };

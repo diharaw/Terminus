@@ -8,14 +8,14 @@
 // UNIFORM BUFFERS --------------------------------------------------
 // ------------------------------------------------------------------
 
-layout (std140) uniform u_Material
+layout (std140) uniform u_Material //#binding 0
 { 
 	vec4  u_diffuse_value;
 	float u_roughness_value;
 	float u_metalness_value;
 };
 
-layout (std140) uniform u_PointLight
+layout (std140) uniform u_PointLight //#binding 1
 { 
 	int   u_pl_count;
 	vec3  u_pl_position[10];
@@ -23,7 +23,7 @@ layout (std140) uniform u_PointLight
 	float u_pl_radius[10];
 };
 
-layout (std140) uniform u_SpotLight
+layout (std140) uniform u_SpotLight //#binding 2
 { 
 	int   u_sl_count;
 	vec3  u_sl_position[10];
@@ -31,7 +31,7 @@ layout (std140) uniform u_SpotLight
 	vec3  u_sl_color[10];
 };
 
-layout (std140) uniform u_DirectionalLight
+layout (std140) uniform u_DirectionalLight //#binding 3
 { 
 	vec3  u_dl_direction;
 	vec3  u_dl_color;
@@ -42,23 +42,23 @@ layout (std140) uniform u_DirectionalLight
 // ------------------------------------------------------------------
 
 #ifdef USE_DIFFUSE_MAP
-uniform sampler2D u_Diffuse;
+uniform sampler2D u_Diffuse; //#slot 0
 #endif
 
 #ifdef USE_NORMAL_MAP
-uniform sampler2D u_Normal;
+uniform sampler2D u_Normal; //#slot 1
 #endif
 
 #ifdef USE_ROUGHNESS_MAP
-uniform sampler2D u_Roughness;
+uniform sampler2D u_Roughness; //#slot 2
 #endif
 
 #ifdef USE_METALNESS_MAP
-uniform sampler2D u_Metalness;
+uniform sampler2D u_Metalness; //#slot 3
 #endif
 
 #ifdef USE_PARALLAX_OCCLUSION
-uniform sampler2D u_Displacement;
+uniform sampler2D u_Displacement; //#slot 4
 #endif
 
 // ------------------------------------------------------------------
