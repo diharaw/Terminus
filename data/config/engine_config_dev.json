@@ -1,0 +1,53 @@
+{
+	"window_title" : "Terminus Sandbox",
+	"version" 	: "0.1.1",
+	"build" : "170126",
+	"initial_scene" : "scene/sandbox_scene.json",
+	"local_data_dir" :
+	{
+		"win32" : "data",
+		"macosx" : "data",
+		"linux" : "data",
+		"ios" : "data",
+		"android" : "data"
+	},
+	"resource_dir" :
+	[
+		{
+			"type" : "disk",
+			"virtual_name" : "model",
+			"path" : "../bin/asset/model"
+		},
+		{
+			"type" : "disk",
+			"virtual_name" : "script",
+			"path" : "../bin/asset/script"
+		}
+		{
+			"type" : "disk",
+			"virtual_name" : "shader",
+			"path" : "../bin/asset/shader"
+		},
+		{
+			"type" : "disk",
+			"virtual_name" : "material",
+			"path" : "../bin/asset/material"
+		},
+		{
+			"type" : "disk",
+			"virtual_name" : "texture",
+			"path" : "../bin/asset/texture"
+		},
+		{
+			"type" : "disk",
+			"virtual_name" : "mesh",
+			"path" : "../bin/asset/mesh"
+		},
+		{
+			"type" : "disk",
+			"virtual_name" : "scene",
+			"path" : "../bin/asset/scene"
+		}
+	]
+		
+}
