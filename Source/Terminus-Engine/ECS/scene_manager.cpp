@@ -45,7 +45,9 @@ namespace terminus
     
 	SceneManager::SceneManager()
 	{
-		
+        EventCallback callback;
+        callback.Bind<SceneManager, &SceneManager::on_scene_load_complete>(this);
+        EventHandler::RegisterListener(SceneLoadEvent::sk_Type, callback);
 	}
 
 	SceneManager::~SceneManager()
@@ -70,14 +72,17 @@ namespace terminus
 	void SceneManager::load(String scene)
 	{
         Task task;
-
+        
         LoadingThread& loading_thread = Global::get_context()._loading_thread;
         
-		task._function.Bind<&scene_load_task>();
         SceneLoadData* data = task_data<SceneLoadData>(task);
-		strcpy(data->scene_name, scene.c_str());
-		
-		loading_thread.enqueue_load_task(task);
+        
+        const char* name = scene.c_str();
+        strcpy(&data->scene_name[0], name);
+        
+        task._function.Bind<&scene_load_task>();
+        
+        loading_thread.enqueue_load_task(task);
 	}
 
 	void SceneManager::preload(String scene)
@@ -131,7 +136,8 @@ namespace terminus
     
     EVENT_METHOD_DEFINITION(SceneManager, on_scene_load_complete)
     {
-        
+        SceneLoadEvent* event_data = (SceneLoadEvent*)event;
+        _active_scenes.push_back(event_data->GetScene());
     }
     
     EVENT_METHOD_DEFINITION(SceneManager, on_scene_preload_complete)

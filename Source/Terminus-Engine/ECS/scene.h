@@ -58,21 +58,31 @@ namespace terminus
         
         inline void initialize()
         {
-            _camera_system.Initialize(this);
-            _transform_system.Initialize(this);
+            _camera_system.initialize(this);
+            _transform_system.initialize(this);
             _render_system.initialize(this);
         }
         
         inline void shutdown()
         {
-            _camera_system.Shutdown();
-            _transform_system.Shutdown();
+            _camera_system.shutdown();
+            _transform_system.shutdown();
             _render_system.shutdown();
         }
 
         inline void update(double dt)
         {
             
+        }
+        
+        inline Entity* get_entity_array()
+        {
+            return &_entities._objects[0];
+        }
+        
+        inline uint32_t get_num_entities()
+        {
+            return _entities._num_objects;
         }
         
 		// attach methods

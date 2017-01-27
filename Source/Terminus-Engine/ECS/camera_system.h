@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ECS/entity.h>
+#include <ECS/component_types.h>
 
 namespace terminus
 {
@@ -9,15 +10,17 @@ namespace terminus
 	class CameraSystem
 	{
     private:
-        Scene* _scene;
+        Scene*   _scene;
+        Entity   _entities[16];
+        uint32_t _num_entities;
         
 	public:
 		CameraSystem();
 		~CameraSystem();
-		virtual void Initialize(Scene* scene);
-		virtual void Update(double delta);
-		virtual void Shutdown();
-		void OnEntityCreated(Entity entity);
-		void OnEntityDestroyed(Entity entity);
+		virtual void initialize(Scene* scene);
+		virtual void update(double delta);
+		virtual void shutdown();
+		void on_entity_created(Entity entity);
+		void on_entity_destroyed(Entity entity);
 	};
 } // namespace terminus

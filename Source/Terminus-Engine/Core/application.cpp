@@ -80,7 +80,8 @@ namespace terminus
             
 			platform.update();
             EventHandler::Update();
-                       
+            
+            context._scene_manager.update(0.0);
             // Synchronize Rendering Thread
             context._render_done_sema.wait();
             
@@ -148,7 +149,7 @@ namespace terminus
             {
                 String trimmed_path = filesystem::get_file_name_and_extention(scene_path);
                 std::cout << "Trimmed Path : " << trimmed_path << std::endl;
-                context::get_scene_manager().preload(trimmed_path);
+                context::get_scene_manager().load(trimmed_path);
             }
             else
             {

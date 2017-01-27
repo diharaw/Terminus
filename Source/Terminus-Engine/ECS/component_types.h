@@ -47,6 +47,7 @@ namespace terminus
 		Vector3 _position;
 		Vector3 _scale;
 		Vector3 _rotation;
+        Vector3 _forward;
 		bool    _is_dirty;
 		String	_parent_entity_name;
 	};
