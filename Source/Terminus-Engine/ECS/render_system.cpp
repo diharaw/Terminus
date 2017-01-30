@@ -46,6 +46,9 @@ namespace terminus
             view._is_shadow = false;
             view._cmd_buf_idx = _renderer->create_command_buffer();
             view._rendering_path = camera_array[i].rendering_path;
+            view._projection_matrix = &camera_array[i].camera.m_ProjectionMatrix;
+            view._view_matrix = &camera_array[i].camera.m_ViewMatrix;
+            view._num_items = 0;
         }
         
         // TODO : For each Shadow Camera, add SceneView
@@ -213,10 +216,10 @@ namespace terminus
         
         // Sort DrawItem array
         
-        std::partial_sort(scene_view._draw_items.begin(),
-                          scene_view._draw_items.begin() + scene_view._num_items,
-                          scene_view._draw_items.end(),
-                          DrawItemSort);
+       // std::partial_sort(scene_view._draw_items.begin(),
+         //                 scene_view._draw_items.begin() + scene_view._num_items,
+             //             scene_view._draw_items.end(),
+           //               DrawItemSort);
         
         // Fill CommandBuffer while skipping redundant state changes
         
@@ -241,7 +244,7 @@ namespace terminus
                 
                 ClearFramebufferCmdData cmd2;
                 cmd2.clear_target = FramebufferClearTarget::ALL;
-                cmd2.clear_color  = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+                cmd2.clear_color  = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
                 
                 cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
                 
@@ -295,12 +298,16 @@ namespace terminus
                         ShaderKey key;
                         
                         key.encode_mesh_type(draw_item.type);
-                        key.encode_albedo(draw_item.material->texture_maps[DIFFUSE]);
-                        key.encode_normal(draw_item.material->texture_maps[NORMAL]);
-                        key.encode_metalness(draw_item.material->texture_maps[METALNESS]);
-                        key.encode_roughness(draw_item.material->texture_maps[ROUGHNESS]);
-                        key.encode_parallax_occlusion(draw_item.material->texture_maps[DISPLACEMENT]);
                         key.encode_renderpass_id(render_pass->pass_id);
+                        
+                        if(draw_item.material)
+                        {
+                            key.encode_albedo(draw_item.material->texture_maps[DIFFUSE]);
+                            key.encode_normal(draw_item.material->texture_maps[NORMAL]);
+                            key.encode_metalness(draw_item.material->texture_maps[METALNESS]);
+                            key.encode_roughness(draw_item.material->texture_maps[ROUGHNESS]);
+                            key.encode_parallax_occlusion(draw_item.material->texture_maps[DISPLACEMENT]);
+                        }
                         
                         // Send to rendering thread pool
                         ShaderProgram* program = _shader_cache->load(key);
@@ -344,41 +351,43 @@ namespace terminus
                         
                         for (int k = 0; k < 5 ; k++)
                         {
-                            if(draw_item.material->texture_maps[k])
+                            if(draw_item.material)
                             {
-                                if(last_sampler != draw_item.material->sampler->m_resource_id)
+                                if(draw_item.material->texture_maps[k])
                                 {
-                                    last_sampler = draw_item.material->sampler->m_resource_id;
+                                    if(last_sampler != draw_item.material->sampler->m_resource_id)
+                                    {
+                                        last_sampler = draw_item.material->sampler->m_resource_id;
+                                        
+                                        // Bind Sampler State
+                                        
+                                        cmd_buf.Write(CommandType::BindSamplerState);
+                                        
+                                        BindSamplerStateCmdData cmd9;
+                                        cmd9.state = draw_item.material->sampler;
+                                        cmd9.slot = k;
+                                        cmd9.shader_type = ShaderType::PIXEL;
+                                        
+                                        cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
+                                    }
                                     
-                                    // Bind Sampler State
-                                    
-                                    cmd_buf.Write(CommandType::BindSamplerState);
-                                    
-                                    BindSamplerStateCmdData cmd9;
-                                    cmd9.state = draw_item.material->sampler;
-                                    cmd9.slot = k;
-                                    cmd9.shader_type = ShaderType::PIXEL;
-                                    
-                                    cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
-                                }
-                                
-                                if(last_texture != draw_item.material->texture_maps[k]->m_resource_id)
-                                {
-                                    last_texture = draw_item.material->texture_maps[k]->m_resource_id;
-                                    
-                                    // Bind Textures
-                                    
-                                    cmd_buf.Write(CommandType::BindTexture2D);
-                                    
-                                    BindTexture2DCmdData cmd10;
-                                    cmd10.texture = draw_item.material->texture_maps[k];
-                                    cmd10.slot = k;
-                                    cmd10.shader_type = ShaderType::PIXEL;
-                                    
-                                    cmd_buf.Write<BindTexture2DCmdData>(&cmd10);
+                                    if(last_texture != draw_item.material->texture_maps[k]->m_resource_id)
+                                    {
+                                        last_texture = draw_item.material->texture_maps[k]->m_resource_id;
+                                        
+                                        // Bind Textures
+                                        
+                                        cmd_buf.Write(CommandType::BindTexture2D);
+                                        
+                                        BindTexture2DCmdData cmd10;
+                                        cmd10.texture = draw_item.material->texture_maps[k];
+                                        cmd10.slot = k;
+                                        cmd10.shader_type = ShaderType::PIXEL;
+                                        
+                                        cmd_buf.Write<BindTexture2DCmdData>(&cmd10);
+                                    }
                                 }
                             }
-                            
                         }
                         
                         // Draw

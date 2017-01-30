@@ -105,20 +105,20 @@ namespace terminus
         
         CommandBuffer& cmd_buf = context::get_renderer().command_buffer(cmd_buf_idx);
         
-        BindFramebufferCmdData cmd1;
-        cmd1.framebuffer = nullptr;
-        
-        cmd_buf.Write(CommandType::BindFramebuffer);
-        cmd_buf.Write(&cmd1, sizeof(cmd1));
-        
-        ClearFramebufferCmdData cmd2;
-        cmd2.clear_target = FramebufferClearTarget::ALL;
-        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-        
-        cmd_buf.Write(CommandType::ClearFramebuffer);
-        cmd_buf.Write(&cmd2, sizeof(cmd2));
-        
-        cmd_buf.WriteEnd();
+//        BindFramebufferCmdData cmd1;
+//        cmd1.framebuffer = nullptr;
+//        
+//        cmd_buf.Write(CommandType::BindFramebuffer);
+//        cmd_buf.Write(&cmd1, sizeof(cmd1));
+//        
+//        ClearFramebufferCmdData cmd2;
+//        cmd2.clear_target = FramebufferClearTarget::ALL;
+//        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+//        
+//        cmd_buf.Write(CommandType::ClearFramebuffer);
+//        cmd_buf.Write(&cmd2, sizeof(cmd2));
+//        
+//        cmd_buf.WriteEnd();
         
         // TEST TEST TEST
         

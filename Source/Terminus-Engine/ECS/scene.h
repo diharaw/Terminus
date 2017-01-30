@@ -72,7 +72,9 @@ namespace terminus
 
         inline void update(double dt)
         {
-            
+            _transform_system.update(dt);
+            _camera_system.update(dt);
+            _render_system.update(dt);
         }
         
         inline Entity* get_entity_array()
