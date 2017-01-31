@@ -62,6 +62,7 @@ namespace terminus
             uint16 m_framebuffer_res_id;
             uint16 m_vertex_array_res_id;
             uint16 m_shader_program_res_id;
+            uint16 m_sampler_res_id;
 
 		public:
 

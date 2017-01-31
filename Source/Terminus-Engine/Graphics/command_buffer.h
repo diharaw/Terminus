@@ -21,6 +21,8 @@ namespace terminus
         BindVertexArray,
         BindUniformBuffer,
         BindSamplerState,
+        BindRasterizerState,
+        BindDepthStencilState,
         BindTexture2D,
         CopyUniformData,
         ClearFramebuffer,
@@ -79,6 +81,16 @@ namespace terminus
         BufferMapType map_type;
         void* data;
         size_t size;
+    };
+    
+    struct BindRasterizerStateData
+    {
+        RasterizerState* state;
+    };
+    
+    struct BindDepthStencilStateData
+    {
+        DepthStencilState* state;
     };
     
     struct BindTexture2DCmdData

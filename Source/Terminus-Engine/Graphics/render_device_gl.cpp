@@ -57,6 +57,7 @@ namespace terminus
         m_framebuffer_res_id = 0;
         m_vertex_array_res_id = 0;
         m_shader_program_res_id = 0;
+        m_sampler_res_id = 0;
     }
 
 	void RenderDevice::Shutdown()
@@ -749,6 +750,7 @@ namespace terminus
 														 bool scissor)
 	{
 		RasterizerState* rasterizerState = new RasterizerState();
+        
 
 		switch (cullMode)
 		{
@@ -818,6 +820,7 @@ namespace terminus
 												   float borderAlpha)
 	{
 		SamplerState* samplerState = new SamplerState();
+        samplerState->m_resource_id = m_sampler_res_id++;
 
 		GL_CHECK_ERROR(glGenSamplers(1, &samplerState->m_id));
 

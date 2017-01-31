@@ -48,6 +48,7 @@ namespace terminus
             view._rendering_path = camera_array[i].rendering_path;
             view._projection_matrix = &camera_array[i].camera.m_ProjectionMatrix;
             view._view_matrix = &camera_array[i].camera.m_ViewMatrix;
+            view._view_projection_matrix = &camera_array[i].camera.m_ViewProjection;
             view._num_items = 0;
         }
         
@@ -203,6 +204,7 @@ namespace terminus
                 draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
                 draw_item.uniforms->model = *renderable._transform;
                 draw_item.uniforms->position = *renderable._position;
+                draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
                 draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
                 draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
                 draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;
@@ -244,7 +246,7 @@ namespace terminus
                 
                 ClearFramebufferCmdData cmd2;
                 cmd2.clear_target = FramebufferClearTarget::ALL;
-                cmd2.clear_color  = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+                cmd2.clear_color  = Vector4(0.3f, 0.3f, 0.3f, 1.0f);
                 
                 cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
                 
@@ -272,10 +274,10 @@ namespace terminus
                 
                 if(render_pass->geometry_type == GeometryType::SCENE)
                 {
-                    uint16 last_vao = 0;
-                    uint16 last_program = 0;
-                    uint16 last_texture = 0;
-                    uint16 last_sampler = 0;
+                    int16 last_vao = -1;
+                    int16 last_program = -1;
+                    int16 last_texture = -1;
+                    int16 last_sampler = -1;
                     
                     for (int j = 0; j < scene_view._num_items; j++)
                     {
@@ -412,6 +414,9 @@ namespace terminus
         }
         
         cmd_buf.WriteEnd();
+        
+        // reset
+        scene_view._num_items = 0;
     }
 } // namespace terminus
 

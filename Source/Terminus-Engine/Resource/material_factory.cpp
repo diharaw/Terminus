@@ -7,6 +7,18 @@ namespace terminus
 {
 	namespace material_factory
     {
+        struct CreateSamplerTaskData
+        {
+            SamplerState** sampler;
+        };
+        
+        void create_sampler_task(void* data)
+        {
+            CreateSamplerTaskData* task_data = (CreateSamplerTaskData*)data;
+            *task_data->sampler = context::get_render_device().CreateSamplerState(TextureFilteringMode::NEAREST_ALL, TextureFilteringMode::LINEAR_ALL, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT);
+        }
+
+        
         Material* create(String material_name)
         {
             TextureCache& cache = context::get_texture_cache();
@@ -74,6 +86,13 @@ namespace terminus
                 String key = std::string(doc["displacement_map"].GetString());
                 material->texture_maps[DISPLACEMENT] = (Texture2D*)cache.load(key);
             }
+            
+            Task task;
+            CreateSamplerTaskData* sampler_task_data = task_data<CreateSamplerTaskData>(task);
+        
+            sampler_task_data->sampler = &material->sampler;
+            task._function.Bind<&create_sampler_task>();
+            submit_gpu_upload_task(task);
             
             return material;
         }

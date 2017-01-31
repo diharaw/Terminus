@@ -54,6 +54,8 @@ namespace terminus
         UniformBuffer* _per_draw_buffer;
         UniformBuffer* _per_draw_material_buffer;
         UniformBuffer* _per_draw_bone_offsets_buffer;
+        RasterizerState* _rasterizer_state;
+        DepthStencilState* _depth_stencil_state;
         
     public:
         Renderer();

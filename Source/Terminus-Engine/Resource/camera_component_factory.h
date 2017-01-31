@@ -16,17 +16,17 @@ namespace terminus
             rapidjson::Value& projection_info = json["projection_info"];
             
             {
-                component.camera.SetFarPlane(projection_info["far_plane"].GetFloat());
-                component.camera.SetNearPlane(projection_info["near_plane"].GetFloat());
+                //component.camera.SetFarPlane(projection_info["far_plane"].GetFloat());
+                //component.camera.SetNearPlane(projection_info["near_plane"].GetFloat());
                 
                 String proj_type = String(projection_info["projection_type"].GetString());
                 
-                if(proj_type == "PERSPECTIVE")
-                    component.camera.SetProjectionType(ProjectionType::PERSPECTIVE);
-                else
-                    component.camera.SetProjectionType(ProjectionType::ORTHOGRAPHIC);
+                //if(proj_type == "PERSPECTIVE")
+                  //  component.camera.SetProjectionType(ProjectionType::PERSPECTIVE);
+                //else
+                  //  component.camera.SetProjectionType(ProjectionType::ORTHOGRAPHIC);
                 
-                component.camera.SetFoV(projection_info["field_of_view"].GetFloat());
+                //component.camera.SetFoV(projection_info["field_of_view"].GetFloat());
                 
                 float aspect_x = projection_info["aspect_ratio_x"].GetFloat();
                 float aspect_y = projection_info["aspect_ratio_y"].GetFloat();
@@ -38,6 +38,12 @@ namespace terminus
                 }
                 
                 component.camera.SetAspectRatio(aspect_x / aspect_y);
+                component.camera = Camera(Vector3(0.0f, 0.0f, 0.0f),
+                                          Vector3(0.0f, 0.0f, -1.0f),
+                                          projection_info["field_of_view"].GetFloat(),
+                                          aspect_x / aspect_y,
+                                          projection_info["near_plane"].GetFloat(),
+                                          projection_info["far_plane"].GetFloat());
             }
             
             component.is_active = json["is_active"].GetBool();

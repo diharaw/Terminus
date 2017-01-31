@@ -14,7 +14,7 @@ namespace terminus
 	class MaterialCache
 	{
 	private:
-		std::unordered_map<std::string, Material*> m_MaterialMap;
+		std::unordered_map<std::string, Material*> _material_map;
 
 	public:
 		MaterialCache();

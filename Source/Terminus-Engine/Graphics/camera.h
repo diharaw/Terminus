@@ -19,7 +19,6 @@ namespace terminus
 		Vector3 m_Forward;
 		Vector3 m_Right;
 		Vector3 m_Up;
-		Matrix4 m_ViewProjection;
 		Matrix4 m_Rotation;
 		Matrix4 m_Translation;
 		Quaternion m_Orientation;
@@ -46,6 +45,7 @@ namespace terminus
 	public:
 		Matrix4 m_ViewMatrix;
 		Matrix4 m_ProjectionMatrix;
+        Matrix4 m_ViewProjection;
 
 	public:
 		Camera();

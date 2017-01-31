@@ -51,6 +51,7 @@ namespace terminus
                 cmp._global_transform = glm::translate(cmp._global_transform, cmp._position);
                 //cmp._global_transform = glm::rotate(cmp._global_transform, glm);
                 cmp._global_transform = glm::scale(cmp._global_transform, cmp._scale);
+                cmp._is_dirty = false;
             }
 		}
 	}

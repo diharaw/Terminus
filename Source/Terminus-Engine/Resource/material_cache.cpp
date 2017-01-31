@@ -22,18 +22,18 @@ namespace terminus
         if(key == "")
             return nullptr;
         
-		if (m_MaterialMap.find(key) == m_MaterialMap.end())
+		if (_material_map.find(key) == _material_map.end())
 		{
 			std::cout << "Asset not in Cache. Loading Asset." << std::endl;
             
             Material* material = material_factory::create(key);
-            m_MaterialMap[key] = material;
+            _material_map[key] = material;
             return material;
 		}
 		else
 		{
 			std::cout << "Asset already in cache, returning reference.." << std::endl;
-			return m_MaterialMap[key];
+			return _material_map[key];
 		}
 	}
 

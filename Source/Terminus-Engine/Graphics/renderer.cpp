@@ -23,6 +23,8 @@ namespace terminus
         _per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::STATIC);
         _per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::STATIC);
         _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
+        _rasterizer_state = device.CreateRasterizerState(CullMode::NONE);
+        _depth_stencil_state = device.CreateDepthStencilState();
     }
     
     void Renderer::shutdown()
@@ -33,6 +35,8 @@ namespace terminus
         device.DestroyUniformBuffer(_per_draw_buffer);
         device.DestroyUniformBuffer(_per_draw_material_buffer);
         device.DestroyUniformBuffer(_per_draw_bone_offsets_buffer);
+        device.DestroyRasterizerState(_rasterizer_state);
+        device.DestroyDepthStencilState(_depth_stencil_state);
     }
     
     void Renderer::submit()
@@ -40,6 +44,10 @@ namespace terminus
         RenderDevice& device = context::get_render_device();
         
         GraphicsQueue& queue = graphics_queue_back();
+        
+        // temp
+        device.BindRasterizerState(_rasterizer_state);
+        device.BindDepthStencilState(_depth_stencil_state);
         
         for (int i = 0; i < queue.m_num_cmd_buf; i++)
         {
@@ -72,6 +80,10 @@ namespace terminus
                         DrawIndexedBaseVertexCmdData _cmd_data;
                         _cmd_buf.Read<DrawIndexedBaseVertexCmdData>(_cmd_data);
                         device.DrawIndexedBaseVertex(_cmd_data.index_count, _cmd_data.base_index, _cmd_data.base_vertex);
+                        
+                        // temp
+                        device.SetPrimitiveType(DrawPrimitive::TRIANGLES);
+                        
                         break;
                     }
                     case CommandType::BindFramebuffer:
@@ -79,13 +91,24 @@ namespace terminus
                         BindFramebufferCmdData _cmd_data;
                         _cmd_buf.Read<BindFramebufferCmdData>(_cmd_data);
                         device.BindFramebuffer(_cmd_data.framebuffer);
+                        
+                        // temp
+                        device.SetViewport(context::get_platform().get_width(), context::get_platform().get_height(), 0, 0);
+                        
                         break;
                     }
                     case CommandType::BindShaderProgram:
                     {
-                        BindFramebufferCmdData _cmd_data;
-                        _cmd_buf.Read<BindFramebufferCmdData>(_cmd_data);
-                        device.BindFramebuffer(_cmd_data.framebuffer);
+                        BindShaderProgramCmdData _cmd_data;
+                        _cmd_buf.Read<BindShaderProgramCmdData>(_cmd_data);
+                        device.BindShaderProgram(_cmd_data.program);
+                        break;
+                    }
+                    case CommandType::BindSamplerState:
+                    {
+                        BindSamplerStateCmdData _cmd_data;
+                        _cmd_buf.Read<BindSamplerStateCmdData>(_cmd_data);
+                        device.BindSamplerState(_cmd_data.state, _cmd_data.shader_type, _cmd_data.slot);
                         break;
                     }
                     case CommandType::BindVertexArray:
@@ -100,6 +123,27 @@ namespace terminus
                         BindUniformBufferCmdData _cmd_data;
                         _cmd_buf.Read<BindUniformBufferCmdData>(_cmd_data);
                         device.BindUniformBuffer(_cmd_data.buffer, _cmd_data.shader_type, _cmd_data.slot);
+                        break;
+                    }
+                    case CommandType::BindRasterizerState:
+                    {
+                        BindRasterizerStateData _cmd_data;
+                        _cmd_buf.Read<BindRasterizerStateData>(_cmd_data);
+                        device.BindRasterizerState(_cmd_data.state);
+                        break;
+                    }
+                    case CommandType::BindDepthStencilState:
+                    {
+                        BindDepthStencilStateData _cmd_data;
+                        _cmd_buf.Read<BindDepthStencilStateData>(_cmd_data);
+                        device.BindDepthStencilState(_cmd_data.state);
+                        break;
+                    }
+                    case CommandType::BindTexture2D:
+                    {
+                        BindTexture2DCmdData _cmd_data;
+                        _cmd_buf.Read<BindTexture2DCmdData>(_cmd_data);
+                        device.BindTexture(_cmd_data.texture, _cmd_data.shader_type, _cmd_data.slot);
                         break;
                     }
                     case CommandType::CopyUniformData:
