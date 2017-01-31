@@ -132,6 +132,7 @@ float GetMetalness(vec2 texCoords)
 vec4 GetFinalColor()
 {
 	vec2 texCoords = GetTexCoords();
+	vec3 test_normal = GetNormal(texCoords);
 	vec4 color = GetDiffuse(texCoords);
 	return color;
 }

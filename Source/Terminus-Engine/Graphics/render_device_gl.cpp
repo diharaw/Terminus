@@ -43,6 +43,7 @@ namespace terminus
         
         m_gl_context = SDL_GL_CreateContext(m_window);
         SDL_GL_MakeCurrent(m_window, m_gl_context);
+        SDL_GL_GetDrawableSize(m_window, &_drawable_width, &_drawable_height);
         
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK)
@@ -736,9 +737,9 @@ namespace terminus
 			}
 		}
 
-		GL_CHECK_ERROR(glBindVertexArray(vertexArray->m_id));
-		GL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->m_id));
-		GL_CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->m_id));
+        GL_CHECK_ERROR(glBindVertexArray(0));
+		GL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		GL_CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
 		return vertexArray;
 	}
@@ -1103,8 +1104,8 @@ namespace terminus
                     
                     T_LOG_ERROR(uniform_error);
                 }
-                else
-                    it.second->m_sampler_bindings[binding] = location;
+                
+                it.second->m_sampler_bindings[binding] = location;
 			}
 		}
         
@@ -1665,9 +1666,14 @@ namespace terminus
 										ShaderType shaderStage,
 										uint slot)
 	{
-		GL_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));
-		GL_CHECK_ERROR(glBindSampler(slot, state->m_id));
-		GL_CHECK_ERROR(glUniform1i(m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
+        GLuint location = m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot];
+        
+        if(location != GL_INVALID_INDEX)
+        {
+            GL_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));
+            GL_CHECK_ERROR(glBindSampler(slot, state->m_id));
+            GL_CHECK_ERROR(glUniform1i(m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
+        }
 	}
 
 	void RenderDevice::BindFramebuffer(Framebuffer* framebuffer)
@@ -1806,10 +1812,20 @@ namespace terminus
 	void RenderDevice::SetViewport(int width, int height, int topLeftX, int topLeftY)
 	{
         // TODO : Cache pointer.
-		glViewport(topLeftX,
-			      (context::get_platform().get_height() - (height + topLeftY)),
-				   width,
-				   height);
+        if(width == 0 && height == 0)
+        {
+            glViewport(topLeftX,
+                       topLeftY,//(_drawable_height - (height + topLeftY)),
+                       _drawable_width,
+                       _drawable_height);
+        }
+		else
+        {
+            glViewport(topLeftX,
+                       (context::get_platform().get_height() - (height + topLeftY)),
+                       width,
+                       height);
+        }
 	}
 
 	void RenderDevice::SwapBuffers()

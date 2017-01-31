@@ -85,8 +85,6 @@ namespace terminus
             
             task._function.Bind<&create_mesh_task>();
             
-            Context& context = Global::get_context();
-            
             submit_gpu_upload_task(task);
             
             mesh->SubMeshes = new SubMesh[data->header.m_MeshCount];

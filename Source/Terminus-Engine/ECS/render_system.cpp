@@ -187,7 +187,7 @@ namespace terminus
         PerFrameUniforms* per_frame = uniform_allocator->NewPerFrame<PerFrameUniforms>();
         per_frame->projection = *scene_view._projection_matrix;
         per_frame->view       = *scene_view._view_matrix;
-        
+       
         CommandBuffer& cmd_buf = _renderer->command_buffer(scene_view._cmd_buf_idx);
         
         // Frustum cull Renderable array and fill DrawItem array
@@ -203,8 +203,8 @@ namespace terminus
                 
                 draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
                 draw_item.uniforms->model = *renderable._transform;
-                draw_item.uniforms->position = *renderable._position;
-                draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
+                //draw_item.uniforms->position = *renderable._position;
+                //draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
                 draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
                 draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
                 draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;
@@ -357,7 +357,7 @@ namespace terminus
                             {
                                 if(draw_item.material->texture_maps[k])
                                 {
-                                    if(last_sampler != draw_item.material->sampler->m_resource_id)
+                                    //if(last_sampler != draw_item.material->sampler->m_resource_id)
                                     {
                                         last_sampler = draw_item.material->sampler->m_resource_id;
                                         

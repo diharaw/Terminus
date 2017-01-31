@@ -13,7 +13,7 @@ layout(location = 1) in vec2  VS_IN_TexCoord;
 
 #ifndef QUAD_VERTEX
 layout(location = 2) in vec3  VS_IN_Normal;
-layout(location = 3) in vec3  VS_IN_Tangent;
+layout(location = 3) in vec4  VS_IN_Tangent;
 #endif
 
 #ifdef SKELETAL_VERTEX
@@ -27,20 +27,20 @@ layout(location = 5) in vec4  VS_IN_BoneWeights;
 
 layout (std140) uniform u_PerFrame //#binding 0
 { 
-	mat4 u_last_vp_mat;
-	mat4 u_vp_mat;
-	mat4 u_inv_vp_mat;
+	//mat4 u_last_vp_mat;
+	//mat4 u_vp_mat;
+	//mat4 u_inv_vp_mat;
 	mat4 u_proj_mat;
 	mat4 u_view_mat;
-	vec3 u_view_pos;
-	vec3 u_view_dir;
+	//vec3 u_view_pos;
+	//vec3 u_view_dir;
 };
 
 layout (std140) uniform u_PerEntity //#binding 1
 {
-	mat4 u_mvp_mat;
+	//mat4 u_mvp_mat;
 	mat4 u_model_mat;	
-	vec3 u_pos;
+	//vec3 u_pos;
 };
 
 #ifdef SKELETAL_VERTEX
@@ -77,21 +77,20 @@ void main()
 	vec4 pos = bone_transform * vec4(VS_IN_Position, 1.0f);
 	pos = u_mvp_mat * pos;
 #else
-	vec4 pos = u_mvp_mat * vec4(VS_IN_Position, 1.0f);
+	vec4 pos = u_proj_mat * u_view_mat * u_model_mat * vec4(VS_IN_Position, 1.0f);
 #endif
-
-	PS_IN_Position = pos.xyz;
-	gl_Position = pos;
 
 	PS_IN_TexCoords = VS_IN_TexCoord;
 	PS_IN_Normal = VS_IN_Normal;
 
 #ifdef USE_NORMAL_MAP
-	vec3 bitangent = cross(VS_IN_Normal, VS_IN_Tangent);
-	vec3 T = normalize(vec3(u_model_mat * vec4(VS_IN_Tangent,   0.0)));
+	vec3 bitangent = cross(VS_IN_Normal, VS_IN_Tangent.xyz);
+	vec3 T = normalize(vec3(u_model_mat * VS_IN_Tangent));
    	vec3 B = normalize(vec3(u_model_mat * vec4(bitangent, 0.0)));
    	vec3 N = normalize(vec3(u_model_mat * vec4(VS_IN_Normal,    0.0)));
    	PS_IN_TBN = mat3(T, B, N);
 #endif
-
+	
+	PS_IN_Position = pos.xyz;
+	gl_Position = pos;
 }

@@ -68,6 +68,7 @@ namespace terminus
                                    window_flags | SDL_WINDOW_ALLOW_HIGHDPI);
         if(!_window)
             return false;
+
         
         return true;
     }

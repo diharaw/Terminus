@@ -233,6 +233,8 @@ namespace terminus
 			Framebuffer*			 m_current_framebuffer;
 			GLenum					 m_primitive_type;
 			ShaderProgram*			 m_current_program;
+            int                      _drawable_width;
+            int                      _drawable_height;
 			std::unordered_map<String, Texture2D*> m_render_target_map;
 			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
 		};

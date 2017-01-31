@@ -19,11 +19,11 @@ namespace terminus
     {
         RenderDevice& device = context::get_render_device();
         
-        _per_frame_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerFrameUniforms), BufferUsageType::STATIC);
-        _per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::STATIC);
-        _per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::STATIC);
-        _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::STATIC);
-        _rasterizer_state = device.CreateRasterizerState(CullMode::NONE);
+        _per_frame_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerFrameUniforms), BufferUsageType::DYNAMIC);
+        _per_draw_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawUniforms), BufferUsageType::DYNAMIC);
+        _per_draw_material_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawMaterialUniforms), BufferUsageType::DYNAMIC);
+        _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::DYNAMIC);
+        _rasterizer_state = device.CreateRasterizerState();
         _depth_stencil_state = device.CreateDepthStencilState();
     }
     
@@ -77,12 +77,12 @@ namespace terminus
                     }
                     case CommandType::DrawIndexedBaseVertex:
                     {
+                        // temp
+                        device.SetPrimitiveType(DrawPrimitive::TRIANGLES);
+                        
                         DrawIndexedBaseVertexCmdData _cmd_data;
                         _cmd_buf.Read<DrawIndexedBaseVertexCmdData>(_cmd_data);
                         device.DrawIndexedBaseVertex(_cmd_data.index_count, _cmd_data.base_index, _cmd_data.base_vertex);
-                        
-                        // temp
-                        device.SetPrimitiveType(DrawPrimitive::TRIANGLES);
                         
                         break;
                     }
@@ -93,7 +93,7 @@ namespace terminus
                         device.BindFramebuffer(_cmd_data.framebuffer);
                         
                         // temp
-                        device.SetViewport(context::get_platform().get_width(), context::get_platform().get_height(), 0, 0);
+                        device.SetViewport(0, 0, 0, 0);
                         
                         break;
                     }

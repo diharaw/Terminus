@@ -37,10 +37,9 @@ namespace terminus
                     aspect_y = context::get_platform().get_height();
                 }
                 
-                component.camera.SetAspectRatio(aspect_x / aspect_y);
                 component.camera = Camera(Vector3(0.0f, 0.0f, 0.0f),
-                                          Vector3(0.0f, 0.0f, -1.0f),
-                                          projection_info["field_of_view"].GetFloat(),
+                                          Vector3(0.0f, 0.0f, 1.0f),
+                                          glm::radians(projection_info["field_of_view"].GetFloat()),
                                           aspect_x / aspect_y,
                                           projection_info["near_plane"].GetFloat(),
                                           projection_info["far_plane"].GetFloat());
