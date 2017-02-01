@@ -203,8 +203,8 @@ namespace terminus
                 
                 draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
                 draw_item.uniforms->model = *renderable._transform;
-                //draw_item.uniforms->position = *renderable._position;
-                //draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
+                draw_item.uniforms->position = *renderable._position;
+                draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
                 draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
                 draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
                 draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;
@@ -218,10 +218,9 @@ namespace terminus
         
         // Sort DrawItem array
         
-       // std::partial_sort(scene_view._draw_items.begin(),
-         //                 scene_view._draw_items.begin() + scene_view._num_items,
-             //             scene_view._draw_items.end(),
-           //               DrawItemSort);
+        std::sort(scene_view._draw_items.begin(),
+                  scene_view._draw_items.begin() + scene_view._num_items,
+                  DrawItemSort);
         
         // Fill CommandBuffer while skipping redundant state changes
         
@@ -357,21 +356,16 @@ namespace terminus
                             {
                                 if(draw_item.material->texture_maps[k])
                                 {
-                                    //if(last_sampler != draw_item.material->sampler->m_resource_id)
-                                    {
-                                        last_sampler = draw_item.material->sampler->m_resource_id;
-                                        
-                                        // Bind Sampler State
-                                        
-                                        cmd_buf.Write(CommandType::BindSamplerState);
-                                        
-                                        BindSamplerStateCmdData cmd9;
-                                        cmd9.state = draw_item.material->sampler;
-                                        cmd9.slot = k;
-                                        cmd9.shader_type = ShaderType::PIXEL;
-                                        
-                                        cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
-                                    }
+                                    // Bind Sampler State
+                                    
+                                    cmd_buf.Write(CommandType::BindSamplerState);
+                                    
+                                    BindSamplerStateCmdData cmd9;
+                                    cmd9.state = draw_item.material->sampler;
+                                    cmd9.slot = k;
+                                    cmd9.shader_type = ShaderType::PIXEL;
+                                    
+                                    cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
                                     
                                     if(last_texture != draw_item.material->texture_maps[k]->m_resource_id)
                                     {

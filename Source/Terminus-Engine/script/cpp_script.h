@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Utility/serializable.h>
+#include <Core/macro.h>
 #include <ECS/entity.h>
 
 namespace terminus

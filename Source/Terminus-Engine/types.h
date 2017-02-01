@@ -26,7 +26,7 @@
     #define T_ALIGNED(x) __declspec(align(x))
 #else
 #if defined(__GNUC__) || defined(__clang__)
-    #define T_ALIGNED(x) //__attribute__ ((aligned(x)))
+    #define T_ALIGNED(x) __attribute__ ((aligned(x)))
 #endif
 #endif
 

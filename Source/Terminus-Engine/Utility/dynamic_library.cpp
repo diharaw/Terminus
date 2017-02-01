@@ -1,5 +1,6 @@
-#include "library_loader.h"
-
+#include <Utility/dynamic_library.h>
+#include <Core/config.h>
+#include <string>
 #include <cwchar>
 
 wchar_t* get_wide_string(const char* str)
@@ -17,7 +18,10 @@ namespace dynamic_library
 
     LibHandle open(const char* lib_name)
     {
-		wchar_t* str = get_wide_string(lib_name);
+        std::string formatted_name = std::string(lib_name);
+        formatted_name += ".dll";
+
+		wchar_t* str = get_wide_string(formatted_name.c_str());
 
         LibHandle handle;
         handle._hndl = LoadLibrary(str);
@@ -40,8 +44,14 @@ namespace dynamic_library
 
     LibHandle open(const char* lib_name)
     {
+        std::string formatted_name = std::string(lib_name);
+#if defined(TERMINUS_PLATFORM_MACOS)
+        formatted_name += ".dylib";
+#else
+        formatted_name += ".so;
+#endif
         LibHandle handle;
-        handle._hndl = dlopen(lib_name, RTLD_NOW);
+        handle._hndl = dlopen(formatted_name.c_str(), RTLD_NOW);
         return handle;
     }
     

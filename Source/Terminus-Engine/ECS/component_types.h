@@ -79,19 +79,19 @@ namespace terminus
 
 	// Transform helpers
 
-	inline void set_position(TransformComponent& cmp, Vector3& pos)
+	inline void set_world_position(TransformComponent& cmp, Vector3& pos)
 	{
 		cmp._position = pos;
 		cmp._is_dirty = true;
 	}
 
-	inline void set_scale(TransformComponent& cmp, Vector3& scale)
+	inline void set_world_scale(TransformComponent& cmp, Vector3& scale)
 	{
 		cmp._scale = scale;
 		cmp._is_dirty = true;
 	}
 
-	inline void set_rotation(TransformComponent& cmp, Vector3& rot)
+	inline void set_world_rotation(TransformComponent& cmp, Vector3& rot)
 	{
 		cmp._rotation = rot;
 		cmp._is_dirty = true;

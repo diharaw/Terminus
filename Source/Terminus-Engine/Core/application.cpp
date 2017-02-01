@@ -4,6 +4,10 @@
 #include <Utility/Remotery.h>
 #endif
 
+#include <Utility/dynamic_library.h>
+#include <script/cpp_script.h>
+#include <Utility/runtime_compile.h>
+
 namespace terminus 
 {
     // TEST TEST TEST
@@ -11,6 +15,8 @@ namespace terminus
     int cmd_buf_idx;
     
     String scene_path = "";
+    CppScript* test_script = nullptr;
+    dynamic_library::LibHandle lib_handle;
 
     // TEST TEST TEST
     
@@ -21,6 +27,15 @@ namespace terminus
         EventCallback callback;
         callback.Bind<Application, &Application::OnScenePreload>(this);
         EventHandler::RegisterListener(ScenePreloadEvent::sk_Type, callback);
+        
+        lib_handle = dynamic_library::open("libtestscript");
+        if(dynamic_library::valid_handle(lib_handle))
+        {
+            T_LOG_INFO("Successfully loaded library");
+            test_script = dynamic_library::create_instance_from_factory<CppScript>("CreateTestScript", lib_handle);
+        }
+        else
+            T_LOG_ERROR("Failed to load library");
 	}
     
     EVENT_METHOD_DEFINITION(Application, OnScenePreload)
@@ -31,7 +46,8 @@ namespace terminus
 
 	Application::~Application()
 	{
-        
+        if(dynamic_library::valid_handle(lib_handle))
+            dynamic_library::close(lib_handle);
 	}
     
 	bool Application::initialize()
@@ -49,6 +65,9 @@ namespace terminus
 		initialize_physics();
 		initialize_audio();
 		initialize_script();
+        
+        // temp
+        test_script->initialize();
         
 		return true;
 	}
@@ -80,6 +99,9 @@ namespace terminus
             
 			platform.update();
             EventHandler::Update();
+            
+            // temp
+            test_script->update(0.0);
             
             context._scene_manager.update(0.0);
             // Synchronize Rendering Thread
@@ -157,6 +179,27 @@ namespace terminus
             }
         }
         
+        if(ImGui::Button("Reload Cpp Script"))
+        {
+            if(runtime_compile::compile("../../../Source/Terminus-Engine/script", "test_script.cpp", "../../../projects/bin/Debug/libtestscript", "-I \"../../Third Party/glm/\" -I \"../\" -I \"../../Third Party/sol2/\" -I \"../../Third Party/luajit/src/\" -I \"../../Third Party/rapidjson/\" -I \"../../Third Party/glew/include/\" -I \"../../Third Party/SDL2/include/\" -I \"../../Third Party/nfd/include/\" -I \"../../Third Party/Boxer/include/\"  -I \"../../Third Party/Delegates11/\"", "-std=c++14"))
+            {
+                T_LOG_INFO("Successfully compiled");
+                
+                dynamic_library::close(lib_handle);
+                
+                lib_handle = dynamic_library::open("libtestscript");
+                if(dynamic_library::valid_handle(lib_handle))
+                {
+                    T_LOG_INFO("Successfully loaded library");
+                    test_script = dynamic_library::create_instance_from_factory<CppScript>("CreateTestScript", lib_handle);
+                }
+                else
+                    T_LOG_ERROR("Failed to load library");
+            }
+            else
+                T_LOG_ERROR("Failed to compile");
+        }
+        
         ImGui::End();
         
         // TEST
@@ -175,6 +218,9 @@ namespace terminus
         context._rendering_thread.exit();
         
         context::get_platform().shutdown();
+        
+        // temp
+        test_script->shutdown();
         
         TERMINUS_DESTROY_PROFILER
 	}

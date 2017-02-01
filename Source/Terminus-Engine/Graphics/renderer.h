@@ -15,20 +15,20 @@ namespace terminus
     // Uniform Buffer Structs
     struct T_ALIGNED(16) PerFrameUniforms
     {
-        //Matrix4 last_view_projection;
-        //Matrix4 view_projection;
-        //Matrix4 inverse_view_projection;
+        Matrix4 last_view_projection;
+        Matrix4 view_projection;
+        Matrix4 inverse_view_projection;
         Matrix4 projection;
         Matrix4 view;
-        //Vector3 view_position;
-        //Vector3 view_direction;
+        Vector3 view_position;
+        Vector3 view_direction;
     };
     
     struct T_ALIGNED(16) PerDrawUniforms
     {
-        //Matrix4 model_view_projection;
+        Matrix4 model_view_projection;
         Matrix4 model;
-        //Vector3 position;
+        Vector3 position;
     };
     
     struct T_ALIGNED(16) PerDrawMaterialUniforms

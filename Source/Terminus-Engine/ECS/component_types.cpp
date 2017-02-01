@@ -10,7 +10,7 @@ namespace terminus
         _shutdown = _object["shutdown"];
         
         _object["_entity"] = _entity;
-        //_object["_scene"] = _scene;
+        _object["_scene"] = _scene;
         
         _initialize(_object, _entity);
     }
