@@ -4,13 +4,24 @@
 #define EVENTHANDLER_H
 
 #include <Core/Event/event.h>
+#include <container/packed_array.h>
 #include <Delegate11.h>
 #include <vector>
 #include <map>
 
-typedef terminus::Delegate<void(Event*)> EventCallback;
-typedef std::vector<EventCallback> CallbackList;
-typedef std::map<EventType, CallbackList> EventCallbackMap;
+#define MAX_EVENT_LISTENERS 24
+
+using EventCallback = terminus::Delegate<void(Event*)>;
+
+struct EventListener
+{
+    int           _listener_id;
+    EventCallback _callback;
+};
+
+using ListenerID   = ID;
+using ListenerArray = PackedArray<EventListener, MAX_EVENT_LISTENERS>;
+using ListenerMap  = std::map<EventType, ListenerArray>;
 
 #define EVENT_METHOD_DECLARATION(x) void x(Event* event)
 #define EVENT_METHOD_DEFINITION(x, y) void x::y(Event* event)
@@ -20,16 +31,18 @@ namespace terminus
     class EventHandler
     {
     private:
-        static std::vector<Event*> m_EventQueue;
-        static EventCallbackMap m_CallbackMap;
+        static std::vector<Event*> _event_queue;
+        static ListenerMap _listener_map;
+        static int _last_listener_id;
         
     public:
         EventHandler();
         ~EventHandler();
-        static void QueueEvent(Event* _Event);
-        static void FireEvent(Event* _Event);
-        static void Update();
-        static void RegisterListener(EventType _Type, EventCallback _Callback);
+        static void queue_event(Event* event);
+        static void fire_event(Event* event);
+        static void update();
+        static ListenerID register_listener(EventType type, EventCallback callback);
+        static void unregister_listener(EventType type, ListenerID listener_id);
         
     };
     

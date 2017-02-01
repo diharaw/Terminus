@@ -59,6 +59,11 @@ struct PackedArray
         return in.id;
     }
     
+    inline uint32_t size()
+    {
+        return _num_objects;
+    }
+    
     inline void remove(ID id)
     {
         Index &in = _indices[id & INDEX_MASK];

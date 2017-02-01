@@ -3,8 +3,9 @@
 
 namespace terminus
 {
-    std::vector<Event*> EventHandler::m_EventQueue;
-    EventCallbackMap EventHandler::m_CallbackMap;
+    std::vector<Event*> EventHandler::_event_queue;
+    ListenerMap EventHandler::_listener_map;
+    int EventHandler::_last_listener_id = 0;
     
     EventHandler::EventHandler()
     {
@@ -16,38 +17,51 @@ namespace terminus
         
     }
     
-    void EventHandler::QueueEvent(Event* _Event)
+    void EventHandler::queue_event(Event* event)
     {
-        m_EventQueue.push_back(_Event);
+        _event_queue.push_back(event);
     }
     
-    void EventHandler::FireEvent(Event* _Event)
+    void EventHandler::fire_event(Event* event)
     {
-        for (int i = 0; i < m_CallbackMap[_Event->GetType()].size(); i++)
-            m_CallbackMap[_Event->GetType()][i].Invoke(_Event);
+        for (int i = 0; i < _listener_map[event->GetType()]._num_objects; i++)
+            _listener_map[event->GetType()]._objects[i]._callback.Invoke(event);
     }
     
-    void EventHandler::Update()
+    void EventHandler::update()
     {
-        std::vector<Event*>::iterator it = m_EventQueue.begin();
-        while (it != m_EventQueue.end())
+        std::vector<Event*>::iterator it = _event_queue.begin();
+        while (it != _event_queue.end())
         {
             Event* event = *it;
             
-            EventCallbackMap::iterator callbackItr = m_CallbackMap.find(event->GetType());
+            ListenerMap::iterator listenerItr = _listener_map.find(event->GetType());
             
-            if(callbackItr != m_CallbackMap.end())
+            if(listenerItr != _listener_map.end())
             {
-                for (auto callback : callbackItr->second)
-                    callback.Invoke(event);
+                for (int i = 0; i < listenerItr->second.size(); i++)
+                    listenerItr->second._objects[i]._callback.Invoke(event);
             }
             
-            it = m_EventQueue.erase(it);
+            it = _event_queue.erase(it);
         }
     }
     
-    void EventHandler::RegisterListener(EventType _Type, EventCallback _Callback)
+    ListenerID EventHandler::register_listener(EventType type, EventCallback callback)
     {
-        m_CallbackMap[_Type].push_back(_Callback);
+        ListenerID listener_id = _listener_map[type].add();
+        EventListener& listener = _listener_map[type].lookup(listener_id);
+        
+        listener._listener_id = listener_id;
+        listener._callback = callback;
+    
+        return listener_id;
     }
+    
+    void EventHandler::unregister_listener(EventType type, ListenerID listener_id)
+    {
+        ListenerArray& listener_arry = _listener_map[type];
+        listener_arry.remove(listener_id);
+    }
+
 } // namespace terminus

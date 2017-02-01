@@ -1,7 +1,10 @@
-#include <iostream>
-#include <string>
 #include <Utility/runtime_compile.h>
 #include <Core/config.h>
+#include <IO/logger.h>
+
+#include <iostream>
+#include <string>
+#include <cstdio>
 
 namespace runtime_compile
 {
@@ -35,6 +38,7 @@ namespace runtime_compile
             command += _include_paths;
             command += " ";
             command += _flags;
+            command += " >& build_log.txt";
 #elif defined(__GNUC__)
             command += "; ";
             command += "g++ -Wall -shared -fPIC -o "

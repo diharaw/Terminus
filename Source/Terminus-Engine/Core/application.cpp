@@ -26,7 +26,7 @@ namespace terminus
 	{
         EventCallback callback;
         callback.Bind<Application, &Application::OnScenePreload>(this);
-        EventHandler::RegisterListener(ScenePreloadEvent::sk_Type, callback);
+        EventHandler::register_listener(ScenePreloadEvent::sk_Type, callback);
         
         lib_handle = dynamic_library::open("libtestscript");
         if(dynamic_library::valid_handle(lib_handle))
@@ -67,7 +67,8 @@ namespace terminus
 		initialize_script();
         
         // temp
-        test_script->initialize();
+        if(test_script)
+            test_script->initialize();
         
 		return true;
 	}
@@ -98,10 +99,11 @@ namespace terminus
             TERMINUS_BEGIN_CPU_PROFILE(update_loop)
             
 			platform.update();
-            EventHandler::Update();
+            EventHandler::update();
             
             // temp
-            test_script->update(0.0);
+            if(test_script)
+                test_script->update(0.0);
             
             context._scene_manager.update(0.0);
             // Synchronize Rendering Thread
@@ -191,6 +193,13 @@ namespace terminus
                 if(dynamic_library::valid_handle(lib_handle))
                 {
                     T_LOG_INFO("Successfully loaded library");
+                    
+                    if(test_script)
+                    {
+                        test_script->shutdown();
+                        delete test_script;
+                    }
+                    
                     test_script = dynamic_library::create_instance_from_factory<CppScript>("CreateTestScript", lib_handle);
                 }
                 else
@@ -220,7 +229,8 @@ namespace terminus
         context::get_platform().shutdown();
         
         // temp
-        test_script->shutdown();
+        if(test_script)
+            test_script->shutdown();
         
         TERMINUS_DESTROY_PROFILER
 	}

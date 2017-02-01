@@ -129,7 +129,7 @@ namespace Input
                 
                 // Fire Event
                 InputActionEvent* event = new InputActionEvent(action);
-                terminus::EventHandler::QueueEvent(event);
+                terminus::EventHandler::queue_event(event);
                 
                 m_keyboard.button_states[_Key] = _Action;
                 
@@ -145,7 +145,7 @@ namespace Input
                 {
                     // Fire Pressed Event
                     InputStateEvent* event = new InputStateEvent(state, 1);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     return;
                 }
@@ -153,7 +153,7 @@ namespace Input
                 {
                     // Fire Released Event
                     InputStateEvent* event = new InputStateEvent(state, 0);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     return;
                 }
@@ -173,7 +173,7 @@ namespace Input
                     
                     // Fire Axis Positive Event
                     InputAxisEvent* event = new InputAxisEvent(axis, 1.0, 1.0 - last_value);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     m_keyboard.button_axis_states[_Key] = 1.0;
                     
@@ -189,7 +189,7 @@ namespace Input
                     
                     // Fire Axis Negative Event
                     InputAxisEvent* event = new InputAxisEvent(axis, -1.0, -1.0 - last_value);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     m_keyboard.button_axis_states[_Key] = -1.0;
                     
@@ -208,7 +208,7 @@ namespace Input
                     
                     // Fire Axis Positive Event
                     InputAxisEvent* event = new InputAxisEvent(axis, 0.0, 0.0 - last_value);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     m_keyboard.button_axis_states[_Key] = 0.0;
                     
@@ -222,7 +222,7 @@ namespace Input
                     
                     // Fire Axis Negative Event
                     InputAxisEvent* event = new InputAxisEvent(axis, 0.0, 0.0 - last_value);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     m_keyboard.button_axis_states[_Key] = 0.0;
                     
@@ -248,7 +248,7 @@ namespace Input
                 std::string action = context->m_MouseActionMap[_Key];
                 // Fire Event
                 InputActionEvent* event = new InputActionEvent(action);
-                terminus::EventHandler::QueueEvent(event);
+                terminus::EventHandler::queue_event(event);
                 
                 return;
             }
@@ -262,7 +262,7 @@ namespace Input
                 {
                     // Fire Pressed Event
                     InputStateEvent* event = new InputStateEvent(state, 1);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     return;
                 }
@@ -270,7 +270,7 @@ namespace Input
                 {
                     // Fire Released Event
                     InputStateEvent* event = new InputStateEvent(state, 0);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                     
                     return;
                 }
@@ -296,14 +296,14 @@ namespace Input
                     double last_position = m_mouse.x_position;
                     // Fire Mouse Axis Event
                     InputAxisEvent* event = new InputAxisEvent(it.second, _Xpos, _Xpos - last_position);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                 }
                 if(it.first == MOUSE_AXIS_Y)
                 {
                     double last_position = m_mouse.y_position;
                     // Fire Mouse Axis Event
                     InputAxisEvent* event = new InputAxisEvent(it.second, _Ypos, _Ypos - last_position);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace Input
                 {
                     Uint32 last_value = m_mouse.wheel;
                     InputAxisEvent* event = new InputAxisEvent(it.second, value, value - last_value);
-                    terminus::EventHandler::QueueEvent(event);
+                    terminus::EventHandler::queue_event(event);
                 }
             }
         }

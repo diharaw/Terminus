@@ -21,7 +21,7 @@ namespace terminus
         // Fire Scene Load Complete Event
         
         SceneLoadEvent* event = new SceneLoadEvent(loaded);
-        EventHandler::QueueEvent(event);
+        EventHandler::queue_event(event);
     }
     
     void scene_preload_task(void* data)
@@ -32,7 +32,7 @@ namespace terminus
         // Fire Scene Preload Complete Event
         
         ScenePreloadEvent* event = new ScenePreloadEvent(loaded);
-        EventHandler::QueueEvent(event);
+        EventHandler::queue_event(event);
     }
     
     void scene_unload_task(void* data)
@@ -47,7 +47,7 @@ namespace terminus
 	{
         EventCallback callback;
         callback.Bind<SceneManager, &SceneManager::on_scene_load_complete>(this);
-        EventHandler::RegisterListener(SceneLoadEvent::sk_Type, callback);
+        EventHandler::register_listener(SceneLoadEvent::sk_Type, callback);
 	}
 
 	SceneManager::~SceneManager()
