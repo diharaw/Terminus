@@ -214,7 +214,7 @@ namespace terminus
         context._loading_thread.exit();
         context._rendering_thread.exit();
         
-        context::get_script_library_cache().shutdown();
+        context::get_dynamic_library_cache().shutdown();
         context::get_platform().shutdown();
         
         TERMINUS_DESTROY_PROFILER

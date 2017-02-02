@@ -3,6 +3,7 @@
 #ifndef TERMINUS_TYPES_H
 #define TERMINUS_TYPES_H
 
+#include <Utility/string_buffer.h>
 #include <stdint.h>
 #include <glm.hpp>
 #include <string>
@@ -54,6 +55,7 @@ using JsonDocument = rapidjson::Document;
 using JsonValue = rapidjson::Value;
 using LuaObject	  = sol::table;
 using LuaFunction = sol::function;
+using LuaScriptFile = StringBuffer<2048>;
 
 namespace Atomic
 {

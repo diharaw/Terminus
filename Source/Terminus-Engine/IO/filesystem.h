@@ -88,6 +88,8 @@ namespace filesystem
 	extern void write_end();
 
 	extern void copy_file(std::string input, std::string output);
+    
+    extern void destroy_handle(FileHandle& handle);
 }
 
 #endif

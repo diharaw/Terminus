@@ -17,7 +17,8 @@
 #include <Resource/texture_cache.h>
 #include <Resource/mesh_cache.h>
 #include <Resource/material_cache.h>
-#include <Resource/script_library_cache.h>
+#include <Resource/dynamic_library_cache.h>
+#include <Resource/lua_script_file_cache.h>
 #include <Core/rendering_thread.h>
 #include <Core/loading_thread.h>
 #include <script/script_engine.h>
@@ -46,7 +47,8 @@ namespace terminus
         TextureCache  _texture_cache;
         RenderPassCache _render_pass_cache;
         RenderingPathCache _rendering_path_cache;
-        ScriptLibraryCache _script_library_cache;
+        DynamicLibraryCache _dynamic_library_cache;
+        LuaScriptFileCache _lua_script_file_cache;
         
         // Thread Syncs
         Semaphore _render_ready_sema;
@@ -83,7 +85,8 @@ namespace terminus
         T_FORCE_INLINE SceneCache&         get_scene_cache()          { return Global::get_context()._scene_cache; }
         T_FORCE_INLINE RenderPassCache&    get_render_pass_cache()    { return Global::get_context()._render_pass_cache; }
         T_FORCE_INLINE RenderingPathCache& get_rendering_path_cache() { return Global::get_context()._rendering_path_cache; }
-        T_FORCE_INLINE ScriptLibraryCache& get_script_library_cache() { return Global::get_context()._script_library_cache; }
+        T_FORCE_INLINE DynamicLibraryCache& get_dynamic_library_cache() { return Global::get_context()._dynamic_library_cache; }
+        T_FORCE_INLINE LuaScriptFileCache& get_lua_script_file_cache() { return Global::get_context()._lua_script_file_cache; }
         T_FORCE_INLINE ShaderCache&        get_shader_cache()         { return Global::get_context()._shader_cache; }
         T_FORCE_INLINE MeshCache&          get_mesh_cache()           { return Global::get_context()._mesh_cache; }
         T_FORCE_INLINE MaterialCache&      get_material_cache()       { return Global::get_context()._material_cache; }

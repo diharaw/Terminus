@@ -2,7 +2,6 @@
 
 #include <types.h>
 #include <ECS/scene.h>
-#include <Resource/script_library_cache.h>
 
 namespace terminus
 {

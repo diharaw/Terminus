@@ -265,4 +265,12 @@ namespace filesystem
 		source.close();
 		dest.close();
 	}
+    
+    void destroy_handle(FileHandle& handle)
+    {
+        if(handle.buffer)
+        {
+            free(handle.buffer);
+        }
+    }
 }

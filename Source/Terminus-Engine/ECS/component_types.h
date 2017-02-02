@@ -6,6 +6,7 @@
 #include <script/cpp_script.h>
 #include <ECS/entity.h>
 #include <types.h>
+#include <script/lua_script.h>
 
 #include <string>
 
@@ -56,16 +57,7 @@ namespace terminus
 	{
 		Entity		_entity;
 		Scene*		_scene;
-		LuaFunction _initialize;
-		LuaFunction _update;
-		LuaFunction _shutdown;
-		LuaObject	_object;
-
-        void initialize();
-
-        void update(double dt);
-
-        void shutdown();
+        LuaScript*  _script;
 	};
     
     struct CppScriptComponent

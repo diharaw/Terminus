@@ -1,4 +1,5 @@
 #include <Resource/cpp_script_component_factory.h>
+#include <ECS/component_types.h>
 #include <Core/context.h>
 
 namespace terminus
@@ -7,7 +8,7 @@ namespace terminus
     {
         void create(JsonValue& json, Entity& entity, Scene* scene)
         {
-            ScriptLibraryCache& cache = context::get_script_library_cache();
+            ScriptEngine& script_engine = context::get_script_engine();
             
             CppScriptComponent& component = scene->attach_cpp_script_component(entity);
             
@@ -15,7 +16,7 @@ namespace terminus
             component._file_name = String(json["script_file"].GetString());
             component._scene = scene;
             component._entity = entity;
-            component._script = cache.create_script_from_library(component._file_name, component._class_name);
+            component._script = script_engine.create_cpp_script(component._file_name, component._class_name);
             component._script->_entity = entity;
             component._script->_scene = scene;
         }
