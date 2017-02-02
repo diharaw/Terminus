@@ -7,6 +7,8 @@ class TERMINUS_API TestScript : public terminus::CppScript
 {
 private:
     bool is_first;
+    int some_int;
+    float some_float;
     ListenerID listener_id;
     
 public:
@@ -15,9 +17,6 @@ public:
     virtual void initialize() override;
     virtual void update(double dt) override;
     virtual void shutdown() override;
-    virtual void serialize(void* mem) override;
-    virtual void deserialize(void* data) override;
-    virtual size_t get_size() override;
     void OnSceneLoad(Event* event);
 };
 

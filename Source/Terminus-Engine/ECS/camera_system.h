@@ -17,9 +17,9 @@ namespace terminus
 	public:
 		CameraSystem();
 		~CameraSystem();
-		virtual void initialize(Scene* scene);
-		virtual void update(double delta);
-		virtual void shutdown();
+		void initialize(Scene* scene);
+		void update(double delta);
+		void shutdown();
 		void on_entity_created(Entity entity);
 		void on_entity_destroyed(Entity entity);
 	};

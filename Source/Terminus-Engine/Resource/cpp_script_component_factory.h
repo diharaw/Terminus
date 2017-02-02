@@ -2,15 +2,13 @@
 
 #include <types.h>
 #include <ECS/scene.h>
+#include <Resource/script_library_cache.h>
 
 namespace terminus
 {
     namespace cpp_script_component_factory
     {
-        void create(JsonValue& json, Entity& entity, Scene* scene)
-        {
-            
-        }
+        extern void create(JsonValue& json, Entity& entity, Scene* scene);
     }
 }
 

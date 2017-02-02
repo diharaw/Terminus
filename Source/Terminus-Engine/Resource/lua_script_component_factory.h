@@ -7,9 +7,6 @@ namespace terminus
 {
 	namespace lua_script_component_factory
 	{
-		void create(JsonValue& json, Entity& entity, Scene* scene)
-		{
-            
-		}
+        extern void create(JsonValue& json, Entity& entity, Scene* scene);
 	}
 }

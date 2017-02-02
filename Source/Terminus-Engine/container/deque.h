@@ -1,72 +1,80 @@
 #pragma once
 
-#include <cassert>
-#include <container/container_types.h>
+#include <stdint.h>
+#include <assert.h>
 
-namespace deque
+template<typename T, size_t N>
+class Deque
 {
-    template<typename DATA, size_t SIZE>
-    void clear(Deque<DATA, SIZE>& deque)
-    {
-        deque._num_objects = 0;
-        deque._front = -1;
-        deque._back = 0;
-    }
-    
-    template<typename DATA, size_t SIZE>
-    DATA& front(Deque<DATA, SIZE>& deque) { return deque._data[deque._front]; }
-    
-    template<typename DATA, size_t SIZE>
-    DATA& back(Deque<DATA, SIZE>& deque) { return deque._data[deque._back]; }
-    
-    template<typename DATA, size_t SIZE>
-    void push_back(Deque<DATA, SIZE>& deque, DATA& value)
-    {
-        if(deque._num_objects < SIZE)
-        {
-            if(deque._back == SIZE && deque._front > 0)
-                deque._back = 0;
-            
-            deque._data[deque._back++] = value;
-            deque._num_objects++;
-        }
-    }
-    
-    template<typename DATA, size_t SIZE>
-    DATA pop_back(Deque<DATA, SIZE>& deque)
-    {
-        assert(deque._num_objects > 0 && "No elements in Deque to pop");
-        
-        if(deque._back == 0 && deque._front < SIZE - 1)
-            deque._back = SIZE - 1;
-        
-        deque._num_objects--;
-        return deque._data[--deque._back];
-    }
-    
-    template<typename DATA, size_t SIZE>
-    void push_front(Deque<DATA, SIZE>& deque, DATA& value)
-    {
-        if(deque._num_objects < SIZE)
-        {
-            if(deque._front == -1 && deque._back < SIZE - 1)
-                deque._front = SIZE - 1;
-            
-            deque._data[deque._front--] = value;
-            deque._num_objects++;
-        }
-    }
-    
-    template<typename DATA, size_t SIZE>
-    DATA pop_front(Deque<DATA, SIZE>& deque)
-    {
-        assert(deque._num_objects > 0 && "No elements in Deque to pop");
+private:
+	T		  _data[N];
+	uint32_t  _num_objects;
+	uint32_t  _front;
+	uint32_t  _back;
 
-        if(deque._front == SIZE && deque._back > 0)
-            deque._front = 0;
-        
-        deque._num_objects--;
-        return deque._data[++deque._front];
-    }
+public:
+	Deque()
+	{
+		_num_objects = 0;
+		_front = -1;
+		_back = 0;
+	}
 
-}
+	~Deque()
+	{
+
+	}
+
+	inline uint32_t size() { return _num_objects; }
+
+	inline T& front() { return _data[_front]; }
+
+	inline T& back() { return _data[_back]; }
+
+	inline void push_back(T value)
+	{
+		if (_num_objects < N)
+		{
+			if (_back == N && _front > 0)
+				_back = 0;
+
+			_data[_back++] = value;
+			_num_objects++;
+		}
+	}
+
+	inline T pop_back()
+	{
+		assert(_num_objects > 0 && "No elements in Deque to pop");
+
+		if (_back == 0 && _front < N - 1)
+			_back = N - 1;
+
+		_num_objects--;
+		return _data[--_back];
+	}
+
+	inline void push_front(T value)
+	{
+		if (_num_objects < N)
+		{
+			if (_front == -1 && _back < N - 1)
+				_front = N - 1;
+
+			_data[_front--] = value;
+			_num_objects++;
+		}
+	}
+
+	inline T pop_front()
+	{
+		assert(_num_objects > 0 && "No elements in Deque to pop");
+
+		if (_front == N && _back > 0)
+			_front = 0;
+
+		_num_objects--;
+		return _data[++_front];
+	}
+};
+

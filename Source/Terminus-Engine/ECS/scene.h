@@ -9,6 +9,7 @@
 #include <ECS/transform_system.h>
 #include <ECS/render_system.h>
 #include <ECS/camera_system.h>
+#include <ECS/script_system.h>
 
 #include <vector>
 #include <iostream>
@@ -36,6 +37,7 @@ namespace terminus
 		CameraSystem	_camera_system;
 		TransformSystem _transform_system;
 		RenderSystem    _render_system;
+        ScriptSystem    _script_system;
         
         String          _name;
 
@@ -61,10 +63,12 @@ namespace terminus
             _camera_system.initialize(this);
             _transform_system.initialize(this);
             _render_system.initialize(this);
+            _script_system.initialize(this);
         }
         
         inline void shutdown()
         {
+            _script_system.shutdown();
             _camera_system.shutdown();
             _transform_system.shutdown();
             _render_system.shutdown();
@@ -72,6 +76,7 @@ namespace terminus
 
         inline void update(double dt)
         {
+            _script_system.update(dt);
             _transform_system.update(dt);
             _camera_system.update(dt);
             _render_system.update(dt);
@@ -210,6 +215,8 @@ namespace terminus
 				_transform_pool.remove(entity);
 				_mesh_pool.remove(entity);
 				_collider_pool.remove(entity);
+                _cpp_script_pool.remove(entity);
+                _lua_script_pool.remove(entity);
 
 				_versions[INDEX_FROM_ID(entity._id)]++;
 				_entities.remove(entity._id);
