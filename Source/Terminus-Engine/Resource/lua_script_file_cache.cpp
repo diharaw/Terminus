@@ -6,7 +6,7 @@ namespace terminus
 {
     LuaScriptFileCache::LuaScriptFileCache()
     {
-        
+        filesystem::add_directory("assets/script/lua");
     }
     
     LuaScriptFileCache::~LuaScriptFileCache()

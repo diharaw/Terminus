@@ -35,8 +35,8 @@
 				},
 				{
 					"component_type" : "CPP_SCRIPT",
-					"script_file" : "test_cpp_script.cpp",
-					"class_name" : "TestCppScript"	
+					"script_file" : "libtestscript",
+					"class_name" : "TestScript"	
 				}
 			]
 		},

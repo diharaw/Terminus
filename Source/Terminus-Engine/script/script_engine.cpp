@@ -2,6 +2,7 @@
 #include <Core/context.h>
 #include <ECS/entity.h>
 #include <ECS/scene.h>
+#include <Core/Event/event.h>
 
 namespace terminus
 {
@@ -52,14 +53,22 @@ namespace terminus
     {
         LuaScriptFileCache& cache = context::get_lua_script_file_cache();
         
+        String instance_name = "obj";
+        instance_name += std::to_string(_last_object_id++);
+        
+        // development only
+        if(!_script_instance_map.has(HASH(file_name.c_str())))
+        {
+            LuaScriptInstanceList new_list;
+            new_list.initialize();
+            _script_instance_map.set(HASH(file_name.c_str()), new_list);
+        }
+    
         if(!cache.is_loaded(file_name))
         {
             LuaScriptFile* script_file = cache.load(file_name);
             execute_file_lua(script_file);
         }
-        
-        String instance_name = "obj";
-        instance_name += std::to_string(_last_object_id++);
         
         String construct_script = instance_name;
         construct_script += " = ";
@@ -70,8 +79,13 @@ namespace terminus
         
         // TODO: Use pool allocator.
         LuaScript* lua_script = new LuaScript();
+        
         lua_script->_instance_name = instance_name;
+        lua_script->_class_name = class_name;
+        lua_script->_id = _last_object_id - 1;
         lua_script->_object = _lua_state[instance_name];
+        
+        _script_instance_map.get_ref(HASH(file_name.c_str()))->add_instance(lua_script);
         
         return lua_script;
     }
@@ -95,6 +109,7 @@ namespace terminus
             _lua_state[script->_instance_name] = sol::lua_nil;
             _lua_state.collect_garbage();
             
+            // TODO: remove from instance list
             // temp
             T_SAFE_DELETE(script);
         }
@@ -111,7 +126,40 @@ namespace terminus
     
     void ScriptEngine::reload_lua_script(LuaScript* script)
     {
+        String instance_name = "obj";
+        instance_name += std::to_string(_last_object_id++);
         
+        String construct_script = instance_name;
+        construct_script += " = ";
+        construct_script += script->_class_name;
+        construct_script += ".new()";
+        
+        _lua_state.script(construct_script);
+        LuaObject new_object = _lua_state[instance_name];
+        
+        LuaObject new_properties = new_object["property"];
+        LuaObject old_properties = script->_object["property"];
+        
+        new_object["_entity"] = script->_object["_entity"];
+        new_object["_scene"] = script->_object["_scene"];
+        
+        for(auto member : new_properties)
+        {
+            const std::string member_name = member.first.as<std::string>();
+            auto lua_member = old_properties[member_name];
+            
+            if (lua_member.valid())
+                new_properties[member_name] = old_properties[member_name];
+        }
+        
+        script->_initialize = script->_object["initialize"];
+        script->_update = script->_object["update"];
+        script->_shutdown = script->_object["shutdown"];
+        
+        _lua_state[script->_instance_name] = sol::lua_nil;
+        _lua_state.collect_garbage();
+        
+        script->_object = new_object;
     }
     
     void ScriptEngine::reload_cpp_script(CppScript* script)
@@ -121,7 +169,26 @@ namespace terminus
     
     void ScriptEngine::on_lua_script_updated(Event* event)
     {
+        LuaScriptUpdatedEvent* event_data = (LuaScriptUpdatedEvent*)event;
         
+        LuaScriptFileCache& cache = context::get_lua_script_file_cache();
+        cache.unload(HASH(event_data->get_script_name().c_str()));
+        LuaScriptFile* script_file = cache.load(event_data->get_script_name());
+        execute_file_lua(script_file);
+        
+        LuaScriptInstanceList* instance_list = _script_instance_map.get_ref(HASH(event_data->get_script_name().c_str()));
+        
+        if(instance_list)
+        {
+            for(int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+            {
+                if(instance_list->_instances[i])
+                {
+                    LuaScript* script = instance_list->_instances[i];
+                    reload_lua_script(script);
+                }
+            }
+        }
     }
     
     void ScriptEngine::on_cpp_script_updated(Event* event)

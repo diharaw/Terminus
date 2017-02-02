@@ -6,6 +6,11 @@
 #include <Core/Event/event.h>
 #include <types.h>
 
+#include <container/hash_map.h>
+
+#define MAX_SCRIPT_INSTANCES 10
+#define MAX_SCRIPTS 10
+
 namespace terminus
 {
 	struct LuaScriptListener
@@ -13,6 +18,43 @@ namespace terminus
 		LuaFunction _callback;
 		LuaObject   _object;
 	};
+    
+    // development only
+    
+    struct LuaScriptInstanceList
+    {
+        LuaScript* _instances[MAX_SCRIPT_INSTANCES];
+        
+        void initialize()
+        {
+            for (int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+                    _instances[i] = nullptr;
+        }
+        
+        void add_instance(LuaScript* script)
+        {
+            for (int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+            {
+                if(!_instances[i])
+                {
+                    _instances[i] = script;
+                    return;
+                }
+            }
+        }
+        
+        void remove_instance(LuaScript* script)
+        {
+            for (int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+            {
+                if(_instances[i]->_id == script->_id)
+                {
+                    _instances[i] = nullptr;
+                    return;
+                }
+            }
+        }
+    };
 
 	class ScriptEngine
 	{
@@ -43,5 +85,8 @@ namespace terminus
 	private:
 		sol::state _lua_state;
         uint32_t   _last_object_id;
+        
+        // development only
+        HashMap<LuaScriptInstanceList, MAX_SCRIPTS> _script_instance_map;
 	};
 }

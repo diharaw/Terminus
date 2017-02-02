@@ -15,6 +15,10 @@ namespace terminus
         LuaFunction _shutdown;
         LuaObject	_object;
         String      _instance_name;
+        String      _class_name;
+        
+        // development only
+        uint32_t    _id;
         
     public:
         LuaScript();

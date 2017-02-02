@@ -27,20 +27,20 @@ layout(location = 5) in vec4  VS_IN_BoneWeights;
 
 layout (std140) uniform u_PerFrame //#binding 0
 { 
-	//mat4 u_last_vp_mat;
-	//mat4 u_vp_mat;
-	//mat4 u_inv_vp_mat;
+	mat4 u_last_vp_mat;
+	mat4 u_vp_mat;
+	mat4 u_inv_vp_mat;
 	mat4 u_proj_mat;
 	mat4 u_view_mat;
-	//vec3 u_view_pos;
-	//vec3 u_view_dir;
+	vec3 u_view_pos;
+	vec3 u_view_dir;
 };
 
 layout (std140) uniform u_PerEntity //#binding 1
 {
-	//mat4 u_mvp_mat;
+	mat4 u_mvp_mat;
 	mat4 u_model_mat;	
-	//vec3 u_pos;
+	vec3 u_pos;
 };
 
 #ifdef SKELETAL_VERTEX
@@ -77,7 +77,7 @@ void main()
 	vec4 pos = bone_transform * vec4(VS_IN_Position, 1.0f);
 	pos = u_mvp_mat * pos;
 #else
-	vec4 pos = u_proj_mat * u_view_mat * u_model_mat * vec4(VS_IN_Position, 1.0f);
+	vec4 pos = u_mvp_mat * vec4(VS_IN_Position, 1.0f);
 #endif
 
 	PS_IN_TexCoords = VS_IN_TexCoord;

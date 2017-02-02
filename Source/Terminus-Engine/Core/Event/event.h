@@ -139,4 +139,18 @@ public:
     inline FileWatcherEventType GetEventType()            { return m_event_type; }
 };
 
+class LuaScriptUpdatedEvent : public Event
+{
+private:
+    static const EventType sk_Type;
+    std::string            _script;
+    
+public:
+    LuaScriptUpdatedEvent(std::string script) : _script(script) {}
+    virtual ~LuaScriptUpdatedEvent() {}
+    inline virtual EventType GetType()                    { return sk_Type; }
+    inline virtual std::string GetName()                  { return "Lua Script Updated Event"; }
+    inline std::string get_script_name()                  { return _script; }
+};
+
 #endif

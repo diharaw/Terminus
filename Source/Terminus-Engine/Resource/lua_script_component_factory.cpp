@@ -1,4 +1,6 @@
 #include <Resource/lua_script_component_factory.h>
+#include <ECS/component_types.h>
+#include <Core/context.h>
 
 namespace terminus
 {
@@ -6,7 +8,15 @@ namespace terminus
     {
         void create(JsonValue& json, Entity& entity, Scene* scene)
         {
+            ScriptEngine& script_engine = context::get_script_engine();
             
+            LuaScriptComponent& component = scene->attach_lua_script_component(entity);
+            
+            String class_name = String(json["class_name"].GetString());
+            String file_name = String(json["script_file"].GetString());
+            component._scene = scene;
+            component._entity = entity;
+            component._script = script_engine.create_lua_script(file_name, class_name);
         }
     }
 }
