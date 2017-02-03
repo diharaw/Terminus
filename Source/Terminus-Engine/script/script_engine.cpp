@@ -18,6 +18,7 @@ namespace terminus
     
     void ScriptEngine::initialize()
     {
+        _lua_state.open_libraries(sol::lib::base, sol::lib::package);
         register_lua_api();
     }
     
@@ -73,7 +74,7 @@ namespace terminus
         String construct_script = instance_name;
         construct_script += " = ";
         construct_script += class_name;
-        construct_script += ".new()";
+        construct_script += ":new()";
         
         _lua_state.script(construct_script);
         
@@ -132,7 +133,7 @@ namespace terminus
         String construct_script = instance_name;
         construct_script += " = ";
         construct_script += script->_class_name;
-        construct_script += ".new()";
+        construct_script += ":new()";
         
         _lua_state.script(construct_script);
         LuaObject new_object = _lua_state[instance_name];
@@ -147,9 +148,7 @@ namespace terminus
         {
             const std::string member_name = member.first.as<std::string>();
             auto lua_member = old_properties[member_name];
-            
-            if (lua_member.valid())
-                new_properties[member_name] = old_properties[member_name];
+            new_properties[member_name] = old_properties[member_name];
         }
         
         script->_initialize = script->_object["initialize"];
@@ -170,13 +169,13 @@ namespace terminus
     void ScriptEngine::on_lua_script_updated(Event* event)
     {
         LuaScriptUpdatedEvent* event_data = (LuaScriptUpdatedEvent*)event;
-        
+    
         LuaScriptFileCache& cache = context::get_lua_script_file_cache();
         cache.unload(HASH(event_data->get_script_name().c_str()));
         LuaScriptFile* script_file = cache.load(event_data->get_script_name());
-        execute_file_lua(script_file);
         
         LuaScriptInstanceList* instance_list = _script_instance_map.get_ref(HASH(event_data->get_script_name().c_str()));
+        bool first = true;
         
         if(instance_list)
         {
@@ -184,6 +183,15 @@ namespace terminus
             {
                 if(instance_list->_instances[i])
                 {
+                    if(first)
+                    {
+                        _lua_state[instance_list->_instances[i]->_class_name] = sol::nil;
+                        _lua_state.collect_garbage();
+                        execute_file_lua(script_file);
+                        
+                        first = false;
+                    }
+                    
                     LuaScript* script = instance_list->_instances[i];
                     reload_lua_script(script);
                 }
@@ -198,7 +206,14 @@ namespace terminus
     
     void ScriptEngine::execute_file_lua(LuaScriptFile* script_file)
     {
-        _lua_state.script(script_file->c_str());
+        try
+        {
+            _lua_state.script(script_file->c_str());
+        }
+        catch(sol::error error)
+        {
+            std::cout << error.what() << std::endl;
+        }
     }
     
     void ScriptEngine::execute_string_lua(String script)

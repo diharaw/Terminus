@@ -158,6 +158,13 @@ namespace terminus
             }
         }
         
+        if(ImGui::Button("Reload Lua Script"))
+        {
+            LuaScriptUpdatedEvent temp("test_lua_script.lua");
+            context::get_script_engine().on_lua_script_updated(&temp);
+        }
+            
+        
 //        if(ImGui::Button("Reload Cpp Script"))
 //        {
 //            if(runtime_compile::compile("../../../Source/Terminus-Engine/script", "test_script.cpp", "../../../projects/bin/Debug/libtestscript", "-I \"../../Third Party/glm/\" -I \"../\" -I \"../../Third Party/sol2/\" -I \"../../Third Party/luajit/src/\" -I \"../../Third Party/rapidjson/\" -I \"../../Third Party/glew/include/\" -I \"../../Third Party/SDL2/include/\" -I \"../../Third Party/nfd/include/\" -I \"../../Third Party/Boxer/include/\"  -I \"../../Third Party/Delegates11/\"", "-std=c++14"))
@@ -247,6 +254,6 @@ namespace terminus
 
 	void Application::initialize_script()
 	{
-
+        context::get_script_engine().initialize();
 	}
 }
