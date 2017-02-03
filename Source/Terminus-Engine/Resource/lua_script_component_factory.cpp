@@ -16,7 +16,17 @@ namespace terminus
             String file_name = String(json["script_file"].GetString());
             component._scene = scene;
             component._entity = entity;
-            component._script = script_engine.create_lua_script(file_name, class_name);
+            
+            LuaScript* script = script_engine.create_lua_script(file_name, class_name);
+            
+            if(!script)
+            {
+                scene->_lua_script_pool.remove(entity);
+                T_LOG_ERROR("Lua Script Component not attached");
+                return;
+            }
+            else
+                component._script = script;
         }
     }
 }

@@ -206,6 +206,96 @@ namespace logger
         }
     }
     
+    void log_simple(std::string text, LogLevel level)
+    {
+        std::lock_guard<std::mutex> lock(g_logger._log_mutex);
+        
+        std::time(&g_logger._rawtime);
+        g_logger._timeinfo = std::localtime(&g_logger._rawtime);
+        std::strftime(g_logger._temp_buffer, 80, "%H:%M:%S", g_logger._timeinfo);
+        
+        std::string log_level_string;
+        
+        switch(level)
+        {
+            case LogLevel::INFO:
+            {
+                log_level_string = "INFO   ";
+                break;
+            }
+            case LogLevel::WARNING:
+            {
+                log_level_string = "WARNING";
+                break;
+            }
+            case LogLevel::ERROR:
+            {
+                log_level_string = "ERROR  ";
+                break;
+            }
+            case LogLevel::FATAL:
+            {
+                log_level_string = "FATAL  ";
+                break;
+            }
+        }
+        
+        std::string output;
+        
+        if((g_logger._verbosity & VERBOSITY_TIMESTAMP) || (g_logger._verbosity & VERBOSITY_LEVEL))
+        {
+            output             =  "[ ";
+            
+            if(g_logger._verbosity & VERBOSITY_TIMESTAMP)
+                output            += g_logger._temp_buffer;
+            
+            if((g_logger._verbosity & VERBOSITY_TIMESTAMP) && (g_logger._verbosity & VERBOSITY_LEVEL))
+                output            += " | ";
+            
+            if(g_logger._verbosity & VERBOSITY_LEVEL)
+                output            += log_level_string;
+            
+            output            += " ] : ";
+        }
+        
+        output            += text;
+        
+        if(g_logger._open_streams[FILE_STREAM_INDEX])
+        {
+            g_logger._stream << output << "\n";
+        }
+        
+        if(g_logger._open_streams[CONSOLE_STREAM_INDEX])
+        {
+            std::cout << output << "\n";
+        }
+        
+        if(g_logger._open_streams[CUSTOM_STREAM_INDEX] && g_logger._callback)
+        {
+            g_logger._callback(output, level);
+        }
+    }
+    
+    void log_info(std::string text)
+    {
+        log_simple(text, LogLevel::INFO);
+    }
+    
+    void log_error(std::string text)
+    {
+        log_simple(text, LogLevel::ERROR);
+    }
+    
+    void log_warning(std::string text)
+    {
+        log_simple(text, LogLevel::WARNING);
+    }
+    
+    void log_fatal(std::string text)
+    {
+        log_simple(text, LogLevel::FATAL);
+    }
+    
     void flush()
     {
         if(g_logger._open_streams[FILE_STREAM_INDEX])

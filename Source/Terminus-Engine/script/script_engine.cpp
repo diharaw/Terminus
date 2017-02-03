@@ -43,6 +43,11 @@ namespace terminus
                                         "_id", &Entity::_id,
                                         "_name", &Entity::_name
                                         );
+        // register logger
+        _lua_state.set_function("T_LOG_INFO", &logger::log_info);
+        _lua_state.set_function("T_LOG_WARNING", &logger::log_warning);
+        _lua_state.set_function("T_LOG_ERROR", &logger::log_error);
+        _lua_state.set_function("T_LOG_FATAL", &logger::log_fatal);
     }
     
     void ScriptEngine::shutdown()
@@ -62,6 +67,7 @@ namespace terminus
         {
             LuaScriptInstanceList new_list;
             new_list.initialize();
+            new_list._class_name = class_name;
             _script_instance_map.set(HASH(file_name.c_str()), new_list);
         }
     
@@ -76,7 +82,11 @@ namespace terminus
         construct_script += class_name;
         construct_script += ":new()";
         
-        _lua_state.script(construct_script);
+        if(!execute_string_lua(construct_script))
+        {
+            T_LOG_ERROR("Failed to execute Lua String");
+            return nullptr;
+        }
         
         // TODO: Use pool allocator.
         LuaScript* lua_script = new LuaScript();
@@ -125,43 +135,130 @@ namespace terminus
         }
     }
     
-    void ScriptEngine::reload_lua_script(LuaScript* script)
+    void ScriptEngine::reload_lua_script(String file_name)
     {
-        String instance_name = "obj";
-        instance_name += std::to_string(_last_object_id++);
+        LuaScriptFileCache& cache = context::get_lua_script_file_cache();
+        cache.unload(HASH(file_name.c_str()));
+        LuaScriptFile* script_file = cache.load(file_name);
         
-        String construct_script = instance_name;
-        construct_script += " = ";
-        construct_script += script->_class_name;
-        construct_script += ":new()";
+        LuaScriptInstanceList* instance_list = _script_instance_map.get_ref(HASH(file_name.c_str()));
         
-        _lua_state.script(construct_script);
-        LuaObject new_object = _lua_state[instance_name];
+        int last_temp_obj_id = 0;
         
-        LuaObject new_properties = new_object["property"];
-        LuaObject old_properties = script->_object["property"];
-        
-        new_object["_entity"] = script->_object["_entity"];
-        new_object["_scene"] = script->_object["_scene"];
-        
-        for(auto member : new_properties)
+        if(instance_list)
         {
-            const std::string member_name = member.first.as<std::string>();
-            auto lua_member = old_properties[member_name];
-            new_properties[member_name] = old_properties[member_name];
+            // first pass to copy state into temporary tables
+            for(int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+            {
+                if(instance_list->_instances[i])
+                {
+                    // copy state into temporary table
+                    std::string temp_obj_name = "temp_obj_";
+                    temp_obj_name += std::to_string(last_temp_obj_id++);
+                    
+                    sol::table temp_obj = _lua_state.create_table(temp_obj_name);
+                    sol::table old_properties = instance_list->_instances[i]->_object["property"];
+                    
+                    temp_obj["_entity"] = instance_list->_instances[i]->_object["_entity"];
+                    temp_obj["_scene"] = instance_list->_instances[i]->_object["_scene"];
+                    
+                    for(auto member : old_properties)
+                    {
+                        std::string new_member = member.first.as<std::string>();
+                        temp_obj[new_member] = member.second;
+                    }
+                }
+            }
+            
+            // initial run to check for errors
+            if(!execute_file_lua(script_file))
+            {
+                T_LOG_ERROR("Failed to Hot Reload Lua Script : Failed to execute Lua Script File");
+                
+                // delete temp objects since loading failed
+                for(int i = 0; i < last_temp_obj_id; i++)
+                {
+                    std::string temp_obj_name = "temp_obj_";
+                    temp_obj_name += std::to_string(i);
+                    
+                    _lua_state[temp_obj_name] = sol::lua_nil;
+                    _lua_state.collect_garbage();
+                }
+                
+                return;
+            }
+            
+            // second pass to delete instances if script is valid
+            for(int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+            {
+                if(instance_list->_instances[i])
+                {
+                    _lua_state[instance_list->_instances[i]->_instance_name] = sol::lua_nil;
+                    _lua_state.collect_garbage();
+                }
+            }
+            
+            // destroy initial class
+            _lua_state[instance_list->_class_name] = sol::lua_nil;
+            _lua_state.collect_garbage();
+            
+            // run script again after old one is deleted
+            execute_file_lua(script_file);
+
+            // second pass to instantiate new instances and copy data from temporary tables
+            for(int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
+            {
+                if(instance_list->_instances[i])
+                {
+                    std::string temp_obj_name = "temp_obj_";
+                    temp_obj_name += std::to_string(i);
+                    
+                    sol::table temp_obj = _lua_state[temp_obj_name];
+                    
+                    std::string command = "obj";
+                    command += std::to_string(_last_object_id++);
+                    
+                    std::string instance_name = command;
+                    
+                    command += " = ";
+                    command += instance_list->_class_name;
+                    command += ":new()";
+                    
+                    if(!execute_string_lua(command))
+                    {
+                        T_LOG_ERROR("Failed to Hot Reload Lua Script : Failed to execute Lua String");
+                        return;
+                    }
+                    
+                    sol::table obj = _lua_state[instance_name];
+                    sol::table new_properties = obj["property"];
+                    
+                    obj["_entity"] = temp_obj["_entity"];
+                    obj["_scene"] = temp_obj["_scene"];
+                    
+                    for (auto member : new_properties)
+                    {
+                        std::string new_member = member.first.as<std::string>();
+                        sol::object temp = temp_obj[new_member];
+                        
+                        if(temp != sol::nil)
+                            new_properties[new_member] = temp;
+                    }
+                    
+                    instance_list->_instances[i]->_id = _last_object_id - 1;
+                    instance_list->_instances[i]->_object = obj;
+                    instance_list->_instances[i]->_initialize = obj["initialize"];
+                    instance_list->_instances[i]->_update = obj["update"];
+                    instance_list->_instances[i]->_shutdown = obj["shutdown"];
+                    
+                    _lua_state[temp_obj_name] = sol::lua_nil;
+                    _lua_state.collect_garbage();
+                }
+            }
         }
-        
-        script->_initialize = script->_object["initialize"];
-        script->_update = script->_object["update"];
-        script->_shutdown = script->_object["shutdown"];
-        
-        _lua_state[script->_instance_name] = sol::lua_nil;
-        _lua_state.collect_garbage();
-        
-        script->_object = new_object;
     }
     
-    void ScriptEngine::reload_cpp_script(CppScript* script)
+    void ScriptEngine::reload_cpp_script(String file_name)
     {
         
     }
@@ -169,34 +266,7 @@ namespace terminus
     void ScriptEngine::on_lua_script_updated(Event* event)
     {
         LuaScriptUpdatedEvent* event_data = (LuaScriptUpdatedEvent*)event;
-    
-        LuaScriptFileCache& cache = context::get_lua_script_file_cache();
-        cache.unload(HASH(event_data->get_script_name().c_str()));
-        LuaScriptFile* script_file = cache.load(event_data->get_script_name());
-        
-        LuaScriptInstanceList* instance_list = _script_instance_map.get_ref(HASH(event_data->get_script_name().c_str()));
-        bool first = true;
-        
-        if(instance_list)
-        {
-            for(int i = 0; i < MAX_SCRIPT_INSTANCES; i++)
-            {
-                if(instance_list->_instances[i])
-                {
-                    if(first)
-                    {
-                        _lua_state[instance_list->_instances[i]->_class_name] = sol::nil;
-                        _lua_state.collect_garbage();
-                        execute_file_lua(script_file);
-                        
-                        first = false;
-                    }
-                    
-                    LuaScript* script = instance_list->_instances[i];
-                    reload_lua_script(script);
-                }
-            }
-        }
+        reload_lua_script(event_data->get_script_name());
     }
     
     void ScriptEngine::on_cpp_script_updated(Event* event)
@@ -204,7 +274,7 @@ namespace terminus
         
     }
     
-    void ScriptEngine::execute_file_lua(LuaScriptFile* script_file)
+    bool ScriptEngine::execute_file_lua(LuaScriptFile* script_file)
     {
         try
         {
@@ -212,12 +282,23 @@ namespace terminus
         }
         catch(sol::error error)
         {
-            std::cout << error.what() << std::endl;
+            T_LOG_ERROR(error.what());
+            return false;
         }
+        return true;
     }
     
-    void ScriptEngine::execute_string_lua(String script)
+    bool ScriptEngine::execute_string_lua(String script)
     {
-        _lua_state.script(script);
+        try
+        {
+            _lua_state.script(script);
+        }
+        catch(sol::error error)
+        {
+            T_LOG_ERROR(error.what());
+            return false;
+        }
+        return true;
     }
 }

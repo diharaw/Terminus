@@ -24,6 +24,7 @@ namespace terminus
     struct LuaScriptInstanceList
     {
         LuaScript* _instances[MAX_SCRIPT_INSTANCES];
+        String     _class_name;
         
         void initialize()
         {
@@ -69,11 +70,11 @@ namespace terminus
         void destroy_lua_script(LuaScript* script);
         void destroy_cpp_script(CppScript* script);
         
-        void execute_file_lua(LuaScriptFile* script_file);
-		void execute_string_lua(String script);
+        bool execute_file_lua(LuaScriptFile* script_file);
+		bool execute_string_lua(String script);
         
-        void reload_lua_script(LuaScript* script);
-        void reload_cpp_script(CppScript* script);
+        void reload_lua_script(String file_name);
+        void reload_cpp_script(String file_name);
         
         // events
         void on_lua_script_updated(Event* event);

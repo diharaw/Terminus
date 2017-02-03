@@ -38,5 +38,12 @@ namespace logger
     extern void close_console_stream();
     extern void close_custom_stream();
     extern void log(std::string text, std::string file, int line, LogLevel level);
+    
+    // simplified api for scripting
+    extern void log_info(std::string text);
+    extern void log_error(std::string text);
+    extern void log_warning(std::string text);
+    extern void log_fatal(std::string text);
+    
     extern void flush();
 }
