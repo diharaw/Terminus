@@ -90,8 +90,8 @@
 				},
 				{
 					"component_type" : "LUA_SCRIPT",
-					"script_file" : "test_script.lua",
-					"class_name" : "TestScript"	
+					"script_file" : "test_lua_script.lua",
+					"class_name" : "TestLuaScript"	
 				}
 			]
 		}

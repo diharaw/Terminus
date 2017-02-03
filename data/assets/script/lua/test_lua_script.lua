@@ -1,11 +1,10 @@
-require "component.script_component"
+require "assets.script.lua.script_component"
 
-AIComponent = ScriptComponent:new
+TestLuaScript = ScriptComponent:new
 {
 	property = 
 	{
 		iThing = 5,
-		vPosition = Vector3.new(0,0,0),
 		nNum = 1,
 		fSomething = 5.3,
 		bThing = false,
@@ -13,16 +12,17 @@ AIComponent = ScriptComponent:new
 	}
 }
 
-function AIComponent:initialize()
-	print("initialize from AIComponent" .. self.entity)
-	--register_event_listener(self.onEntityCreated, self);
+function TestLuaScript:initialize()
+	T_LOG_INFO("initialize from TestLuaScript")
 end
 
-function AIComponent:update(dt)
-	print("update from AIComponent " .. dt)
-	print("HOT RELOAD HOT RELOAD")
+function TestLuaScript:update(dt)
+	if self.property.bAnotherThing == true then
+		T_LOG_INFO("update from TestLuaScript")
+		self.property.bAnotherThing = false
+	end
 end
 
-function AIComponent:shutdown()
-	print("shutdown from AIComponent")
+function TestLuaScript:shutdown()
+	T_LOG_INFO("shutdown")
 end

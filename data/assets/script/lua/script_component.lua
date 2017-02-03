@@ -4,12 +4,12 @@ ScriptComponent =
 	_scene
 }
 
-function ScriptComponent:new (o)
-      o = o or {}   -- create object if user does not provide one
-      setmetatable(o, self)
-      self.__index = self
-      return o
-  end
+function ScriptComponent:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+	return o
+end
 
 function ScriptComponent:initialize()
 	print("No overridden initialize method")
