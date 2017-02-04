@@ -59,6 +59,7 @@ namespace terminus
         m_vertex_array_res_id = 0;
         m_shader_program_res_id = 0;
         m_sampler_res_id = 0;
+		_last_sampler_location = 0;
     }
 
 	void RenderDevice::Shutdown()
@@ -1620,7 +1621,8 @@ namespace terminus
 								   ShaderType shaderStage,
 								   uint bufferSlot)
 	{
-		GL_CHECK_ERROR(glBindTexture(texture->m_glTextureTarget ,texture->m_id));
+		if (_last_sampler_location != GL_INVALID_INDEX)
+			GL_CHECK_ERROR(glBindTexture(texture->m_glTextureTarget, texture->m_id));
 	}
 
 	void RenderDevice::BindUniformBuffer(UniformBuffer* uniformBuffer,
@@ -1667,7 +1669,8 @@ namespace terminus
 										uint slot)
 	{
         GLuint location = m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot];
-        
+		_last_sampler_location = location;
+
         if(location != GL_INVALID_INDEX)
         {
             GL_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));

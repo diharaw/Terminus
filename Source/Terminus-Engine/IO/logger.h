@@ -4,14 +4,14 @@
 
 #define T_LOG_INFO(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::INFO)
 #define T_LOG_WARNING(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::WARNING)
-#define T_LOG_ERROR(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::ERROR)
+#define T_LOG_ERROR(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::ERR)
 #define T_LOG_FATAL(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::FATAL)
 
 enum class LogLevel
 {
     INFO     = 0,
     WARNING  = 1,
-    ERROR    = 2,
+    ERR	     = 2,
     FATAL    = 3
 };
 

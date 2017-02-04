@@ -59,8 +59,8 @@ double Timer::get_elapsed_time_milisec()
 double Timer::get_elapsed_time_microsec()
 {
 #ifdef WIN32
-    if(!stopped)
-        QueryPerformanceCounter(&endCount);
+    if(!_stopped)
+        QueryPerformanceCounter(&_end_count);
     
     _start_time_microsec = _start_count.QuadPart * (1000000.0 / _frequency.QuadPart);
     _end_time_microsec = _end_count.QuadPart * (1000000.0 / _frequency.QuadPart);

@@ -235,6 +235,7 @@ namespace terminus
 			ShaderProgram*			 m_current_program;
             int                      _drawable_width;
             int                      _drawable_height;
+			GLuint					 _last_sampler_location;
 			std::unordered_map<String, Texture2D*> m_render_target_map;
 			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
 		};

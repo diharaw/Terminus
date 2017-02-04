@@ -113,8 +113,16 @@ namespace terminus
 		{
 			for (auto define : defines)
 			{
+#ifdef WIN32
+				String temp = define;
+				temp += "\r";
+
+				if (name == temp)
+					return true;
+#else
 				if (name == define)
 					return true;
+#endif
 			}
 
 			return false;

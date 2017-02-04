@@ -17,7 +17,7 @@ namespace terminus
             component._scene = scene;
             component._entity = entity;
             component._script = script_engine.create_cpp_script(component._file_name, component._class_name);
-            component._script->_entity = entity;
+            //component._script->_entity = entity;
             component._script->_scene = scene;
         }
     }

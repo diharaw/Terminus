@@ -123,7 +123,7 @@ namespace terminus
             
             ID renderable_id = _renderables.add();
             
-            _entity_renderable_ref[entity._id] = renderable_id;
+            _entity_renderable_ref[INDEX_FROM_ID(entity._id)] = renderable_id;
             Renderable& renderable = _renderables.lookup(renderable_id);
             
             renderable._mesh = mesh_component.mesh;

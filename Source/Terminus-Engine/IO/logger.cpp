@@ -146,7 +146,7 @@ namespace logger
                 log_level_string = "WARNING";
                 break;
             }
-            case LogLevel::ERROR:
+            case LogLevel::ERR:
             {
                 log_level_string = "ERROR  ";
                 break;
@@ -228,7 +228,7 @@ namespace logger
                 log_level_string = "WARNING";
                 break;
             }
-            case LogLevel::ERROR:
+            case LogLevel::ERR:
             {
                 log_level_string = "ERROR  ";
                 break;
@@ -283,7 +283,7 @@ namespace logger
     
     void log_error(std::string text)
     {
-        log_simple(text, LogLevel::ERROR);
+        log_simple(text, LogLevel::ERR);
     }
     
     void log_warning(std::string text)

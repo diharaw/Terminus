@@ -22,7 +22,7 @@ namespace terminus
             return _script_file_map.get_ref(hash);
         else
         {
-            FileHandle handle = filesystem::read_file(file_name);
+            FileHandle handle = filesystem::read_file(file_name, true);
             
             if(handle.buffer)
             {
