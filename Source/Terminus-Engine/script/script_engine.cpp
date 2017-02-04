@@ -2,10 +2,21 @@
 #include <Core/context.h>
 #include <ECS/entity.h>
 #include <ECS/scene.h>
-#include <Core/Event/event.h>
+#include <types.h>
+#include <Math/math_utility.h>
 
 namespace terminus
 {
+	float dot_product(Vector3& a, Vector3& b)
+	{
+		return glm::dot(a, b);
+	}
+
+	Vector3 cross_product(Vector3& a, Vector3& b)
+	{
+		return glm::cross(a, b);
+	}
+
     ScriptEngine::ScriptEngine()
     {
         _last_object_id = 0;
@@ -19,36 +30,210 @@ namespace terminus
     void ScriptEngine::initialize()
     {
         _lua_state.open_libraries(sol::lib::base, sol::lib::package);
-        register_lua_api();
+        
+		register_math_api();
+		register_component_api();
+		register_scene_api();
+		register_scene_manager_api();
+		register_logger_api();
+		register_event_api();
     }
     
-    void ScriptEngine::register_lua_api()
-    {
-        _lua_state.new_usertype<Scene>("Scene",
-                                      sol::constructors<sol::types<>>(),
-                                      "get_transform_component", &Scene::get_transform_component,
-                                      "get_mesh_component", &Scene::get_mesh_component,
-                                      "get_collider_component", &Scene::get_collider_component,
-                                      "get_camera_component", &Scene::get_camera_component,
-                                      "get_lua_script_component", &Scene::get_lua_script_component,
-                                      "has_transform_component", &Scene::has_transform_component,
-                                      "has_mesh_component", &Scene::has_mesh_component,
-                                      "has_collider_component", &Scene::has_collider_component,
-                                      "has_camera_component", &Scene::has_camera_component,
-                                      "has_lua_script_component", &Scene::has_lua_script_component,
-                                      "is_entity_alive", &Scene::is_alive);
-        
-        _lua_state.new_usertype<Entity>("Entity",
-                                        sol::constructors<sol::types<>>(),
-                                        "_id", &Entity::_id,
-                                        "_name", &Entity::_name
-                                        );
-        // register logger
-        _lua_state.set_function("T_LOG_INFO", &logger::log_info);
-        _lua_state.set_function("T_LOG_WARNING", &logger::log_warning);
-        _lua_state.set_function("T_LOG_ERROR", &logger::log_error);
-        _lua_state.set_function("T_LOG_FATAL", &logger::log_fatal);
-    }
+	void ScriptEngine::register_logger_api()
+	{
+		// register logger
+		_lua_state.set_function("log_info", &logger::log_info);
+		_lua_state.set_function("log_warning", &logger::log_warning);
+		_lua_state.set_function("log_error", &logger::log_error);
+		_lua_state.set_function("log_fatal", &logger::log_fatal);
+	}
+
+	void ScriptEngine::register_math_api()
+	{
+		sol::table math_root = _lua_state.create_table("math");
+
+		_lua_state.new_usertype<Vector2>("Vector2",
+			sol::constructors<sol::types<>, sol::types<float, float>>(),
+			"x", &Vector2::x,
+			"y", &Vector2::y,
+			sol::meta_function::addition, sol::resolve<glm::vec2(const glm::vec2&, const glm::vec2&)>(glm::operator+),
+			sol::meta_function::subtraction, sol::resolve<glm::vec2(const glm::vec2&, const glm::vec2&)>(glm::operator-),
+			sol::meta_function::multiplication, sol::resolve<glm::vec2(const glm::vec2&, float)>(glm::operator*),
+			sol::meta_function::division, sol::resolve<glm::vec2(const glm::vec2&, float)>(glm::operator/)
+			);
+
+		_lua_state.new_usertype<Vector3>("Vector3",
+			sol::constructors<sol::types<>, sol::types<float, float, float>>(),
+			"x", &Vector3::x,
+			"y", &Vector3::y,
+			"z", &Vector3::z,
+			sol::meta_function::addition, sol::resolve<glm::vec3(const glm::vec3&, const glm::vec3&)>(glm::operator+),
+			sol::meta_function::subtraction, sol::resolve<glm::vec3(const glm::vec3&, const glm::vec3&)>(glm::operator-),
+			sol::meta_function::multiplication, sol::resolve<glm::vec3(const glm::vec3&, float)>(glm::operator*),
+			sol::meta_function::division, sol::resolve<glm::vec3(const glm::vec3&, float)>(glm::operator/)
+			);
+
+		_lua_state.new_usertype<Vector4>("Vector4",
+			sol::constructors<sol::types<>, sol::types<float, float, float, float>>(),
+			"x", &Vector4::x,
+			"y", &Vector4::y,
+			"z", &Vector4::z,
+			"w", &Vector4::w,
+			sol::meta_function::addition, sol::resolve<glm::vec4(const glm::vec4&, const glm::vec4&)>(glm::operator+),
+			sol::meta_function::subtraction, sol::resolve<glm::vec4(const glm::vec4&, const glm::vec4&)>(glm::operator-),
+			sol::meta_function::multiplication, sol::resolve<glm::vec4(const glm::vec4&, float)>(glm::operator*),
+			sol::meta_function::division, sol::resolve<glm::vec4(const glm::vec4&, float)>(glm::operator/)
+			);
+
+		_lua_state.new_usertype<Matrix3>("Matrix3",
+			sol::constructors<sol::types<>>(),
+			sol::meta_function::multiplication, sol::resolve<glm::mat3(const glm::mat3&, const glm::mat3&)>(glm::operator*),
+			sol::meta_function::multiplication, sol::resolve<glm::vec3(const glm::mat3&, const glm::vec3&)>(glm::operator*)
+			);
+
+		_lua_state.new_usertype<Matrix4>("Matrix4",
+			sol::constructors<sol::types<>>(),
+			sol::meta_function::multiplication, sol::resolve<glm::mat4(const glm::mat4&, const glm::mat4&)>(glm::operator*),
+			sol::meta_function::multiplication, sol::resolve<glm::vec4(const glm::mat4&, const glm::vec4&)>(glm::operator*)
+			);
+
+		math_root.set_function("dot", &dot_product);
+		math_root.set_function("cross", &cross_product);
+	}
+
+	void ScriptEngine::register_event_api()
+	{
+		sol::table event_root = _lua_state.create_table("event_handler");
+
+		event_root.set_function("register_listener", &ScriptEngine::register_script_listener);
+		event_root.set_function("unregister_listener", &ScriptEngine::unregister_script_listener);
+		event_root.set_function("queue_event", &EventHandler::queue_event);
+		event_root.set_function("fire_event", &EventHandler::fire_event);
+
+		_lua_state.new_usertype<InputActionEvent>("InputActionEvent",
+			sol::constructors<sol::types<std::string>>()
+			);
+
+		_lua_state.new_usertype<InputStateEvent>("InputStateEvent",
+			sol::constructors<sol::types<std::string, int>>()
+			);
+
+		_lua_state.new_usertype<InputAxisEvent>("InputAxisEvent",
+			sol::constructors<sol::types<std::string, double, double>>()
+			);
+	}
+
+	void ScriptEngine::register_component_api()
+	{
+
+	}
+
+	void ScriptEngine::register_scene_api()
+	{
+		_lua_state.new_usertype<Scene>("Scene",
+			sol::constructors<sol::types<>>(),
+			"get_transform_component", &Scene::get_transform_component,
+			"get_mesh_component", &Scene::get_mesh_component,
+			"get_collider_component", &Scene::get_collider_component,
+			"get_camera_component", &Scene::get_camera_component,
+			"get_lua_script_component", &Scene::get_lua_script_component,
+			"has_transform_component", &Scene::has_transform_component,
+			"has_mesh_component", &Scene::has_mesh_component,
+			"has_collider_component", &Scene::has_collider_component,
+			"has_camera_component", &Scene::has_camera_component,
+			"has_lua_script_component", &Scene::has_lua_script_component,
+			"is_entity_alive", &Scene::is_alive);
+
+		_lua_state.new_usertype<Entity>("Entity",
+			sol::constructors<sol::types<>>(),
+			"_id", &Entity::_id,
+			"_name", &Entity::_name
+			);
+	}
+
+	void ScriptEngine::register_scene_manager_api()
+	{
+		_lua_state.new_usertype<SceneManager>("SceneManager",
+			sol::constructors<sol::types<>>(),
+			"load_scene", &SceneManager::load,
+			"preload_scene", &SceneManager::preload,
+			"unload_scene", &SceneManager::unload,
+			"set_active_scene", &SceneManager::set_active_scene);
+	}
+
+	void ScriptEngine::on_lua_script_event(Event* event)
+	{
+		EventType type = event->GetType();
+
+		if (_listener_map.find(type) == _listener_map.end())
+		{
+			LuaListenerArray& listener_array = _listener_map[type];
+
+			for (int i = 0; i < listener_array._num_objects; i++)
+			{
+				LuaScriptListener& listener = listener_array._objects[i];
+				// TODO: make event types scoped enums
+				switch (type)
+				{
+				case 0x791dc446: // InputStateEvent
+				{
+					listener._callback(listener._object, (InputStateEvent*)event);
+					break;
+				}
+				case 0x63fa800: // InputAxisEvent
+				{
+					listener._callback(listener._object, (InputAxisEvent*)event);
+					break;
+				}
+				case 0x235cd18d: // InputActionEvent
+				{
+					listener._callback(listener._object, (InputActionEvent*)event);
+					break;
+				}
+				case 0x8bd7b76e: // SceneLoadEvent
+				{
+					listener._callback(listener._object, (SceneLoadEvent*)event);
+					break;
+				}
+				case 0x8bd7b36e: // ScenePreloadEvent
+				{
+					listener._callback(listener._object, (ScenePreloadEvent*)event);
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+	}
+
+	ListenerID ScriptEngine::register_script_listener(EventType type, LuaFunction lua_callback, LuaObject object)
+	{
+		if (_listener_map.find(type) == _listener_map.end())
+			_listener_map[type] = LuaListenerArray();
+
+		EventCallback callback;
+		callback.Bind<ScriptEngine, &ScriptEngine::on_lua_script_event>(this);
+		ListenerID listener_id = EventHandler::register_listener(type, callback);
+
+		ListenerID lua_listener_id = _listener_map[type].add();
+		LuaScriptListener& script_listener = _listener_map[type].lookup(lua_listener_id);
+		script_listener._listener_id = listener_id;
+		script_listener._callback = lua_callback;
+		script_listener._object = object;
+		
+		return lua_listener_id;
+	}
+
+	void ScriptEngine::unregister_script_listener(EventType type, ListenerID listener)
+	{
+		if (_listener_map[type].has(listener))
+		{
+			LuaScriptListener& script_listener = _listener_map[type].lookup(listener);
+			EventHandler::unregister_listener(type, script_listener._listener_id);
+			_listener_map[type].remove(listener);
+		}
+	}
     
     void ScriptEngine::shutdown()
     {

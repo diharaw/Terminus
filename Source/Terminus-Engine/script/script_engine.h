@@ -3,6 +3,7 @@
 #include <ECS/component_pool.h>
 #include <script/lua_script.h>
 #include <script/cpp_script.h>
+#include <Core/Event/event_handler.h>
 #include <Core/Event/event.h>
 #include <types.h>
 
@@ -17,7 +18,11 @@ namespace terminus
 	{
 		LuaFunction _callback;
 		LuaObject   _object;
+		ListenerID  _listener_id;
 	};
+
+	using LuaListenerArray = PackedArray<LuaScriptListener, MAX_EVENT_LISTENERS>;
+	using LuaListenerMap = std::map<EventType, LuaListenerArray>;
     
     // development only
     
@@ -79,13 +84,22 @@ namespace terminus
         // events
         void on_lua_script_updated(Event* event);
         void on_cpp_script_updated(Event* event);
+		void on_lua_script_event(Event* event);
+		ListenerID register_script_listener(EventType type, LuaFunction lua_callback, LuaObject object);
+		void unregister_script_listener(EventType type, ListenerID listener);
 
     private:
-        void register_lua_api();
+		void register_math_api();
+		void register_component_api();
+		void register_scene_api();
+		void register_scene_manager_api();
+		void register_logger_api();
+		void register_event_api();
         
 	private:
-		sol::state _lua_state;
-        uint32_t   _last_object_id;
+		sol::state     _lua_state;
+        uint32_t	   _last_object_id;
+		LuaListenerMap _listener_map;
         
         // development only
         HashMap<LuaScriptInstanceList, MAX_SCRIPTS> _script_instance_map;
