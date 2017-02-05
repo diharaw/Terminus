@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <Core/macro.h>
 
 #define T_LOG_INFO(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::INFO)
 #define T_LOG_WARNING(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::WARNING)
@@ -29,21 +30,21 @@ namespace logger
     
     typedef void(*CustomStreamCallback)(std::string, LogLevel);
     
-    extern void initialize();
-    extern void set_verbosity(int flags);
-    extern void open_file_stream();
-    extern void open_console_stream();
-    extern void open_custom_stream(CustomStreamCallback callback);
-    extern void close_file_stream();
-    extern void close_console_stream();
-    extern void close_custom_stream();
-    extern void log(std::string text, std::string file, int line, LogLevel level);
+    extern TERMINUS_API void initialize();
+    extern TERMINUS_API void set_verbosity(int flags);
+    extern TERMINUS_API void open_file_stream();
+    extern TERMINUS_API void open_console_stream();
+    extern TERMINUS_API void open_custom_stream(CustomStreamCallback callback);
+    extern TERMINUS_API void close_file_stream();
+    extern TERMINUS_API void close_console_stream();
+    extern TERMINUS_API void close_custom_stream();
+    extern TERMINUS_API void log(std::string text, std::string file, int line, LogLevel level);
     
     // simplified api for scripting
-    extern void log_info(std::string text);
-    extern void log_error(std::string text);
-    extern void log_warning(std::string text);
-    extern void log_fatal(std::string text);
+    extern TERMINUS_API void log_info(std::string text);
+    extern TERMINUS_API void log_error(std::string text);
+    extern TERMINUS_API void log_warning(std::string text);
+    extern TERMINUS_API void log_fatal(std::string text);
     
-    extern void flush();
+    extern TERMINUS_API void flush();
 }

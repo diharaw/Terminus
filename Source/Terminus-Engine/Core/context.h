@@ -22,6 +22,7 @@
 #include <Core/rendering_thread.h>
 #include <Core/loading_thread.h>
 #include <script/script_engine.h>
+#include <script/script_interface_impl.h>
 
 namespace terminus
 {    
@@ -65,6 +66,7 @@ namespace terminus
         
 		// Script
 		ScriptEngine	_script_engine;
+		ScriptInterfaceImpl _script_interface_impl;
         
         bool      _shutdown;
     };
@@ -76,25 +78,26 @@ namespace terminus
     
     namespace context
     {
-        T_FORCE_INLINE Platform&           get_platform() 			  { return Global::get_context()._platform; }
-        T_FORCE_INLINE Renderer&           get_renderer() 			  { return Global::get_context()._renderer; }
-        T_FORCE_INLINE RenderDevice&       get_render_device()        { return Global::get_context()._render_device; }
-        T_FORCE_INLINE RenderTargetPool&   get_render_target_pool()   { return Global::get_context()._render_target_pool; }
-        T_FORCE_INLINE FramebufferPool&    get_framebuffer_pool()     { return Global::get_context()._framebuffer_pool; }
-        T_FORCE_INLINE SceneManager&       get_scene_manager()        { return Global::get_context()._scene_manager; }
-        T_FORCE_INLINE SceneCache&         get_scene_cache()          { return Global::get_context()._scene_cache; }
-        T_FORCE_INLINE RenderPassCache&    get_render_pass_cache()    { return Global::get_context()._render_pass_cache; }
-        T_FORCE_INLINE RenderingPathCache& get_rendering_path_cache() { return Global::get_context()._rendering_path_cache; }
-        T_FORCE_INLINE DynamicLibraryCache& get_dynamic_library_cache() { return Global::get_context()._dynamic_library_cache; }
-        T_FORCE_INLINE LuaScriptFileCache& get_lua_script_file_cache() { return Global::get_context()._lua_script_file_cache; }
-        T_FORCE_INLINE ShaderCache&        get_shader_cache()         { return Global::get_context()._shader_cache; }
-        T_FORCE_INLINE MeshCache&          get_mesh_cache()           { return Global::get_context()._mesh_cache; }
-        T_FORCE_INLINE MaterialCache&      get_material_cache()       { return Global::get_context()._material_cache; }
-        T_FORCE_INLINE TextureCache&       get_texture_cache()        { return Global::get_context()._texture_cache; }
-		T_FORCE_INLINE ScriptEngine&       get_script_engine()		  { return Global::get_context()._script_engine; }
-        T_FORCE_INLINE Platform*           get_platform_ptr()         { return &Global::get_context()._platform; }
-        T_FORCE_INLINE Renderer*           get_renderer_ptr()         { return &Global::get_context()._renderer; }
-        T_FORCE_INLINE RenderDevice*       get_render_device_ptr()    { return &Global::get_context()._render_device; }
-        T_FORCE_INLINE SceneManager*       get_scene_manager_ptr()    { return &Global::get_context()._scene_manager; }
+        T_FORCE_INLINE Platform&			get_platform() 					{ return Global::get_context()._platform; }
+        T_FORCE_INLINE Renderer&			get_renderer() 					{ return Global::get_context()._renderer; }
+        T_FORCE_INLINE RenderDevice&		get_render_device()				{ return Global::get_context()._render_device; }
+        T_FORCE_INLINE RenderTargetPool&	get_render_target_pool()		{ return Global::get_context()._render_target_pool; }
+        T_FORCE_INLINE FramebufferPool&		get_framebuffer_pool()			{ return Global::get_context()._framebuffer_pool; }
+        T_FORCE_INLINE SceneManager&		get_scene_manager()				{ return Global::get_context()._scene_manager; }
+        T_FORCE_INLINE SceneCache&			get_scene_cache()				{ return Global::get_context()._scene_cache; }
+        T_FORCE_INLINE RenderPassCache&		get_render_pass_cache()			{ return Global::get_context()._render_pass_cache; }
+        T_FORCE_INLINE RenderingPathCache&	get_rendering_path_cache()		{ return Global::get_context()._rendering_path_cache; }
+        T_FORCE_INLINE DynamicLibraryCache& get_dynamic_library_cache()		{ return Global::get_context()._dynamic_library_cache; }
+        T_FORCE_INLINE LuaScriptFileCache&	get_lua_script_file_cache()		{ return Global::get_context()._lua_script_file_cache; }
+        T_FORCE_INLINE ShaderCache&			get_shader_cache()				{ return Global::get_context()._shader_cache; }
+        T_FORCE_INLINE MeshCache&			get_mesh_cache()				{ return Global::get_context()._mesh_cache; }
+        T_FORCE_INLINE MaterialCache&		get_material_cache()			{ return Global::get_context()._material_cache; }
+        T_FORCE_INLINE TextureCache&		get_texture_cache()				{ return Global::get_context()._texture_cache; }
+		T_FORCE_INLINE ScriptEngine&		get_script_engine()				{ return Global::get_context()._script_engine; }
+		T_FORCE_INLINE ScriptInterfaceImpl* get_script_interface_impl_ptr() { return &Global::get_context()._script_interface_impl; }
+        T_FORCE_INLINE Platform*			get_platform_ptr()				{ return &Global::get_context()._platform; }
+        T_FORCE_INLINE Renderer*			get_renderer_ptr()				{ return &Global::get_context()._renderer; }
+        T_FORCE_INLINE RenderDevice*		get_render_device_ptr()			{ return &Global::get_context()._render_device; }
+        T_FORCE_INLINE SceneManager*		get_scene_manager_ptr()			{ return &Global::get_context()._scene_manager; }
     }
 }

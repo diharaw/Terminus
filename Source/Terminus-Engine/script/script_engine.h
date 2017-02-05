@@ -84,9 +84,9 @@ namespace terminus
         // events
         void on_lua_script_updated(Event* event);
         void on_cpp_script_updated(Event* event);
-		void on_lua_script_event(Event* event);
-		ListenerID register_script_listener(EventType type, LuaFunction lua_callback, LuaObject object);
-		void unregister_script_listener(EventType type, ListenerID listener);
+		//void on_lua_script_event(Event* event);
+		//ListenerID register_script_listener(EventType type, LuaFunction lua_callback, LuaObject object);
+		//void unregister_script_listener(EventType type, ListenerID listener);
 
     private:
 		void register_math_api();
@@ -99,7 +99,6 @@ namespace terminus
 	private:
 		sol::state     _lua_state;
         uint32_t	   _last_object_id;
-		LuaListenerMap _listener_map;
         
         // development only
         HashMap<LuaScriptInstanceList, MAX_SCRIPTS> _script_instance_map;

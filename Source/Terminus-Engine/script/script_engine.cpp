@@ -2,11 +2,89 @@
 #include <Core/context.h>
 #include <ECS/entity.h>
 #include <ECS/scene.h>
+#include <ECS/component_types.h>
 #include <types.h>
 #include <Math/math_utility.h>
 
 namespace terminus
 {
+	// temp global
+	LuaListenerMap _listener_map;
+
+	void on_lua_script_event(Event* event)
+	{
+		EventType type = event->GetType();
+
+		if (_listener_map.find(type) != _listener_map.end())
+		{
+			LuaListenerArray& listener_array = _listener_map[type];
+
+			for (int i = 0; i < listener_array._num_objects; i++)
+			{
+				LuaScriptListener& listener = listener_array._objects[i];
+				// TODO: make event types scoped enums
+				switch (type)
+				{
+				case 0x791dc446: // InputStateEvent
+				{
+					listener._callback(listener._object, (InputStateEvent*)event);
+					break;
+				}
+				case 0x63fa800: // InputAxisEvent
+				{
+					listener._callback(listener._object, (InputAxisEvent*)event);
+					break;
+				}
+				case 0x235cd18d: // InputActionEvent
+				{
+					listener._callback(listener._object, (InputActionEvent*)event);
+					break;
+				}
+				case 0x8bd7b76e: // SceneLoadEvent
+				{
+					listener._callback(listener._object, (SceneLoadEvent*)event);
+					break;
+				}
+				case 0x8bd7b36e: // ScenePreloadEvent
+				{
+					listener._callback(listener._object, (ScenePreloadEvent*)event);
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+	}
+
+	ListenerID register_script_listener(EventType type, LuaFunction lua_callback, LuaObject object)
+	{
+		if (_listener_map.find(type) == _listener_map.end())
+			_listener_map[type] = LuaListenerArray();
+
+		EventCallback callback;
+		callback.Bind<&on_lua_script_event>();
+		ListenerID listener_id = EventHandler::register_listener(type, callback);
+
+		ListenerID lua_listener_id = _listener_map[type].add();
+		LuaScriptListener& script_listener = _listener_map[type].lookup(lua_listener_id);
+		script_listener._listener_id = listener_id;
+		script_listener._callback = lua_callback;
+		script_listener._object = object;
+
+		return lua_listener_id;
+	}
+
+	void unregister_script_listener(EventType type, ListenerID listener)
+	{
+		if (_listener_map[type].has(listener))
+		{
+			LuaScriptListener& script_listener = _listener_map[type].lookup(listener);
+			EventHandler::unregister_listener(type, script_listener._listener_id);
+			_listener_map[type].remove(listener);
+		}
+	}
+
 	float dot_product(Vector3& a, Vector3& b)
 	{
 		return glm::dot(a, b);
@@ -105,8 +183,8 @@ namespace terminus
 	{
 		sol::table event_root = _lua_state.create_table("event_handler");
 
-		event_root.set_function("register_listener", &ScriptEngine::register_script_listener);
-		event_root.set_function("unregister_listener", &ScriptEngine::unregister_script_listener);
+		event_root.set_function("register_listener", &register_script_listener);
+		event_root.set_function("unregister_listener", &unregister_script_listener);
 		event_root.set_function("queue_event", &EventHandler::queue_event);
 		event_root.set_function("fire_event", &EventHandler::fire_event);
 
@@ -125,7 +203,25 @@ namespace terminus
 
 	void ScriptEngine::register_component_api()
 	{
+		_lua_state.new_usertype<TransformComponent>("TransformComponent",
+			sol::constructors<sol::types<>>(),
+			"_global_transform", &TransformComponent::_global_transform,
+			"_position", &TransformComponent::_position,
+			"_scale", &TransformComponent::_scale,
+			"_rotation", &TransformComponent::_rotation,
+			"_forward", &TransformComponent::_forward,
+			"_is_dirty", &TransformComponent::_is_dirty,
+			"_parent_entity_name", &TransformComponent::_parent_entity_name);
 
+		_lua_state.new_usertype<CameraComponent>("CameraComponent",
+			sol::constructors<sol::types<>>(),
+			"offset", &CameraComponent::offset,
+			"screen_rect", &CameraComponent::screen_rect);
+
+		_lua_state.set_function("set_world_position", &set_world_position);
+		_lua_state.set_function("set_world_scale", &set_world_scale);
+		_lua_state.set_function("set_world_rotation", &set_world_rotation);
+		
 	}
 
 	void ScriptEngine::register_scene_api()
@@ -161,80 +257,6 @@ namespace terminus
 			"set_active_scene", &SceneManager::set_active_scene);
 	}
 
-	void ScriptEngine::on_lua_script_event(Event* event)
-	{
-		EventType type = event->GetType();
-
-		if (_listener_map.find(type) == _listener_map.end())
-		{
-			LuaListenerArray& listener_array = _listener_map[type];
-
-			for (int i = 0; i < listener_array._num_objects; i++)
-			{
-				LuaScriptListener& listener = listener_array._objects[i];
-				// TODO: make event types scoped enums
-				switch (type)
-				{
-				case 0x791dc446: // InputStateEvent
-				{
-					listener._callback(listener._object, (InputStateEvent*)event);
-					break;
-				}
-				case 0x63fa800: // InputAxisEvent
-				{
-					listener._callback(listener._object, (InputAxisEvent*)event);
-					break;
-				}
-				case 0x235cd18d: // InputActionEvent
-				{
-					listener._callback(listener._object, (InputActionEvent*)event);
-					break;
-				}
-				case 0x8bd7b76e: // SceneLoadEvent
-				{
-					listener._callback(listener._object, (SceneLoadEvent*)event);
-					break;
-				}
-				case 0x8bd7b36e: // ScenePreloadEvent
-				{
-					listener._callback(listener._object, (ScenePreloadEvent*)event);
-					break;
-				}
-				default:
-					break;
-				}
-			}
-		}
-	}
-
-	ListenerID ScriptEngine::register_script_listener(EventType type, LuaFunction lua_callback, LuaObject object)
-	{
-		if (_listener_map.find(type) == _listener_map.end())
-			_listener_map[type] = LuaListenerArray();
-
-		EventCallback callback;
-		callback.Bind<ScriptEngine, &ScriptEngine::on_lua_script_event>(this);
-		ListenerID listener_id = EventHandler::register_listener(type, callback);
-
-		ListenerID lua_listener_id = _listener_map[type].add();
-		LuaScriptListener& script_listener = _listener_map[type].lookup(lua_listener_id);
-		script_listener._listener_id = listener_id;
-		script_listener._callback = lua_callback;
-		script_listener._object = object;
-		
-		return lua_listener_id;
-	}
-
-	void ScriptEngine::unregister_script_listener(EventType type, ListenerID listener)
-	{
-		if (_listener_map[type].has(listener))
-		{
-			LuaScriptListener& script_listener = _listener_map[type].lookup(listener);
-			EventHandler::unregister_listener(type, script_listener._listener_id);
-			_listener_map[type].remove(listener);
-		}
-	}
-    
     void ScriptEngine::shutdown()
     {
         
@@ -295,6 +317,8 @@ namespace terminus
         factory_name += class_name;
         
         CppScript* cpp_script = dynamic_library::create_instance_from_factory<CppScript>(factory_name.c_str(), *handle);
+		cpp_script->setup_environment(context::get_script_interface_impl_ptr());
+
         return cpp_script;
     }
     
