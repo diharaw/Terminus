@@ -20,19 +20,19 @@ namespace terminus
 		
 	};
 
-	struct CameraComponent
-	{
-		Camera camera;
-		Vector3 offset;
-		bool inherit_rotation_x;
-		bool inherit_rotation_y;
-		bool inherit_rotation_z;
-		bool is_offscreen;
-		bool is_active;
-		Vector4 screen_rect;
-        Texture* render_target;
-        RenderingPath* rendering_path;
-	};
+//	struct CameraComponent
+//	{
+//		Camera camera;
+//		Vector3 offset;
+//		bool inherit_rotation_x;
+//		bool inherit_rotation_y;
+//		bool inherit_rotation_z;
+//		bool is_offscreen;
+//		bool is_active;
+//		Vector4 screen_rect;
+//        Texture* render_target;
+//        RenderingPath* rendering_path;
+//	};
 
 	struct MeshComponent
 	{
@@ -54,51 +54,51 @@ namespace terminus
 		String     _parent_entity_name;
 	};
 
-//    enum class ProjectionType
-//    {
-//        PERSPECTIVE = 0,
-//        ORTHOGRAPHIC
-//    };
-//    
-//    struct PerspectiveInfo
-//    {
-//        float fov;
-//        float aspect_ratio;
-//    };
-//    
-//    struct OrthographicInfo
-//    {
-//        float left;
-//        float right;
-//        float up;
-//        float down;
-//    };
-//    
-//    struct CameraComponent
-//    {
-//        TransformComponent transform;
-//        Matrix4            projection_matrix;
-//        Matrix4            view_matrix;
-//        Matrix4            view_projection_matrix;
-//        float              near_plane;
-//        float              far_plane;
-//        bool               is_offscreen;
-//        bool               is_active;
-//        bool               inherit_pitch;
-//        bool               inherit_yaw;
-//        bool               inherit_roll;
-//        Vector4            screen_rect;
-//        Texture*           render_target;
-//        RenderingPath*     rendering_path;
-//        
-//        ProjectionType     projection_type;
-//        
-//        union
-//        {
-//            PerspectiveInfo  persp_info;
-//            OrthographicInfo ortho_info;
-//        };
-//    };
+    enum class ProjectionType
+    {
+        PERSPECTIVE = 0,
+        ORTHOGRAPHIC
+    };
+    
+    struct PerspectiveInfo
+    {
+        float fov;
+        float aspect_ratio;
+    };
+    
+    struct OrthographicInfo
+    {
+        float left;
+        float right;
+        float up;
+        float down;
+    };
+    
+    struct CameraComponent
+    {
+        TransformComponent transform;
+        Matrix4            projection_matrix;
+        Matrix4            view_matrix;
+        Matrix4            view_projection_matrix;
+        float              near_plane;
+        float              far_plane;
+        bool               is_offscreen;
+        bool               is_active;
+        bool               inherit_pitch;
+        bool               inherit_yaw;
+        bool               inherit_roll;
+        Vector4            screen_rect;
+        Texture*           render_target;
+        RenderingPath*     rendering_path;
+        
+        ProjectionType     projection_type;
+        
+        union
+        {
+            PerspectiveInfo  persp_info;
+            OrthographicInfo ortho_info;
+        };
+    };
     
 	struct LuaScriptComponent
 	{
@@ -158,66 +158,66 @@ namespace terminus
         }
     }
     
-//    namespace camera
-//    {
-//        // relative position
-//        inline void set_position(CameraComponent& cmp, Vector3& pos)
-//        {
-//            transform::set_position(cmp.transform, pos);
-//        }
-//        
-//        inline void set_yaw(CameraComponent& cmp, float yaw)
-//        {
-//            Vector3 euler = Vector3(cmp.transform._euler_angles.x,
-//                                    yaw,
-//                                    cmp.transform._euler_angles.z);
-//            transform::set_rotation_euler(cmp.transform, euler);
-//        }
-//        
-//        inline void set_pitch(CameraComponent& cmp, float pitch)
-//        {
-//            Vector3 euler = Vector3(pitch,
-//                                    cmp.transform._euler_angles.y,
-//                                    cmp.transform._euler_angles.z);
-//            transform::set_rotation_euler(cmp.transform, euler);
-//        }
-//        
-//        inline void set_roll(CameraComponent& cmp, float roll)
-//        {
-//            Vector3 euler = Vector3(cmp.transform._euler_angles.x,
-//                                    cmp.transform._euler_angles.y,
-//                                    roll);
-//            transform::set_rotation_euler(cmp.transform, euler);
-//        }
-//        
-//        inline void offset_position(CameraComponent& cmp, Vector3& pos)
-//        {
-//            Vector3 new_pos = cmp.transform._position + pos;
-//            transform::set_position(cmp.transform, new_pos);
-//        }
-//        
-//        inline void offset_yaw(CameraComponent& cmp, float yaw)
-//        {
-//            Vector3 euler = Vector3(cmp.transform._euler_angles.x,
-//                                    cmp.transform._euler_angles.y + yaw,
-//                                    cmp.transform._euler_angles.z);
-//            transform::set_rotation_euler(cmp.transform, euler);
-//        }
-//        
-//        inline void offset_pitch(CameraComponent& cmp, float pitch)
-//        {
-//            Vector3 euler = Vector3(cmp.transform._euler_angles.x + pitch,
-//                                    cmp.transform._euler_angles.y,
-//                                    cmp.transform._euler_angles.z);
-//            transform::set_rotation_euler(cmp.transform, euler);
-//        }
-//        
-//        inline void offset_roll(CameraComponent& cmp, float roll)
-//        {
-//            Vector3 euler = Vector3(cmp.transform._euler_angles.x,
-//                                    cmp.transform._euler_angles.y,
-//                                    cmp.transform._euler_angles.z + roll);
-//            transform::set_rotation_euler(cmp.transform, euler);
-//        }
-//    }
+    namespace camera
+    {
+        // relative position
+        inline void set_position(CameraComponent& cmp, Vector3& pos)
+        {
+            transform::set_position(cmp.transform, pos);
+        }
+        
+        inline void set_yaw(CameraComponent& cmp, float yaw)
+        {
+            cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
+                                                  yaw,
+                                                  cmp.transform._euler_angles.z);
+            //transform::set_rotation_euler(cmp.transform, euler);
+        }
+        
+        inline void set_pitch(CameraComponent& cmp, float pitch)
+        {
+            cmp.transform._euler_angles = Vector3(pitch,
+                                                  cmp.transform._euler_angles.y,
+                                                  cmp.transform._euler_angles.z);
+            //transform::set_rotation_euler(cmp.transform, euler);
+        }
+        
+        inline void set_roll(CameraComponent& cmp, float roll)
+        {
+            cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
+                                                  cmp.transform._euler_angles.y,
+                                                  roll);
+            //transform::set_rotation_euler(cmp.transform, euler);
+        }
+        
+        inline void offset_position(CameraComponent& cmp, Vector3& pos)
+        {
+            cmp.transform._euler_angles = cmp.transform._position + pos;
+            //transform::set_position(cmp.transform, new_pos);
+        }
+        
+        inline void offset_yaw(CameraComponent& cmp, float yaw)
+        {
+            cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
+                                                  cmp.transform._euler_angles.y + yaw,
+                                                  cmp.transform._euler_angles.z);
+            //transform::set_rotation_euler(cmp.transform, euler);
+        }
+        
+        inline void offset_pitch(CameraComponent& cmp, float pitch)
+        {
+            cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x + pitch,
+                                    cmp.transform._euler_angles.y,
+                                    cmp.transform._euler_angles.z);
+            //transform::set_rotation_euler(cmp.transform, euler);
+        }
+        
+        inline void offset_roll(CameraComponent& cmp, float roll)
+        {
+            cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
+                                    cmp.transform._euler_angles.y,
+                                    cmp.transform._euler_angles.z + roll);
+            //transform::set_rotation_euler(cmp.transform, euler);
+        }
+    }
 }

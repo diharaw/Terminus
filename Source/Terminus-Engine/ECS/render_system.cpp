@@ -46,9 +46,14 @@ namespace terminus
             view._is_shadow = false;
             view._cmd_buf_idx = _renderer->create_command_buffer();
             view._rendering_path = camera_array[i].rendering_path;
-            view._projection_matrix = &camera_array[i].camera.m_ProjectionMatrix;
-            view._view_matrix = &camera_array[i].camera.m_ViewMatrix;
-            view._view_projection_matrix = &camera_array[i].camera.m_ViewProjection;
+            //view._projection_matrix = &camera_array[i].camera.m_ProjectionMatrix;
+            //view._view_matrix = &camera_array[i].camera.m_ViewMatrix;
+            //view._view_projection_matrix = &camera_array[i].camera.m_ViewProjection;
+            
+            view._projection_matrix = &camera_array[i].projection_matrix;
+            view._view_matrix = &camera_array[i].view_matrix;
+            view._view_projection_matrix = &camera_array[i].view_projection_matrix;
+            
             view._num_items = 0;
         }
         

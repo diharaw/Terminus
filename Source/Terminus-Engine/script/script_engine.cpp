@@ -226,22 +226,22 @@ namespace terminus
                                                     "_is_dirty", &TransformComponent::_is_dirty,
                                                     "_parent_entity_name", &TransformComponent::_parent_entity_name);
 
-		_lua_state.new_usertype<CameraComponent>("CameraComponent",
-                                                 sol::constructors<sol::types<>>(),
-                                                 "offset", &CameraComponent::offset,
-                                                 "screen_rect", &CameraComponent::screen_rect);
-
-//        _lua_state.new_usertype<CameraComponent>("CameraComponent",
+//		_lua_state.new_usertype<CameraComponent>("CameraComponent",
 //                                                 sol::constructors<sol::types<>>(),
-//                                                 "transform", &CameraComponent::transform,
-//                                                 "screen_rect", &CameraComponent::screen_rect,
-//                                                 "projection_matrix", &CameraComponent::projection_matrix,
-//                                                 "near_plane", &CameraComponent::near_plane,
-//                                                 "far_plane", &CameraComponent::far_plane,
-//                                                 "is_active", &CameraComponent::is_active,
-//                                                 "inherit_pitch", &CameraComponent::inherit_pitch,
-//                                                 "inherit_yaw", &CameraComponent::inherit_yaw,
-//                                                 "inherit_roll", &CameraComponent::inherit_roll);
+//                                                 "offset", &CameraComponent::offset,
+//                                                 "screen_rect", &CameraComponent::screen_rect);
+
+        _lua_state.new_usertype<CameraComponent>("CameraComponent",
+                                                 sol::constructors<sol::types<>>(),
+                                                 "transform", &CameraComponent::transform,
+                                                 "screen_rect", &CameraComponent::screen_rect,
+                                                 "projection_matrix", &CameraComponent::projection_matrix,
+                                                 "near_plane", &CameraComponent::near_plane,
+                                                 "far_plane", &CameraComponent::far_plane,
+                                                 "is_active", &CameraComponent::is_active,
+                                                 "inherit_pitch", &CameraComponent::inherit_pitch,
+                                                 "inherit_yaw", &CameraComponent::inherit_yaw,
+                                                 "inherit_roll", &CameraComponent::inherit_roll);
 
         LuaObject transform_root = _lua_state.create_table("transform");
         
@@ -251,16 +251,16 @@ namespace terminus
         transform_root.set_function("set_rotation_quat", &transform::set_rotation_quat);
 		transform_root.set_function("look_at", &transform::look_at);
         
-//        LuaObject camera_root = _lua_state.create_table("camera");
-//        
-//        camera_root.set_function("set_position", &camera::set_position);
-//        camera_root.set_function("set_yaw", &camera::set_yaw);
-//        camera_root.set_function("set_pitch", &camera::set_pitch);
-//        camera_root.set_function("set_roll", &camera::set_roll);
-//        camera_root.set_function("offset_position", &camera::offset_position);
-//        camera_root.set_function("offset_yaw", &camera::offset_yaw);
-//        camera_root.set_function("offset_pitch", &camera::offset_pitch);
-//        camera_root.set_function("offset_roll", &camera::offset_roll);
+        LuaObject camera_root = _lua_state.create_table("camera");
+        
+        camera_root.set_function("set_position", &camera::set_position);
+        camera_root.set_function("set_yaw", &camera::set_yaw);
+        camera_root.set_function("set_pitch", &camera::set_pitch);
+        camera_root.set_function("set_roll", &camera::set_roll);
+        camera_root.set_function("offset_position", &camera::offset_position);
+        camera_root.set_function("offset_yaw", &camera::offset_yaw);
+        camera_root.set_function("offset_pitch", &camera::offset_pitch);
+        camera_root.set_function("offset_roll", &camera::offset_roll);
 	}
 
 	void ScriptEngine::register_scene_api()
