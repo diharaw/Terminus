@@ -21,11 +21,8 @@ namespace dynamic_library
         std::string formatted_name = std::string(lib_name);
         formatted_name += ".dll";
 
-		//wchar_t* str = get_wide_string(formatted_name.c_str());
-
         LibHandle handle;
         handle._hndl = LoadLibrary(formatted_name.c_str());
-		//delete str;
 
         return handle;
     }

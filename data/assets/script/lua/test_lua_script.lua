@@ -30,8 +30,20 @@ function TestLuaScript:initialize()
 end
 
 function TestLuaScript:update(dt)
+
+	test_cmp = self._scene:get_transform_component(self._entity)
+
+	look_at_pos = Vector3:new(0.0, 0.0, -100.0)
+	--new_rotation.y = new_rotation.y + dt * 10.0
+
+	--set_rotation_euler(test_cmp, new_rotation)
+	transform.look_at(test_cmp, look_at_pos)
+
 	if self.property.bAnotherThing == true then
 		log_info("update from TestLuaScript")
+		log_info("My entity Id : " .. self._entity._id)
+		log_info("My scene name : " .. self._scene._name)
+
 		self.property.bAnotherThing = false
 	end
 end

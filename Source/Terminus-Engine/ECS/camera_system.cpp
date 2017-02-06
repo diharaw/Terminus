@@ -39,6 +39,35 @@ namespace terminus
                 
                 cmr_cmp.camera.SetPosition(trn_cmp._position);
                 cmr_cmp.camera.Update();
+                
+//                cmr_cmp.transform._forward = Vector3(0.0, 0.0, 1.0);
+//                // inherit position;
+//                cmr_cmp.transform._position += trn_cmp._position;
+//                
+//                // inherit pitch if enabled
+//                if(cmr_cmp.inherit_pitch)
+//                    cmr_cmp.transform._euler_angles.x += trn_cmp._euler_angles.x;
+//                
+//                // inherit yaw if enabled
+//                if(cmr_cmp.inherit_yaw)
+//                    cmr_cmp.transform._euler_angles.y += trn_cmp._euler_angles.y;
+//                
+//                // inherit roll if enabled
+//                if(cmr_cmp.inherit_roll)
+//                    cmr_cmp.transform._euler_angles.z += trn_cmp._euler_angles.z;
+//                
+//                cmr_cmp.transform._rotation = glm::quat(Vector3(cmr_cmp.transform._euler_angles.x,
+//                                                                cmr_cmp.transform._euler_angles.y,
+//                                                                cmr_cmp.transform._euler_angles.z));
+//                
+//                // TODO: move into Transform System
+//                Matrix4 translation = glm::translate(-cmr_cmp.transform._position);
+//                Matrix4 inverse_translation = glm::translate(cmr_cmp.transform._position);
+//                Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
+//                
+//                cmr_cmp.transform._global_transform = translation;
+//                cmr_cmp.view_matrix = inverse_translation * rotation;
+//                cmr_cmp.view_projection_matrix = cmr_cmp.projection_matrix * cmr_cmp.view_matrix;
             }
         }
 	}
@@ -52,6 +81,61 @@ namespace terminus
 	{
         if(_scene->has_camera_component(entity) && _scene->has_transform_component(entity))
             _entities[_num_entities++] = entity;
+        
+//        if(_scene->has_camera_component(entity) && _scene->has_transform_component(entity))
+//        {
+//            _entities[_num_entities++] = entity;
+//            
+//            TransformComponent& trn_cmp = _scene->get_transform_component(entity);
+//            CameraComponent& cmr_cmp = _scene->get_camera_component(entity);
+//            
+//            cmr_cmp.transform._forward = Vector3(0.0, 0.0, 1.0);
+//            // inherit position;
+//            cmr_cmp.transform._position += trn_cmp._position;
+//            
+//            // inherit pitch if enabled
+//            if(cmr_cmp.inherit_pitch)
+//                cmr_cmp.transform._euler_angles.x += trn_cmp._euler_angles.x;
+//            
+//            // inherit yaw if enabled
+//            if(cmr_cmp.inherit_yaw)
+//                cmr_cmp.transform._euler_angles.y += trn_cmp._euler_angles.y;
+//            
+//            // inherit roll if enabled
+//            if(cmr_cmp.inherit_roll)
+//                cmr_cmp.transform._euler_angles.z += trn_cmp._euler_angles.z;
+//            
+//            cmr_cmp.transform._rotation = glm::quat(Vector3(cmr_cmp.transform._euler_angles.x,
+//                                                            cmr_cmp.transform._euler_angles.y,
+//                                                            cmr_cmp.transform._euler_angles.z));
+//            
+//            // TODO: move into Transform System
+//            Matrix4 translation = glm::translate(-cmr_cmp.transform._position);
+//            Matrix4 inverse_translation = glm::translate(cmr_cmp.transform._position);
+//            Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
+//            
+//            cmr_cmp.transform._global_transform = translation;
+//            cmr_cmp.view_matrix = inverse_translation * rotation;
+//            
+//            if(cmr_cmp.projection_type == ProjectionType::PERSPECTIVE)
+//            {
+//                cmr_cmp.projection_matrix = Math::Perspective(cmr_cmp.persp_info.fov,
+//                                                              cmr_cmp.persp_info.aspect_ratio,
+//                                                              cmr_cmp.near_plane,
+//                                                              cmr_cmp.far_plane);
+//            }
+//            else
+//            {
+//                cmr_cmp.projection_matrix = Math::Ortho(cmr_cmp.ortho_info.left,
+//                                                        cmr_cmp.ortho_info.right,
+//                                                        cmr_cmp.ortho_info.down,
+//                                                        cmr_cmp.ortho_info.up,
+//                                                        cmr_cmp.near_plane,
+//                                                        cmr_cmp.far_plane);
+//            }
+//            
+//            cmr_cmp.view_projection_matrix = cmr_cmp.projection_matrix * cmr_cmp.view_matrix;
+//        }
 	}
 
 	void CameraSystem::on_entity_destroyed(Entity entity)

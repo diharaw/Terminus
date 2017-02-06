@@ -8,7 +8,7 @@ namespace terminus
 	{
 	public:
 		ScriptInterfaceImpl() {}
-		~ScriptInterfaceImpl() {}
+		virtual ~ScriptInterfaceImpl() {}
 
 		// logger
 		virtual void log_info(std::string text) override;

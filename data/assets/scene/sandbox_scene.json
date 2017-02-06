@@ -34,9 +34,9 @@
 					"material_overrides" : []
 				},
 				{
-					"component_type" : "CPP_SCRIPT",
-					"script_file" : "libtestscript",
-					"class_name" : "TestScript"	
+					"component_type" : "LUA_SCRIPT",
+					"script_file" : "test_lua_script.lua",
+					"class_name" : "TestLuaScript"	
 				}
 			]
 		},
@@ -68,6 +68,21 @@
 				},
 				{
 					"component_type" : "CAMERA",
+					"transform" :
+					{
+						"position" : 
+						{
+							"x" : 0.0,
+							"y" : 0.0,
+							"z" : 0.0
+						},
+						"rotation" : 
+						{
+							"x" : 0.0,
+							"y" : 0.0,
+							"z" : 0.0
+						}
+					},
 					"projection_info" :
 					{
 						"projection_type" : "PERSPECTIVE",
@@ -89,9 +104,9 @@
 					}
 				},
 				{
-					"component_type" : "LUA_SCRIPT",
-					"script_file" : "test_lua_script.lua",
-					"class_name" : "TestLuaScript"	
+					"component_type" : "CPP_SCRIPT",
+					"script_file" : "libtestscript",
+					"class_name" : "TestScript"	
 				}
 			]
 		}

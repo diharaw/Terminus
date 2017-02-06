@@ -6,6 +6,7 @@
 #include <types.h>
 #include <SDL.h>
 #include <mutex>
+#include <Utility/timer.h>
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 #include <Windows.h>
@@ -77,6 +78,10 @@ namespace terminus
         
         int get_height();
         
+        void begin_frame();
+        void end_frame();
+        double get_delta_time();
+        
 #if defined(WIN32)
         HWND get_handle_win32();
 #endif
@@ -94,6 +99,8 @@ namespace terminus
         bool                   _resizable;
         String				   _title;
         std::mutex             _mutex;
+        double                 _delta;
+        Timer                  _timer;
         
     };
     

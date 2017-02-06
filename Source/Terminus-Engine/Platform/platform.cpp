@@ -139,6 +139,8 @@ namespace terminus
 		}
 		
 		create_platform_window();
+        
+        _delta      = 0;
 
         if(!_window)
         {
@@ -213,6 +215,22 @@ namespace terminus
 	{
 		return _height;
 	}
+    
+    void Platform::begin_frame()
+    {
+        _timer.start();
+    }
+    
+    void Platform::end_frame()
+    {
+        _timer.stop();
+        _delta = _timer.get_elapsed_time_sec();
+    }
+    
+    double Platform::get_delta_time()
+    {
+       return _delta;
+    }
 
 #if defined(WIN32)
 	HWND Platform::get_handle_win32()

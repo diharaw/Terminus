@@ -19,10 +19,14 @@ namespace terminus
             
             rapidjson::Value& rotation = json["rotation"];
             
-            component._rotation.x = rotation["x"].GetFloat();
-            component._rotation.y = rotation["y"].GetFloat();
-            component._rotation.z = rotation["z"].GetFloat();
+            component._euler_angles = Vector3(rotation["x"].GetFloat(),
+                                              rotation["y"].GetFloat(),
+                                              rotation["z"].GetFloat());
             
+            component._rotation = glm::quat(Vector3(glm::radians(component._euler_angles.x),
+                                                    glm::radians(component._euler_angles.y),
+                                                    glm::radians(component._euler_angles.z)));
+
             rapidjson::Value& scale = json["scale"];
             
             component._scale.x = scale["x"].GetFloat();

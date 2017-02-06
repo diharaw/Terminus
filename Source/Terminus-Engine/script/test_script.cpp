@@ -39,7 +39,11 @@ void TestScript::OnSceneLoad(Event* event)
 
 void TestScript::update(double dt)
 {
-	_script_interface->log_info("hot reload");
+    if(is_first)
+    {
+        _script_interface->log_info("hot reload");
+        is_first = false;
+    }
 }
 
 void TestScript::shutdown()

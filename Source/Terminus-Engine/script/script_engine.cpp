@@ -94,6 +94,11 @@ namespace terminus
 	{
 		return glm::cross(a, b);
 	}
+    
+    Quaternion axis_angle(float angle, Vector3 axis)
+    {
+        return glm::angleAxis(angle, axis);
+    }
 
     ScriptEngine::ScriptEngine()
     {
@@ -174,9 +179,16 @@ namespace terminus
 			sol::meta_function::multiplication, sol::resolve<glm::mat4(const glm::mat4&, const glm::mat4&)>(glm::operator*),
 			sol::meta_function::multiplication, sol::resolve<glm::vec4(const glm::mat4&, const glm::vec4&)>(glm::operator*)
 			);
+        
+        _lua_state.new_usertype<Quaternion>("Quaternion",
+                                         sol::constructors<sol::types<>, sol::types<Vector3>>(),
+                                         sol::meta_function::multiplication, sol::resolve<glm::quat(const glm::quat&, const glm::quat&)>(glm::operator*),
+                                         sol::meta_function::multiplication, sol::resolve<glm::vec3(const glm::quat&, const glm::vec3&)>(glm::operator*)
+                                         );
 
 		math_root.set_function("dot", &dot_product);
 		math_root.set_function("cross", &cross_product);
+        math_root.set_function("axis_angle", &axis_angle);
 	}
 
 	void ScriptEngine::register_event_api()
@@ -204,57 +216,85 @@ namespace terminus
 	void ScriptEngine::register_component_api()
 	{
 		_lua_state.new_usertype<TransformComponent>("TransformComponent",
-			sol::constructors<sol::types<>>(),
-			"_global_transform", &TransformComponent::_global_transform,
-			"_position", &TransformComponent::_position,
-			"_scale", &TransformComponent::_scale,
-			"_rotation", &TransformComponent::_rotation,
-			"_forward", &TransformComponent::_forward,
-			"_is_dirty", &TransformComponent::_is_dirty,
-			"_parent_entity_name", &TransformComponent::_parent_entity_name);
+                                                    sol::constructors<sol::types<>>(),
+                                                    "_global_transform", &TransformComponent::_global_transform,
+                                                    "_position", &TransformComponent::_position,
+                                                    "_scale", &TransformComponent::_scale,
+                                                    "_rotation", &TransformComponent::_rotation,
+                                                    "_euler_angles", &TransformComponent::_euler_angles,
+                                                    "_forward", &TransformComponent::_forward,
+                                                    "_is_dirty", &TransformComponent::_is_dirty,
+                                                    "_parent_entity_name", &TransformComponent::_parent_entity_name);
 
 		_lua_state.new_usertype<CameraComponent>("CameraComponent",
-			sol::constructors<sol::types<>>(),
-			"offset", &CameraComponent::offset,
-			"screen_rect", &CameraComponent::screen_rect);
+                                                 sol::constructors<sol::types<>>(),
+                                                 "offset", &CameraComponent::offset,
+                                                 "screen_rect", &CameraComponent::screen_rect);
 
-		_lua_state.set_function("set_world_position", &set_world_position);
-		_lua_state.set_function("set_world_scale", &set_world_scale);
-		_lua_state.set_function("set_world_rotation", &set_world_rotation);
-		
+//        _lua_state.new_usertype<CameraComponent>("CameraComponent",
+//                                                 sol::constructors<sol::types<>>(),
+//                                                 "transform", &CameraComponent::transform,
+//                                                 "screen_rect", &CameraComponent::screen_rect,
+//                                                 "projection_matrix", &CameraComponent::projection_matrix,
+//                                                 "near_plane", &CameraComponent::near_plane,
+//                                                 "far_plane", &CameraComponent::far_plane,
+//                                                 "is_active", &CameraComponent::is_active,
+//                                                 "inherit_pitch", &CameraComponent::inherit_pitch,
+//                                                 "inherit_yaw", &CameraComponent::inherit_yaw,
+//                                                 "inherit_roll", &CameraComponent::inherit_roll);
+
+        LuaObject transform_root = _lua_state.create_table("transform");
+        
+		transform_root.set_function("set_position", &transform::set_position);
+        transform_root.set_function("set_scale", &transform::set_scale);
+		transform_root.set_function("set_rotation_euler", &transform::set_rotation_euler);
+        transform_root.set_function("set_rotation_quat", &transform::set_rotation_quat);
+		transform_root.set_function("look_at", &transform::look_at);
+        
+//        LuaObject camera_root = _lua_state.create_table("camera");
+//        
+//        camera_root.set_function("set_position", &camera::set_position);
+//        camera_root.set_function("set_yaw", &camera::set_yaw);
+//        camera_root.set_function("set_pitch", &camera::set_pitch);
+//        camera_root.set_function("set_roll", &camera::set_roll);
+//        camera_root.set_function("offset_position", &camera::offset_position);
+//        camera_root.set_function("offset_yaw", &camera::offset_yaw);
+//        camera_root.set_function("offset_pitch", &camera::offset_pitch);
+//        camera_root.set_function("offset_roll", &camera::offset_roll);
 	}
 
 	void ScriptEngine::register_scene_api()
 	{
 		_lua_state.new_usertype<Scene>("Scene",
-			sol::constructors<sol::types<>>(),
-			"get_transform_component", &Scene::get_transform_component,
-			"get_mesh_component", &Scene::get_mesh_component,
-			"get_collider_component", &Scene::get_collider_component,
-			"get_camera_component", &Scene::get_camera_component,
-			"get_lua_script_component", &Scene::get_lua_script_component,
-			"has_transform_component", &Scene::has_transform_component,
-			"has_mesh_component", &Scene::has_mesh_component,
-			"has_collider_component", &Scene::has_collider_component,
-			"has_camera_component", &Scene::has_camera_component,
-			"has_lua_script_component", &Scene::has_lua_script_component,
-			"is_entity_alive", &Scene::is_alive);
+                                       sol::constructors<sol::types<>>(),
+                                       "get_transform_component", &Scene::get_transform_component,
+                                       "get_mesh_component", &Scene::get_mesh_component,
+                                       "get_collider_component", &Scene::get_collider_component,
+                                       "get_camera_component", &Scene::get_camera_component,
+                                       "get_lua_script_component", &Scene::get_lua_script_component,
+                                       "has_transform_component", &Scene::has_transform_component,
+                                       "has_mesh_component", &Scene::has_mesh_component,
+                                       "has_collider_component", &Scene::has_collider_component,
+                                       "has_camera_component", &Scene::has_camera_component,
+                                       "has_lua_script_component", &Scene::has_lua_script_component,
+                                       "is_entity_alive", &Scene::is_alive,
+                                       "_name", &Scene::_name);
 
 		_lua_state.new_usertype<Entity>("Entity",
-			sol::constructors<sol::types<>>(),
-			"_id", &Entity::_id,
-			"_name", &Entity::_name
-			);
+                                        sol::constructors<sol::types<>>(),
+                                        "_id", &Entity::_id,
+                                        "_name", &Entity::_name
+                                        );
 	}
 
 	void ScriptEngine::register_scene_manager_api()
 	{
 		_lua_state.new_usertype<SceneManager>("SceneManager",
-			sol::constructors<sol::types<>>(),
-			"load_scene", &SceneManager::load,
-			"preload_scene", &SceneManager::preload,
-			"unload_scene", &SceneManager::unload,
-			"set_active_scene", &SceneManager::set_active_scene);
+                                              sol::constructors<sol::types<>>(),
+                                              "load_scene", &SceneManager::load,
+                                              "preload_scene", &SceneManager::preload,
+                                              "unload_scene", &SceneManager::unload,
+                                              "set_active_scene", &SceneManager::set_active_scene);
 	}
 
     void ScriptEngine::shutdown()

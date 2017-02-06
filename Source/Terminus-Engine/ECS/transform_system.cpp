@@ -27,10 +27,12 @@ namespace terminus
             TransformComponent& cmp = _component_array[i];
             
             cmp._forward = Vector3(0.0f, 1.0f, 0.0f);
-            cmp._global_transform = Matrix4();
-            cmp._global_transform = glm::translate(cmp._global_transform, cmp._position);
-            //cmp._global_transform = glm::rotate(cmp._global_transform, glm);
-            cmp._global_transform = glm::scale(cmp._global_transform, cmp._scale);
+            
+            Matrix4 translation = glm::translate(cmp._position);
+            Matrix4 rotation = glm::toMat4(cmp._rotation);
+            Matrix4 scale = glm::scale(cmp._scale);
+            
+            cmp._global_transform = translation * rotation * scale;
             
             cmp._is_dirty = false;
         }
@@ -47,10 +49,12 @@ namespace terminus
             
             if(cmp._is_dirty)
             {
-                cmp._global_transform = Matrix4();
-                cmp._global_transform = glm::translate(cmp._global_transform, cmp._position);
-                //cmp._global_transform = glm::rotate(cmp._global_transform, glm);
-                cmp._global_transform = glm::scale(cmp._global_transform, cmp._scale);
+                Matrix4 translation = glm::translate(cmp._position);
+                Matrix4 rotation = glm::toMat4(cmp._rotation);
+                Matrix4 scale = glm::scale(cmp._scale);
+                
+                cmp._global_transform = translation * rotation * scale;
+
                 cmp._is_dirty = false;
             }
 		}

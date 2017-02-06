@@ -10,7 +10,7 @@ namespace terminus
 	{
 	public:
 		ScriptInterface() {}
-		~ScriptInterface() {}
+		virtual ~ScriptInterface() {}
 
 		// logger
 		virtual void log_info(std::string text) = 0;

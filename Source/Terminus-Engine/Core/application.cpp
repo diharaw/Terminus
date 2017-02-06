@@ -10,8 +10,6 @@ namespace terminus
 {
     // TEST TEST TEST
     
-    int cmd_buf_idx;
-    
     String scene_path = "";
     // TEST TEST TEST
     
@@ -60,12 +58,6 @@ namespace terminus
         Platform& platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
         
-        // TEST TEST TEST
-        
-        cmd_buf_idx = context::get_renderer().create_command_buffer();
-        
-        // TEST TEST TEST
-        
         context._rendering_thread.run();
         context._loading_thread.run();
         
@@ -79,10 +71,11 @@ namespace terminus
 		{
             TERMINUS_BEGIN_CPU_PROFILE(update_loop)
             
+            platform.begin_frame();
 			platform.update();
             EventHandler::update();
             
-            context._scene_manager.update(0.0);
+            context._scene_manager.update(platform.get_delta_time());
             // Synchronize Rendering Thread
             context._render_done_sema.wait();
             
@@ -94,6 +87,7 @@ namespace terminus
 			Global::GetPerFrameAllocator()->Clear();
             
             context._swap_done_sema.notify();
+            platform.end_frame();
             
             TERMINUS_END_CPU_PROFILE
 		}
@@ -101,28 +95,6 @@ namespace terminus
     
     void Application::temp_render()
     {
-        // temp
-        // TEST TEST TEST
-        
-        CommandBuffer& cmd_buf = context::get_renderer().command_buffer(cmd_buf_idx);
-        
-//        BindFramebufferCmdData cmd1;
-//        cmd1.framebuffer = nullptr;
-//        
-//        cmd_buf.Write(CommandType::BindFramebuffer);
-//        cmd_buf.Write(&cmd1, sizeof(cmd1));
-//        
-//        ClearFramebufferCmdData cmd2;
-//        cmd2.clear_target = FramebufferClearTarget::ALL;
-//        cmd2.clear_color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-//        
-//        cmd_buf.Write(CommandType::ClearFramebuffer);
-//        cmd_buf.Write(&cmd2, sizeof(cmd2));
-//        
-//        cmd_buf.WriteEnd();
-        
-        // TEST TEST TEST
-        
 #if defined(TERMINUS_WITH_EDITOR)
         static bool testWin = true;
         ImGui::ShowTestWindow(&testWin);

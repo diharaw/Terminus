@@ -15,7 +15,7 @@ private:
     
 public:
     TestScript();
-    ~TestScript();
+    virtual ~TestScript();
 	virtual void setup_environment(terminus::ScriptInterface* script_interface) override;
     virtual void initialize() override;
     virtual void update(double dt) override;
