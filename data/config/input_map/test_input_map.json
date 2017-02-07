@@ -2,7 +2,7 @@
 	"action" :
 	[
 		{
-			"name" : "move_camera",
+			"name" : "toggle_camera",
 			"keyboard" : "SPACE",
 			"gamepad" : null,
 			"mouse" : null 

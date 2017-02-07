@@ -1,7 +1,7 @@
 {
-	"app_name" : "Sandbox",
-	"window_title" : "Terminus Engine",
-	"initial_scene" : "splash_screen.scene",
+	"app_name" : "Terminus Sandbox",
+	"window_title" : "Terminus Sandbox",
+	"initial_scene" : "sandbox_scene.json",
 	"local_data_paths" : 
 	{
 		"win32" : "C:/Users/My Documents/Terminus Engine/",
