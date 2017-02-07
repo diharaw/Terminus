@@ -201,7 +201,7 @@ namespace terminus
 
 	void Application::initialize_input()
 	{
-		Input::Initialize();
+		input_handler::initialize();
 	}
 
 	void Application::initialize_resources()

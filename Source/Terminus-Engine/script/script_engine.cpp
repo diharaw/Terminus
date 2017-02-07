@@ -5,6 +5,7 @@
 #include <ECS/component_types.h>
 #include <types.h>
 #include <Math/math_utility.h>
+#include <Input/input_handler.h>
 
 namespace terminus
 {
@@ -99,6 +100,19 @@ namespace terminus
     {
         return glm::angleAxis(angle, axis);
     }
+    
+    HashResult string_hash(std::string text)
+    {
+        HashResult result;
+        result.hash = HASH(text.c_str());
+        return result;
+    }
+    
+    bool hash_equals(std::string text, HashResult hash_result)
+    {
+        uint64_t result = HASH(text.c_str());
+        return (result == hash_result.hash);
+    }
 
     ScriptEngine::ScriptEngine()
     {
@@ -113,11 +127,13 @@ namespace terminus
     void ScriptEngine::initialize()
     {
         _lua_state.open_libraries(sol::lib::base, sol::lib::package);
-        
+    
+        register_misc_api();
 		register_math_api();
 		register_component_api();
 		register_scene_api();
 		register_scene_manager_api();
+        register_input_api();
 		register_logger_api();
 		register_event_api();
     }
@@ -190,6 +206,21 @@ namespace terminus
 		math_root.set_function("cross", &cross_product);
         math_root.set_function("axis_angle", &axis_angle);
 	}
+    
+    void ScriptEngine::register_misc_api()
+    {
+        LuaObject utility_root = _lua_state.create_table("Utility");
+        _lua_state.new_usertype<HashResult>("Hash",
+                                            sol::constructors<sol::types<>>()
+                                            );
+        
+        utility_root.set_function("string_hash", &string_hash);
+        utility_root.set_function("hash_equals", &hash_equals);
+        
+        _lua_state.new_usertype<StringBuffer32>("StringBuffer32",
+                                            sol::constructors<sol::types<>, sol::types<std::string>>()
+                                            );
+    }
 
 	void ScriptEngine::register_event_api()
 	{
@@ -201,16 +232,27 @@ namespace terminus
 		event_root.set_function("fire_event", &EventHandler::fire_event);
 
 		_lua_state.new_usertype<InputActionEvent>("InputActionEvent",
-			sol::constructors<sol::types<std::string>>()
-			);
+                                                  sol::constructors<sol::types<HashResult>>(),
+                                                  "get_action_hash", &InputActionEvent::get_action_hash
+                                                  );
 
 		_lua_state.new_usertype<InputStateEvent>("InputStateEvent",
-			sol::constructors<sol::types<std::string, int>>()
-			);
+                                                 sol::constructors<sol::types<HashResult, int>>(),
+                                                 "get_state_hash", &InputStateEvent::get_state_hash
+                                                 );
 
 		_lua_state.new_usertype<InputAxisEvent>("InputAxisEvent",
-			sol::constructors<sol::types<std::string, double, double>>()
-			);
+                                                sol::constructors<sol::types<HashResult, double, double>>(),
+                                                "get_axis_hash", &InputAxisEvent::get_axis_hash
+                                                );
+        
+        sol::table event_types = _lua_state.create_table("EventType");
+        
+        event_types.set("INPUT_ACTION", InputActionEvent::sk_Type);
+        event_types.set("INPUT_AXIS", InputAxisEvent::sk_Type);
+        event_types.set("INPUT_STATE", InputStateEvent::sk_Type);
+        event_types.set("SCENE_LOAD", SceneLoadEvent::sk_Type);
+        event_types.set("SCENE_PRELOAD", ScenePreloadEvent::sk_Type);
 	}
 
 	void ScriptEngine::register_component_api()
@@ -262,6 +304,24 @@ namespace terminus
         camera_root.set_function("offset_pitch", &camera::offset_pitch);
         camera_root.set_function("offset_roll", &camera::offset_roll);
 	}
+    
+    void ScriptEngine::register_input_api()
+    {
+        _lua_state.new_usertype<PlayerContextHandle>("PlayerContextHandle",
+                                                     sol::constructors<sol::types<>>()
+                                                     );
+        
+        _lua_state.new_usertype<InputMapHandle>("InputMapHandle",
+                                                 sol::constructors<sol::types<>>()
+                                                );
+        
+        LuaObject input_root = _lua_state.create_table("Input");
+        
+        input_root.set_function("create_player", input_handler::create_player);
+        input_root.set_function("get_default_player_context", input_handler::get_default_player_context);
+        input_root.set_function("load_input_map", input_handler::load_input_map);
+        input_root.set_function("set_active_input_map", input_handler::set_active_input_map);
+    }
 
 	void ScriptEngine::register_scene_api()
 	{

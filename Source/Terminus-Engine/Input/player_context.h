@@ -1,15 +1,18 @@
-#ifndef INPUTHANDLER_H
-#define INPUTHANDLER_H
+#pragma once
 
-#include <string>
-#include <vector>
-#include <Input/input_context.h>
+#include <Input/input_map.h>
+#include <container/handle_array.h>
 
-struct PlayerContexts
+#define MAX_INPUT_MAPS 5
+
+namespace terminus
 {
-    uint8 m_GamepadIndex;
-    InputContext* m_ActiveContext;
-    std::vector<InputContext> m_Contexts;
-};
-
-#endif
+    using InputMapHandle = Handle<InputMap>;
+    
+    struct PlayerContext
+    {
+        uint8                                 _gamepad_index;
+        InputMapHandle                        _active;
+        HandleArray<InputMap, MAX_INPUT_MAPS> _input_maps;
+    };
+}

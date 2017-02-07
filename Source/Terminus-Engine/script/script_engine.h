@@ -95,6 +95,8 @@ namespace terminus
 		void register_scene_manager_api();
 		void register_logger_api();
 		void register_event_api();
+        void register_input_api();
+        void register_misc_api();
         
 	private:
 		sol::state     _lua_state;

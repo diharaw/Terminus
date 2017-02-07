@@ -15,8 +15,8 @@
 #include <IO/filesystem.h>
 #include <IO/file_watcher.h>
 #include <IO/logger.h>
-#include <Input/input.h>
-#include <Input/input_context.h>
+#include <Input/input_handler.h>
+#include <Input/input_map.h>
 #include <Core/Event/event_handler.h>
 #include <Resource/shader_cache.h>
 #include <Resource/mesh_cache.h>

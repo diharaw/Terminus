@@ -43,6 +43,7 @@ namespace terminus
                     listenerItr->second._objects[i]._callback.Invoke(event);
             }
             
+            delete event;
             it = _event_queue.erase(it);
         }
     }

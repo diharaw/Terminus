@@ -4,6 +4,7 @@
 #define EVENT_H
 
 #include <string>
+#include <types.h>
 
 class Actor;
 class Entity;
@@ -69,14 +70,21 @@ public:
     static const EventType sk_Type;
     
 private:
-    std::string            m_action;
+    uint64_t            m_action;
     
 public:
-    InputActionEvent(std::string _action) : m_action(_action) {}
+    InputActionEvent(uint64_t _action) : m_action(_action) {}
+    InputActionEvent(HashResult _action) : m_action(_action.hash) {}
     virtual ~InputActionEvent() {}
     inline virtual EventType GetType()                    { return sk_Type; }
     inline virtual std::string GetName()                  { return "Input Action Event"; }
-    inline std::string GetAction()                         { return m_action; }
+    inline uint64_t GetAction()                         { return m_action; }
+    inline HashResult get_action_hash()
+    {
+        HashResult result;
+        result.hash = m_action;
+        return result;
+    }
 };
 
 class InputStateEvent : public Event
@@ -85,16 +93,23 @@ public:
     static const EventType sk_Type;
     
 private:
-    std::string            m_state;
-    int                    m_value;
+    uint64_t            m_state;
+    int                 m_value;
     
 public:
-    InputStateEvent(std::string _state, int _value) : m_state(_state), m_value(_value) {}
+    InputStateEvent(uint64_t _state, int _value) : m_state(_state), m_value(_value) {}
+    InputStateEvent(HashResult _state, int _value) : m_state(_state.hash), m_value(_value) {}
     virtual ~InputStateEvent() {}
     inline virtual EventType GetType()                    { return sk_Type; }
     inline virtual std::string GetName()                  { return "Input State Event"; }
-    inline std::string GetState()                        { return m_state; }
+    inline uint64_t GetState()                        { return m_state; }
     inline int GetValue()                                 { return m_value; }
+    inline HashResult get_state_hash()
+    {
+        HashResult result;
+        result.hash = m_state;
+        return result;
+    }
 };
 
 class InputAxisEvent : public Event
@@ -103,18 +118,25 @@ public:
     static const EventType sk_Type;
     
 private:
-    std::string            m_axis;
+    uint64_t            m_axis;
     double                 m_value;
     double                 m_delta;
     
 public:
-    InputAxisEvent(std::string _axis, double _value, double _delta) : m_axis(_axis), m_value(_value), m_delta(_delta) {}
+    InputAxisEvent(uint64_t _axis, double _value, double _delta) : m_axis(_axis), m_value(_value), m_delta(_delta) {}
+    InputAxisEvent(HashResult _axis, double _value, double _delta) : m_axis(_axis.hash), m_value(_value), m_delta(_delta) {}
     virtual ~InputAxisEvent() {}
     inline virtual EventType GetType()                    { return sk_Type; }
     inline virtual std::string GetName()                  { return "Input State Event"; }
-    inline std::string GetAxis()                          { return m_axis; }
+    inline uint64_t GetAxis()                          { return m_axis; }
     inline double GetValue()                              { return m_value; }
     inline double GetDelta()                              { return m_delta; }
+    inline HashResult get_axis_hash()
+    {
+        HashResult result;
+        result.hash = m_axis;
+        return result;
+    }
 };
 
 enum FileWatcherEventType

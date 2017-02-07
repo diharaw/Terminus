@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <cstring>
+#include <string>
 
 template<size_t SIZE>
 class StringBuffer
@@ -23,6 +24,12 @@ public:
     {
         strcpy(&_buffer[0], str);
         _length = strlen(str);
+    }
+    
+    StringBuffer(std::string str)
+    {
+        strcpy(&_buffer[0], str.c_str());
+        _length = strlen(str.c_str());
     }
     
     inline size_t find_first(char c)

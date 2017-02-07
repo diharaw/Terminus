@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Platform/platform.h>
-#include <Input/input.h>
+#include <Input/input_handler.h>
 #include <Core/config.h>
 #include <Graphics/imgui_backend.h>
 #include <IO/filesystem.h>
@@ -151,8 +151,8 @@ namespace terminus
         // Poll input once to set initial mouse position
         update();
         
-        Input::MouseDevice* device = Input::GetMouseDevice();
-        SDL_GetMouseState(&device->x_position, &device->y_position);
+        input_handler::MouseDevice& device = input_handler::get_mouse_device();
+        SDL_GetMouseState(&device.x_position, &device.y_position);
 
         return true;
     }
@@ -167,7 +167,7 @@ namespace terminus
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            Input::ProcessWindowEvents(event);
+            input_handler::process_window_events(event);
             terminus::ImGuiBackend::process_window_events(&event);
             
             switch (event.type) {

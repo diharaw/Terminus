@@ -56,11 +56,24 @@ using JsonValue = rapidjson::Value;
 using LuaObject	  = sol::table;
 using LuaFunction = sol::function;
 using LuaScriptFile = StringBuffer<2048>;
+using StringBuffer32 = StringBuffer<32>;
+using StringBuffer64 = StringBuffer<64>;
+using StringBuffer128 = StringBuffer<1282>;
+using StringBuffer256 = StringBuffer<256>;
+using StringBuffer512 = StringBuffer<512>;
+using StringBuffer1024 = StringBuffer<1024>;
+using StringBuffer2048 = StringBuffer<2048>;
+using StringBuffer4096 = StringBuffer<4096>;
 
 namespace Atomic
 {
     using Int = std::atomic_int;
 }
+
+struct HashResult
+{
+    uint64_t hash;
+};
 
 class TypeID
 {
