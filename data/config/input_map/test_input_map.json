@@ -4,9 +4,9 @@
 	[
 		{
 			"name" : "toggle_camera",
-			"keyboard" : null,
+			"keyboard" : "SPACE",
 			"gamepad" : null,
-			"mouse" : "MOUSE_RIGHT" 
+			"mouse" : null 
 		}
 	],
 	"axis" :
@@ -36,6 +36,13 @@
 			"name" : "sideways",
 			"keyboard_pos" : "A",
 			"keyboard_neg" : "D",
+			"gamepad" : null,
+			"mouse" : null
+		},
+		{
+			"name" : "roll",
+			"keyboard_pos" : "Q",
+			"keyboard_neg" : "E",
 			"gamepad" : null,
 			"mouse" : null
 		}

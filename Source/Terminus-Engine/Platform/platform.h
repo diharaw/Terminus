@@ -103,7 +103,7 @@ namespace terminus
         bool				   _vsync;
         int					   _refresh_rate;
         bool                   _resizable;
-        String				   _title;
+        StringBuffer64         _title;
         std::mutex             _mutex;
         double                 _delta;
         Timer                  _timer;

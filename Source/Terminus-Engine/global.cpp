@@ -1,6 +1,7 @@
 #include <global.h>
 #include <types.h>
 #include <Core/context.h>
+#include <Resource/config_file_factory.h>
 #include <Graphics/imgui_console.h>
 #include <iostream>
 
@@ -31,6 +32,9 @@ namespace terminus
             
             g_context = T_NEW Context();
             g_context->_shutdown = false;
+            
+            filesystem::add_directory("config");
+            g_context->_engine_config = config_file_factory::create("engine_config.json");
             
         #if defined(TERMINUS_WITH_EDITOR)
             imgui_console::initialize();

@@ -58,10 +58,6 @@ namespace terminus
 //                if(cmr_cmp.inherit_roll)
 //                    final_rot.z = cmr_cmp.transform._euler_angles.z + trn_cmp._euler_angles.z;
                 
-                cmr_cmp.transform._rotation = glm::quat(Vector3(glm::radians(final_rot.x),
-                                                                glm::radians(final_rot.y),
-                                                                glm::radians(final_rot.z)));
-                
                 // TODO: move into Transform System
                 Matrix4 translation = glm::translate(final_pos);
                 Matrix4 inverse_translation = glm::translate(-final_pos);

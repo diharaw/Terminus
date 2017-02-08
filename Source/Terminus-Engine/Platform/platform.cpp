@@ -42,10 +42,6 @@ namespace terminus
                 break;
         }
         
-        _title = "Terminus Engine - Build ";
-        _title += std::to_string(TERMINUS_BUILD);
-        
-        
 #if defined(TERMINUS_OPENGL)
         _title += " (OpenGL)";
         window_flags |= SDL_WINDOW_OPENGL;
@@ -80,64 +76,37 @@ namespace terminus
         if (SDL_Init(flags) != 0)
             return false;
 
-		JsonDocument config;
-		FileHandle handle = filesystem::read_file("TerminusConfig.json", true);
-
-		if (handle.buffer)
-		{
-			config.Parse(handle.buffer);
-			
-			if (config.HasMember("width"))
-				_width = config["width"].GetInt();
-			else
-				return false;
-
-			if (config.HasMember("height"))
-				_height = config["height"].GetInt();
-			else
-				return false;
-
-			if (config.HasMember("refresh_rate"))
-				_refresh_rate = config["refresh_rate"].GetInt();
-			else
-				return false;
-
-			if (config.HasMember("vsync"))
-				_vsync = config["vsync"].GetBool();
-			else
-				return false;
-
-			if (config.HasMember("window_mode"))
-            {
-                String window_mode_str = String(config["window_mode"].GetString());
-                
-                if(window_mode_str == "WINDOWED")
-                    _window_mode = WindowMode::WINDOWED;
-                else if(window_mode_str == "BORDERLESS_WINDOW")
-                    _window_mode = WindowMode::BORDERLESS_WINDOW;
-                else if(window_mode_str == "FULLSCREEN")
-                    _window_mode = WindowMode::FULLSCREEN;
-                else
-                    _window_mode = WindowMode::WINDOWED;
-            }
-			else
-				return false;
+        ConfigFile* config = context::get_engine_config();
+        
+        _width = config->get_int(CONFIG_WINDOW_WIDTH, 1280);
+        _height = config->get_int(CONFIG_WINDOW_HEIGHT, 720);
+        _refresh_rate = config->get_int(CONFIG_WINDOW_REFRESH_RATE, 60);
+        _resizable = config->get_bool(CONFIG_WINDOW_RESIZABLE, false);
+        _vsync = config->get_bool(CONFIG_WINDOW_VSYNC, false);
+        
+        StringBuffer64 mode = config->get_string(CONFIG_WINDOW_MODE, "windowed");
             
-            if (config.HasMember("resizable"))
-                _resizable = config["resizable"].GetBool();
-            else
-                return false;
-		}
-		else
-		{
-			_width = 1280;
-			_height = 720;
-			_refresh_rate = 60;
-            _resizable = true;
+        if(mode == "fullscreen")
+            _window_mode = WindowMode::FULLSCREEN;
+        else if(mode == "borderless")
+            _window_mode = WindowMode::BORDERLESS_WINDOW;
+        else
             _window_mode = WindowMode::WINDOWED;
-			_vsync = false;
-		}
-		
+        
+        _title = config->get_string(CONFIG_WINDOW_TITLE, "Terminus App");
+        
+        if(config->has_value(CONFIG_APP_VERSION))
+        {
+            _title += " ";
+            _title += config->get_string(CONFIG_APP_VERSION);
+        }
+        
+        if(config->has_value(CONFIG_ENGINE_VERSION))
+        {
+            _title += " - Terminus Engine ";
+            _title += config->get_string(CONFIG_ENGINE_VERSION);
+        }
+        
 		create_platform_window();
         
         _delta      = 0;
@@ -170,7 +139,8 @@ namespace terminus
             input_handler::process_window_events(event);
             terminus::ImGuiBackend::process_window_events(&event);
             
-            switch (event.type) {
+            switch (event.type)
+            {
                 case SDL_QUIT:
                     Global::get_context()._shutdown = true;
                     break;

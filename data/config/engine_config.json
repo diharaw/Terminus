@@ -4,20 +4,12 @@
 	"engine_version" : "0.1.1",
 	"engine_build" : "1",
 	"initial_scene" : "sandbox_scene.json",
-	"window" :
-	{
-		"title" : "Terminus Sandbox",
-		"width" : 1600,
-		"height" : 900,
-		"mode" : "windowed",
-		"vsync" : false
-	},
-	"local_data_dir" : 
-	{
-		"win32" : "C:/Users/My Documents/Terminus Engine/",
-		"ios" : null,
-		"macosx" : null,
-		"linux" : null,
-		"android" : null
-	}
+	"window_title" : "Terminus Sandbox",
+	"window_width" : 1280,
+	"window_height" : 720,
+	"window_refresh_rate" : 60,
+	"window_mode" : "windowed",
+	"window_vsync" : false,
+	"window_resizable" : false,
+	"local_data_dir" : "C:/Users/My Documents/Terminus Engine/"
 }

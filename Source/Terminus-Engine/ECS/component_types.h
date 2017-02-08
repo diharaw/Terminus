@@ -172,12 +172,30 @@ namespace terminus
             transform::set_position(cmp.transform, pos);
         }
         
+        inline void set_euler(CameraComponent& cmp, Vector3 euler)
+        {
+            cmp.transform._euler_angles = euler;
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
+        }
+        
         inline void set_yaw(CameraComponent& cmp, float yaw)
         {
             cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
                                                   yaw,
                                                   cmp.transform._euler_angles.z);
-            //transform::set_rotation_euler(cmp.transform, euler);
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
         
         inline void set_pitch(CameraComponent& cmp, float pitch)
@@ -185,7 +203,13 @@ namespace terminus
             cmp.transform._euler_angles = Vector3(pitch,
                                                   cmp.transform._euler_angles.y,
                                                   cmp.transform._euler_angles.z);
-            //transform::set_rotation_euler(cmp.transform, euler);
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
         
         inline void set_roll(CameraComponent& cmp, float roll)
@@ -193,13 +217,30 @@ namespace terminus
             cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
                                                   cmp.transform._euler_angles.y,
                                                   roll);
-            //transform::set_rotation_euler(cmp.transform, euler);
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
         
         inline void offset_position(CameraComponent& cmp, Vector3& pos)
         {
             cmp.transform._euler_angles = cmp.transform._position + pos;
-            //transform::set_position(cmp.transform, new_pos);
+        }
+        
+        inline void offset_euler(CameraComponent& cmp, Vector3 euler)
+        {
+            cmp.transform._euler_angles += euler;
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
         
         inline void offset_yaw(CameraComponent& cmp, float yaw)
@@ -207,7 +248,13 @@ namespace terminus
             cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
                                                   cmp.transform._euler_angles.y + yaw,
                                                   cmp.transform._euler_angles.z);
-            //transform::set_rotation_euler(cmp.transform, euler);
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
         
         inline void offset_pitch(CameraComponent& cmp, float pitch)
@@ -215,7 +262,13 @@ namespace terminus
             cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x + pitch,
                                     cmp.transform._euler_angles.y,
                                     cmp.transform._euler_angles.z);
-            //transform::set_rotation_euler(cmp.transform, euler);
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
         
         inline void offset_roll(CameraComponent& cmp, float roll)
@@ -223,7 +276,13 @@ namespace terminus
             cmp.transform._euler_angles = Vector3(cmp.transform._euler_angles.x,
                                     cmp.transform._euler_angles.y,
                                     cmp.transform._euler_angles.z + roll);
-            //transform::set_rotation_euler(cmp.transform, euler);
+            
+            Quaternion qPitch = glm::angleAxis(glm::radians(cmp.transform._euler_angles.x), Vector3(1, 0, 0));
+            Quaternion qYaw = glm::angleAxis(glm::radians(cmp.transform._euler_angles.y), Vector3(0, 1, 0));
+            Quaternion qRoll = glm::angleAxis(glm::radians(cmp.transform._euler_angles.z),Vector3(0,0,1));
+            
+            cmp.transform._rotation = qPitch * qYaw * qRoll;
+            cmp.transform._rotation = glm::normalize(cmp.transform._rotation);
         }
     }
 }

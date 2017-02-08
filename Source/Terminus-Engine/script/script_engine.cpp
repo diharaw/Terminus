@@ -321,6 +321,7 @@ namespace terminus
         camera_root.set_function("set_pitch", &camera::set_pitch);
         camera_root.set_function("set_roll", &camera::set_roll);
         camera_root.set_function("offset_position", &camera::offset_position);
+        camera_root.set_function("offset_euler", &camera::offset_euler);
         camera_root.set_function("offset_yaw", &camera::offset_yaw);
         camera_root.set_function("offset_pitch", &camera::offset_pitch);
         camera_root.set_function("offset_roll", &camera::offset_roll);

@@ -21,6 +21,7 @@
 #include <Resource/lua_script_file_cache.h>
 #include <Core/rendering_thread.h>
 #include <Core/loading_thread.h>
+#include <Core/config_file.h>
 #include <script/script_engine.h>
 #include <script/script_interface_impl.h>
 
@@ -28,6 +29,9 @@ namespace terminus
 {    
     struct Context
     {
+        // Engine Config
+        ConfigFile*  _engine_config;
+        
         // Platform
         Platform	 _platform;
         
@@ -78,6 +82,7 @@ namespace terminus
     
     namespace context
     {
+        T_FORCE_INLINE ConfigFile*			get_engine_config() 			{ return Global::get_context()._engine_config; }
         T_FORCE_INLINE Platform&			get_platform() 					{ return Global::get_context()._platform; }
         T_FORCE_INLINE Renderer&			get_renderer() 					{ return Global::get_context()._renderer; }
         T_FORCE_INLINE RenderDevice&		get_render_device()				{ return Global::get_context()._render_device; }

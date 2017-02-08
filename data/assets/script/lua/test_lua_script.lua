@@ -31,14 +31,23 @@ function TestLuaScript:OnAxisInput(event)
 
 	if self.look_mode then
 
+		is_dirty = false
+		cam_offset = Vector3:new()
+
 		camera_cmp = self._scene:get_camera_component(self._entity)
 	
 		if Utility.hash_equals("mouse_look_x", event:get_axis_hash()) then
-			Camera.offset_yaw(camera_cmp, event.delta * self.delta_time)
+			is_dirty = true
+			cam_offset.y = event.delta * self.delta_time
 		end
 
 		if Utility.hash_equals("mouse_look_y", event:get_axis_hash()) then
-			Camera.offset_pitch(camera_cmp, event.delta * self.delta_time)
+			is_dirty = true
+			cam_offset.x = event.delta * self.delta_time
+		end
+		
+		if is_dirty then
+			Camera.offset_euler(camera_cmp, cam_offset)
 		end
 
 	end
