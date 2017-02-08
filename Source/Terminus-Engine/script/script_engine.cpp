@@ -102,6 +102,11 @@ namespace terminus
 		context::get_platform().grab_mouse(grab);
 	}
 
+	double get_delta_time()
+	{
+		return context::get_platform().get_delta_time();
+	}
+
 	float dot_product(Vector3& a, Vector3& b)
 	{
 		return glm::dot(a, b);
@@ -352,6 +357,7 @@ namespace terminus
 		platform_root.set_function("set_cursor_visibility", &set_cursor_visibility);
 		platform_root.set_function("set_relative_mouse", &set_relative_mouse);
 		platform_root.set_function("grab_mouse", &grab_mouse);
+		platform_root.set_function("get_delta_time", &get_delta_time);
 	}
 
 	void ScriptEngine::register_scene_api()

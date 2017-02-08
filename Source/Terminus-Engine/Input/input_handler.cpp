@@ -382,7 +382,7 @@ namespace terminus
             }
         }
         
-        void process_keyboard_input(Sint32 key, Uint32 action)
+        void process_keyboard_input(Sint32 key, Sint32 scan_code, Uint32 action)
         {
             PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
             InputMap* input_map = context->_input_maps.get_ptr(context->_active);
@@ -401,7 +401,7 @@ namespace terminus
                         InputActionEvent* event = new InputActionEvent(action);
                         terminus::EventHandler::queue_event(event);
                         
-                        _keyboard_device.button_states[key] = action;
+                        _keyboard_device.button_states[scan_code] = action;
                         
                         return;
                     }
@@ -430,7 +430,7 @@ namespace terminus
                         return;
                     }
                     
-                    _keyboard_device.button_states[key] = action;
+                    _keyboard_device.button_states[scan_code] = action;
                 }
                 
                 // Check if Axis Press
@@ -442,13 +442,13 @@ namespace terminus
                         uint64_t axis_hash;
                         input_map->_axis_map._keyboard_pos.get(key, axis_hash);
                         
-                        double last_value = _keyboard_device.button_axis_states[key];
+                        double last_value = _keyboard_device.button_axis_states[scan_code];
                         
                         // Fire Axis Positive Event
                         InputAxisEvent* event = new InputAxisEvent(axis_hash, 1.0, 1.0 - last_value);
                         terminus::EventHandler::queue_event(event);
                         
-                        _keyboard_device.button_axis_states[key] = 1.0;
+                        _keyboard_device.button_axis_states[scan_code] = 1.0;
                         
                         return;
                     }
@@ -459,13 +459,13 @@ namespace terminus
                         uint64_t axis_hash;
                         input_map->_axis_map._keyboard_neg.get(key, axis_hash);
                         
-                        double last_value = (double)_keyboard_device.button_axis_states[key];
+                        double last_value = (double)_keyboard_device.button_axis_states[scan_code];
                         
                         // Fire Axis Negative Event
                         InputAxisEvent* event = new InputAxisEvent(axis_hash, -1.0, -1.0 - last_value);
                         terminus::EventHandler::queue_event(event);
                         
-                        _keyboard_device.button_axis_states[key] = -1.0;
+                        _keyboard_device.button_axis_states[scan_code] = -1.0;
                         
                         return;
                     }
@@ -479,13 +479,13 @@ namespace terminus
                         uint64_t axis_hash;
                         input_map->_axis_map._keyboard_pos.get(key, axis_hash);
                         
-                        double last_value = (double)_keyboard_device.button_axis_states[key];
+                        double last_value = (double)_keyboard_device.button_axis_states[scan_code];
                         
                         // Fire Axis Positive Event
                         InputAxisEvent* event = new InputAxisEvent(axis_hash, 0.0, 0.0 - last_value);
                         terminus::EventHandler::queue_event(event);
                         
-                        _keyboard_device.button_axis_states[key] = 0.0;
+                        _keyboard_device.button_axis_states[scan_code] = 0.0;
                         
                         return;
                     }
@@ -494,13 +494,13 @@ namespace terminus
                         uint64_t axis_hash;
                         input_map->_axis_map._keyboard_neg.get(key, axis_hash);
                         
-                        double last_value = (double)_keyboard_device.button_axis_states[key];
+                        double last_value = (double)_keyboard_device.button_axis_states[scan_code];
                         
                         // Fire Axis Negative Event
                         InputAxisEvent* event = new InputAxisEvent(axis_hash, 0.0, 0.0 - last_value);
                         terminus::EventHandler::queue_event(event);
                         
-                        _keyboard_device.button_axis_states[key] = 0.0;
+                        _keyboard_device.button_axis_states[scan_code] = 0.0;
                         
                         return;
                     }
@@ -653,7 +653,7 @@ namespace terminus
                 case SDL_KEYDOWN:
                 {
                     if(event.key.repeat == 0)
-                        process_keyboard_input(event.key.keysym.sym, event.type);
+                        process_keyboard_input(event.key.keysym.sym, event.key.keysym.scancode, event.type);
                 }
                     break;
                     

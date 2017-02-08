@@ -180,7 +180,7 @@ namespace terminus
         extern PlayerContextHandle get_default_player_context();
         extern InputMapHandle load_input_map(PlayerContextHandle player, String name);
         extern void set_active_input_map(PlayerContextHandle player, InputMapHandle input_map);
-        extern void process_keyboard_input(Sint32 key, Uint32 action);
+        extern void process_keyboard_input(Sint32 key, Sint32 scan_code, Uint32 action);
         extern void process_mouse_button_input(Uint8 Key, Uint32 action);
         extern void process_cursor_input(Sint32 xpos, Sint32 ypos, Sint32 xrel, Sint32 yrel);
         extern void process_mouse_wheel_input(Uint32 value);

@@ -66,6 +66,7 @@ namespace terminus
         context._render_ready_sema.wait();
         
         // begin initial scene load here 
+		load_initial_scene();
         
 		while (!context._shutdown)
 		{
@@ -92,6 +93,17 @@ namespace terminus
             TERMINUS_END_CPU_PROFILE
 		}
 	}
+
+	void Application::load_initial_scene()
+	{
+		SceneManager& scene_manager = context::get_scene_manager();
+		
+		if (context::get_engine_config()->has_value(CONFIG_INITIAL_SCENE))
+		{
+			StringBuffer64 scene_name = context::get_engine_config()->get_string(CONFIG_INITIAL_SCENE);
+			scene_manager.load(String(scene_name.c_str()));
+		}
+	}
     
     void Application::temp_render()
     {
@@ -107,28 +119,6 @@ namespace terminus
         
         ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
         ImGui::Begin("Scene Load", &testWin, 0);
-        
-        ImGui::Text("%s", scene_path.c_str());
-        
-        ImGui::SameLine();
-        
-        if(ImGui::Button("Browse..."))
-        {
-            scene_path = platform::open_file_dialog("json");
-        }
-        if(ImGui::Button("Load Scene"))
-        {
-            if(scene_path != "")
-            {
-                String trimmed_path = filesystem::get_file_name_and_extention(scene_path);
-                std::cout << "Trimmed Path : " << trimmed_path << std::endl;
-                context::get_scene_manager().load(trimmed_path);
-            }
-            else
-            {
-                std::cout << "Invalid Path" << std::endl;
-            }
-        }
         
         if(ImGui::Button("Reload Lua Script"))
         {

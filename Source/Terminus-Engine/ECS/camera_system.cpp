@@ -46,25 +46,14 @@ namespace terminus
                 Vector3 final_pos = cmr_cmp.transform._position + trn_cmp._position;
                 
                 Vector3 final_rot = cmr_cmp.transform._euler_angles;
-                // inherit pitch if enabled
-//                if(cmr_cmp.inherit_pitch)
-//                    final_rot.x = cmr_cmp.transform._euler_angles.x + trn_cmp._euler_angles.x;
-//                
-//                // inherit yaw if enabled
-//                if(cmr_cmp.inherit_yaw)
-//                    final_rot.y = cmr_cmp.transform._euler_angles.y + trn_cmp._euler_angles.y;
-//                
-//                // inherit roll if enabled
-//                if(cmr_cmp.inherit_roll)
-//                    final_rot.z = cmr_cmp.transform._euler_angles.z + trn_cmp._euler_angles.z;
-                
+
                 // TODO: move into Transform System
-                Matrix4 translation = glm::translate(final_pos);
-                Matrix4 inverse_translation = glm::translate(-final_pos);
+                Matrix4 entity_translation = glm::translate(-trn_cmp._position);
+                Matrix4 camera_translation = glm::translate(-cmr_cmp.transform._position);
                 Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
                 
-                cmr_cmp.transform._global_transform = translation;
-                cmr_cmp.view_matrix = rotation * inverse_translation;
+                cmr_cmp.transform._global_transform = glm::translate(trn_cmp._position) * glm::translate(cmr_cmp.transform._position);
+                cmr_cmp.view_matrix = camera_translation * rotation * entity_translation;
                 cmr_cmp.view_projection_matrix = cmr_cmp.projection_matrix * cmr_cmp.view_matrix;
             }
         }
@@ -92,29 +81,17 @@ namespace terminus
             Vector3 final_pos = cmr_cmp.transform._position + trn_cmp._position;
             
             Vector3 final_rot = cmr_cmp.transform._euler_angles;
-            // inherit pitch if enabled
-//            if(cmr_cmp.inherit_pitch)
-//                final_rot.x = cmr_cmp.transform._euler_angles.x + trn_cmp._euler_angles.x;
-//            
-//            // inherit yaw if enabled
-//            if(cmr_cmp.inherit_yaw)
-//                final_rot.y = cmr_cmp.transform._euler_angles.y + trn_cmp._euler_angles.y;
-//            
-//            // inherit roll if enabled
-//            if(cmr_cmp.inherit_roll)
-//                final_rot.z = cmr_cmp.transform._euler_angles.z + trn_cmp._euler_angles.z;
-            
+  
             cmr_cmp.transform._rotation = glm::quat(Vector3(glm::radians(final_rot.x),
                                                             glm::radians(final_rot.y),
                                                             glm::radians(final_rot.z)));
             
-            // TODO: move into Transform System
-            Matrix4 translation = glm::translate(final_pos);
-            Matrix4 inverse_translation = glm::translate(-final_pos);
-            Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
-            
-            cmr_cmp.transform._global_transform = translation;
-            cmr_cmp.view_matrix = rotation * inverse_translation;
+			Matrix4 entity_translation = glm::translate(-trn_cmp._position);
+			Matrix4 camera_translation = glm::translate(-cmr_cmp.transform._position);
+			Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
+
+			cmr_cmp.transform._global_transform = glm::translate(trn_cmp._position) * glm::translate(cmr_cmp.transform._position);
+			cmr_cmp.view_matrix = camera_translation * rotation * entity_translation;
             
             if(cmr_cmp.projection_type == ProjectionType::PERSPECTIVE)
             {

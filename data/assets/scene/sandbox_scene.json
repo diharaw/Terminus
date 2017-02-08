@@ -32,6 +32,48 @@
 					"component_type" : "MESH",
 					"mesh" : "nanosuit.tsm",
 					"material_overrides" : []
+				},
+				{
+					"component_type" : "CAMERA",
+					"transform" :
+					{
+						"position" : 
+						{
+							"x" : 0.0,
+							"y" : 10.0,
+							"z" : 15.0
+						},
+						"rotation" : 
+						{
+							"x" : 0.0,
+							"y" : 0.0,
+							"z" : 0.0
+						}
+					},
+					"projection_info" :
+					{
+						"projection_type" : "PERSPECTIVE",
+						"field_of_view" : 60.0,
+						"aspect_ratio_x" : 0,
+						"aspect_ratio_y" : 0,
+						"near_plane" : 0.1,
+						"far_plane" : 500.0
+					},
+					"rendering_path" : "test_rendering_path.json",
+					"is_active" : true,
+					"is_offscreen" : false,
+					"viewport_rect" :
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"w" : 1.0,
+						"h" : 1.0
+					}
+				},
+				{
+					"component_type" : "LUA_SCRIPT",
+					"script_file" : "test_lua_script.lua",
+					"class_name" : "TestLuaScript"	
 				}
 			]
 		},
@@ -98,76 +140,6 @@
 					"component_type" : "MESH",
 					"mesh" : "nanosuit.tsm",
 					"material_overrides" : []
-				}
-			]
-		},
-		{
-			"entity_name" : "player",
-			"components" :
-			[
-				{
-					"component_type" : "TRANSFORM",
-					"position" : 
-					{
-						"x" : 0.0,
-						"y" : 9.0,
-						"z" : 12.0
-					},
-					"rotation" : 
-					{
-						"x" : 0.0,
-						"y" : 0.0,
-						"z" : 0.0
-					},
-					"scale" : 
-					{
-						"x" : 1.0,
-						"y" : 1.0,
-						"z" : 1.0
-					},
-					"parent_entity" : null
-				},
-				{
-					"component_type" : "CAMERA",
-					"transform" :
-					{
-						"position" : 
-						{
-							"x" : 0.0,
-							"y" : 0.0,
-							"z" : 0.0
-						},
-						"rotation" : 
-						{
-							"x" : 0.0,
-							"y" : 0.0,
-							"z" : 0.0
-						}
-					},
-					"projection_info" :
-					{
-						"projection_type" : "PERSPECTIVE",
-						"field_of_view" : 60.0,
-						"aspect_ratio_x" : 0,
-						"aspect_ratio_y" : 0,
-						"near_plane" : 0.1,
-						"far_plane" : 500.0
-					},
-					"rendering_path" : "test_rendering_path.json",
-					"is_active" : true,
-					"is_offscreen" : false,
-					"viewport_rect" :
-					{
-						"x" : 0.0,
-						"y" : 0.0,
-						"w" : 1.0,
-						"h" : 1.0
-					}
-				},
-				{
-					"component_type" : "LUA_SCRIPT",
-					"script_file" : "test_lua_script.lua",
-					"class_name" : "TestLuaScript"	
 				}
 			]
 		}
