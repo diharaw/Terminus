@@ -200,6 +200,32 @@ namespace terminus
         std::lock_guard<std::mutex> lock(_mutex);
         Global::get_context()._shutdown = true;
     }
+
+	void Platform::set_relative_mouse(bool relative)
+	{
+		if(relative)
+			SDL_SetRelativeMouseMode(SDL_TRUE);
+		else
+		{
+			SDL_SetRelativeMouseMode(SDL_FALSE);
+
+			//input_handler::MouseDevice& mouse_device = input_handler::get_mouse_device();
+			//SDL_WarpMouseInWindow(_window, mouse_device.x_position, mouse_device.y_position);
+		}
+	}
+
+	void Platform::grab_mouse(bool grab)
+	{
+		if (grab)
+			SDL_CaptureMouse(SDL_TRUE);
+		else
+			SDL_CaptureMouse(SDL_FALSE);
+	}
+
+	void Platform::set_cursor_visibility(bool visible)
+	{
+		SDL_ShowCursor(visible);
+	}
     
     SDL_Window* Platform::get_window()
     {

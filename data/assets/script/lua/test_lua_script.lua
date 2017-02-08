@@ -4,65 +4,84 @@ TestLuaScript = ScriptComponent:new
 {
 	property = 
 	{
-		iThing = 5,
-		nNum = 1,
-		fSomething = 5.3,
-		bThing = false,
-		bAnotherThing = true,
-		listenerId,
-		actionListenerId,
+		stateListenerId,
 		axisListenerId
 	},
-	firstNew = true,
 	default_player,
-	test_input_map
+	test_input_map,
+	delta_time = 0,
+	forward_speed = 0,
+	sideways_speed = 0,
+	look_mode = false
 }
 
-function TestLuaScript:OnSceneLoadComplete(event)
-	log_info("Scene load complete notification")
-end
+function TestLuaScript:OnStateInput(event)
+	
+	if event.value == 0 then
+		self.look_mode = false
+		Platform.set_relative_mouse(false)
+	else
+		self.look_mode = true
+		Platform.set_relative_mouse(true)
+	end
 
-function TestLuaScript:OnActionInput(event)
-	log_info("Action input recieved!")
 end
 
 function TestLuaScript:OnAxisInput(event)
-	log_info("Axis input recieved!")
+
+	if self.look_mode then
+
+		camera_cmp = self._scene:get_camera_component(self._entity)
+	
+		if Utility.hash_equals("mouse_look_x", event:get_axis_hash()) then
+			Camera.offset_yaw(camera_cmp, event.delta * self.delta_time)
+		end
+
+		if Utility.hash_equals("mouse_look_y", event:get_axis_hash()) then
+			Camera.offset_pitch(camera_cmp, event.delta * self.delta_time)
+		end
+
+	end
+
+	if Utility.hash_equals("forward", event:get_axis_hash()) then
+		log_info("forward value " .. event.value)
+		self.forward_speed = event.value * 10
+	end
+
+	if Utility.hash_equals("sideways", event:get_axis_hash()) then
+		self.sideways_speed = event.value * 10
+	end
+
 end
 
 function TestLuaScript:initialize()
+
 	log_info("initialize from TestLuaScript")
-	self.property.listenerId = event_handler.register_listener(EventType.SCENE_LOAD, self.OnSceneLoadComplete, self)
-	self.property.actionListenerId = event_handler.register_listener(EventType.INPUT_ACTION, self.OnActionInput, self)
+
+	self.property.stateListenerId = event_handler.register_listener(EventType.INPUT_STATE, self.OnStateInput, self)
 	self.property.axisListenerId = event_handler.register_listener(EventType.INPUT_AXIS, self.OnAxisInput, self)
 
 	self.default_player = Input.get_default_player_context()
+
 	log_info("loading input map")
+
 	self.test_input_map = Input.load_input_map(self.default_player, "test_input_map.json")
 	Input.set_active_input_map(self.default_player, self.test_input_map)
+
 end
 
 function TestLuaScript:update(dt)
-	test_cmp = self._scene:get_transform_component(self._entity)
 
-	log_info("Lua Hot Reload!")
-	new_pos = test_cmp._position
-	new_pos.x = new_pos.x + dt * 20.0
+	self.delta_time = dt
 
-	transform.set_position(test_cmp, Vector3:new(1.0, 1.0, 1.0))
-	camera_cmp = self._scene:get_camera_component(self._entity)
+	transform_cmp = self._scene:get_transform_component(self._entity)
 
-	cam_speed = dt * 10.0
+	position_offset = Vector3:new(0.0, 0.0, 0.0)
+	position_offset.x = self.sideways_speed * dt
+	position_offset.z = self.forward_speed * dt
 
-	camera.set_position(camera_cmp, Vector3:new(0.0, 0.0, 10.0))
+	Transform.offset_position(transform_cmp, position_offset)
 
-	if self.property.bAnotherThing == true then
-		log_info("update from TestLuaScript")
-		log_info("My entity Id : " .. self._entity._id)
-		log_info("My scene name : " .. self._scene._name)
-
-		self.property.bAnotherThing = false
-	end
 end
 
 function TestLuaScript:shutdown()

@@ -96,6 +96,7 @@ namespace terminus
 		void register_logger_api();
 		void register_event_api();
         void register_input_api();
+		void register_platform_api();
         void register_misc_api();
         
 	private:

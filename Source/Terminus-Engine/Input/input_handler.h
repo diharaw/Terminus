@@ -182,7 +182,7 @@ namespace terminus
         extern void set_active_input_map(PlayerContextHandle player, InputMapHandle input_map);
         extern void process_keyboard_input(Sint32 key, Uint32 action);
         extern void process_mouse_button_input(Uint8 Key, Uint32 action);
-        extern void process_cursor_input(int xpos, int ypos);
+        extern void process_cursor_input(Sint32 xpos, Sint32 ypos, Sint32 xrel, Sint32 yrel);
         extern void process_mouse_wheel_input(Uint32 value);
         extern void process_window_events(SDL_Event& event);
         extern MouseDevice& get_mouse_device();

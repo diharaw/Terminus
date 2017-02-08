@@ -86,6 +86,22 @@ namespace terminus
 		}
 	}
 
+	// platform script api
+	void set_cursor_visibility(bool visible)
+	{
+		context::get_platform().set_cursor_visibility(visible);
+	}
+
+	void set_relative_mouse(bool relative)
+	{
+		context::get_platform().set_relative_mouse(relative);
+	}
+
+	void grab_mouse(bool grab)
+	{
+		context::get_platform().grab_mouse(grab);
+	}
+
 	float dot_product(Vector3& a, Vector3& b)
 	{
 		return glm::dot(a, b);
@@ -134,6 +150,7 @@ namespace terminus
 		register_scene_api();
 		register_scene_manager_api();
         register_input_api();
+		register_platform_api();
 		register_logger_api();
 		register_event_api();
     }
@@ -238,11 +255,14 @@ namespace terminus
 
 		_lua_state.new_usertype<InputStateEvent>("InputStateEvent",
                                                  sol::constructors<sol::types<HashResult, int>>(),
+												 "value", &InputStateEvent::m_value,
                                                  "get_state_hash", &InputStateEvent::get_state_hash
                                                  );
 
 		_lua_state.new_usertype<InputAxisEvent>("InputAxisEvent",
                                                 sol::constructors<sol::types<HashResult, double, double>>(),
+												"value", &InputAxisEvent::m_value,
+												"delta", &InputAxisEvent::m_delta,
                                                 "get_axis_hash", &InputAxisEvent::get_axis_hash
                                                 );
         
@@ -285,15 +305,16 @@ namespace terminus
                                                  "inherit_yaw", &CameraComponent::inherit_yaw,
                                                  "inherit_roll", &CameraComponent::inherit_roll);
 
-        LuaObject transform_root = _lua_state.create_table("transform");
+        LuaObject transform_root = _lua_state.create_table("Transform");
         
 		transform_root.set_function("set_position", &transform::set_position);
+		transform_root.set_function("offset_position", &transform::offset_position);
         transform_root.set_function("set_scale", &transform::set_scale);
 		transform_root.set_function("set_rotation_euler", &transform::set_rotation_euler);
         transform_root.set_function("set_rotation_quat", &transform::set_rotation_quat);
 		transform_root.set_function("look_at", &transform::look_at);
         
-        LuaObject camera_root = _lua_state.create_table("camera");
+        LuaObject camera_root = _lua_state.create_table("Camera");
         
         camera_root.set_function("set_position", &camera::set_position);
         camera_root.set_function("set_yaw", &camera::set_yaw);
@@ -322,6 +343,15 @@ namespace terminus
         input_root.set_function("load_input_map", input_handler::load_input_map);
         input_root.set_function("set_active_input_map", input_handler::set_active_input_map);
     }
+
+	void ScriptEngine::register_platform_api()
+	{
+		LuaObject platform_root = _lua_state.create_table("Platform");
+
+		platform_root.set_function("set_cursor_visibility", &set_cursor_visibility);
+		platform_root.set_function("set_relative_mouse", &set_relative_mouse);
+		platform_root.set_function("grab_mouse", &grab_mouse);
+	}
 
 	void ScriptEngine::register_scene_api()
 	{

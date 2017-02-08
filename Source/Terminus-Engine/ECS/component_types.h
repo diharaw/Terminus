@@ -125,6 +125,12 @@ namespace terminus
             cmp._position = pos;
             cmp._is_dirty = true;
         }
+
+		inline void offset_position(TransformComponent& cmp, Vector3& pos)
+		{
+			cmp._position += pos;
+			cmp._is_dirty = true;
+		}
         
         inline void set_scale(TransformComponent& cmp, Vector3& scale)
         {

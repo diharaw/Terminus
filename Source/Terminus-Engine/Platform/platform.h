@@ -67,6 +67,12 @@ namespace terminus
         void update();
         
         void request_shutdown();
+
+		void set_cursor_visibility(bool visible);
+
+		void set_relative_mouse(bool relative);
+
+		void grab_mouse(bool grab);
         
         void set_window_mode(WindowMode mode);
         

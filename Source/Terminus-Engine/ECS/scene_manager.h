@@ -41,13 +41,11 @@ namespace terminus
 
 }
 
-class SceneLoadEvent : public Event
+struct SceneLoadEvent : public Event
 {
-public:
 	static const EventType sk_Type;
 	terminus::Scene* m_scene;
 
-public:
 	SceneLoadEvent(terminus::Scene* scene) : m_scene(scene) {}
 	virtual ~SceneLoadEvent() {}
     inline virtual std::string GetName()             { return "Scene Load Event"; }
@@ -55,13 +53,11 @@ public:
 	inline virtual terminus::Scene* GetScene() { return m_scene; }
 };
 
-class ScenePreloadEvent : public Event
+struct ScenePreloadEvent : public Event
 {
-public:
     static const EventType sk_Type;
     terminus::Scene* m_scene;
     
-public:
     ScenePreloadEvent(terminus::Scene* scene) : m_scene(scene) {}
     virtual ~ScenePreloadEvent() {}
     inline virtual std::string GetName()             { return "Scene Preload Event"; }

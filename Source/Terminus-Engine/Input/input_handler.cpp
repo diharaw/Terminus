@@ -315,7 +315,7 @@ namespace terminus
                                         Sint32 value;
                                         _keyboard_code_map.get(kb_hash, value);
                                         
-                                        input_map->_axis_map._keyboard_pos.set(value, name_hash);
+                                        input_map->_axis_map._keyboard_neg.set(value, name_hash);
                                     }
                                 }
                             }
@@ -537,7 +537,7 @@ namespace terminus
                     uint64_t state_hash;
                     input_map->_state_map._mouse.get(key, state_hash);
                     
-                    if(action == SDL_KEYDOWN)
+                    if(action == SDL_MOUSEBUTTONDOWN)
                     {
                         // Fire Pressed Event
                         InputStateEvent* event = new InputStateEvent(state_hash, 1);
@@ -545,7 +545,7 @@ namespace terminus
                         
                         return;
                     }
-                    if(action == SDL_KEYUP)
+                    if(action == SDL_MOUSEBUTTONUP)
                     {
                         // Fire Released Event
                         InputStateEvent* event = new InputStateEvent(state_hash, 0);
@@ -559,13 +559,16 @@ namespace terminus
             _mouse_device.button_states[key] = action;
         }
         
-        void process_cursor_input(int xpos, int ypos)
+        void process_cursor_input(Sint32 xpos, Sint32 ypos, Sint32 xrel, Sint32 yrel)
         {
+			//SDL_bool relative = SDL_GetRelativeMouseMode();
+
             if(_player_contexts.has(_default_player_context))
             {
                 PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
                 InputMap* input_map = context->_input_maps.get_ptr(context->_active);
-                
+				SDL_bool relative = SDL_GetRelativeMouseMode();
+
                 if(input_map)
                 {
                     if(input_map->_axis_map._mouse.has(MOUSE_AXIS_X))
@@ -575,7 +578,13 @@ namespace terminus
                         
                         double last_position = _mouse_device.x_position;
                         // Fire Mouse Axis Event
-                        InputAxisEvent* event = new InputAxisEvent(axis_hash, xpos, xpos - last_position);
+						InputAxisEvent* event;
+
+						if(relative)
+							event = new InputAxisEvent(axis_hash, xpos, xrel);
+						else
+							event = new InputAxisEvent(axis_hash, xpos, xpos - last_position);
+
                         terminus::EventHandler::queue_event(event);
                     }
                     if(input_map->_axis_map._mouse.has(MOUSE_AXIS_Y))
@@ -585,14 +594,23 @@ namespace terminus
                         
                         double last_position = _mouse_device.y_position;
                         // Fire Mouse Axis Event
-                        InputAxisEvent* event = new InputAxisEvent(axis_hash, ypos, ypos - last_position);
+						InputAxisEvent* event;
+
+						if (relative)
+							event = new InputAxisEvent(axis_hash, ypos, yrel);
+						else
+							event = new InputAxisEvent(axis_hash, ypos, ypos - last_position);
+
                         terminus::EventHandler::queue_event(event);
                     }
                 }
             }
             
-            _mouse_device.x_position = xpos;
-            _mouse_device.y_position = ypos;
+			//if (!relative)
+			{
+				_mouse_device.x_position = xpos;
+				_mouse_device.y_position = ypos;
+			}
         }
         
         void process_mouse_wheel_input(Uint32 value)
@@ -623,7 +641,7 @@ namespace terminus
                     break;
                     
                 case SDL_MOUSEMOTION:
-                    process_cursor_input(event.motion.x, event.motion.y);
+                    process_cursor_input(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
                     break;
                     
                 case SDL_MOUSEBUTTONUP:

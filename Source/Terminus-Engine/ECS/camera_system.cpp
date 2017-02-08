@@ -68,7 +68,7 @@ namespace terminus
                 Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
                 
                 cmr_cmp.transform._global_transform = translation;
-                cmr_cmp.view_matrix =  inverse_translation * rotation;
+                cmr_cmp.view_matrix = rotation * inverse_translation;
                 cmr_cmp.view_projection_matrix = cmr_cmp.projection_matrix * cmr_cmp.view_matrix;
             }
         }
@@ -118,7 +118,7 @@ namespace terminus
             Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
             
             cmr_cmp.transform._global_transform = translation;
-            cmr_cmp.view_matrix =  inverse_translation * rotation;
+            cmr_cmp.view_matrix = rotation * inverse_translation;
             
             if(cmr_cmp.projection_type == ProjectionType::PERSPECTIVE)
             {

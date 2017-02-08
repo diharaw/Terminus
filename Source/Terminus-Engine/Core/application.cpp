@@ -52,6 +52,11 @@ namespace terminus
 		return true;
 	}
 
+	void Application::load_config()
+	{
+
+	}
+
 	void Application::run()
 	{
         Context& context = Global::get_context();

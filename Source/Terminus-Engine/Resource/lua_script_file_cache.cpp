@@ -31,7 +31,7 @@ namespace terminus
                 
                 filesystem::destroy_handle(handle);
                 
-                return _script_file_map.get_ref(hash);
+				return _script_file_map.get_ref(hash);
             }
             else
                 return nullptr;

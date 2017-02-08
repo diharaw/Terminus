@@ -1,8 +1,18 @@
 {
 	"app_name" : "Terminus Sandbox",
-	"window_title" : "Terminus Sandbox",
+	"app_version" : "1.0",
+	"engine_version" : "0.1.1",
+	"engine_build" : "1",
 	"initial_scene" : "sandbox_scene.json",
-	"local_data_paths" : 
+	"window" :
+	{
+		"title" : "Terminus Sandbox",
+		"width" : 1600,
+		"height" : 900,
+		"mode" : "windowed",
+		"vsync" : false
+	},
+	"local_data_dir" : 
 	{
 		"win32" : "C:/Users/My Documents/Terminus Engine/",
 		"ios" : null,

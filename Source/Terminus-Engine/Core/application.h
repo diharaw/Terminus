@@ -94,6 +94,7 @@ namespace terminus {
 		void initialize_audio();
 		void initialize_ecs();
 		void initialize_script();
+		void load_config();
 
         EVENT_METHOD_DECLARATION(OnScenePreload);
         
