@@ -171,7 +171,7 @@ namespace terminus
 
 	void ScriptEngine::register_math_api()
 	{
-		sol::table math_root = _lua_state.create_table("math");
+		sol::table math_root = _lua_state.create_table("Math");
 
 		_lua_state.new_usertype<Vector2>("Vector2",
 			sol::constructors<sol::types<>, sol::types<float, float>>(),

@@ -14,7 +14,7 @@ namespace terminus
 {
     namespace Utility
     {
-	inline void ImportMesh(String filename)
+	inline void import_mesh(String filename)
 	{
 		String extension = filesystem::get_file_extention(filename);
 		String meshPath = filesystem::get_file_path(filename);
@@ -42,10 +42,10 @@ namespace terminus
             {
                 String name = filesystem::get_file_name_and_extention(map);
                 String ext = filesystem::get_file_extention(map);
-                std::string texPath = "Assets/Texture/";
+                std::string texPath = "assets/texture/";
                 texPath += name;
                 
-                String texturePath = "Texture/";
+                String texturePath = "texture/";
                 texturePath += map;
                 
                 rapidjson::Value val(texturePath.c_str(), doc.GetAllocator());
@@ -75,10 +75,10 @@ namespace terminus
             {
                 String name = filesystem::get_file_name_and_extention(map);
                 String ext = filesystem::get_file_extention(map);
-                std::string texPath = "Assets/Texture/";
+                std::string texPath = "assets/texture/";
                 texPath += name;
                 
-                String texturePath = "Texture/";
+                String texturePath = "texture/";
                 texturePath += map;
                 
                 rapidjson::Value val(texturePath.c_str(), doc.GetAllocator());
@@ -100,7 +100,7 @@ namespace terminus
             doc.AddMember("backface_cull", true, doc.GetAllocator());
             
             
-            std::string matPath = "Assets/Material/Mat_";
+            std::string matPath = "assets/material/mat_";
             matPath += data->materials[i].m_MeshName;
             matPath += ".json";
             
@@ -113,7 +113,7 @@ namespace terminus
                 filesystem::write_end();
             }
             
-            String formattedString = "Material/Mat_";
+            String formattedString = "material/mat_";
             formattedString += data->materials[i].m_MeshName;
             formattedString += ".json\0";
             strncpy(mats[i].material, formattedString.c_str(),50);

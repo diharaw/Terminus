@@ -40,6 +40,16 @@
     #define TERMINUS_PLATFORM_LINUX
 #endif
 
+// Compiler Type
+
+#if defined(__clang__)
+	#define TERMINUS_COMPILER_CLANG
+#elif defined(__GNUC__)
+	#define TERMINUS_COMPILER_GCC
+#elif defined(_MSC_VER)
+	#define TERMINUS_COMPILER_MSVC
+#endif
+
 // Build Type
 
 #define TERMINUS_WITH_EDITOR

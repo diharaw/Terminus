@@ -49,6 +49,7 @@ namespace terminus
 		Vector3    _scale;
         Quaternion _rotation;
         Vector3    _forward;
+		Vector3	   _right;
         Vector3    _euler_angles;
 		bool       _is_dirty;
 		String     _parent_entity_name;
@@ -156,7 +157,7 @@ namespace terminus
         inline void look_at(TransformComponent& cmp, Vector3& point)
         {
             Matrix4 rotation = glm::lookAt(cmp._position, point, Vector3(0.0, 1.0, 0.0));
-            //cmp._rotation = glm::conjugate(glm::toQuat(rotation));
+            
             cmp._rotation = glm::quat(rotation);
             Vector3 euler = glm::eulerAngles(cmp._rotation);
             cmp._euler_angles = Vector3(glm::degrees(euler.x), glm::degrees(euler.y), glm::degrees(euler.z));

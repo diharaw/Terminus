@@ -12,7 +12,9 @@ TestLuaScript = ScriptComponent:new
 	delta_time = 0,
 	forward_speed = 0,
 	sideways_speed = 0,
-	look_mode = false
+	look_mode = false,
+	camera_boom_length = 15,
+	character_offset = Vector3:new(0.0, 10.0, 0.0)
 }
 
 function TestLuaScript:OnStateInput(event)
@@ -35,6 +37,7 @@ function TestLuaScript:OnAxisInput(event)
 		cam_offset = Vector3:new()
 
 		camera_cmp = self._scene:get_camera_component(self._entity)
+		transform_cmp = self._scene:get_transform_component(self._entity)
 	
 		if Utility.hash_equals("mouse_look_x", event:get_axis_hash()) then
 			is_dirty = true
@@ -48,12 +51,12 @@ function TestLuaScript:OnAxisInput(event)
 		
 		if is_dirty then
 			Camera.offset_euler(camera_cmp, cam_offset)
+			Camera.set_position(camera_cmp, transform_cmp._position + self.character_offset + camera_cmp.transform._forward * -self.camera_boom_length)
 		end
 
 	end
 
 	if Utility.hash_equals("forward", event:get_axis_hash()) then
-		log_info("forward value " .. event.value)
 		self.forward_speed = event.value * 10
 	end
 
@@ -76,7 +79,6 @@ function TestLuaScript:initialize()
 
 	self.test_input_map = Input.load_input_map(self.default_player, "test_input_map.json")
 	Input.set_active_input_map(self.default_player, self.test_input_map)
-
 end
 
 function TestLuaScript:update(dt)
@@ -84,13 +86,19 @@ function TestLuaScript:update(dt)
 	self.delta_time = dt
 
 	transform_cmp = self._scene:get_transform_component(self._entity)
+	camera_cmp = self._scene:get_camera_component(self._entity)
 
 	position_offset = Vector3:new(0.0, 0.0, 0.0)
-	position_offset.x = self.sideways_speed * dt
-	position_offset.z = self.forward_speed * dt
 
+	position_offset = camera_cmp.transform._forward * self.forward_speed * dt
 	Transform.offset_position(transform_cmp, position_offset)
 
+	position_offset = Math.cross(Vector3:new(0.0, 1.0, 0.0), camera_cmp.transform._forward) * self.sideways_speed * dt
+	Transform.offset_position(transform_cmp, position_offset)
+
+	transform_cmp._position.y = 0.0
+
+	Camera.set_position(camera_cmp, transform_cmp._position + self.character_offset + camera_cmp.transform._forward * -self.camera_boom_length)
 end
 
 function TestLuaScript:shutdown()

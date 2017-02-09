@@ -41,7 +41,8 @@ namespace terminus
                 //cmr_cmp.camera.SetPosition(trn_cmp._position);
                 //cmr_cmp.camera.Update();
                 
-                cmr_cmp.transform._forward = Vector3(0.0, 0.0, 1.0);
+				cmr_cmp.transform._forward = glm::conjugate(cmr_cmp.transform._rotation) * Vector3(0.0f, 0.0f, -1.0f);
+				cmr_cmp.transform._forward = glm::normalize(cmr_cmp.transform._forward);
                 // inherit position;
                 Vector3 final_pos = cmr_cmp.transform._position + trn_cmp._position;
                 
@@ -53,7 +54,8 @@ namespace terminus
                 Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
                 
                 cmr_cmp.transform._global_transform = glm::translate(trn_cmp._position) * glm::translate(cmr_cmp.transform._position);
-                cmr_cmp.view_matrix = camera_translation * rotation * entity_translation;
+                //cmr_cmp.view_matrix = camera_translation * rotation * entity_translation;
+				cmr_cmp.view_matrix = rotation * camera_translation;
                 cmr_cmp.view_projection_matrix = cmr_cmp.projection_matrix * cmr_cmp.view_matrix;
             }
         }
@@ -75,8 +77,7 @@ namespace terminus
             
             TransformComponent& trn_cmp = _scene->get_transform_component(entity);
             CameraComponent& cmr_cmp = _scene->get_camera_component(entity);
-            
-            cmr_cmp.transform._forward = Vector3(0.0, 0.0, 1.0);
+           
             // inherit position;
             Vector3 final_pos = cmr_cmp.transform._position + trn_cmp._position;
             
@@ -85,13 +86,17 @@ namespace terminus
             cmr_cmp.transform._rotation = glm::quat(Vector3(glm::radians(final_rot.x),
                                                             glm::radians(final_rot.y),
                                                             glm::radians(final_rot.z)));
+
+			cmr_cmp.transform._forward = glm::conjugate(cmr_cmp.transform._rotation) * Vector3(0.0f, 0.0f, -1.0f);
+			cmr_cmp.transform._forward = glm::normalize(cmr_cmp.transform._forward);
             
 			Matrix4 entity_translation = glm::translate(-trn_cmp._position);
 			Matrix4 camera_translation = glm::translate(-cmr_cmp.transform._position);
 			Matrix4 rotation = glm::toMat4(cmr_cmp.transform._rotation);
 
 			cmr_cmp.transform._global_transform = glm::translate(trn_cmp._position) * glm::translate(cmr_cmp.transform._position);
-			cmr_cmp.view_matrix = camera_translation * rotation * entity_translation;
+			//cmr_cmp.view_matrix = camera_translation * rotation * entity_translation;
+			cmr_cmp.view_matrix = rotation * camera_translation;
             
             if(cmr_cmp.projection_type == ProjectionType::PERSPECTIVE)
             {
