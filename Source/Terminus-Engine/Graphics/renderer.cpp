@@ -49,6 +49,9 @@ namespace terminus
         device.BindRasterizerState(_rasterizer_state);
         device.BindDepthStencilState(_depth_stencil_state);
         
+        if(queue.m_num_cmd_buf == 0)
+            device.ClearFramebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+        
         for (int i = 0; i < queue.m_num_cmd_buf; i++)
         {
             CommandBuffer& _cmd_buf = queue.m_cmd_buf[i];

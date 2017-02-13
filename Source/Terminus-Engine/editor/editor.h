@@ -4,6 +4,7 @@
 #include <Core/Event/event.h>
 #include <editor/ieditor_window.h>
 #include <unordered_map>
+#include <vector>
 
 namespace terminus
 {
@@ -20,6 +21,7 @@ namespace terminus
 		void create_project(const char* name, const char* path);
 		void load_project(const char* name);
 		void register_window(uint32_t id, IEditorWindow* window);
+        void open_window(uint32_t id);
 		void on_scene_load_complete(Event* event);
 	};
 }

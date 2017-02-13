@@ -58,6 +58,10 @@ namespace terminus
         Platform& platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
         
+#if defined(TERMINUS_WITH_EDITOR)
+        Editor& editor = context::get_editor();
+#endif
+        
         context._rendering_thread.run();
         context._loading_thread.run();
         
@@ -85,7 +89,8 @@ namespace terminus
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
             
-            temp_render();
+            //temp_render();
+            editor.update(platform.get_delta_time());
             
 			Global::GetPerFrameAllocator()->Clear();
             

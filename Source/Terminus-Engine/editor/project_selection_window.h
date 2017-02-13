@@ -7,8 +7,8 @@ namespace terminus
 	class ProjectSelectionWindow : public IEditorWindow
 	{
 	public:
-		ProjectSelectionWindow();
+        ProjectSelectionWindow(std::string title, float rel_width, float rel_height);
 		virtual ~ProjectSelectionWindow();
-		virtual void update(double dt) override;
+		virtual void window_contents(double dt) override;
 	};
 }

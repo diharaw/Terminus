@@ -24,6 +24,7 @@
 #include <Core/config_file.h>
 #include <script/script_engine.h>
 #include <script/script_interface_impl.h>
+#include <editor/editor.h>
 
 namespace terminus
 {    
@@ -72,6 +73,10 @@ namespace terminus
 		ScriptEngine	_script_engine;
 		ScriptInterfaceImpl _script_interface_impl;
         
+#if defined(TERMINUS_WITH_EDITOR)
+        Editor _editor;
+#endif
+        
         bool      _shutdown;
     };
     
@@ -104,5 +109,9 @@ namespace terminus
         T_FORCE_INLINE Renderer*			get_renderer_ptr()				{ return &Global::get_context()._renderer; }
         T_FORCE_INLINE RenderDevice*		get_render_device_ptr()			{ return &Global::get_context()._render_device; }
         T_FORCE_INLINE SceneManager*		get_scene_manager_ptr()			{ return &Global::get_context()._scene_manager; }
+        
+#if defined(TERMINUS_WITH_EDITOR)
+        T_FORCE_INLINE Editor&              get_editor()                    { return Global::get_context()._editor; }
+#endif
     }
 }

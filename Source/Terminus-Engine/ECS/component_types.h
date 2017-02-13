@@ -294,7 +294,7 @@ namespace terminus
 
 #if defined(TERMINUS_WITH_EDITOR)
 
-	JsonValue component_serialize(TransformComponent& cmp, JsonDocument& doc)
+	inline JsonValue component_serialize(TransformComponent& cmp, JsonDocument& doc)
 	{
 		JsonValue json_cmp(rapidjson::kObjectType);
 
@@ -332,7 +332,7 @@ namespace terminus
 		return json_cmp;
 	}
 
-	JsonValue component_serialize(CameraComponent& cmp, JsonDocument& doc)
+	inline JsonValue component_serialize(CameraComponent& cmp, JsonDocument& doc)
 	{
 		JsonValue json_cmp(rapidjson::kObjectType);
 
@@ -405,7 +405,7 @@ namespace terminus
 		return json_cmp;
 	}
 
-	JsonValue component_serialize(MeshComponent& cmp, JsonDocument& doc)
+	inline JsonValue component_serialize(MeshComponent& cmp, JsonDocument& doc)
 	{
 		JsonValue json_cmp(rapidjson::kObjectType);
 
@@ -415,7 +415,7 @@ namespace terminus
 		return json_cmp;
 	}
 	
-	JsonValue component_serialize(LuaScriptComponent& cmp, JsonDocument& doc)
+	inline JsonValue component_serialize(LuaScriptComponent& cmp, JsonDocument& doc)
 	{
 		JsonValue json_cmp(rapidjson::kObjectType);
 
@@ -428,7 +428,7 @@ namespace terminus
 		return json_cmp;
 	}
 
-	JsonValue component_serialize(CppScriptComponent& cmp, JsonDocument& doc)
+	inline JsonValue component_serialize(CppScriptComponent& cmp, JsonDocument& doc)
 	{
 		JsonValue json_cmp(rapidjson::kObjectType);
 
