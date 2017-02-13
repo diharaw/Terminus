@@ -66,7 +66,9 @@ namespace terminus
         context._render_ready_sema.wait();
         
         // begin initial scene load here 
+#if !defined(TERMINUS_WITH_EDITOR)
 		load_initial_scene();
+#endif
         
 		while (!context._shutdown)
 		{
@@ -125,47 +127,7 @@ namespace terminus
             LuaScriptUpdatedEvent temp("test_lua_script.lua");
             context::get_script_engine().on_lua_script_updated(&temp);
         }
-            
-        
-//        if(ImGui::Button("Reload Cpp Script"))
-//        {
-//            if(runtime_compile::compile("../../../Source/Terminus-Engine/script", "test_script.cpp", "../../../projects/bin/Debug/libtestscript", "-I \"../../Third Party/glm/\" -I \"../\" -I \"../../Third Party/sol2/\" -I \"../../Third Party/luajit/src/\" -I \"../../Third Party/rapidjson/\" -I \"../../Third Party/glew/include/\" -I \"../../Third Party/SDL2/include/\" -I \"../../Third Party/nfd/include/\" -I \"../../Third Party/Boxer/include/\"  -I \"../../Third Party/Delegates11/\"", "-std=c++14"))
-//            {
-//                T_LOG_INFO("Successfully compiled");
-//                
-//                dynamic_library::close(lib_handle);
-//                
-//                lib_handle = dynamic_library::open("libtestscript");
-//                if(dynamic_library::valid_handle(lib_handle))
-//                {
-//                    T_LOG_INFO("Successfully loaded library");
-//                    
-//                    void* mem = nullptr;
-//                    
-//                    if(test_script)
-//                    {
-//                        size_t size = test_script->get_size();
-//                        mem = malloc(size);
-//                        test_script->serialize(mem);
-//                        test_script->shutdown();
-//                        delete test_script;
-//                    }
-//                    
-//                    test_script = dynamic_library::create_instance_from_factory<CppScript>("CreateTestScript", lib_handle);
-//                    
-//                    if(mem)
-//                    {
-//                        test_script->deserialize(mem);
-//                        free(mem);
-//                    }
-//                }
-//                else
-//                    T_LOG_ERROR("Failed to load library");
-//            }
-//            else
-//                T_LOG_ERROR("Failed to compile");
-//        }
-        
+
         ImGui::End();
         
         // TEST

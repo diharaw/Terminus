@@ -228,5 +228,79 @@ namespace terminus
 			return (entity._version == _versions[INDEX_FROM_ID(entity._id)] - 1);
 		}
 
+#if defined(TERMINUS_WITH_EDITOR)
+
+		inline void serialize(JsonDocument& doc)
+		{
+			JsonValue scene(_name.c_str(), doc.GetAllocator());
+			doc.AddMember("scene_name", scene, doc.GetAllocator());
+			
+			JsonValue entities(rapidjson::kArrayType);
+
+			for (int i = 0; i < _entities.size(); i++)
+			{
+				Entity& current_entity = _entities._objects[i];
+
+				JsonValue entity(rapidjson::kObjectType);
+
+				JsonValue entity_name(current_entity._name.c_str(), doc.GetAllocator());
+				entity.AddMember("entity_name", entity_name, doc.GetAllocator());
+
+				// add components
+
+				JsonValue components(rapidjson::kArrayType);
+
+				{
+					// transform
+					if (has_transform_component(current_entity))
+					{
+						TransformComponent& cmp = get_transform_component(current_entity);
+						JsonValue json_cmp = component_serialize(cmp, doc);
+						components.PushBack(json_cmp, doc.GetAllocator());
+					}
+
+					// mesh
+					if (has_mesh_component(current_entity))
+					{
+						MeshComponent& cmp = get_mesh_component(current_entity);
+						JsonValue json_cmp = component_serialize(cmp, doc);
+						components.PushBack(json_cmp, doc.GetAllocator());
+					}
+
+					// lua script
+					if (has_lua_script_component(current_entity))
+					{
+						LuaScriptComponent& cmp = get_lua_script_component(current_entity);
+						JsonValue json_cmp = component_serialize(cmp, doc);
+						components.PushBack(json_cmp, doc.GetAllocator());
+					}
+
+					// cpp script
+					if (has_cpp_script_component(current_entity))
+					{
+						CppScriptComponent& cmp = get_cpp_script_component(current_entity);
+						JsonValue json_cmp = component_serialize(cmp, doc);
+						components.PushBack(json_cmp, doc.GetAllocator());
+					}
+
+					// camera
+					if (has_camera_component(current_entity))
+					{
+						CameraComponent& cmp = get_camera_component(current_entity);
+						JsonValue json_cmp = component_serialize(cmp, doc);
+						components.PushBack(json_cmp, doc.GetAllocator());
+					}
+				}
+
+				entity.AddMember("components", components, doc.GetAllocator());
+
+				entities.PushBack(entity, doc.GetAllocator());
+			}
+
+			doc.AddMember("entities", entities, doc.GetAllocator());
+		}
+
+#endif
+
 	};
 }

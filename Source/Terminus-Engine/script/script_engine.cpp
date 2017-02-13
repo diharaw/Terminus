@@ -437,6 +437,7 @@ namespace terminus
         
         lua_script->_instance_name = instance_name;
         lua_script->_class_name = class_name;
+		lua_script->_script_name = file_name;
         lua_script->_id = _last_object_id - 1;
         lua_script->_object = _lua_state[instance_name];
         
