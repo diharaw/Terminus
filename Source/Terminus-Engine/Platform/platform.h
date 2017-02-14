@@ -132,9 +132,9 @@ namespace terminus
                 return String(openPath);
             }
             else
-                return nullptr;
+                return String("");
 #else
-            return nullptr;
+            return String("");
 #endif
         }
         
@@ -148,9 +148,9 @@ namespace terminus
                 return String(savePath);
             }
             else
-                return nullptr;
+                return String("");
 #else
-            return nullptr;
+            return String("");
 #endif
         }
     }

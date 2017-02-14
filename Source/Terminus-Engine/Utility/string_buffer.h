@@ -56,6 +56,11 @@ public:
         return pos;
     }
     
+    inline size_t size()
+    {
+        return SIZE;
+    }
+    
     inline StringBuffer substring(size_t start, size_t end)
     {
         StringBuffer buf;

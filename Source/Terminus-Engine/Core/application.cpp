@@ -60,6 +60,7 @@ namespace terminus
         
 #if defined(TERMINUS_WITH_EDITOR)
         Editor& editor = context::get_editor();
+        editor.initialize();
 #endif
         
         context._rendering_thread.run();
