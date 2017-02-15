@@ -144,6 +144,8 @@ namespace terminus
 	{
         Context& context = Global::get_context();
         
+        context._editor.shutdown();
+        
         context._load_wakeup_sema.notify();
         context._load_exit_sema.wait();
         context._render_exit_sema.wait();

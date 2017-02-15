@@ -30,5 +30,7 @@ IMGUI_API void DockDebugWindow();
 IMGUI_API ImVec2 GetCurrentDockSize();
 IMGUI_API ImVec2 GetCurrentDockPos();
 IMGUI_API void SetCurrentDockInitialPosSize(ImVec2 pos, ImVec2 size);
+IMGUI_API void SaveDock();
+IMGUI_API void LoadDock();
 
 };

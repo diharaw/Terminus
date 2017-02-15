@@ -17,10 +17,18 @@ namespace terminus
         void edit_menu();
         void exit_modal();
         void dock_contents();
+        
+        void scene_window();
+        void inspector_window();
+        void log_window();
+        void asset_browser_window();
+        
         void scene_heirachy_contents();
         void inspector_contents();
+        int main_menu_bar();
         
     private:
+        bool _use_docks;
         bool _editor_viewport;
         bool _game_viewport;
         bool _scene_heirachy;

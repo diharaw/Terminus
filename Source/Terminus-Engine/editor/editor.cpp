@@ -15,15 +15,7 @@ namespace terminus
 
 	Editor::~Editor()
 	{
-        EventHandler::unregister_listener(SceneLoadEvent::sk_Type, _listener_id);
         
-        for(auto itr : _window_map)
-        {
-            if(itr.second)
-            {
-                T_SAFE_DELETE(itr.second);
-            }
-        }
 	}
 
     void Editor::initialize()
@@ -54,6 +46,19 @@ namespace terminus
                                                                          0));
         
         open_window(EditorWindowType::PROJECT_SELECTION);
+    }
+    
+    void Editor::shutdown()
+    {
+        EventHandler::unregister_listener(SceneLoadEvent::sk_Type, _listener_id);
+        
+        for(auto itr : _window_map)
+        {
+            if(itr.second)
+            {
+                T_SAFE_DELETE(itr.second);
+            }
+        }
     }
     
 	void Editor::update(double dt)
@@ -90,7 +95,6 @@ namespace terminus
 	void Editor::register_window(uint32_t id, IEditorWindow* window)
 	{
         _window_map[id] = window;
-        window->initialize();
 	}
 
     Scene* Editor::get_current_scene()

@@ -14,28 +14,38 @@ namespace terminus
                                    int flags) : IEditorWindow(title, rel_size, size, rel_pos, pos, flags)
     {
         _exit_modal = false;
-        _editor_viewport = true;
-        _profiler = true;
-        _asset_browser = true;
-        _log = true;
-        _inspector = true;
-        _scene_heirachy = true;
-        _game_viewport = true;
+        _use_docks = false;
+        
+        if(_use_docks)
+        {
+            _editor_viewport = true;
+            _profiler = true;
+            _asset_browser = true;
+            _log = true;
+            _inspector = true;
+            _scene_heirachy = true;
+            _game_viewport = true;
+        }
+        else
+        {
+            _editor_viewport = false;
+            _profiler = false;
+            _asset_browser = false;
+            _log = false;
+            _inspector = false;
+            _scene_heirachy = false;
+            _game_viewport = false;
+        }
     }
     
     MainDockWindow::~MainDockWindow()
     {
-        
+        ImGui::ShutdownDock();
     }
     
-    void MainDockWindow::window_contents(double dt)
+    int MainDockWindow::main_menu_bar()
     {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0);
-        
-        ImGui::SetNextWindowSize(ImVec2(_size.x, _size.y - 20.0f), ImGuiSetCond_FirstUseEver);
-        ImGui::SetNextWindowPos(ImVec2(0.0f, 20.0f));
-        
-        ImGui::Begin(_title.c_str(), &_is_open, _flags);
+        int menu_height = 0;
         
         if (ImGui::BeginMainMenuBar())
         {
@@ -57,19 +67,93 @@ namespace terminus
                 ImGui::EndMenu();
             }
             
+            menu_height = ImGui::GetWindowSize().y;
+            
             ImGui::EndMainMenuBar();
         }
         
+        return menu_height;
+    }
+    
+    void MainDockWindow::window_contents(double dt)
+    {
+        main_menu_bar();
+        
         if(_exit_modal)
             ImGui::OpenPopup("Exit Editor");
-            
+        
         exit_modal();
-        
-        dock_contents();
-        
-        ImGui::End();
-        
-        ImGui::PopStyleVar();
+
+        if(_use_docks)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0);
+            
+            ImGui::SetNextWindowSize(ImVec2(_size.x, _size.y - 20.0f), ImGuiSetCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(0.0f, 20.0f));
+            
+            ImGui::Begin(_title.c_str(), &_is_open, _flags);
+            
+            dock_contents();
+            
+            ImGui::End();
+            
+            ImGui::PopStyleVar();
+        }
+        else
+        {
+            scene_window();
+            inspector_window();
+            log_window();
+            asset_browser_window();
+        }
+    }
+    
+    void MainDockWindow::scene_window()
+    {
+        if(_scene_heirachy)
+        {
+            if(ImGui::Begin("Scene", &_scene_heirachy, 0))
+            {
+                ImGui::Text("Hello from win!");
+            }
+            ImGui::End();
+        }
+    }
+    
+    void MainDockWindow::inspector_window()
+    {
+        if(_inspector)
+        {
+            if(ImGui::Begin("Inspector", &_inspector, 0))
+            {
+                ImGui::Text("Hello from win!");
+            }
+            ImGui::End();
+        }
+    }
+    
+    void MainDockWindow::log_window()
+    {
+        if(_log)
+        {
+            if(ImGui::Begin("Log", &_log, 0))
+            {
+                imgui_console::draw();
+            }
+            ImGui::End();
+        }
+    }
+    
+    void MainDockWindow::asset_browser_window()
+    {
+        if(_asset_browser)
+        {
+            if(ImGui::Begin("Asset Browser", &_asset_browser, 0))
+            {
+                ImGui::Text("Hello from win!");
+            }
+            ImGui::End();
+        }
     }
     
     void MainDockWindow::scene_heirachy_contents()

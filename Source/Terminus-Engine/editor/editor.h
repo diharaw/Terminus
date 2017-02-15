@@ -31,6 +31,7 @@ namespace terminus
 		Editor();
 		~Editor();
         void initialize();
+        void shutdown();
 		void update(double dt);
 		void create_project(const char* name, const char* path);
 		void load_project(const char* name);
