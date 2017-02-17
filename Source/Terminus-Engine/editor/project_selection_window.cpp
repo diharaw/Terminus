@@ -53,7 +53,7 @@ namespace terminus
     
     void ProjectSelectionWindow::on_scene_load_complete(Event* event)
     {
-        context::get_editor().open_window(EditorWindowType::MAIN_DOCK);
         close();
+        context::get_editor().open_window(EditorWindowType::MAIN_DOCK);
     }
 }

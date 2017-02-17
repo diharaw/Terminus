@@ -25,6 +25,7 @@
 #include <script/script_engine.h>
 #include <script/script_interface_impl.h>
 #include <editor/editor.h>
+#include <physics/physics_engine.h>
 
 namespace terminus
 {    
@@ -44,6 +45,9 @@ namespace terminus
         
         // Gameplay Systems
         SceneManager _scene_manager;
+        
+        // Physics Systems
+        PhysicsEngineState _physics_state;
         
         // Resource Caches
         SceneCache    _scene_cache;
@@ -93,6 +97,7 @@ namespace terminus
         T_FORCE_INLINE RenderDevice&		get_render_device()				{ return Global::get_context()._render_device; }
         T_FORCE_INLINE RenderTargetPool&	get_render_target_pool()		{ return Global::get_context()._render_target_pool; }
         T_FORCE_INLINE FramebufferPool&		get_framebuffer_pool()			{ return Global::get_context()._framebuffer_pool; }
+        T_FORCE_INLINE PhysicsEngineState&	get_physics_state()             { return Global::get_context()._physics_state; }
         T_FORCE_INLINE SceneManager&		get_scene_manager()				{ return Global::get_context()._scene_manager; }
         T_FORCE_INLINE SceneCache&			get_scene_cache()				{ return Global::get_context()._scene_cache; }
         T_FORCE_INLINE RenderPassCache&		get_render_pass_cache()			{ return Global::get_context()._render_pass_cache; }

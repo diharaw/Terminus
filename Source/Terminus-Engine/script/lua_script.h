@@ -16,7 +16,7 @@ namespace terminus
         LuaObject	_object;
         String      _instance_name;
         String      _class_name;
-		String      _script_name;
+		StringBuffer32 _script_name;
         
         // development only
         uint32_t    _id;

@@ -37,5 +37,6 @@ namespace terminus
         bool _log;
         bool _inspector;
         bool _exit_modal;
+        int  _selected_entity;
     };
 }

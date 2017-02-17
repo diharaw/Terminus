@@ -136,8 +136,8 @@ namespace terminus
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            input_handler::process_window_events(event);
             terminus::ImGuiBackend::process_window_events(&event);
+            input_handler::process_window_events(event);
             
             switch (event.type)
             {

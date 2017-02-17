@@ -75,6 +75,12 @@ namespace terminus
             
             // wait for swap done
             context._swap_done_sema.wait();
+            
+#if defined(TERMINUS_WITH_EDITOR)
+            ImGuiBackend::render();
+            context._render_device.SwapBuffers();
+#endif
+            
             TERMINUS_END_CPU_PROFILE
         }
         

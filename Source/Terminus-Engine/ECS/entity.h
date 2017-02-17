@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <climits>
-#include <string>
+#include <types.h>
 
 #include <container/packed_array.h>
 
@@ -16,8 +16,8 @@ namespace terminus
 	struct Entity
 	{
 		ID _id;
-		EntityKey _key;
-		int       _version;
-		std::string _name;
+		EntityKey      _key;
+		int            _version;
+		StringBuffer32 _name;
 	};
 }

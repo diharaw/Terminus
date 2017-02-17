@@ -182,12 +182,6 @@ namespace terminus
                 }
             } while(!is_done);
         }
-        
-#if defined(TERMINUS_WITH_EDITOR)
-        ImGuiBackend::render();
-        ImGuiBackend::new_frame();
-#endif
-        device.SwapBuffers();
     }
     
     void Renderer::swap()

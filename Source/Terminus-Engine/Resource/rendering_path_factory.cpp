@@ -17,7 +17,7 @@ namespace terminus
             doc.Parse(load_data->buffer);
             
             if (doc.HasMember("name"))
-                rp->_name = String(doc["name"].GetString());
+                rp->_name = doc["name"].GetString();
             
             rapidjson::Value& render_passes = doc["render_passes"];
             

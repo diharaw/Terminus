@@ -37,7 +37,7 @@ namespace terminus
 	struct MeshComponent
 	{
 #if defined(TERMINUS_WITH_EDITOR)
-		String mesh_name;
+		StringBuffer32 mesh_name;
 #endif
 		Mesh* mesh;
 		bool cull_submeshes;

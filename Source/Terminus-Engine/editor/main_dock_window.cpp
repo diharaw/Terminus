@@ -13,6 +13,7 @@ namespace terminus
                                    Vector2 pos,
                                    int flags) : IEditorWindow(title, rel_size, size, rel_pos, pos, flags)
     {
+        _selected_entity = -1;
         _exit_modal = false;
         _use_docks = false;
         
@@ -77,8 +78,9 @@ namespace terminus
     
     void MainDockWindow::window_contents(double dt)
     {
-        main_menu_bar();
         
+        main_menu_bar();
+        ImGui::ShowTestWindow();
         if(_exit_modal)
             ImGui::OpenPopup("Exit Editor");
         
@@ -114,7 +116,24 @@ namespace terminus
         {
             if(ImGui::Begin("Scene", &_scene_heirachy, 0))
             {
-                ImGui::Text("Hello from win!");
+                Scene* active_scene = context::get_editor().get_current_scene();
+                
+                if(active_scene)
+                {
+                    uint32_t num_entities = active_scene->get_num_entities();
+                    
+                    for(int i = 0; i < num_entities; i++)
+                    {
+                        ImGuiTreeNodeFlags flags = 0;
+                        
+                        if(i == _selected_entity)
+                            flags = ImGuiTreeNodeFlags_Selected;
+                        
+                        ImGui::TreeNodeEx((void*)(intptr_t)i, flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", active_scene->_entities._objects[i]._name.c_str());
+                        if (ImGui::IsItemClicked())
+                            _selected_entity = i;
+                    }
+                }
             }
             ImGui::End();
         }
@@ -124,9 +143,162 @@ namespace terminus
     {
         if(_inspector)
         {
+            bool transform_cmp = false;
+            bool mesh_cmp = false;
+            bool camera_cmp = false;
+            bool lua_script_cmp = false;
+            bool cpp_script_cmp = false;
+            
             if(ImGui::Begin("Inspector", &_inspector, 0))
             {
-                ImGui::Text("Hello from win!");
+                if(_selected_entity != -1)
+                {
+                    Scene* active_scene = context::get_editor().get_current_scene();
+                    
+                    Entity& entity = active_scene->_entities._objects[_selected_entity];
+                    ImGui::InputText("Entity Name", (char*)entity._name.c_str(), entity._name.size());
+                    
+                    ImGui::Separator();
+                    
+                    // transform
+                    
+                    if(active_scene->has_transform_component(entity))
+                    {
+                        transform_cmp = true;
+                        if (ImGui::CollapsingHeader("Transform"))
+                        {
+                            TransformComponent& cmp = active_scene->get_transform_component(entity);
+                            
+                            ImGui::InputFloat3("Position", &cmp._position.x);
+                            ImGui::InputFloat3("Rotation", &cmp._rotation.x);
+                            ImGui::InputFloat3("Scale", &cmp._scale.x);
+                            
+                            cmp._is_dirty = true;
+                        }
+                    }
+                    
+                    // mesh
+                    
+                    if(active_scene->has_mesh_component(entity))
+                    {
+                        mesh_cmp = true;
+                        if (ImGui::CollapsingHeader("Mesh"))
+                        {
+                            MeshComponent& cmp = active_scene->get_mesh_component(entity);
+                            
+                            ImGui::InputText("Mesh File", (char*)cmp.mesh_name.c_str(), cmp.mesh_name.size());
+                            ImGui::SameLine();
+                            
+                            if(ImGui::Button("Load"))
+                            {
+                                
+                            }
+                        }
+                    }
+                    
+                    // camera
+                    
+                    if(active_scene->has_camera_component(entity))
+                    {
+                        camera_cmp = true;
+                        if (ImGui::CollapsingHeader("Camera"))
+                        {
+                            CameraComponent& cmp = active_scene->get_camera_component(entity);
+                            
+                            ImGui::InputFloat3("Position", &cmp.transform._position.x);
+                            ImGui::InputFloat3("Rotation", &cmp.transform._rotation.x);
+                            ImGui::InputFloat3("Scale", &cmp.transform._scale.x);
+                            ImGui::Spacing();
+                            ImGui::InputText("Rendering Path", (char*)cmp.rendering_path->_name.c_str(), cmp.rendering_path->_name.size());
+                            ImGui::SameLine();
+                            
+                            if(ImGui::Button("Load"))
+                            {
+                                
+                            }
+                        }
+                    }
+                    
+                    // lua script
+                    
+                    if(active_scene->has_lua_script_component(entity))
+                    {
+                        lua_script_cmp = true;
+                        if (ImGui::CollapsingHeader("Lua Script"))
+                        {
+                            LuaScriptComponent& cmp = active_scene->get_lua_script_component(entity);
+                            
+                            ImGui::InputText("Script", (char*)cmp._script->_script_name.c_str(), cmp._script->_script_name.size());
+                        }
+                    }
+                    
+                    // cpp script
+                    
+                    if(active_scene->has_cpp_script_component(entity))
+                    {
+                        cpp_script_cmp = true;
+                        if (ImGui::CollapsingHeader("C++ Script"))
+                        {
+                            CppScriptComponent& cmp = active_scene->get_cpp_script_component(entity);
+                            ImGui::SameLine();
+                            
+                            if(ImGui::Button("Load"))
+                            {
+                                
+                            }
+                        }
+                    }
+                    
+                    // add component
+                    
+                    if(ImGui::Button("New Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 30.0f)))
+                    {
+                       ImGui::OpenPopup("cmp_list");
+                    }
+                    
+                    if (ImGui::BeginPopup("cmp_list"))
+                    {
+                        ImGui::Separator();
+                    
+                        if(!transform_cmp)
+                        {
+                            if (ImGui::Selectable("Transform"))
+                            {
+                                
+                            }
+                        }
+                        if(!mesh_cmp)
+                        {
+                            if (ImGui::Selectable("Mesh"))
+                            {
+                                
+                            }
+                        }
+                        if(!camera_cmp)
+                        {
+                            if (ImGui::Selectable("Camera"))
+                            {
+                                
+                            }
+                        }
+                        if(!lua_script_cmp)
+                        {
+                            if (ImGui::Selectable("Lua Script"))
+                            {
+                                
+                            }
+                        }
+                        if(!cpp_script_cmp)
+                        {
+                            if (ImGui::Selectable("C++ Script"))
+                            {
+                                
+                            }
+                        }
+                        
+                        ImGui::EndPopup();
+                    }
+                }
             }
             ImGui::End();
         }

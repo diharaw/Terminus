@@ -91,6 +91,7 @@ namespace terminus
             renderer.swap();
             
             //temp_render();
+            ImGuiBackend::new_frame();
             editor.update(platform.get_delta_time());
             
 			Global::GetPerFrameAllocator()->Clear();
