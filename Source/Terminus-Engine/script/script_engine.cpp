@@ -293,11 +293,6 @@ namespace terminus
                                                     "_is_dirty", &TransformComponent::_is_dirty,
                                                     "_parent_entity_name", &TransformComponent::_parent_entity_name);
 
-//		_lua_state.new_usertype<CameraComponent>("CameraComponent",
-//                                                 sol::constructors<sol::types<>>(),
-//                                                 "offset", &CameraComponent::offset,
-//                                                 "screen_rect", &CameraComponent::screen_rect);
-
         _lua_state.new_usertype<CameraComponent>("CameraComponent",
                                                  sol::constructors<sol::types<>>(),
                                                  "transform", &CameraComponent::transform,
@@ -366,7 +361,7 @@ namespace terminus
                                        sol::constructors<sol::types<>>(),
                                        "get_transform_component", &Scene::get_transform_component,
                                        "get_mesh_component", &Scene::get_mesh_component,
-                                       "get_collider_component", &Scene::get_collider_component,
+                                       "get_box_collider_component", &Scene::get_box_collider_component,
                                        "get_camera_component", &Scene::get_camera_component,
                                        "get_lua_script_component", &Scene::get_lua_script_component,
                                        "has_transform_component", &Scene::has_transform_component,

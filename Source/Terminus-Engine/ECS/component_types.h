@@ -7,6 +7,7 @@
 #include <ECS/entity.h>
 #include <types.h>
 #include <script/lua_script.h>
+#include <physics/physics_types.h>
 
 #include <string>
 
@@ -14,27 +15,40 @@ namespace terminus
 {
 	// forward declaration
 	class Scene;
+    
+    struct RigidBodyComponent
+    {
+        ID     _rigid_body;
+        bool   _is_kinematic;
+        Entity _entity;
+    };
 
-	struct ColliderComponent
+	struct SphereColliderComponent
 	{
-
+        SphereShape _collision_shape;
 	};
+    
+    struct BoxColliderComponent
+    {
+        BoxShape _collision_shape;
+    };
+    
+    struct HeightFieldColliderComponent
+    {
+        HeightFieldShape _collision_shape;
+    };
+    
+    struct TriangleMeshColliderComponent
+    {
+        TriangleMeshShape _collision_shape;
+    };
+    
+    struct ConvexHullColliderComponent
+    {
+        ConvexHullShape _collision_shape;
+    };
 
-	//	struct CameraComponent
-	//	{
-	//		Camera camera;
-	//		Vector3 offset;
-	//		bool inherit_rotation_x;
-	//		bool inherit_rotation_y;
-	//		bool inherit_rotation_z;
-	//		bool is_offscreen;
-	//		bool is_active;
-	//		Vector4 screen_rect;
-	//        Texture* render_target;
-	//        RenderingPath* rendering_path;
-	//	};
-
-	struct MeshComponent
+    struct MeshComponent
 	{
 #if defined(TERMINUS_WITH_EDITOR)
 		StringBuffer32 mesh_name;

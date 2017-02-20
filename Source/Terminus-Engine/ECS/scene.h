@@ -25,12 +25,12 @@ namespace terminus
 
 		// component pools
 
-		ComponentPool<TransformComponent> _transform_pool;
-		ComponentPool<MeshComponent>	  _mesh_pool;
-		ComponentPool<ColliderComponent>  _collider_pool;
-		ComponentPool<CameraComponent>	  _camera_pool;
-		ComponentPool<LuaScriptComponent> _lua_script_pool;
-        ComponentPool<CppScriptComponent> _cpp_script_pool;
+		ComponentPool<TransformComponent>   _transform_pool;
+		ComponentPool<MeshComponent>	    _mesh_pool;
+		ComponentPool<BoxColliderComponent> _box_collider_pool;
+		ComponentPool<CameraComponent>	    _camera_pool;
+		ComponentPool<LuaScriptComponent>   _lua_script_pool;
+        ComponentPool<CppScriptComponent>   _cpp_script_pool;
 
 		// systems
 
@@ -104,9 +104,9 @@ namespace terminus
 			return _mesh_pool.create(entity);
 		}
 
-		inline ColliderComponent& attach_collider_component(Entity& entity)
+		inline BoxColliderComponent& attach_box_collider_component(Entity& entity)
 		{
-			return _collider_pool.create(entity);
+			return _box_collider_pool.create(entity);
 		}
 
 		inline CameraComponent& attach_camera_component(Entity& entity)
@@ -136,9 +136,9 @@ namespace terminus
 			return _mesh_pool.lookup(entity);
 		}
 
-		inline ColliderComponent& get_collider_component(Entity& entity)
+		inline BoxColliderComponent& get_box_collider_component(Entity& entity)
 		{
-			return _collider_pool.lookup(entity);
+			return _box_collider_pool.lookup(entity);
 		}
 
 		inline CameraComponent& get_camera_component(Entity& entity)
@@ -170,7 +170,7 @@ namespace terminus
 
 		inline bool has_collider_component(Entity& entity)
 		{
-			return _collider_pool.has(entity);
+			return _box_collider_pool.has(entity);
 		}
 
 		inline bool has_camera_component(Entity& entity)
@@ -214,7 +214,7 @@ namespace terminus
 				// remove all components belonging to entity
 				_transform_pool.remove(entity);
 				_mesh_pool.remove(entity);
-				_collider_pool.remove(entity);
+				_box_collider_pool.remove(entity);
                 _cpp_script_pool.remove(entity);
                 _lua_script_pool.remove(entity);
 

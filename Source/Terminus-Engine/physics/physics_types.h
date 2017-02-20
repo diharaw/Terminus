@@ -8,59 +8,115 @@
 
 namespace terminus
 {
+    enum class CollisionShapeType
+    {
+        SPHERE = 0,
+        BOX,
+        CYLINDER,
+        CAPSULE,
+        TRIANGLE_MESH,
+        CONVEX_HULL,
+        STATIC_MESH,
+        HEIGHT_FIELD,
+        STATIC_PLANE,
+        NONE
+    };
+    
     struct RigidBody
     {
+        btRigidBody*   _rigid_body;
+        btMotionState* _motion_state;
+    };
+    
+    struct CollisionShape
+    {
+        CollisionShapeType _type;
+        btCollisionShape* _shape;
         
+        CollisionShape()
+        {
+            _type = CollisionShapeType::NONE;
+        }
     };
     
-    struct SphereShape
+    struct SphereShape : public CollisionShape
     {
-        btSphereShape* _shape;
         float          _radius;
+        
+        SphereShape()
+        {
+            _type = CollisionShapeType::SPHERE;
+        }
     };
     
-    struct BoxShape
+    struct BoxShape : public CollisionShape
     {
-        btBoxShape* _shape;
         Vector3     _half_extents;
+        
+        BoxShape()
+        {
+            _type = CollisionShapeType::BOX;
+        }
     };
     
-    struct CylinderShape
+    struct CylinderShape : public CollisionShape
     {
-        btCylinderShape* _shape;
         Vector3          _half_extents;
+        
+        CylinderShape()
+        {
+            _type = CollisionShapeType::CYLINDER;
+        }
     };
     
-    struct CapsuleShape
+    struct CapsuleShape : public CollisionShape
     {
-        btCapsuleShape* _shape;
         float           _radius;
         float           _height;
+        
+        CapsuleShape()
+        {
+            _type = CollisionShapeType::CAPSULE;
+        }
     };
     
     // TODO(dihara) : Bvh Triangle Mesh Shape
-    struct TriangleMeshShape
+    struct TriangleMeshShape : public CollisionShape
     {
-        btBvhTriangleMeshShape* _shape;
+        TriangleMeshShape()
+        {
+            _type = CollisionShapeType::TRIANGLE_MESH;
+        }
     };
     
     // TODO(dihara) : Convex Hull Shape
-    struct ConvexHullShape
+    struct ConvexHullShape : public CollisionShape
     {
-        btConvexHullShape* _shape;
+        ConvexHullShape()
+        {
+            _type = CollisionShapeType::CONVEX_HULL;
+        }
     };
     
-    struct StaticPlaneShape
+    struct StaticPlaneShape : public CollisionShape
     {
-        btStaticPlaneShape* _shape;
         Vector3             _normal;
         float               _constant;
+        
+        StaticPlaneShape()
+        {
+            _type = CollisionShapeType::STATIC_PLANE;
+        }
     };
     
-    struct HeightFieldShape
+    struct HeightFieldShape : public CollisionShape
     {
-        btHeightfieldTerrainShape* _shape;
         int                        _height;
         int                        _width;
+        
+        HeightFieldShape()
+        {
+            _type = CollisionShapeType::HEIGHT_FIELD;
+        }
     };
 }

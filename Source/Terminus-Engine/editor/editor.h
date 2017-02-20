@@ -3,6 +3,7 @@
 #include <editor/project.h>
 #include <Core/Event/event.h>
 #include <editor/ieditor_window.h>
+#include <editor/editor_scene.h>
 #include <unordered_map>
 #include <vector>
 
