@@ -3,6 +3,7 @@
 #include <editor/project_wizard_window.h>
 #include <editor/main_dock_window.h>
 #include <ECS/scene_manager.h>
+#include <Input/input_handler.h>
 #include <string>
 
 namespace terminus
@@ -11,6 +12,7 @@ namespace terminus
 	{
 		_current_project = nullptr;
         _current_scene = nullptr;
+        _state = EditorState::EDIT;
 	}
 
 	Editor::~Editor()
@@ -46,6 +48,8 @@ namespace terminus
                                                                          0));
         
         open_window(EditorWindowType::PROJECT_SELECTION);
+        
+        //input_handler::load_input_map(input_handler::get_default_player_context(), "editor_input_map");
     }
     
     void Editor::shutdown()
@@ -63,6 +67,8 @@ namespace terminus
     
 	void Editor::update(double dt)
 	{
+        update_camera(dt);
+        
         for(auto itr : _window_map)
         {
             if(itr.second->is_open())
@@ -107,4 +113,41 @@ namespace terminus
         SceneLoadEvent* event_data = (SceneLoadEvent*)event;
         _current_scene = event_data->GetScene();
 	}
+    
+    void Editor::set_state(EditorState state)
+    {
+        _state = state;
+    }
+    
+    void Editor::update_camera(double dt)
+    {
+        if(_state == EditorState::EDIT)
+        {
+            
+        }
+    }
+    
+    void Editor::on_input_action(Event* event)
+    {
+        if(_state == EditorState::EDIT)
+        {
+            
+        }
+    }
+    
+    void Editor::on_input_state(Event* event)
+    {
+        if(_state == EditorState::EDIT)
+        {
+            
+        }
+    }
+    
+    void Editor::on_input_axis(Event* event)
+    {
+        if(_state == EditorState::EDIT)
+        {
+            
+        }
+    }
 }

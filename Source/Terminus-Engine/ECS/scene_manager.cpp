@@ -8,6 +8,11 @@ namespace terminus
         char scene_name[100];
     };
     
+    struct EditorSceneLoadData
+    {
+        EditorScene* scene;
+    };
+    
     struct SceneUnloadData
     {
         Scene* _scene;
@@ -17,6 +22,17 @@ namespace terminus
     {
         SceneLoadData* load_data = (SceneLoadData*)data;
         Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
+        
+        // Fire Scene Load Complete Event
+        
+        SceneLoadEvent* event = new SceneLoadEvent(loaded);
+        EventHandler::queue_event(event);
+    }
+    
+    void editor_scene_load_task(void* data)
+    {
+        EditorSceneLoadData* load_data = (EditorSceneLoadData*)data;
+        Scene* loaded = scene_factory::create(load_data->scene);
         
         // Fire Scene Load Complete Event
         
@@ -100,6 +116,20 @@ namespace terminus
 
         loading_thread.enqueue_load_task(task);
 	}
+    
+    void SceneManager::load_from_editor_scene(EditorScene* editor_scene)
+    {
+        Task task;
+        
+        LoadingThread& loading_thread = Global::get_context()._loading_thread;
+        
+        EditorSceneLoadData* data = task_data<EditorSceneLoadData>(task);
+        
+        data->scene = editor_scene;
+        task._function.Bind<&editor_scene_load_task>();
+        
+        loading_thread.enqueue_load_task(task);
+    }
 
 	void SceneManager::set_active_scene(String scene)
 	{
@@ -110,7 +140,9 @@ namespace terminus
 	{
         for(int i = 0; i < _active_scenes.size(); i++)
         {
-            if(_active_scenes[i]->_name == scene)
+            String scene_str = String(_active_scenes[i]->_name.c_str());
+            
+            if(scene_str == scene)
             {
                 // is an active scene
                 // TODO: more graceful scene unload

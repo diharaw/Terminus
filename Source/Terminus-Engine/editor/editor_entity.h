@@ -2,6 +2,7 @@
 
 #include <editor/component_desc.h>
 #include <container/packed_array.h>
+#include <physics/physics_types.h>
 #include <types.h>
 
 #define MAX_COMPONENT_DESC 20
@@ -13,9 +14,12 @@ namespace terminus
         ComponentDesc* _components[MAX_COMPONENT_DESC];
         StringBuffer32 _name;
         ID             _entity_id;
+        ID             _rigid_body;
         
-        EditorEntity(StringBuffer32 name)
+        EditorEntity()
         {
+            _rigid_body = USHRT_MAX;
+            
             for(int i = 0 ; i < MAX_COMPONENT_DESC; i++)
                 _components[i] = nullptr;
         }

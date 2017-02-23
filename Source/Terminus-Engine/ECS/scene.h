@@ -39,7 +39,7 @@ namespace terminus
 		RenderSystem    _render_system;
         ScriptSystem    _script_system;
         
-        String          _name;
+        StringBuffer32  _name;
 
 	private:
 		std::array<int, MAX_ENTITIES> _versions;

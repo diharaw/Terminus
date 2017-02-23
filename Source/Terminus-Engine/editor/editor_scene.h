@@ -10,7 +10,8 @@ namespace terminus
     
     struct EditorScene
     {
-        //PackedArray<EditorEntity, MAX_EDITOR_ENTITIES> _entities;
+        PackedArray<EditorEntity, MAX_EDITOR_ENTITIES> _entities;
+        StringBuffer32 _name;
         
         EditorScene();
         
@@ -18,7 +19,7 @@ namespace terminus
         
         void load_from_file(StringBuffer32 scene);
         
-        void create_entity(StringBuffer32 name);
+        EditorEntity& create_entity(StringBuffer32 name);
         
         void remove_entity(EditorEntity& entity);
         

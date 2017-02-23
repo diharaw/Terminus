@@ -29,7 +29,7 @@ namespace terminus
     
     struct MeshDesc : public ComponentDesc
     {
-        MeshComponent cmp;
+        StringBuffer32 _mesh_name;
     };
     
     struct CameraDesc : public ComponentDesc
@@ -39,12 +39,14 @@ namespace terminus
     
     struct LuaScriptDesc : public ComponentDesc
     {
-        LuaScriptComponent cmp;
+        StringBuffer32 _script_name;
+        StringBuffer32 _class_name;
     };
     
     struct CppScriptDesc : public ComponentDesc
     {
-        CppScriptComponent cmp;
+        StringBuffer32 _script_name;
+        StringBuffer32 _class_name;
     };
     
     struct SphereColliderDesc : public ComponentDesc

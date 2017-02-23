@@ -9,6 +9,8 @@
 #include <Resource/scene_cache.h>
 #include <Core/Event/event_handler.h>
 
+#include <editor/editor_scene.h>
+
 #include <vector>
 
 namespace terminus
@@ -29,6 +31,7 @@ namespace terminus
         void initialize();
         void update(double dt);
 		void load(String scene);
+        void load_from_editor_scene(EditorScene* editor_scene);
 		void preload(String scene);
 		void set_active_scene(String scene);
 		void unload(String scene);
