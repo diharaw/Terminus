@@ -52,22 +52,36 @@ namespace terminus
             T_SAFE_DELETE(state._collision_config);
         }
         
+        void add_shape_entry(CollisionShape* shape)
+        {
+            PhysicsEngineState& state = context::get_physics_state();
+            
+            ID shape_id = state._collision_shapes.add();
+            shape->_shape_id = shape_id;
+            
+            btCollisionShape*& shape_ref = state._collision_shapes.lookup(shape_id);
+            shape_ref = shape->_shape;
+        }
+        
         void create_sphere_shape(SphereShape& shape, float radius)
         {
             shape._radius = radius;
             shape._shape = new btSphereShape(radius);
+            add_shape_entry(&shape);
         }
         
         void create_box_shape(BoxShape& shape, Vector3 half_extents)
         {
             shape._half_extents = half_extents;
             shape._shape = new btBoxShape(convert(half_extents));
+            add_shape_entry(&shape);
         }
         
         void create_cylinder_shape(CylinderShape& shape, Vector3 half_extents)
         {
             shape._half_extents = half_extents;
             shape._shape = new btCylinderShape(convert(half_extents));
+            add_shape_entry(&shape);
         }
         
         void create_capsule_shape(CapsuleShape& shape, float radius, float height)
@@ -75,6 +89,7 @@ namespace terminus
             shape._radius = radius;
             shape._height = height;
             shape._shape = new btCapsuleShape(radius, height);
+            add_shape_entry(&shape);
         }
         
         void create_staic_plane_shape(StaticPlaneShape& shape, Vector3 normal, float constant)
@@ -82,6 +97,7 @@ namespace terminus
             shape._normal = normal;
             shape._constant = constant;
             shape._shape = new btStaticPlaneShape(convert(normal), constant);
+            add_shape_entry(&shape);
         }
         
         void create_triangle_mesh_shape(TriangleMeshShape& shape)

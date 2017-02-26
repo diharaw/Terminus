@@ -4,6 +4,7 @@
 #include <Resource/camera_component_factory.h>
 #include <Resource/lua_script_component_factory.h>
 #include <Resource/cpp_script_component_factory.h>
+#include <Resource/collider_component_factory.h>
 #include <Core/context.h>
 
 namespace terminus
@@ -55,6 +56,22 @@ namespace terminus
                         else if(component_type == "CPP_SCRIPT")
                         {
                             cpp_script_component_factory::create(components[j], new_entity, scene);
+                        }
+                        else if(component_type == "SPHERE_COLLIDER")
+                        {
+                            sphere_collider_component_factory::create(components[j], new_entity, scene);
+                        }
+                        else if(component_type == "BOX_COLLIDER")
+                        {
+                            box_collider_component_factory::create(components[j], new_entity, scene);
+                        }
+                        else if(component_type == "CYLINDER_COLLIDER")
+                        {
+                            cylinder_collider_component_factory::create(components[j], new_entity, scene);
+                        }
+                        else if(component_type == "CAPSULE_COLLIDER")
+                        {
+                            capsule_collider_component_factory::create(components[j], new_entity, scene);
                         }
                     }
                 }

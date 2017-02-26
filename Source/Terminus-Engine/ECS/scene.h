@@ -25,12 +25,15 @@ namespace terminus
 
 		// component pools
 
-		ComponentPool<TransformComponent>   _transform_pool;
-		ComponentPool<MeshComponent>	    _mesh_pool;
-		ComponentPool<BoxColliderComponent> _box_collider_pool;
-		ComponentPool<CameraComponent>	    _camera_pool;
-		ComponentPool<LuaScriptComponent>   _lua_script_pool;
-        ComponentPool<CppScriptComponent>   _cpp_script_pool;
+		ComponentPool<TransformComponent>        _transform_pool;
+		ComponentPool<MeshComponent>             _mesh_pool;
+		ComponentPool<BoxColliderComponent>      _box_collider_pool;
+        ComponentPool<SphereColliderComponent>   _sphere_collider_pool;
+        ComponentPool<CylinderColliderComponent> _cylinder_collider_pool;
+        ComponentPool<CapsuleColliderComponent>  _capsule_collider_pool;
+		ComponentPool<CameraComponent>           _camera_pool;
+		ComponentPool<LuaScriptComponent>        _lua_script_pool;
+        ComponentPool<CppScriptComponent>        _cpp_script_pool;
 
 		// systems
 
@@ -108,6 +111,21 @@ namespace terminus
 		{
 			return _box_collider_pool.create(entity);
 		}
+        
+        inline SphereColliderComponent& attach_shpere_collider_component(Entity& entity)
+        {
+            return _sphere_collider_pool.create(entity);
+        }
+        
+        inline CylinderColliderComponent& attach_cylinder_collider_component(Entity& entity)
+        {
+            return _cylinder_collider_pool.create(entity);
+        }
+        
+        inline CapsuleColliderComponent& attach_capsule_collider_component(Entity& entity)
+        {
+            return _capsule_collider_pool.create(entity);
+        }
 
 		inline CameraComponent& attach_camera_component(Entity& entity)
 		{
@@ -155,6 +173,26 @@ namespace terminus
         {
             return _cpp_script_pool.lookup(entity);
         }
+        
+        inline BoxColliderComponent& get_box_collider_component(Entity& entity)
+        {
+            return _box_collider_pool.lookup(entity);
+        }
+        
+        inline SphereColliderComponent& get_shpere_collider_component(Entity& entity)
+        {
+            return _sphere_collider_pool.lookup(entity);
+        }
+        
+        inline CylinderColliderComponent& get_cylinder_collider_component(Entity& entity)
+        {
+            return _cylinder_collider_pool.lookup(entity);
+        }
+        
+        inline CapsuleColliderComponent& get_capsule_collider_component(Entity& entity)
+        {
+            return _capsule_collider_pool.lookup(entity);
+        }
 
 		// has methods
 
@@ -187,6 +225,26 @@ namespace terminus
         {
             return _cpp_script_pool.has(entity);
         }
+        
+        inline bool has_box_collider_component(Entity& entity)
+        {
+            return _box_collider_pool.has(entity);
+        }
+        
+        inline bool has_shpere_collider_component(Entity& entity)
+        {
+            return _sphere_collider_pool.has(entity);
+        }
+        
+        inline bool has_cylinder_collider_component(Entity& entity)
+        {
+            return _cylinder_collider_pool.has(entity);
+        }
+        
+        inline bool has_capsule_collider_component(Entity& entity)
+        {
+            return _capsule_collider_pool.has(entity);
+        }
 
 		inline Entity& create_entity(std::string name = "")
 		{
@@ -215,6 +273,9 @@ namespace terminus
 				_transform_pool.remove(entity);
 				_mesh_pool.remove(entity);
 				_box_collider_pool.remove(entity);
+                _sphere_collider_pool.remove(entity);
+                _cylinder_collider_pool.remove(entity);
+                _capsule_collider_pool.remove(entity);
                 _cpp_script_pool.remove(entity);
                 _lua_script_pool.remove(entity);
 

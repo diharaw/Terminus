@@ -2,6 +2,7 @@
 
 #include <types.h>
 
+#include <container/packed_array.h>
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -31,7 +32,8 @@ namespace terminus
     struct CollisionShape
     {
         CollisionShapeType _type;
-        btCollisionShape* _shape;
+        btCollisionShape*  _shape;
+        ID                 _shape_id;
         
         CollisionShape()
         {

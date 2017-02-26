@@ -33,6 +33,16 @@ namespace terminus
         BoxShape _collision_shape;
     };
     
+    struct CylinderColliderComponent
+    {
+        CylinderShape _collision_shape;
+    };
+    
+    struct CapsuleColliderComponent
+    {
+        CapsuleShape _collision_shape;
+    };
+    
     struct HeightFieldColliderComponent
     {
         HeightFieldShape _collision_shape;
