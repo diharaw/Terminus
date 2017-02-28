@@ -10,15 +10,37 @@ namespace terminus
         {
             CollisionShape* shape = nullptr;
             
-            if(scene->has_sphere_collider_component(entity))
-                shape = &scene->get_sphere_collider_component(entity)._collision_shape;
-            else if(scene->has_box_collider_component(entity))
-                shape = &scene->get_box_collider_component(entity)._collision_shape;
-            else if(scene->has_cylinder_collider_component(entity))
-                shape = &scene->get_cylinder_collider_component(entity)._collision_shape;
-            else if(scene->has_capsule_collider_component(entity))
-                shape = &scene->get_capsule_collider_component(entity)._collision_shape;
-            
+            if(scene->has_collider_component(entity))
+            {
+                ColliderComponent& collider = scene->get_collider_component(entity);
+                
+                switch (collider._type)
+                {
+                    case CollisionShapeType::SPHERE:
+                        shape = &collider._sphere;
+                        break;
+                        
+                    case CollisionShapeType::BOX:
+                        shape = &collider._sphere;
+                        break;
+                        
+                    case CollisionShapeType::CYLINDER:
+                        shape = &collider._cylinder;
+                        break;
+                        
+                    case CollisionShapeType::CAPSULE:
+                        shape = &collider._capsule;
+                        break;
+                        
+                    case CollisionShapeType::STATIC_PLANE:
+                        shape = &collider._plane;
+                        break;
+ 
+                    default:
+                        break;
+                }
+            }
+           
             if(shape)
             {
                 float mass = json["mass"].GetFloat();

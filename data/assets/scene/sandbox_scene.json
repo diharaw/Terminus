@@ -107,6 +107,54 @@
 					"component_type" : "MESH",
 					"mesh" : "nanosuit.tsm",
 					"material_overrides" : []
+				},
+				{
+					"component_type" : "SPHERE_COLLIDER",
+					"radius" : 0,
+					"set_from_mesh" : true
+				},
+				{
+					"component_type" : "BOX_COLLIDER",
+					"half_extents" : 
+					{
+						"x" : 0,
+						"y" : 0,
+						"z" : 0
+					},
+					"set_from_mesh" : true
+				},
+				{
+					"component_type" : "HEIGHTFIELD_COLLIDER"
+				},
+				{
+					"component_type" : "MESH_COLLIDER"
+				},
+				{
+					"component_type" : "CONVEX_HULL_COLLIDER"
+				},
+				{
+					"component_type" : "CAPSULE_COLLIDER",
+					"radius" : 0,
+					"height" : 0,
+					"set_from_mesh" : true
+				},
+				{
+					"component_type" : "CYLINDER_COLLIDER",
+					"radius" : 0,
+					"half_extents" : 
+					{
+						"x" : 0,
+						"y" : 0,
+						"z" : 0
+					},
+					"set_from_mesh" : true
+				},
+				{
+					"component_type" : "RIGID_BODY",
+					"kinematic" : false,
+					"mass" : 10.0,
+					"restitution" : 0.0,
+					"friction" : 1.0
 				}
 			]
 		},

@@ -5,22 +5,7 @@
 
 namespace terminus
 {
-    namespace sphere_collider_component_factory
-    {
-        extern void create(JsonValue& json, Entity& entity, Scene* scene);
-    }
-    
-    namespace box_collider_component_factory
-    {
-        extern void create(JsonValue& json, Entity& entity, Scene* scene);
-    }
-    
-    namespace capsule_collider_component_factory
-    {
-        extern void create(JsonValue& json, Entity& entity, Scene* scene);
-    }
-    
-    namespace cylinder_collider_component_factory
+    namespace collider_component_factory
     {
         extern void create(JsonValue& json, Entity& entity, Scene* scene);
     }

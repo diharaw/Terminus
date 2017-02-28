@@ -22,6 +22,27 @@ namespace terminus
         bool   _is_kinematic;
         Entity _entity;
     };
+    
+    struct ColliderComponent
+    {
+        CollisionShapeType _type;
+        
+        union
+        {
+            SphereShape       _sphere;
+            BoxShape          _box;
+            CylinderShape     _cylinder;
+            CapsuleShape      _capsule;
+            TriangleMeshShape _mesh;
+            ConvexHullShape   _hull;
+            StaticPlaneShape  _plane;
+        };
+        
+        ColliderComponent()
+        {
+            
+        }
+    };
 
 	struct SphereColliderComponent
 	{
@@ -45,7 +66,7 @@ namespace terminus
     
     struct HeightFieldColliderComponent
     {
-        HeightFieldShape _collision_shape;
+        CapsuleShape _collision_shape;
     };
     
     struct TriangleMeshColliderComponent
@@ -56,6 +77,11 @@ namespace terminus
     struct ConvexHullColliderComponent
     {
         ConvexHullShape _collision_shape;
+    };
+    
+    struct PlaneColliderComponent
+    {
+        StaticPlaneShape _collision_shape;
     };
 
     struct MeshComponent
@@ -146,6 +172,16 @@ namespace terminus
 		CppScript*  _script;
 	};
 
+    struct AudioListenerComponent
+    {
+        
+    };
+    
+    struct AudioSourceComponent
+    {
+        
+    };
+    
 	// Transform helpers
 
 	namespace transform

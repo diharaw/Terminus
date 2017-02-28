@@ -58,21 +58,9 @@ namespace terminus
                         {
                             cpp_script_component_factory::create(components[j], new_entity, scene);
                         }
-                        else if(component_type == "SPHERE_COLLIDER")
+                        else if(component_type == "COLLIDER")
                         {
-                            sphere_collider_component_factory::create(components[j], new_entity, scene);
-                        }
-                        else if(component_type == "BOX_COLLIDER")
-                        {
-                            box_collider_component_factory::create(components[j], new_entity, scene);
-                        }
-                        else if(component_type == "CYLINDER_COLLIDER")
-                        {
-                            cylinder_collider_component_factory::create(components[j], new_entity, scene);
-                        }
-                        else if(component_type == "CAPSULE_COLLIDER")
-                        {
-                            capsule_collider_component_factory::create(components[j], new_entity, scene);
+                            collider_component_factory::create(components[j], new_entity, scene);
                         }
                         else if(component_type == "RIGID_BODY")
                         {

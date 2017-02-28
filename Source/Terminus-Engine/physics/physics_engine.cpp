@@ -55,6 +55,11 @@ namespace terminus
                                                                 state._collision_config);
             
             set_gravity(state._gravity);
+            
+            StaticPlaneShape plane;
+            
+            create_staic_plane_shape(plane, Vector3(0.0f, 1.0f, 0.0f), -50.0f);
+            create_rigid_body(Matrix4(), Matrix4(), 0.0f, 1.0f, 10.0f, false, &plane);
         }
         
         void update(double dt)
@@ -173,6 +178,8 @@ namespace terminus
             info.m_restitution = restituation;
             
             body._rigid_body = new btRigidBody(info);
+            
+            state._dynamics_world->addRigidBody(body._rigid_body);
             
             return rb_id;
         }
