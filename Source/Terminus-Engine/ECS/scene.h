@@ -10,6 +10,7 @@
 #include <ECS/render_system.h>
 #include <ECS/camera_system.h>
 #include <ECS/script_system.h>
+#include <ECS/physics_system.h>
 
 #include <vector>
 #include <iostream>
@@ -34,6 +35,7 @@ namespace terminus
 		ComponentPool<CameraComponent>           _camera_pool;
 		ComponentPool<LuaScriptComponent>        _lua_script_pool;
         ComponentPool<CppScriptComponent>        _cpp_script_pool;
+        ComponentPool<RigidBodyComponent>        _rigid_body_pool;
 
 		// systems
 
@@ -41,6 +43,7 @@ namespace terminus
 		TransformSystem _transform_system;
 		RenderSystem    _render_system;
         ScriptSystem    _script_system;
+        PhysicsSystem   _physics_system;
         
         StringBuffer32  _name;
 
@@ -67,6 +70,7 @@ namespace terminus
             _transform_system.initialize(this);
             _render_system.initialize(this);
             _script_system.initialize(this);
+            _physics_system.initialize(this);
         }
         
         inline void shutdown()
@@ -75,12 +79,14 @@ namespace terminus
             _camera_system.shutdown();
             _transform_system.shutdown();
             _render_system.shutdown();
+            _physics_system.shutdown();
         }
 
         inline void update(double dt)
         {
             _script_system.update(dt);
             _transform_system.update(dt);
+            _physics_system.update(dt);
             _camera_system.update(dt);
             _render_system.update(dt);
         }
@@ -141,6 +147,11 @@ namespace terminus
         {
             return _cpp_script_pool.create(entity);
         }
+        
+        inline RigidBodyComponent& attach_rigid_body_component(Entity& entity)
+        {
+            return _rigid_body_pool.create(entity);
+        }
 
 		// get methods
 
@@ -174,12 +185,7 @@ namespace terminus
             return _cpp_script_pool.lookup(entity);
         }
         
-        inline BoxColliderComponent& get_box_collider_component(Entity& entity)
-        {
-            return _box_collider_pool.lookup(entity);
-        }
-        
-        inline SphereColliderComponent& get_shpere_collider_component(Entity& entity)
+        inline SphereColliderComponent& get_sphere_collider_component(Entity& entity)
         {
             return _sphere_collider_pool.lookup(entity);
         }
@@ -193,6 +199,12 @@ namespace terminus
         {
             return _capsule_collider_pool.lookup(entity);
         }
+        
+        inline RigidBodyComponent& get_rigid_body_component(Entity& entity)
+        {
+            return _rigid_body_pool.lookup(entity);
+        }
+
 
 		// has methods
 
@@ -204,11 +216,6 @@ namespace terminus
 		inline bool has_mesh_component(Entity& entity)
 		{
 			return _mesh_pool.has(entity);
-		}
-
-		inline bool has_collider_component(Entity& entity)
-		{
-			return _box_collider_pool.has(entity);
 		}
 
 		inline bool has_camera_component(Entity& entity)
@@ -231,7 +238,7 @@ namespace terminus
             return _box_collider_pool.has(entity);
         }
         
-        inline bool has_shpere_collider_component(Entity& entity)
+        inline bool has_sphere_collider_component(Entity& entity)
         {
             return _sphere_collider_pool.has(entity);
         }
@@ -244,6 +251,11 @@ namespace terminus
         inline bool has_capsule_collider_component(Entity& entity)
         {
             return _capsule_collider_pool.has(entity);
+        }
+        
+        inline bool has_rigid_body_component(Entity& entity)
+        {
+            return _rigid_body_pool.has(entity);
         }
 
 		inline Entity& create_entity(std::string name = "")
@@ -278,6 +290,7 @@ namespace terminus
                 _capsule_collider_pool.remove(entity);
                 _cpp_script_pool.remove(entity);
                 _lua_script_pool.remove(entity);
+                _rigid_body_pool.remove(entity);
 
 				_versions[INDEX_FROM_ID(entity._id)]++;
 				_entities.remove(entity._id);

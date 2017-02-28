@@ -366,7 +366,7 @@ namespace terminus
                                        "get_lua_script_component", &Scene::get_lua_script_component,
                                        "has_transform_component", &Scene::has_transform_component,
                                        "has_mesh_component", &Scene::has_mesh_component,
-                                       "has_collider_component", &Scene::has_collider_component,
+                                       "has_box_collider_component", &Scene::has_box_collider_component,
                                        "has_camera_component", &Scene::has_camera_component,
                                        "has_lua_script_component", &Scene::has_lua_script_component,
                                        "is_entity_alive", &Scene::is_alive,

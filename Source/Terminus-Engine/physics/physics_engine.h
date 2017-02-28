@@ -19,6 +19,7 @@ namespace terminus
         btCollisionConfiguration* _collision_config;
         PackedArray<RigidBody, MAX_RIGID_BODIES> _rigid_bodies;
         PackedArray<btCollisionShape*, MAX_COLLISION_SHAPES> _collision_shapes;
+        Vector3 _gravity;
     };
     
     namespace physics
@@ -26,7 +27,7 @@ namespace terminus
         extern void initialize();
         extern void update(double dt);
         extern void shutdown();
-        extern void set_gravity(float gravity);
+        extern void set_gravity(Vector3 gravity);
         extern void create_sphere_shape(SphereShape& shape, float radius);
         extern void create_box_shape(BoxShape& shape, Vector3 half_extents);
         extern void create_cylinder_shape(CylinderShape& shape, Vector3 half_extents);
@@ -36,7 +37,9 @@ namespace terminus
         extern void create_convex_hull_shape(ConvexHullShape& shape);
         extern void create_staic_plane_shape(StaticPlaneShape& shape, Vector3 normal, float constant);
         extern void destroy_collision_shape(CollisionShape* shape);
-        extern ID   create_rigid_body(Matrix4 transform, Vector3 cof_offset, float mass, float restituation, float friction, CollisionShape* shape);
+        extern ID   create_rigid_body(Matrix4 transform, Matrix4 cof_offset, float mass, float restituation, float friction, bool kinematic, CollisionShape* shape);
+        extern Matrix4 get_world_transform(ID rigid_body, PhysicsEngineState& state);
+        extern Quaternion get_rotation(ID rigid_body, PhysicsEngineState& state);
         extern void set_rigid_body_user_data(ID rigid_body, void* user_data);
         extern void destroy_rigid_body(ID rigid_body);
         

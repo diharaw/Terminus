@@ -82,6 +82,7 @@ namespace terminus
             platform.begin_frame();
 			platform.update();
             EventHandler::update();
+            physics::update(platform.get_delta_time());
             
             context._scene_manager.update(platform.get_delta_time());
             // Synchronize Rendering Thread
@@ -146,6 +147,7 @@ namespace terminus
         Context& context = Global::get_context();
         
         context._editor.shutdown();
+        physics::shutdown();
         
         context._load_wakeup_sema.notify();
         context._load_exit_sema.wait();
@@ -172,7 +174,7 @@ namespace terminus
 
 	void Application::initialize_physics()
 	{
-
+        physics::initialize();
 	}
 
 	void Application::initialize_audio()

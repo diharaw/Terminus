@@ -15,9 +15,35 @@ namespace terminus
             return Vector3(vec.x(), vec.y(), vec.z());
         }
         
+        Matrix4 convert(btTransform bt_mat)
+        {
+            Matrix4 mat;
+            bt_mat.getOpenGLMatrix(glm::value_ptr(mat));
+            return mat;
+        }
+        
+        btTransform convert(Matrix4 mat)
+        {
+            btTransform bt_mat;
+            bt_mat.setFromOpenGLMatrix(glm::value_ptr(mat));
+            return bt_mat;
+        }
+
+        Quaternion convert(btQuaternion bt_quat)
+        {
+            Quaternion quat;
+            quat.x = bt_quat.getX();
+            quat.y = bt_quat.getY();
+            quat.z = bt_quat.getZ();
+            quat.w = bt_quat.getW();
+            
+            return quat;
+        }
+        
         void initialize()
         {
             PhysicsEngineState& state = context::get_physics_state();
+            state._gravity = Vector3(0.0f, -9.8f, 0.0f);
             
             state._collision_config = new btDefaultCollisionConfiguration();
             state._dispatcher = new btCollisionDispatcher(state._collision_config);
@@ -27,6 +53,8 @@ namespace terminus
                                                                 state._broadphase,
                                                                 state._constraint_solver,
                                                                 state._collision_config);
+            
+            set_gravity(state._gravity);
         }
         
         void update(double dt)
@@ -44,12 +72,19 @@ namespace terminus
             {
                 state._dynamics_world->removeRigidBody(state._rigid_bodies._objects[i]._rigid_body);
             }
-            
+          
             T_SAFE_DELETE(state._dynamics_world);
             T_SAFE_DELETE(state._constraint_solver);
             T_SAFE_DELETE(state._broadphase);
             T_SAFE_DELETE(state._dispatcher);
             T_SAFE_DELETE(state._collision_config);
+        }
+        
+        void set_gravity(Vector3 gravity)
+        {
+            PhysicsEngineState& state = context::get_physics_state();
+            state._dynamics_world->setGravity(convert(gravity));
+            state._gravity = gravity;
         }
         
         void add_shape_entry(CollisionShape* shape)
@@ -120,7 +155,7 @@ namespace terminus
             T_SAFE_DELETE(shape->_shape);
         }
         
-        ID create_rigid_body(Matrix4 transform, Vector3 cof_offset, float mass, float restituation, float friction, bool kinematic, CollisionShape* shape)
+        ID create_rigid_body(Matrix4 transform, Matrix4 cof_offset, float mass, float restituation, float friction, bool kinematic, CollisionShape* shape)
         {
             PhysicsEngineState& state = context::get_physics_state();
             
@@ -128,7 +163,7 @@ namespace terminus
             RigidBody& body = state._rigid_bodies.lookup(rb_id);
             btVector3 inertia(0.0f, 0.0f, 0.0f);
             
-            body._motion_state = new btDefaultMotionState();
+            body._motion_state = new btDefaultMotionState(convert(transform), convert(cof_offset));
             
             if(mass != 0.0f)
                 shape->_shape->calculateLocalInertia(mass, inertia);
@@ -148,6 +183,26 @@ namespace terminus
             
             RigidBody& body = state._rigid_bodies.lookup(rigid_body);
             body._rigid_body->setUserPointer(user_data);
+        }
+        
+        Matrix4 get_world_transform(ID rigid_body, PhysicsEngineState& state)
+        {
+            RigidBody& body = state._rigid_bodies.lookup(rigid_body);
+            
+            btTransform bullet_transform;
+            body._motion_state->getWorldTransform(bullet_transform);
+            
+            return convert(bullet_transform);
+        }
+        
+        Quaternion get_rotation(ID rigid_body, PhysicsEngineState& state)
+        {
+            RigidBody& body = state._rigid_bodies.lookup(rigid_body);
+            
+            btTransform bullet_transform;
+            body._motion_state->getWorldTransform(bullet_transform);
+            
+            return convert(bullet_transform.getRotation());
         }
         
         void destroy_rigid_body(ID rigid_body)

@@ -5,6 +5,7 @@
 #include <Resource/lua_script_component_factory.h>
 #include <Resource/cpp_script_component_factory.h>
 #include <Resource/collider_component_factory.h>
+#include <Resource/rigid_body_component_factory.h>
 #include <Core/context.h>
 
 namespace terminus
@@ -72,6 +73,10 @@ namespace terminus
                         else if(component_type == "CAPSULE_COLLIDER")
                         {
                             capsule_collider_component_factory::create(components[j], new_entity, scene);
+                        }
+                        else if(component_type == "RIGID_BODY")
+                        {
+                            rigid_body_component_factory::create(components[j], new_entity, scene);
                         }
                     }
                 }
