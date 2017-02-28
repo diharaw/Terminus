@@ -150,7 +150,7 @@ namespace terminus
 
 	namespace transform
 	{
-		inline void set_position(TransformComponent& cmp, Vector3& pos)
+		inline void set_position(TransformComponent& cmp, Vector3 pos)
 		{
 			cmp._position = pos;
 			cmp._is_dirty = true;
@@ -162,28 +162,33 @@ namespace terminus
 			cmp._is_dirty = true;
 		}
 
-		inline void set_scale(TransformComponent& cmp, Vector3& scale)
+		inline void set_scale(TransformComponent& cmp, Vector3 scale)
 		{
 			cmp._scale = scale;
 			cmp._is_dirty = true;
 		}
 
-		inline void set_rotation_euler(TransformComponent& cmp, Vector3& rot)
+		inline void set_rotation_euler(TransformComponent& cmp, Vector3 rot)
 		{
 			cmp._euler_angles = rot;
 			cmp._rotation = glm::quat(Vector3(glm::radians(rot.x), glm::radians(rot.y), glm::radians(rot.z)));
 			cmp._is_dirty = true;
 		}
 
-		inline void set_rotation_quat(TransformComponent& cmp, Quaternion& rot)
+		inline void set_rotation_quat(TransformComponent& cmp, Quaternion rot)
 		{
 			cmp._rotation = rot;
 			Vector3 euler = glm::eulerAngles(cmp._rotation);
 			cmp._euler_angles = Vector3(glm::degrees(euler.x), glm::degrees(euler.y), glm::degrees(euler.z));
 			cmp._is_dirty = true;
 		}
+        
+        inline void set_transform(TransformComponent& cmp, Matrix4 transform)
+        {
+            cmp._global_transform = transform;
+        }
 
-		inline void look_at(TransformComponent& cmp, Vector3& point)
+		inline void look_at(TransformComponent& cmp, Vector3 point)
 		{
 			Matrix4 rotation = glm::lookAt(cmp._position, point, Vector3(0.0, 1.0, 0.0));
 

@@ -39,6 +39,7 @@ namespace terminus
         extern void destroy_collision_shape(CollisionShape* shape);
         extern ID   create_rigid_body(Matrix4 transform, Matrix4 cof_offset, float mass, float restituation, float friction, bool kinematic, CollisionShape* shape);
         extern Matrix4 get_world_transform(ID rigid_body, PhysicsEngineState& state);
+        extern Vector3 get_position(ID rigid_body, PhysicsEngineState& state);
         extern Quaternion get_rotation(ID rigid_body, PhysicsEngineState& state);
         extern void set_rigid_body_user_data(ID rigid_body, void* user_data);
         extern void destroy_rigid_body(ID rigid_body);

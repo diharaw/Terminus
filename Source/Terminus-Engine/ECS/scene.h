@@ -152,6 +152,18 @@ namespace terminus
         {
             return _rigid_body_pool.create(entity);
         }
+        
+        // get id methods
+        
+        inline ID get_transform_id(Entity& entity)
+        {
+            return _transform_pool.get_id(entity);
+        }
+        
+        inline ID get_rigid_body_id(Entity& entity)
+        {
+            return _rigid_body_pool.get_id(entity);
+        }
 
 		// get methods
 

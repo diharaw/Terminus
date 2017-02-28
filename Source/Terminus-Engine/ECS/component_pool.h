@@ -56,6 +56,11 @@ namespace terminus
 
 			return _pool.lookup(_cmp_entity_ref[INDEX_FROM_ID(entity._id)]);
 		}
+        
+        inline ID get_id(Entity& entity)
+        {
+            return _cmp_entity_ref[INDEX_FROM_ID(entity._id)];
+        }
 
 		inline void remove(Entity& entity)
 		{

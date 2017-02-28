@@ -9,6 +9,12 @@ namespace terminus
     class  Scene;
     struct Entity;
     
+    struct RigidBodyTransform
+    {
+        ID rigid_body;
+        ID transform;
+    };
+    
     class PhysicsSystem
     {
     public:
@@ -22,5 +28,7 @@ namespace terminus
         
     private:
         Scene* _scene;
+        PackedArray<RigidBodyTransform, MAX_ENTITIES> _pairs;
+        ID _entities[MAX_ENTITIES];
     };
 }

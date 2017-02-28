@@ -195,6 +195,16 @@ namespace terminus
             return convert(bullet_transform);
         }
         
+        Vector3 get_position(ID rigid_body, PhysicsEngineState& state)
+        {
+            RigidBody& body = state._rigid_bodies.lookup(rigid_body);
+            
+            btTransform bullet_transform;
+            body._motion_state->getWorldTransform(bullet_transform);
+            
+            return convert(bullet_transform.getOrigin());
+        }
+        
         Quaternion get_rotation(ID rigid_body, PhysicsEngineState& state)
         {
             RigidBody& body = state._rigid_bodies.lookup(rigid_body);
