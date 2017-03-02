@@ -115,7 +115,7 @@ namespace terminus
 			{
 #ifdef WIN32
 				String temp = define;
-				temp += "\r";
+				//temp += "\r";
 
 				if (name == temp)
 					return true;

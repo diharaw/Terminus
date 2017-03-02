@@ -168,6 +168,14 @@ namespace terminus
             memcpy(data, m_pos, size);
             Move(size);
         }
+
+		template<typename T>
+		inline T* Read()
+		{
+			T* cmd = (T*)m_pos;
+			Move(sizeof(T));
+			return cmd;
+		}
         
         inline void Move(size_t size)
         {

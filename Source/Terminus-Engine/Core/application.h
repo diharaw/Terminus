@@ -35,6 +35,7 @@
 #include <ECS/scene.h>
 #include <ECS/transform_system.h>
 #include <Core/context.h>
+#include <Utility/profiler.h>
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 #define TERMINUS_DECLARE_MAIN(x)							\

@@ -56,20 +56,6 @@
 
 #define TERMINUS_PROFILING
 
-#if defined(TERMINUS_PROFILING)
-    #define TERMINUS_BEGIN_CPU_PROFILE(x) rmt_BeginCPUSample(x, 0);
-    #define TERMINUS_END_CPU_PROFILE rmt_EndCPUSample();
-    #define TERMINUS_PROFILER_INSTANCE Remotery* rmt;
-    #define TERMINUS_CREATE_PROFILER rmt_CreateGlobalInstance(&rmt);
-    #define TERMINUS_DESTROY_PROFILER rmt_DestroyGlobalInstance(rmt);
-#else
-    #define TERMINUS_BEGIN_CPU_PROFILE(x)
-    #define TERMINUS_END_CPU_PROFILE
-    #define TERMINUS_PROFILER_INSTANCE
-    #define TERMINUS_CREATE_PROFILER
-    #define TERMINUS_DESTROY_PROFILER
-#endif
-
 #define MAX_CONFIG_FIELDS		  20
 
 #define CONFIG_APP_NAME			  "app_name"

@@ -3,6 +3,8 @@
 #include <Core/config.h>
 #include <Core/context.h>
 
+#include <Utility/profiler.h>
+
 namespace terminus
 {
     Renderer::Renderer()
@@ -54,28 +56,29 @@ namespace terminus
         
         for (int i = 0; i < queue.m_num_cmd_buf; i++)
         {
+			TERMINUS_BEGIN_GPU_PROFILE(gpu_execution);
+			TERMINUS_BEGIN_CPU_PROFILE(gpu_dispatch);
+
             CommandBuffer& _cmd_buf = queue.m_cmd_buf[i];
-            CommandType _cmd;
+            CommandType* _cmd;
             bool is_done = false;
-            
+ 
             do
             {
-                _cmd_buf.ReadCmd(_cmd);
-                
-                switch(_cmd)
+                _cmd = _cmd_buf.Read<CommandType>();
+				
+                switch(*_cmd)
                 {
                     case CommandType::Draw:
                     {
-                        DrawCmdData _cmd_data;
-                        _cmd_buf.Read<DrawCmdData>(_cmd_data);
-                        device.Draw(_cmd_data.first_index, _cmd_data.count);
+                        DrawCmdData* _cmd_data = _cmd_buf.Read<DrawCmdData>();
+                        device.Draw(_cmd_data->first_index, _cmd_data->count);
                         break;
                     }
                     case CommandType::DrawIndexed:
                     {
-                        DrawIndexedCmdData _cmd_data;
-                        _cmd_buf.Read<DrawIndexedCmdData>(_cmd_data);
-                        device.DrawIndexed(_cmd_data.index_count);
+                        DrawIndexedCmdData* _cmd_data = _cmd_buf.Read<DrawIndexedCmdData>();
+                        device.DrawIndexed(_cmd_data->index_count);
                         break;
                     }
                     case CommandType::DrawIndexedBaseVertex:
@@ -83,17 +86,15 @@ namespace terminus
                         // temp
                         device.SetPrimitiveType(DrawPrimitive::TRIANGLES);
                         
-                        DrawIndexedBaseVertexCmdData _cmd_data;
-                        _cmd_buf.Read<DrawIndexedBaseVertexCmdData>(_cmd_data);
-                        device.DrawIndexedBaseVertex(_cmd_data.index_count, _cmd_data.base_index, _cmd_data.base_vertex);
+                        DrawIndexedBaseVertexCmdData* _cmd_data = _cmd_buf.Read<DrawIndexedBaseVertexCmdData>();
+                        device.DrawIndexedBaseVertex(_cmd_data->index_count, _cmd_data->base_index, _cmd_data->base_vertex);
                         
                         break;
                     }
                     case CommandType::BindFramebuffer:
                     {
-                        BindFramebufferCmdData _cmd_data;
-                        _cmd_buf.Read<BindFramebufferCmdData>(_cmd_data);
-                        device.BindFramebuffer(_cmd_data.framebuffer);
+                        BindFramebufferCmdData* _cmd_data = _cmd_buf.Read<BindFramebufferCmdData>();
+                        device.BindFramebuffer(_cmd_data->framebuffer);
                         
                         // temp
                         device.SetViewport(0, 0, 0, 0);
@@ -102,69 +103,60 @@ namespace terminus
                     }
                     case CommandType::BindShaderProgram:
                     {
-                        BindShaderProgramCmdData _cmd_data;
-                        _cmd_buf.Read<BindShaderProgramCmdData>(_cmd_data);
-                        device.BindShaderProgram(_cmd_data.program);
+                        BindShaderProgramCmdData* _cmd_data = _cmd_buf.Read<BindShaderProgramCmdData>();
+                        device.BindShaderProgram(_cmd_data->program);
                         break;
                     }
                     case CommandType::BindSamplerState:
                     {
-                        BindSamplerStateCmdData _cmd_data;
-                        _cmd_buf.Read<BindSamplerStateCmdData>(_cmd_data);
-                        device.BindSamplerState(_cmd_data.state, _cmd_data.shader_type, _cmd_data.slot);
+						BindSamplerStateCmdData* _cmd_data = _cmd_buf.Read<BindSamplerStateCmdData>();
+                        device.BindSamplerState(_cmd_data->state, _cmd_data->shader_type, _cmd_data->slot);
                         break;
                     }
                     case CommandType::BindVertexArray:
                     {
-                        BindVertexArrayCmdData _cmd_data;
-                        _cmd_buf.Read<BindVertexArrayCmdData>(_cmd_data);
-                        device.BindVertexArray(_cmd_data.vertex_array);
+                        BindVertexArrayCmdData* _cmd_data = _cmd_buf.Read<BindVertexArrayCmdData>();
+                        device.BindVertexArray(_cmd_data->vertex_array);
                         break;
                     }
                     case CommandType::BindUniformBuffer:
                     {
-                        BindUniformBufferCmdData _cmd_data;
-                        _cmd_buf.Read<BindUniformBufferCmdData>(_cmd_data);
-                        device.BindUniformBuffer(_cmd_data.buffer, _cmd_data.shader_type, _cmd_data.slot);
+                        BindUniformBufferCmdData* _cmd_data = _cmd_buf.Read<BindUniformBufferCmdData>();
+                        device.BindUniformBuffer(_cmd_data->buffer, _cmd_data->shader_type, _cmd_data->slot);
                         break;
                     }
                     case CommandType::BindRasterizerState:
                     {
-                        BindRasterizerStateData _cmd_data;
-                        _cmd_buf.Read<BindRasterizerStateData>(_cmd_data);
-                        device.BindRasterizerState(_cmd_data.state);
+                        BindRasterizerStateData* _cmd_data = _cmd_buf.Read<BindRasterizerStateData>();
+                        device.BindRasterizerState(_cmd_data->state);
                         break;
                     }
                     case CommandType::BindDepthStencilState:
                     {
-                        BindDepthStencilStateData _cmd_data;
-                        _cmd_buf.Read<BindDepthStencilStateData>(_cmd_data);
-                        device.BindDepthStencilState(_cmd_data.state);
+                        BindDepthStencilStateData* _cmd_data = _cmd_buf.Read<BindDepthStencilStateData>();
+                        device.BindDepthStencilState(_cmd_data->state);
                         break;
                     }
                     case CommandType::BindTexture2D:
                     {
-                        BindTexture2DCmdData _cmd_data;
-                        _cmd_buf.Read<BindTexture2DCmdData>(_cmd_data);
-                        device.BindTexture(_cmd_data.texture, _cmd_data.shader_type, _cmd_data.slot);
+                        BindTexture2DCmdData* _cmd_data = _cmd_buf.Read<BindTexture2DCmdData>();
+                        device.BindTexture(_cmd_data->texture, _cmd_data->shader_type, _cmd_data->slot);
                         break;
                     }
                     case CommandType::CopyUniformData:
                     {
-                        CopyUniformCmdData _cmd_data;
-                        _cmd_buf.Read<CopyUniformCmdData>(_cmd_data);
+                        CopyUniformCmdData* _cmd_data = _cmd_buf.Read<CopyUniformCmdData>();
                         
-                        void* ptr = device.MapBuffer(_cmd_data.buffer, _cmd_data.map_type);
-                        memcpy(ptr, _cmd_data.data, _cmd_data.size);
-                        device.UnmapBuffer(_cmd_data.buffer);
+                        void* ptr = device.MapBuffer(_cmd_data->buffer, _cmd_data->map_type);
+                        memcpy(ptr, _cmd_data->data, _cmd_data->size);
+                        device.UnmapBuffer(_cmd_data->buffer);
                         
                         break;
                     }
                     case CommandType::ClearFramebuffer:
                     {
-                        ClearFramebufferCmdData _cmd_data;
-                        _cmd_buf.Read<ClearFramebufferCmdData>(_cmd_data);
-                        device.ClearFramebuffer(_cmd_data.clear_target, _cmd_data.clear_color);
+                        ClearFramebufferCmdData* _cmd_data = _cmd_buf.Read<ClearFramebufferCmdData>();
+                        device.ClearFramebuffer(_cmd_data->clear_target, _cmd_data->clear_color);
                         
                         break;
                     }
@@ -180,7 +172,11 @@ namespace terminus
                         break;
                     }
                 }
+
             } while(!is_done);
+
+			TERMINUS_END_CPU_PROFILE
+			TERMINUS_END_GPU_PROFILE;
         }
     }
     

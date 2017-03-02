@@ -3,6 +3,7 @@
 #include <Resource/shader_cache.h>
 #include <ECS/component_types.h>
 #include <Core/context.h>
+#include <Utility/profiler.h>
 
 namespace terminus
 {    
@@ -181,6 +182,8 @@ namespace terminus
     
     TASK_METHOD_DEFINITION(RenderSystem, RenderPrepareTask)
     {
+		TERMINUS_BEGIN_CPU_PROFILE(frustum_cull);
+
         RenderPrepareTaskData* _data = static_cast<RenderPrepareTaskData*>(data);
         SceneView& scene_view = _views[_data->_scene_index];
      
@@ -221,13 +224,21 @@ namespace terminus
             }
         }
         
-        // Sort DrawItem array
-        
+		TERMINUS_END_CPU_PROFILE;
+
+		// Sort DrawItem array
+
+		TERMINUS_BEGIN_CPU_PROFILE(sort);
+
         std::sort(scene_view._draw_items.begin(),
                   scene_view._draw_items.begin() + scene_view._num_items,
                   DrawItemSort);
+
+		TERMINUS_END_CPU_PROFILE;
         
         // Fill CommandBuffer while skipping redundant state changes
+
+		TERMINUS_BEGIN_CPU_PROFILE(command_generation);
         
         for (int i = 0; i < scene_view._rendering_path->_num_render_passes; i++)
         {
@@ -416,6 +427,8 @@ namespace terminus
         
         // reset
         scene_view._num_items = 0;
+
+		TERMINUS_END_CPU_PROFILE;
     }
 } // namespace terminus
 

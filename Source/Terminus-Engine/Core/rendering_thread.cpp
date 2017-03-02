@@ -3,7 +3,7 @@
 #include <Graphics/imgui_backend.h>
 #include <Core/config.h>
 
-#include <Utility/Remotery.h>
+#include <Utility/profiler.h>
 
 namespace terminus
 {
@@ -58,7 +58,7 @@ namespace terminus
         
         while (!context._shutdown)
         {
-            TERMINUS_BEGIN_CPU_PROFILE(render_loop)
+            TERMINUS_BEGIN_CPU_PROFILE(renderer)
             // submit api calls
             context._renderer.submit();
             
@@ -69,7 +69,9 @@ namespace terminus
                 upload_task._function.Invoke(&upload_task._data[0]);
                 context._load_wakeup_sema.notify();
             }
-            
+
+			TERMINUS_END_CPU_PROFILE
+
             // notify done
             context._render_done_sema.notify();
             
@@ -81,7 +83,7 @@ namespace terminus
             context._render_device.SwapBuffers();
 #endif
             
-            TERMINUS_END_CPU_PROFILE
+            
         }
         
         shutdown();

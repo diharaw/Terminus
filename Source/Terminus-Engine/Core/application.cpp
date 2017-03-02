@@ -1,9 +1,4 @@
 #include <Core/application.h>
-
-#if defined(TERMINUS_PROFILING)
-#include <Utility/Remotery.h>
-#endif
-
 #include <Utility/runtime_compile.h>
 
 namespace terminus 
@@ -77,7 +72,7 @@ namespace terminus
         
 		while (!context._shutdown)
 		{
-            TERMINUS_BEGIN_CPU_PROFILE(update_loop)
+			TERMINUS_BEGIN_CPU_PROFILE(simulation);
             
             platform.begin_frame();
 			platform.update();
@@ -85,12 +80,15 @@ namespace terminus
             physics::update(platform.get_delta_time());
             
             context._scene_manager.update(platform.get_delta_time());
+
+			TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread
             context._render_done_sema.wait();
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
             
+			TERMINUS_BEGIN_CPU_PROFILE(gui_update);
             //temp_render();
             ImGuiBackend::new_frame();
             editor.update(platform.get_delta_time());
@@ -98,9 +96,9 @@ namespace terminus
 			Global::GetPerFrameAllocator()->Clear();
             
             context._swap_done_sema.notify();
-            platform.end_frame();
-            
-            TERMINUS_END_CPU_PROFILE
+            platform.end_frame();    
+
+			TERMINUS_END_CPU_PROFILE;
 		}
 	}
 

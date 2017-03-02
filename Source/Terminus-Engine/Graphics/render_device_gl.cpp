@@ -2,6 +2,7 @@
 #include <Core/context.h>
 #include <Utility/string_utility.h>
 #include <iostream>
+#include <Utility/profiler.h>
 
 #if defined(TERMINUS_OPENGL)
 
@@ -44,6 +45,10 @@ namespace terminus
         m_gl_context = SDL_GL_CreateContext(m_window);
         SDL_GL_MakeCurrent(m_window, m_gl_context);
         SDL_GL_GetDrawableSize(m_window, &_drawable_width, &_drawable_height);
+
+#if defined(TERMINUS_PROFILING)
+		rmt_BindOpenGL();
+#endif
         
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK)
@@ -64,6 +69,9 @@ namespace terminus
 
 	void RenderDevice::Shutdown()
 	{
+#if defined(TERMINUS_PROFILING)
+		rmt_UnbindOpenGL();
+#endif
         SDL_GL_DeleteContext(m_gl_context);
 	}
 
