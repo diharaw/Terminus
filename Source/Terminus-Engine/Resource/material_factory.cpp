@@ -62,7 +62,7 @@ namespace terminus
             if (doc.HasMember("roughness_map"))
             {
                 String key = std::string(doc["roughness_map"].GetString());
-                material->texture_maps[ROUGHNESS] = (Texture2D*)cache.load(key);
+                //material->texture_maps[ROUGHNESS] = (Texture2D*)cache.load(key);
             }
             else
             {
@@ -73,7 +73,7 @@ namespace terminus
             if (doc.HasMember("metalness_map"))
             {
                 String key = std::string(doc["metalness_map"].GetString());
-                material->texture_maps[METALNESS] = (Texture2D*)cache.load(key);
+                //material->texture_maps[METALNESS] = (Texture2D*)cache.load(key);
             }
             else
             {
