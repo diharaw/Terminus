@@ -13,12 +13,12 @@ set(ENGINE_DELEGATES_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/Delegates1
 set(ENGINE_BULLET_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/Bullet 3/src")
 set(ENGINE_LUAJIT_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/luajit/src")
 set(ENGINE_SOL2_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/sol2")
-set(ENGINE_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/include")
+set(ENGINE_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/engine/include")
 
 file(GLOB_RECURSE TERMINUS_SOURCE *.cpp
 						  		  *.h
 						  		  *.c
-						  		  ${PROJECT_SOURCE_DIR}/include/engine/*.h)
+						  		  ${PROJECT_SOURCE_DIR}/engine/include/*.h)
 
 find_package(OpenGL REQUIRED)
 
