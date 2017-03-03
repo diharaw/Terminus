@@ -32,7 +32,7 @@
 *.pc
 
 projects/
-bin/debug/
-bin/release/
+bin/editor/
+bin/runtime/
 lib/engine/
 lib/external/

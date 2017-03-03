@@ -17,7 +17,8 @@ set(ENGINE_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/include")
 
 file(GLOB_RECURSE TERMINUS_SOURCE *.cpp
 						  		  *.h
-						  		  *.c)
+						  		  *.c
+						  		  ${PROJECT_SOURCE_DIR}/include/engine/*.h)
 
 find_package(OpenGL REQUIRED)
 
