@@ -1,0 +1,43 @@
+{
+	"action" : [],
+	"state" : 
+	[
+		{
+			"name" : "toggle_camera",
+			"keyboard" : "SPACE",
+			"gamepad" : null,
+			"mouse" : null 
+		}
+	],
+	"axis" :
+	[
+		{
+			"name" : "mouse_look_x",
+			"keyboard_pos" : null,
+			"keyboard_neg" : null,
+			"gamepad" : null,
+			"mouse" : "MOUSE_AXIS_X" 
+		},
+		{
+			"name" : "mouse_look_y",
+			"keyboard_pos" : null,
+			"keyboard_neg" : null,
+			"gamepad" : null,
+			"mouse" : "MOUSE_AXIS_Y" 
+		},
+		{
+			"name" : "forward",
+			"keyboard_pos" : "W",
+			"keyboard_neg" : "S",
+			"gamepad" : null,
+			"mouse" : null
+		},
+		{
+			"name" : "sideways",
+			"keyboard_pos" : "A",
+			"keyboard_neg" : "D",
+			"gamepad" : null,
+			"mouse" : null
+		}
+	]
+}

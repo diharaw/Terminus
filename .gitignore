@@ -28,5 +28,11 @@
 *.out
 *.app
 
+# GLEW pc
+*.pc
+
 projects/
-*/glew.pc
+bin/debug/
+bin/release/
+lib/engine/
+lib/external/
