@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(ENGINE_GLEW_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/glew/include")
+set(ENGINE_SDL2_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/SDL2/include")
+set(ENGINE_RAPIDJSON_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/rapidjson")
+set(ENGINE_IMGUI_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/imgui")
+set(ENGINE_GLM_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/glm")
+set(ENGINE_LIBZIP_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/Libzip/lib")
+set(ENGINE_SIMPLEFILEWATCHER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/simplefilewatcher")
+set(ENGINE_STB_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/stb")
+set(ENGINE_DELEGATES_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/Delegates11")
+set(ENGINE_BULLET_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/Bullet 3/src")
+set(ENGINE_LUAJIT_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/luajit/src")
+set(ENGINE_SOL2_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/sol2")
+set(ENGINE_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/include")
+
 file(GLOB_RECURSE TERMINUS_SOURCE *.cpp
 						  		  *.h
 						  		  *.c)
@@ -10,13 +24,24 @@ find_package(OpenGL REQUIRED)
 add_library(Terminus-Engine ${TERMINUS_SOURCE})
 
 set_target_properties( Terminus-Engine
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/Terminus"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/Terminus"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
+    				   PROPERTIES
+    				   ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/engine"
+    				   LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/engine"
+    				   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/" )
 
-target_link_libraries(Terminus-Engine SDL2-static)
+target_include_directories(Terminus-Engine PUBLIC "${ENGINE_GLEW_INCLUDE_DIRS}"			 
+												  "${ENGINE_RAPIDJSON_INCLUDE_DIRS}"
+												  "${ENGINE_IMGUI_INCLUDE_DIRS}" 			 
+												  "${ENGINE_GLM_INCLUDE_DIRS}" 			 
+												  "${ENGINE_LIBZIP_INCLUDE_DIRS}" 			 
+												  "${ENGINE_SIMPLEFILEWATCHER_INCLUDE_DIRS}"
+												  "${ENGINE_STB_INCLUDE_DIRS}" 
+												  "${ENGINE_DELEGATES_INCLUDE_DIRS}" 		 
+												  "${ENGINE_BULLET_INCLUDE_DIRS}"    		 
+												  "${ENGINE_LUAJIT_INCLUDE_DIRS}"    		 
+												  "${ENGINE_SOL2_INCLUDE_DIRS}" 	  		 
+												  "${ENGINE_TERMINUS_INCLUDE_DIRS}")
+
 target_link_libraries(Terminus-Engine glew_s)
 target_link_libraries(Terminus-Engine assimp)
 target_link_libraries(Terminus-Engine imgui)
