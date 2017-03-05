@@ -1,68 +1,42 @@
-#include <global.h>
-#include <types.h>
-#include <Core/context.h>
-#include <Resource/config_file_factory.h>
-#include <Graphics/imgui_console.h>
+#include <core/global.h>
+#include <core/types.h>
+#include <core/context.h>
+#include <resource/config_file_factory.h>
+#include <graphics/imgui_console.h>
 #include <iostream>
 
 namespace terminus
 {
-    namespace Global
+    namespace global
     {
         void* g_memory = nullptr;
         void* g_per_frame_memory = nullptr;
         LinearAllocator* g_allocator = nullptr;
         LinearAllocator* g_per_frame_allocator = nullptr;
         DefaultThreadPool*   g_thread_pool = nullptr;
-        Context* g_context = nullptr;
-        
-        void Initialize()
-        {
-            logger::initialize();
-            
-            logger::open_file_stream();
-            
-            g_memory = malloc(MAX_MEMORY);
-            g_allocator = new LinearAllocator(MAX_MEMORY, g_memory);
-            
-            g_per_frame_memory = malloc(MAX_PER_FRAME_MEMORY);
-            g_per_frame_allocator = new LinearAllocator(MAX_PER_FRAME_MEMORY, g_per_frame_memory);
-            
-			g_thread_pool = T_NEW DefaultThreadPool();
-            
-            g_context = T_NEW Context();
-            g_context->_shutdown = false;
-            
-            filesystem::add_directory("config");
-            g_context->_engine_config = config_file_factory::create("engine_config.json");
-            
-        #if defined(TERMINUS_WITH_EDITOR)
-            imgui_console::initialize();
-            logger::open_custom_stream(&imgui_console::logger_callback);
-        #endif
-        }
+		Context* g_context = nullptr;
         
         Context& get_context()
         {
             return *g_context;
         }
         
-        LinearAllocator* GetDefaultAllocator()
+        LinearAllocator* get_default_allocator()
         {
             return g_allocator;
         }
         
-        LinearAllocator* GetPerFrameAllocator()
+        LinearAllocator* get_per_frame_allocator()
         {
             return g_per_frame_allocator;
         }
         
-        DefaultThreadPool* GetDefaultThreadPool()
+        DefaultThreadPool* get_default_threadpool()
         {
             return g_thread_pool;
         }
         
-        void Shutdown()
+        void shutdown()
         {
             if(g_per_frame_memory)
             {
@@ -95,5 +69,5 @@ namespace terminus
 void* operator new (size_t size, unsigned line, const char* file)
 {
     std::cout << "Performing Allocation of size " << size << " in File " << file << " at line number " << line << std::endl;
-    return terminus::Global::g_allocator->Allocate(size, MEMORY_ALIGNMENT);
+    return terminus::global::g_allocator->Allocate(size, MEMORY_ALIGNMENT);
 }

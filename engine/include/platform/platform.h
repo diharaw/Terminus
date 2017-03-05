@@ -1,15 +1,14 @@
 #ifndef PlatformBackend_h
 #define PlatformBackend_h
 
-#include <Core/config.h>
+#include <core/types.h>
+#include <core/config.h>
+#include <utility/timer.h>
 #include <GL/glew.h>
-#include <types.h>
-#include <SDL.h>
 #include <mutex>
-#include <Utility/timer.h>
 
 #if defined(TERMINUS_PLATFORM_WIN32)
-#include <Windows.h>
+	#include <Windows.h>
 #endif
 
 #if !defined(TERMINUS_PLATFORM_IOS)
@@ -56,49 +55,40 @@ namespace terminus
     {
     public:
         
-        Platform();
-        
-        ~Platform();
-        
-        bool initialize();
-        
-        void shutdown();
-        
-        void update();
-        
-        void request_shutdown();
-
-		void set_cursor_visibility(bool visible);
-
-		void set_relative_mouse(bool relative);
-
-		void grab_mouse(bool grab);
-        
-        void set_window_mode(WindowMode mode);
-        
-        void set_window_size(uint width, uint height);
-        
-        SDL_Window* get_window();
-        
+		Platform();
+		virtual ~Platform();
+        virtual bool initialize() = 0;
+		virtual void shutdown() = 0;
+        virtual void update() = 0;
+		virtual void set_cursor_visibility(bool visible) = 0;
+		virtual void set_relative_mouse(bool relative) = 0;
+		virtual void grab_mouse(bool grab) = 0;
+        virtual void set_window_mode(WindowMode mode) = 0;
+        virtual void set_window_size(uint width, uint height) = 0;
+		void request_shutdown();
         int get_width();
-        
         int get_height();
-        
+		int get_drawable_width();
+		int get_drawable_height();
         void begin_frame();
         void end_frame();
         double get_delta_time();
-        
-#if defined(WIN32)
-        HWND get_handle_win32();
+
+#if defined(TERMINUS_OPENGL)
+		virtual void create_opengl_context() = 0;
+		virtual void destroy_opengl_context() = 0;
+		virtual void swap_buffers_opengl() = 0;
 #endif
         
-    private:
-        bool create_platform_window();
-        
-    private:
-        SDL_Window*            _window;
+#if defined(TERMINUS_PLATFORM_WIN32)
+        HWND get_handle_win32();
+#endif
+      
+    protected:
         int					   _width;
         int					   _height;
+		int                    _drawable_width;
+		int                    _drawable_height;
         WindowMode             _window_mode;
         bool				   _vsync;
         int					   _refresh_rate;
@@ -107,7 +97,9 @@ namespace terminus
         std::mutex             _mutex;
         double                 _delta;
         Timer                  _timer;
-        
+#if defined(TERMINUS_PLATFORM_WIN32)
+		HWND				   _handle;
+#endif
     };
     
     namespace platform

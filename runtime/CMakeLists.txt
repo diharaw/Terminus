@@ -16,6 +16,13 @@ set_target_properties( Terminus-Runtime
     				   LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/runtime"
     				   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/runtime" )
 
+IF(WIN32) # Check if we are on Windows
+  if(MSVC) # Check if we are using the Visual Studio compiler
+    set_target_properties(Terminus-Runtime PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+    set_target_properties(Terminus-Runtime PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
+  endif()
+ENDIF()
+
 target_include_directories(Terminus-Runtime PUBLIC "${ENGINE_TERMINUS_INCLUDE_DIRS}"
 												   "${ENGINE_SDL2_INCLUDE_DIRS}")
 

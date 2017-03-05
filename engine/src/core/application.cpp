@@ -1,5 +1,5 @@
-#include <engine/core/application.h>
-#include <engine/utility/runtime_compile.h>
+#include <core/application.h>
+#include <utility/runtime_compile.h>
 
 namespace terminus 
 {
@@ -30,11 +30,11 @@ namespace terminus
     
 	bool Application::initialize()
 	{
-		_main_thread_pool = Global::GetDefaultThreadPool();
+		_main_thread_pool = global::get_default_threadpool();
         
         TERMINUS_CREATE_PROFILER
 
-		if (!context::get_platform().initialize())
+		if (!context::get_platform()->initialize())
 			return false;
 
 		initialize_input();
@@ -49,14 +49,9 @@ namespace terminus
 
 	void Application::run()
 	{
-        Context& context = Global::get_context();
-        Platform& platform = context::get_platform();
+        Context& context = global::get_context();
+        Platform* platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
-        
-#if defined(TERMINUS_WITH_EDITOR)
-        Editor& editor = context::get_editor();
-        editor.initialize();
-#endif
         
         context._rendering_thread.run();
         context._loading_thread.run();
@@ -74,12 +69,12 @@ namespace terminus
 		{
 			TERMINUS_BEGIN_CPU_PROFILE(simulation);
             
-            platform.begin_frame();
-			platform.update();
+            platform->begin_frame();
+			platform->update();
             EventHandler::update();
-            physics::update(platform.get_delta_time());
+            physics::update(platform->get_delta_time());
             
-            context._scene_manager.update(platform.get_delta_time());
+            context._scene_manager.update(platform->get_delta_time());
 
 			TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread
@@ -91,12 +86,11 @@ namespace terminus
 			TERMINUS_BEGIN_CPU_PROFILE(gui_update);
             //temp_render();
             ImGuiBackend::new_frame();
-            editor.update(platform.get_delta_time());
-            
-			Global::GetPerFrameAllocator()->Clear();
+           
+			global::get_per_frame_allocator()->Clear();
             
             context._swap_done_sema.notify();
-            platform.end_frame();    
+            platform->end_frame();    
 
 			TERMINUS_END_CPU_PROFILE;
 		}
@@ -142,9 +136,8 @@ namespace terminus
 
 	void Application::shutdown()
 	{
-        Context& context = Global::get_context();
+        Context& context = global::get_context();
         
-        context._editor.shutdown();
         physics::shutdown();
         
         context._load_wakeup_sema.notify();
@@ -155,7 +148,7 @@ namespace terminus
         context._rendering_thread.exit();
         
         context::get_dynamic_library_cache().shutdown();
-        context::get_platform().shutdown();
+        context::get_platform()->shutdown();
         
         TERMINUS_DESTROY_PROFILER
 	}

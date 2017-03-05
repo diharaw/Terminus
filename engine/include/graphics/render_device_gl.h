@@ -5,14 +5,14 @@
 #if defined(TERMINUS_OPENGL)
 
 #include <vector>
-#include <Graphics/render_common.h>
-#include <Resource/asset_common.h>
-#include <types.h>
+#include <graphics/render_common.h>
+#include <resource/asset_common.h>
+#include <core/types.h>
+#include <core/global.h>
 #include <container/packed_array.h>
-#include <Platform/platform.h>
-#include <Memory/pool_allocator.h>
-#include <Graphics/graphics_types_gl.h>
-#include <global.h>
+#include <platform/platform.h>
+#include <memory/pool_allocator.h>
+#include <graphics/graphics_types_gl.h>
 
 #define MAX_TEXTURE_1D 1
 #define MAX_TEXTURE_2D 1
@@ -227,16 +227,16 @@ namespace terminus
 			}
 
 		private:
-
-            SDL_GLContext            m_gl_context;
-			SDL_Window*			     m_window;
-			Framebuffer*			 m_current_framebuffer;
-			GLenum					 m_primitive_type;
-			ShaderProgram*			 m_current_program;
-            int                      _drawable_width;
-            int                      _drawable_height;
-			GLuint					 _last_sampler_location;
-			std::unordered_map<String, Texture2D*> m_render_target_map;
+			Framebuffer*							 m_current_framebuffer;
+			Platform*								 _platform;
+			GLenum									 m_primitive_type;
+			ShaderProgram*							 m_current_program;
+			GLuint									 _last_sampler_location;
+			int										 _drawable_width;
+			int										 _drawable_height;
+			int										 _width;
+			int										 _height;
+			std::unordered_map<String, Texture2D*>	 m_render_target_map;
 			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
 		};
 } // namespace terminus

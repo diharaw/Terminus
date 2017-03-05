@@ -6,16 +6,6 @@
 
 #if defined(TERMINUS_OPENGL)
 
-#ifdef TERMINUS_OPENGL
-#ifdef __APPLE__
-#define GL_MAX_MAJOR_VERSION 4
-#define GL_MAX_MINOR_VERSION 1
-#else
-#define GL_MAX_MAJOR_VERSION 4
-#define GL_MAX_MINOR_VERSION 5
-#endif
-#endif
-
 namespace terminus
 {
 	RenderDevice::RenderDevice()
@@ -30,21 +20,8 @@ namespace terminus
 
 	void RenderDevice::Initialize()
 	{
-        m_window = context::get_platform().get_window();
-        
-#ifdef __APPLE__
-        SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-#endif
-        SDL_GL_SetAttribute (SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAX_MAJOR_VERSION);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MAX_MINOR_VERSION);
-        
-        m_gl_context = SDL_GL_CreateContext(m_window);
-        SDL_GL_MakeCurrent(m_window, m_gl_context);
-        SDL_GL_GetDrawableSize(m_window, &_drawable_width, &_drawable_height);
+		_platform = context::get_platform();
+		_platform->create_opengl_context();
 
 #if defined(TERMINUS_PROFILING)
 		rmt_BindOpenGL();
@@ -65,6 +42,11 @@ namespace terminus
         m_shader_program_res_id = 0;
         m_sampler_res_id = 0;
 		_last_sampler_location = 0;
+
+		_width = _platform->get_width();
+		_height = _platform->get_height();
+		_drawable_width = _platform->get_drawable_width();
+		_drawable_height = _platform->get_drawable_height();
     }
 
 	void RenderDevice::Shutdown()
@@ -72,7 +54,7 @@ namespace terminus
 #if defined(TERMINUS_PROFILING)
 		rmt_UnbindOpenGL();
 #endif
-        SDL_GL_DeleteContext(m_gl_context);
+		_platform->destroy_opengl_context();
 	}
 
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
@@ -1826,14 +1808,14 @@ namespace terminus
         if(width == 0 && height == 0)
         {
             glViewport(topLeftX,
-                       topLeftY,//(_drawable_height - (height + topLeftY)),
+                       topLeftY,
                        _drawable_width,
                        _drawable_height);
         }
 		else
         {
             glViewport(topLeftX,
-                       (context::get_platform().get_height() - (height + topLeftY)),
+                       (_height - (height + topLeftY)),
                        width,
                        height);
         }
@@ -1841,7 +1823,7 @@ namespace terminus
 
 	void RenderDevice::SwapBuffers()
 	{
-		SDL_GL_SwapWindow(m_window);
+		_platform->swap_buffers_opengl();
 	}
 
 	void RenderDevice::Draw(int firstIndex,
