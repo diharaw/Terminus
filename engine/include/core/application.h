@@ -37,45 +37,6 @@
 #include <core/context.h>
 #include <utility/profiler.h>
 
-#if defined(TERMINUS_PLATFORM_WIN32)
-#define TERMINUS_DECLARE_MAIN(AppClass, PlatformClass)              \
-int WINAPI WinMain(HINSTANCE hinstance,								\
-									 HINSTANCE hprevinstance,		\
-								     LPSTR lpcmdline,				\
-									 int ncmdshow)					\
-{																	\
-	terminus::global::initialize();                                 \
-    terminus::global::set_platform(T_NEW PlatformClass())           \
-    terminus::Application* app = T_NEW AppClass();					\
-	if(app->initialize())											\
-	{																\
-		app->run();													\
-	}																\
-	app->shutdown();												\
-	terminus::global::shutdown();									\
-	return 0;														\
-}																	\
-
-#else
-
-#define TERMINUS_DECLARE_MAIN(AppClass, PlatformClass))				\
-int main()															\
-{																	\
-	terminus::global::initialize();                                 \
-    terminus::global::set_platform(T_NEW PlatformClass())           \
-	terminus::Application* app = T_NEW AppClass();					\
-	if(app->initialize())											\
-	{																\
-		app->run();													\
-	}																\
-	app->shutdown();												\
-	terminus::global::shutdown();									\
-	return 0;														\
-}																	\
-
-#endif
-
-
 namespace terminus
 {
 	class Application

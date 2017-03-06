@@ -2,6 +2,10 @@
 #include "platform/platform_sdl2.h"
 #include "graphics/imgui_backend_sdl2.h"
 
+#if defined(TERMINUS_PLATFORM_WIN32)
+#include <Windows.h>
+#endif
+
 namespace terminus
 {
     TERMINUS_PROFILER_INSTANCE
@@ -80,6 +84,8 @@ namespace terminus
                 //temp_render();
                 gui_backend->new_frame();
                 imgui_console::draw();
+				static bool tw = true;
+				ImGui::ShowTestWindow(&tw);
                 
                 global::get_per_frame_allocator()->Clear();
                 
@@ -154,20 +160,46 @@ namespace terminus
     };
 }
 
+#if defined(TERMINUS_PLATFORM_WIN32)
+
+int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow)
+{
+	terminus::global::initialize();
+	terminus::global::set_platform(T_NEW terminus::PlatformSDL2());
+	terminus::global::set_imgui_backend(T_NEW terminus::ImGuiBackendSDL2());
+	terminus::Application* app = T_NEW terminus::RuntimeApp();
+
+	if (app->initialize())
+	{
+		app->run();
+	}
+
+	app->shutdown();
+	terminus::global::shutdown();
+
+	return 0;
+}
+
+#else
+	
 int main()
 {
-    terminus::global::initialize();                                 
-    terminus::global::set_platform(T_NEW terminus::PlatformSDL2());
-    terminus::global::set_imgui_backend(T_NEW terminus::ImGuiBackendSDL2());
-    terminus::Application* app = T_NEW terminus::RuntimeApp();
-    
-    if(app->initialize())											
-    {																
-        app->run();													
-    }
-    
-    app->shutdown();												
-    terminus::global::shutdown();
-    
-    return 0;
+	terminus::global::initialize();
+	terminus::global::set_platform(T_NEW terminus::PlatformSDL2());
+	terminus::global::set_imgui_backend(T_NEW terminus::ImGuiBackendSDL2());
+	terminus::Application* app = T_NEW terminus::RuntimeApp();
+
+	if (app->initialize())
+	{
+		app->run();
+	}
+
+	app->shutdown();
+	terminus::global::shutdown();
+
+	return 0;
 }
+
+#endif
+
+

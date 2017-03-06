@@ -395,7 +395,7 @@ namespace terminus
             //io.ClipboardUserData = NULL;
             
 #ifdef _WIN32
-            io.ImeWindowHandle = context::get_platform().get_handle_win32();
+            io.ImeWindowHandle = context::get_platform()->get_handle_win32();
 #endif
             
         }

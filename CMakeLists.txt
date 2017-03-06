@@ -43,4 +43,5 @@ include_directories("${T_GLEW_INCLUDE_DIRS}"
 add_subdirectory(external)
 add_subdirectory(engine/src)
 add_subdirectory(runtime)
+add_subdirectory(editor)
 
