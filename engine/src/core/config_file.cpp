@@ -1,4 +1,4 @@
-#include <Core/config_file.h>
+#include <core/config_file.h>
 
 namespace terminus
 {

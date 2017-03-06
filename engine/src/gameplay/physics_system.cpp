@@ -1,7 +1,7 @@
-#include <ECS/physics_system.h>
+#include <gameplay/physics_system.h>
+#include <gameplay/scene.h>
 #include <physics/physics_engine.h>
-#include <Core/context.h>
-#include <ECS/scene.h>
+#include <core/context.h>
 
 namespace terminus
 {

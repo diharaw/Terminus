@@ -1,6 +1,6 @@
 #include <script/script_interface_impl.h>
-#include <IO/logger.h>
-#include <Core/context.h>
+#include <io/logger.h>
+#include <core/context.h>
 
 namespace terminus
 {

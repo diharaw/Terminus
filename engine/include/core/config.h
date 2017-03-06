@@ -52,8 +52,6 @@
 
 // Build Type
 
-#define TERMINUS_WITH_EDITOR
-
 #define TERMINUS_PROFILING
 
 #define MAX_CONFIG_FIELDS		  20

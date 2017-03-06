@@ -1,4 +1,4 @@
-#include <Graphics/imgui_console.h>
+#include <graphics/imgui_console.h>
 #include <iostream>
 
 #ifdef _WIN32

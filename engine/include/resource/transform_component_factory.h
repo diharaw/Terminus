@@ -1,9 +1,7 @@
 #pragma once
 
-#include <types.h>
-#include <ECS/scene.h>
-#include <editor/editor_scene.h>
-#include <editor/editor_entity.h>
+#include <core/types.h>
+#include <gameplay/scene.h>
 
 namespace terminus
 {
@@ -44,20 +42,5 @@ namespace terminus
             TransformComponent& component = scene->attach_transform_component(entity);
             create_internal(component, json);
 		}
-        
-#if defined(TERMINUS_WITH_EDITOR)
-        void create_from_desc(TransformDesc* desc, Entity& entity, Scene* scene)
-        {
-            TransformComponent& component = scene->attach_transform_component(entity);
-            component = desc->cmp;
-        }
-        
-        void create(JsonValue& json, EditorEntity& entity)
-        {
-            TransformDesc* desc = new TransformDesc();
-            create_internal(desc->cmp, json);
-            entity.add_component_desc(EditorComponentType::TRANSFORM, desc);
-        }
-#endif
 	}
 }

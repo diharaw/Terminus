@@ -1,7 +1,7 @@
 #pragma once
 
 #include <imgui.h>
-#include <IO/logger.h>
+#include <io/logger.h>
 
 namespace terminus
 {

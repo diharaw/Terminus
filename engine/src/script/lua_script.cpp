@@ -1,5 +1,5 @@
 #include <script/lua_script.h>
-#include <ECS/scene.h>
+#include <gameplay/scene.h>
 
 namespace terminus
 {

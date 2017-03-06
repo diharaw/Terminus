@@ -1,7 +1,7 @@
-#include <Resource/mesh_factory.h>
-#include <Resource/tsm_loader.h>
-#include <Core/context.h>
-#include <Utility/profiler.h>
+#include <resource/mesh_factory.h>
+#include <resource/tsm_loader.h>
+#include <core/context.h>
+#include <utility/profiler.h>
 
 namespace terminus
 {

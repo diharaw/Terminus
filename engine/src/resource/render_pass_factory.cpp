@@ -1,10 +1,10 @@
-#include <Resource/render_pass_factory.h>
-#include <Thread/thread_pool.h>
-#include <Resource/text_loader.h>
-#include <Platform/platform.h>
-#include <Graphics/render_target_pool.h>
-#include <Graphics/framebuffer_pool.h>
-#include <Core/context.h>
+#include <resource/render_pass_factory.h>
+#include <thread/thread_pool.h>
+#include <resource/text_loader.h>
+#include <platform/platform.h>
+#include <graphics/render_target_pool.h>
+#include <graphics/framebuffer_pool.h>
+#include <core/context.h>
 
 namespace terminus
 {
@@ -42,7 +42,7 @@ namespace terminus
         
         RenderPass* create(String render_pass_name)
         {
-            Platform& platform = context::get_platform();
+            Platform* platform = context::get_platform();
             RenderTargetPool& rt_pool = context::get_render_target_pool();
             FramebufferPool& fb_pool = context::get_framebuffer_pool();
             
@@ -101,13 +101,13 @@ namespace terminus
                         if (framebuffers[i].HasMember("width_divisor"))
                         {
                             float divisor = framebuffers[i]["width_divisor"].GetFloat();
-                            width = static_cast<float>(platform.get_width()) / divisor;
+                            width = static_cast<float>(platform->get_width()) / divisor;
                             w_div = divisor;
                         }
                         if (framebuffers[i].HasMember("height_divisor"))
                         {
                             float divisor = framebuffers[i]["height_divisor"].GetFloat();
-                            height = static_cast<float>(platform.get_height()) / divisor;
+                            height = static_cast<float>(platform->get_height()) / divisor;
                             h_div = divisor;
                         }
                         

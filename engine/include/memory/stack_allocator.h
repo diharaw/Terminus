@@ -3,7 +3,7 @@
 #ifndef STACKALLOCATOR_H
 #define STACKALLOCATOR_H
 
-#include <Memory/allocator.h>
+#include <memory/allocator.h>
 
 namespace terminus
 {

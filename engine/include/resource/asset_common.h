@@ -1,8 +1,8 @@
 #ifndef AssetCommon_h
 #define AssetCommon_h
 
-#include <types.h>
-#include <Graphics/render_common.h>
+#include <core/types.h>
+#include <graphics/render_common.h>
 
 struct Vertex
 {

@@ -1,6 +1,6 @@
-#include <Resource/tsm_loader.h>
-#include <Resource/asset_common.h>
-#include <IO/filesystem.h>
+#include <resource/tsm_loader.h>
+#include <resource/asset_common.h>
+#include <io/filesystem.h>
 
 namespace terminus
 {

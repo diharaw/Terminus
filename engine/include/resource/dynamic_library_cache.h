@@ -1,9 +1,9 @@
 #pragma once
 
-#include <types.h>
+#include <core/types.h>
 #include <unordered_map>
 #include <vector>
-#include <Utility/dynamic_library.h>
+#include <utility/dynamic_library.h>
 
 namespace terminus
 {

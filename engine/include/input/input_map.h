@@ -1,7 +1,7 @@
 #pragma once
 
 #include <container/hash_map.h>
-#include <types.h>
+#include <core/types.h>
 
 #define MAX_ACTION 10
 #define MAX_STATE 10

@@ -1,14 +1,11 @@
 #pragma once
 
-#ifndef SHADERCACHE_H
-#define SHADERCACHE_H
-
-#include <Resource/shader_factory.h>
-#include <Resource/shader_key.h>
-#include <Graphics/material.h>
-#include <Graphics/draw_item.h>
-#include <Graphics/render_pass.h>
-#include <types.h>
+#include <resource/shader_factory.h>
+#include <resource/shader_key.h>
+#include <graphics/material.h>
+#include <graphics/draw_item.h>
+#include <graphics/render_pass.h>
+#include <core/types.h>
 
 #include <unordered_map>
 
@@ -46,5 +43,3 @@ namespace terminus
 		void unload(ShaderProgram* program);
 	};
 }
-
-#endif

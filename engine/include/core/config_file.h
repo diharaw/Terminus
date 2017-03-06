@@ -1,9 +1,9 @@
 #pragma once
 
 #include <container/hash_map.h>
-#include <Utility/murmur_hash.h>
-#include <Core/config.h>
-#include <types.h>
+#include <utility/murmur_hash.h>
+#include <core/config.h>
+#include <core/types.h>
 
 namespace terminus
 {

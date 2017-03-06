@@ -1,7 +1,7 @@
-#include <Resource/scene_cache.h>
-#include <Resource/scene_factory.h>
-#include <Resource/text_loader.h>
-#include <IO/filesystem.h>
+#include <resource/scene_cache.h>
+#include <resource/scene_factory.h>
+#include <resource/text_loader.h>
+#include <io/filesystem.h>
 
 namespace terminus
 {

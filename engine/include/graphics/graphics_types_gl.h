@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Core/config.h>
+#include <core/config.h>
 
-#include <Graphics/render_common.h>
-#include <IO/logger.h>
-#include <types.h>
+#include <graphics/render_common.h>
+#include <io/logger.h>
+#include <core/types.h>
 #include <unordered_map>
 
 #ifdef TERMINUS_OPENGL

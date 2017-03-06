@@ -1,11 +1,8 @@
 #pragma once
 
-#ifndef TEXTURECACHE_H
-#define TEXTURECACHE_H
-
-#include <Graphics/render_common.h>
-#include <Resource/texture_factory.h>
-#include <global.h>
+#include <graphics/render_common.h>
+#include <resource/texture_factory.h>
+#include <core/global.h>
 
 #include <unordered_map>
 
@@ -23,5 +20,3 @@ namespace terminus
 		void unload(Texture* texture);
 	};
 }
-
-#endif

@@ -1,13 +1,10 @@
 #pragma once
 
-#ifndef MESHIMPORTER_H
-#define MESHIMPORTER_H
-
-#include <Resource/asset_common.h>
-#include <Resource/assimp_mesh_loader.h>
-#include <types.h>
-#include <Graphics/material.h>
-#include <IO/filesystem.h>
+#include <resource/asset_common.h>
+#include <resource/assimp_mesh_loader.h>
+#include <core/types.h>
+#include <graphics/material.h>
+#include <io/filesystem.h>
 #include "prettywriter.h"
 
 namespace terminus
@@ -151,5 +148,3 @@ namespace terminus
 
     }
 }
-
-#endif

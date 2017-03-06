@@ -1,9 +1,9 @@
-#include <Core/rendering_thread.h>
-#include <Core/context.h>
-#include <Graphics/imgui_backend.h>
-#include <Core/config.h>
+#include <core/rendering_thread.h>
+#include <core/context.h>
+#include <graphics/imgui_backend.h>
+#include <core/config.h>
 
-#include <Utility/profiler.h>
+#include <utility/profiler.h>
 
 namespace terminus
 {
@@ -29,7 +29,7 @@ namespace terminus
     
     void RenderingThread::shutdown()
     {
-        Context& context = Global::get_context();
+        Context& context = global::get_context();
         
         context._renderer.shutdown();
         context._render_device.Shutdown();
@@ -42,17 +42,17 @@ namespace terminus
     
     void RenderingThread::render_loop()
     {
-        Context& context = Global::get_context();
+        Context& context = global::get_context();
         
         context._main_ready_sema.wait();
         
         context._render_device.Initialize();
         context._renderer.initialize();
         
-#if defined(TERMINUS_WITH_EDITOR)
-        ImGuiBackend::initialize();
-        ImGuiBackend::new_frame();
-#endif
+        ImGuiBackend* gui_backend = context::get_imgui_backend();
+        
+        gui_backend->initialize();
+        gui_backend->new_frame();
         
         context._render_ready_sema.notify();
         
@@ -78,11 +78,9 @@ namespace terminus
             // wait for swap done
             context._swap_done_sema.wait();
             
-#if defined(TERMINUS_WITH_EDITOR)
-            ImGuiBackend::render();
-            context._render_device.SwapBuffers();
-#endif
+            gui_backend->render();
             
+            context._render_device.SwapBuffers();
             
         }
         
@@ -93,7 +91,7 @@ namespace terminus
     
     void submit_gpu_upload_task(Task& task)
     {
-        Context& context = Global::get_context();
+        Context& context = global::get_context();
         // queue task into rendering thread.
         context._rendering_thread.enqueue_upload_task(task);
         context._load_wakeup_sema.wait();

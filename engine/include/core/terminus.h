@@ -3,6 +3,6 @@
 #ifndef  TERMINUS_H
 #define TERMINUS_H
 
-#include <Core/application.h>
+#include <core/application.h>
 
 #endif

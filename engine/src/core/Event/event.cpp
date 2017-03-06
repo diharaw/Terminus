@@ -1,5 +1,5 @@
-#include <Core/Event/event.h>
-#include <ECS/scene_manager.h>
+#include <core/Event/event.h>
+#include <gameplay/scene_manager.h>
 
 const EventType	TriggerEvent::sk_Type(0x6905873e);
 const EventType	EntityEvent::sk_Type(0xc32fea56);

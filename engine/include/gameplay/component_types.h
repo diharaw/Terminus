@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Graphics/camera.h>
-#include <Graphics/rendering_path.h>
-#include <Resource/mesh.h>
+#include <graphics/camera.h>
+#include <graphics/rendering_path.h>
+#include <resource/mesh.h>
 #include <script/cpp_script.h>
-#include <ECS/entity.h>
-#include <types.h>
+#include <gameplay/entity.h>
+#include <core/types.h>
 #include <script/lua_script.h>
 #include <physics/physics_types.h>
 

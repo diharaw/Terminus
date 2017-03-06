@@ -1,6 +1,6 @@
 #pragma once
 
-#include "deque.h"
+#include <container/deque.h>
 
 template<typename T, size_t N>
 class HashMap

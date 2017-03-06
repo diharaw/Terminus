@@ -1,8 +1,7 @@
-#ifndef ShaderKey_h
-#define ShaderKey_h
+#pragma once
 
-#include <Resource/asset_common.h>
-#include <Graphics/draw_item.h>
+#include <resource/asset_common.h>
+#include <graphics/draw_item.h>
 
 namespace terminus
 {
@@ -154,5 +153,3 @@ namespace terminus
         
     };
 }
-
-#endif

@@ -1,6 +1,6 @@
-#include <Resource/scene_factory.h>
-#include <IO/filesystem.h>
-#include <Core/context.h>
+#include <resource/scene_factory.h>
+#include <io/filesystem.h>
+#include <core/context.h>
 
 namespace terminus
 {

@@ -1,9 +1,9 @@
-#include <Graphics/renderer.h>
-#include <Graphics/imgui_backend.h>
-#include <Core/config.h>
-#include <Core/context.h>
+#include <graphics/renderer.h>
+#include <graphics/imgui_backend.h>
+#include <core/config.h>
+#include <core/context.h>
 
-#include <Utility/profiler.h>
+#include <utility/profiler.h>
 
 namespace terminus
 {
@@ -56,7 +56,7 @@ namespace terminus
         
         for (int i = 0; i < queue.m_num_cmd_buf; i++)
         {
-			TERMINUS_BEGIN_GPU_PROFILE(gpu_execution);
+			//TERMINUS_BEGIN_GPU_PROFILE(gpu_execution);
 			TERMINUS_BEGIN_CPU_PROFILE(gpu_dispatch);
 
             CommandBuffer& _cmd_buf = queue.m_cmd_buf[i];
@@ -176,7 +176,7 @@ namespace terminus
             } while(!is_done);
 
 			TERMINUS_END_CPU_PROFILE
-			TERMINUS_END_GPU_PROFILE;
+			//TERMINUS_END_GPU_PROFILE;
         }
     }
     

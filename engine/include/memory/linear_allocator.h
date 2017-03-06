@@ -3,7 +3,7 @@
 #ifndef LINEARALLOCATOR_H
 #define LINEARALLOCATOR_H
 
-#include <Memory/allocator.h>
+#include <memory/allocator.h>
 
 namespace terminus
 {

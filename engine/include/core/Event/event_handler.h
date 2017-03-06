@@ -3,7 +3,7 @@
 #ifndef EVENTHANDLER_H
 #define EVENTHANDLER_H
 
-#include <Core/Event/event.h>
+#include <core/Event/event.h>
 #include <container/packed_array.h>
 #include <Delegate11.h>
 #include <vector>

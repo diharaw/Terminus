@@ -1,6 +1,6 @@
-#include <ECS/camera_system.h>
-#include <ECS/scene.h>
-#include <Math/math_utility.h>
+#include <gameplay/camera_system.h>
+#include <gameplay/scene.h>
+#include <math/math_utility.h>
 
 namespace terminus
 {

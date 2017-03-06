@@ -1,8 +1,8 @@
-#include <Resource/rendering_path_factory.h>
-#include <Resource/render_pass_cache.h>
-#include <Resource/text_loader.h>
-#include <Core/context.h>
-#include <types.h>
+#include <resource/rendering_path_factory.h>
+#include <resource/render_pass_cache.h>
+#include <resource/text_loader.h>
+#include <core/context.h>
+#include <core/types.h>
 
 namespace terminus
 {

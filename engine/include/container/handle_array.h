@@ -1,7 +1,7 @@
 #pragma once
 
-#include "handle.h"
-#include "deque.h"
+#include <container/handle.h>
+#include <container/deque.h>
 
 template<typename T, size_t N>
 class HandleArray

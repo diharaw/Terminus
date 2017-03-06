@@ -5,13 +5,13 @@
 #if defined(TERMINUS_DIRECT3D11)
 
 #include <vector>
-#include <Graphics/render_common.h>
-#include <Resource/asset_common.h>
-#include <types.h>
+#include <graphics/render_common.h>
+#include <resource/asset_common.h>
+#include <core/types.h>
 #include <container/packed_array.h>
-#include <Platform/platform.h>
-#include <Memory/pool_allocator.h>
-#include <Graphics/graphics_types_d3d11.h>
+#include <platform/platform.h>
+#include <memory/pool_allocator.h>
+#include <graphics/graphics_types_d3d11.h>
 
 #define MAX_TEXTURE_1D 1
 #define MAX_TEXTURE_2D 1

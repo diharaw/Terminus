@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Resource/mesh_factory.h>
-#include <Resource/material_cache.h>
-#include <types.h>
+#include <resource/mesh_factory.h>
+#include <resource/material_cache.h>
+#include <core/types.h>
 
 #include <unordered_map>
 

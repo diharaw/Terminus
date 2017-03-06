@@ -1,6 +1,7 @@
 #pragma once
 
 #include <platform/platform.h>
+#include <SDL.h>
 
 namespace terminus
 {
@@ -26,6 +27,7 @@ namespace terminus
 
 	private:
 		bool create_platform_window();
+        void create_input_map();
 
 	private:
 		SDL_Window*   _window;

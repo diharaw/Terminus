@@ -38,14 +38,15 @@
 #include <utility/profiler.h>
 
 #if defined(TERMINUS_PLATFORM_WIN32)
-#define TERMINUS_DECLARE_MAIN(AppClass, PlatformClass)				\
+#define TERMINUS_DECLARE_MAIN(AppClass, PlatformClass)              \
 int WINAPI WinMain(HINSTANCE hinstance,								\
 									 HINSTANCE hprevinstance,		\
 								     LPSTR lpcmdline,				\
 									 int ncmdshow)					\
 {																	\
-	terminus::global::initialize<PlatformClass>();					\
-	terminus::Application* app = T_NEW AppClass();					\
+	terminus::global::initialize();                                 \
+    terminus::global::set_platform(T_NEW PlatformClass())           \
+    terminus::Application* app = T_NEW AppClass();					\
 	if(app->initialize())											\
 	{																\
 		app->run();													\
@@ -60,7 +61,8 @@ int WINAPI WinMain(HINSTANCE hinstance,								\
 #define TERMINUS_DECLARE_MAIN(AppClass, PlatformClass))				\
 int main()															\
 {																	\
-	terminus::global::initialize<PlatformClass>();					\
+	terminus::global::initialize();                                 \
+    terminus::global::set_platform(T_NEW PlatformClass())           \
 	terminus::Application* app = T_NEW AppClass();					\
 	if(app->initialize())											\
 	{																\
@@ -74,32 +76,19 @@ int main()															\
 #endif
 
 
-namespace terminus {
-
+namespace terminus
+{
 	class Application
 	{
-	private:
+	protected:
 		DefaultThreadPool*   _main_thread_pool;
         
 	public:
-		Application();
-		~Application();
-		bool initialize();
-		void run();
-		void shutdown();
-
-	private:
-		void initialize_input();
-		void initialize_resources();
-		void initialize_physics();
-		void initialize_audio();
-		void initialize_ecs();
-		void initialize_script();
-		void load_initial_scene();
-
-        EVENT_METHOD_DECLARATION(OnScenePreload);
-        
-        void temp_render();
+        Application() {}
+        virtual ~Application() {}
+        virtual bool initialize() = 0;
+        virtual void run() = 0;
+        virtual void shutdown() = 0;
 	};
 
 }

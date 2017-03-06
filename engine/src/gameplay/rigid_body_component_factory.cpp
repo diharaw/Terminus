@@ -1,5 +1,5 @@
-#include <Resource/rigid_body_component_factory.h>
-#include <ECS/component_types.h>
+#include <resource/rigid_body_component_factory.h>
+#include <gameplay/component_types.h>
 #include <physics/physics_engine.h>
 
 namespace terminus

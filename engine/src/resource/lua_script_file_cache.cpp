@@ -1,6 +1,6 @@
-#include <Resource/lua_script_file_cache.h>
-#include <Utility/murmur_hash.h>
-#include <IO/filesystem.h>
+#include <resource/lua_script_file_cache.h>
+#include <utility/murmur_hash.h>
+#include <io/filesystem.h>
 
 namespace terminus
 {

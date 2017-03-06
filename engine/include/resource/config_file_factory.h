@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Core/config_file.h>
-#include <Resource/text_loader.h>
-#include <types.h>
+#include <core/types.h>
+#include <core/config_file.h>
+#include <resource/text_loader.h>
 
 namespace terminus
 {

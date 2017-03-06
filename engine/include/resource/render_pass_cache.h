@@ -1,9 +1,6 @@
 #pragma once
 
-#ifndef RENDERPASSCACHE_H
-#define RENDERPASSCACHE_H
-
-#include <Resource/render_pass_factory.h>
+#include <resource/render_pass_factory.h>
 
 namespace terminus
 {
@@ -21,5 +18,3 @@ namespace terminus
 		void unload(RenderPass* renderPass);
 	};
 }
-
-#endif

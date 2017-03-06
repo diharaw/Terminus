@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ECS/entity.h>
-#include <ECS/component_types.h>
+#include <gameplay/entity.h>
+#include <gameplay/component_types.h>
 
 namespace terminus
 {

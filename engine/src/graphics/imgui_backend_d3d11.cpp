@@ -1,10 +1,12 @@
-#include <Core/config.h>
+#include <core/config.h>
 
 #if defined(TERMINUS_DIRECT3D11)
 
-#include <Graphics/imgui_backend.h>
-#include <IO/filesystem.h>
-#include <Core/context.h>
+#include <graphics/imgui_backend.h>
+#include <imgui.h>
+#include <graphics/render_device.h>
+#include <io/filesystem.h>
+#include <core/context.h>
 
 namespace terminus 
 { 

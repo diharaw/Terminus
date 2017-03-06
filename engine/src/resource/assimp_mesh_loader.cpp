@@ -1,6 +1,6 @@
-#include <Resource/assimp_mesh_loader.h>
-#include <Resource/asset_common.h>
-#include <IO/filesystem.h>
+#include <resource/assimp_mesh_loader.h>
+#include <resource/asset_common.h>
+#include <io/filesystem.h>
 #include <iostream>
 
 namespace terminus

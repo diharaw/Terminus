@@ -12,6 +12,34 @@ IF(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000")
 ENDIF()
 
+set(T_GLEW_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/glew/include")
+set(T_SDL2_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/SDL2/include")
+set(T_RAPIDJSON_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/rapidjson")
+set(T_IMGUI_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/imgui")
+set(T_GLM_INCLUDE_DIRS 			  	  "${PROJECT_SOURCE_DIR}/external/glm")
+set(T_LIBZIP_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/Libzip/lib")
+set(T_SIMPLEFILEWATCHER_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/external/simplefilewatcher")
+set(T_STB_INCLUDE_DIRS 	  		  	  "${PROJECT_SOURCE_DIR}/external/stb")
+set(T_DELEGATES_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/Delegates11")
+set(T_BULLET_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/Bullet 3/src")
+set(T_LUAJIT_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/luajit/src")
+set(T_SOL2_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/sol2")
+set(T_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/engine/include")
+
+include_directories("${T_GLEW_INCLUDE_DIRS}" 
+					"${T_SDL2_INCLUDE_DIRS}"
+					"${T_RAPIDJSON_INCLUDE_DIRS}"
+					"${T_IMGUI_INCLUDE_DIRS}"
+					"${T_GLM_INCLUDE_DIRS}"
+					"${T_LIBZIP_INCLUDE_DIRS}"
+					"${T_SIMPLEFILEWATCHER_INCLUDE_DIRS}"
+					"${T_STB_INCLUDE_DIRS}"
+					"${T_DELEGATES_INCLUDE_DIRS}"
+					"${T_BULLET_INCLUDE_DIRS}"
+					"${T_LUAJIT_INCLUDE_DIRS}"
+					"${T_SOL2_INCLUDE_DIRS}"
+					"${T_TERMINUS_INCLUDE_DIRS}")
+
 add_subdirectory(external)
 add_subdirectory(engine/src)
 add_subdirectory(runtime)

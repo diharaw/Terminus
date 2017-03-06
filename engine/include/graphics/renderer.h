@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Graphics/render_device.h>
-#include <Graphics/graphics_queue.h>
+#include <graphics/render_device.h>
+#include <graphics/graphics_queue.h>
 
 namespace terminus
 {

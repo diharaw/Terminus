@@ -1,6 +1,6 @@
 #pragma once
 
-#include <types.h>
+#include <core/types.h>
 #include <container/hash_map.h>
 
 #define MAX_SCRIPT_FILES 20

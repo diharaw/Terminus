@@ -1,9 +1,9 @@
 #ifndef DRAWITEM_H
 #define DRAWITEM_H
 
-#include <Graphics/render_device.h>
-#include <Graphics/material.h>
-#include <Graphics/renderer.h>
+#include <graphics/render_device.h>
+#include <graphics/material.h>
+#include <graphics/renderer.h>
 
 namespace terminus
 {
@@ -46,6 +46,7 @@ namespace terminus
         int            index_count;
         unsigned int   base_index;
         unsigned int   base_vertex;
+        int            renderable_id;
     };
 } // namespace terminus
 

@@ -3,8 +3,8 @@
 #ifndef ASSIMPMESHLOADER_H
 #define ASSIMPMESHLOADER_H
 
-#include <Resource/asset_common.h>
-#include <types.h>
+#include <resource/asset_common.h>
+#include <core/types.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

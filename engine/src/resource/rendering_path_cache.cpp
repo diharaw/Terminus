@@ -1,6 +1,6 @@
-#include <Resource/rendering_path_cache.h>
-#include <Resource/rendering_path_factory.h>
-#include <Core/context.h>
+#include <resource/rendering_path_cache.h>
+#include <resource/rendering_path_factory.h>
+#include <core/context.h>
 
 namespace terminus
 {

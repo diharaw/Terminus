@@ -1,18 +1,23 @@
 #pragma once
 
-#include <SDL.h>
-#include <types.h>
+#include <core/types.h>
 #include <container/handle.h>
-#include <Input/player_context.h>
+#include <input/player_context.h>
 
 #define MAX_MOUSE_BUTTONS 5
 #define MAX_KEYBOARD_BUTTONS 512
 
 namespace terminus
-{
-    struct InputMap;
-    
+{    
     using PlayerContextHandle = Handle<PlayerContext>;
+    
+    enum InputActionType
+    {
+        KEY_DOWN = 0,
+        KEY_UP,
+        MOUSE_BUTTON_DOWN,
+        MOUSE_BUTTON_UP
+    };
     
     namespace input_handler
     {
@@ -164,7 +169,7 @@ namespace terminus
         struct MouseDevice
         {
             bool button_states[MAX_MOUSE_BUTTONS];
-            Uint32 wheel;
+            uint32_t wheel;
             int x_position;
             int y_position;
         };
@@ -180,11 +185,10 @@ namespace terminus
         extern PlayerContextHandle get_default_player_context();
         extern InputMapHandle load_input_map(PlayerContextHandle player, String name);
         extern void set_active_input_map(PlayerContextHandle player, InputMapHandle input_map);
-        extern void process_keyboard_input(Sint32 key, Sint32 scan_code, Uint32 action);
-        extern void process_mouse_button_input(Uint8 Key, Uint32 action);
-        extern void process_cursor_input(Sint32 xpos, Sint32 ypos, Sint32 xrel, Sint32 yrel);
-        extern void process_mouse_wheel_input(Uint32 value);
-        extern void process_window_events(SDL_Event& event);
+        extern void process_keyboard_input(uint32_t key, uint32_t scan_code, uint32_t action);
+        extern void process_mouse_button_input(uint8_t Key, uint32_t action);
+        extern void process_cursor_input(int32_t xpos, int32_t ypos, int32_t xrel, int32_t yrel, bool relative);
+        extern void process_mouse_wheel_input(uint32_t value);
         extern MouseDevice& get_mouse_device();
         extern KeyboardDevice& get_keyboard_device();
         extern GamepadDevice& get_gamepad_device(PlayerContextHandle player);

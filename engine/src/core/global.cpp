@@ -16,6 +16,40 @@ namespace terminus
         DefaultThreadPool*   g_thread_pool = nullptr;
 		Context* g_context = nullptr;
         
+        void initialize()
+        {
+            logger::initialize();
+            
+            logger::open_file_stream();
+            
+            g_memory = malloc(MAX_MEMORY);
+            g_allocator = new LinearAllocator(MAX_MEMORY, g_memory);
+            
+            g_per_frame_memory = malloc(MAX_PER_FRAME_MEMORY);
+            g_per_frame_allocator = new LinearAllocator(MAX_PER_FRAME_MEMORY, g_per_frame_memory);
+            
+            g_thread_pool = T_NEW DefaultThreadPool();
+            
+            g_context = T_NEW Context();
+            g_context->_shutdown = false;
+            
+            filesystem::add_directory("config");
+            g_context->_engine_config = config_file_factory::create("engine_config.json");
+            
+            imgui_console::initialize();
+            logger::open_custom_stream(&imgui_console::logger_callback);
+        }
+        
+        void set_platform(Platform* platform)
+        {
+            g_context->_platform = platform;
+        }
+        
+        void set_imgui_backend(ImGuiBackend* backend)
+        {
+            g_context->_imgui_backend = backend;
+        }
+        
         Context& get_context()
         {
             return *g_context;

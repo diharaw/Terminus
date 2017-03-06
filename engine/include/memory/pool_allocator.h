@@ -3,7 +3,7 @@
 #ifndef POOLALLOCATOR_H
 #define POOLALLOCATOR_H
 
-#include <Memory/allocator.h>
+#include <memory/allocator.h>
 
 namespace terminus
 {

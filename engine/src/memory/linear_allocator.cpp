@@ -1,4 +1,4 @@
-#include <Memory/linear_allocator.h>
+#include <memory/linear_allocator.h>
 
 namespace terminus
 {

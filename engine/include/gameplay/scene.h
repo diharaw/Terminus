@@ -1,16 +1,16 @@
 #pragma once
 
-#include <ECS/component_types.h>
-#include <Graphics/render_device.h>
-#include <types.h>
+#include <gameplay/component_types.h>
+#include <graphics/render_device.h>
+#include <core/types.h>
 #include <container/packed_array.h>
-#include <ECS/component_pool.h>
-#include <ECS/entity.h>
-#include <ECS/transform_system.h>
-#include <ECS/render_system.h>
-#include <ECS/camera_system.h>
-#include <ECS/script_system.h>
-#include <ECS/physics_system.h>
+#include <gameplay/component_pool.h>
+#include <gameplay/entity.h>
+#include <gameplay/transform_system.h>
+#include <gameplay/render_system.h>
+#include <gameplay/camera_system.h>
+#include <gameplay/script_system.h>
+#include <gameplay/physics_system.h>
 
 #include <vector>
 #include <iostream>

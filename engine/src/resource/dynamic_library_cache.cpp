@@ -1,6 +1,6 @@
-#include <Resource/dynamic_library_cache.h>
-#include <IO/logger.h>
-#include <IO/filesystem.h>
+#include <resource/dynamic_library_cache.h>
+#include <io/logger.h>
+#include <io/filesystem.h>
 
 namespace terminus
 {

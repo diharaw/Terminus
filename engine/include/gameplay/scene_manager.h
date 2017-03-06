@@ -3,13 +3,11 @@
 #ifndef  SCENEMANAGER_H
 #define SCENEMANAGER_H
 
-#include <ECS/scene.h>
-#include <global.h>
-#include <types.h>
-#include <Resource/scene_cache.h>
-#include <Core/Event/event_handler.h>
-
-#include <editor/editor_scene.h>
+#include <gameplay/scene.h>
+#include <core/global.h>
+#include <core/types.h>
+#include <resource/scene_cache.h>
+#include <core/Event/event_handler.h>
 
 #include <vector>
 
@@ -31,7 +29,6 @@ namespace terminus
         void initialize();
         void update(double dt);
 		void load(String scene);
-        void load_from_editor_scene(EditorScene* editor_scene);
 		void preload(String scene);
 		void set_active_scene(String scene);
 		void unload(String scene);

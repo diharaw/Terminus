@@ -1,8 +1,8 @@
-#include <Graphics/render_device_gl.h>
-#include <Core/context.h>
-#include <Utility/string_utility.h>
+#include <graphics/render_device_gl.h>
+#include <core/context.h>
+#include <utility/string_utility.h>
+#include <utility/profiler.h>
 #include <iostream>
-#include <Utility/profiler.h>
 
 #if defined(TERMINUS_OPENGL)
 

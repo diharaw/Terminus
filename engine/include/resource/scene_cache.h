@@ -1,9 +1,6 @@
 #pragma once
 
-#ifndef  SCENECACHE_H
-#define SCENECACHE_H
-
-#include <Resource/scene_factory.h>
+#include <resource/scene_factory.h>
 
 namespace terminus
 {
@@ -20,5 +17,3 @@ namespace terminus
 			void unload(Scene* scene);
 		};
 }
-
-#endif

@@ -1,4 +1,6 @@
-#include <types.h>
+#pragma once
+
+#include <core/types.h>
 #include <string>
 #include <include/FileWatcher/FileWatcher.h>
 

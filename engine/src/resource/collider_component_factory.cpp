@@ -1,4 +1,4 @@
-#include <Resource/collider_component_factory.h>
+#include <resource/collider_component_factory.h>
 #include <physics/physics_engine.h>
 
 namespace terminus

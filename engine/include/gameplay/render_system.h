@@ -1,14 +1,14 @@
 #ifndef RENDERSYSTEM_H
 #define RENDERSYSTEM_H
 
-#include <global.h>
-#include <Graphics/rendering_path.h>
-#include <Graphics/draw_item.h>
-#include <Graphics/renderer.h>
-#include <Resource/shader_cache.h>
-#include <Resource/mesh.h>
+#include <core/global.h>
+#include <graphics/rendering_path.h>
+#include <graphics/draw_item.h>
+#include <graphics/renderer.h>
+#include <resource/shader_cache.h>
+#include <resource/mesh.h>
 #include <container/packed_array.h>
-#include <ECS/entity.h>
+#include <gameplay/entity.h>
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10

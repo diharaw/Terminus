@@ -1,8 +1,8 @@
 #ifndef GRAPHICSQUEUE_H
 #define GRAPHICSQUEUE_H
 
-#include <Graphics/command_buffer.h>
-#include <global.h>
+#include <graphics/command_buffer.h>
+#include <core/global.h>
 
 #define MAX_COMMAND_BUFFERS 32
 #define PER_FRAME_UNIFORM_MEMORY 1
@@ -19,7 +19,7 @@ namespace terminus
         GraphicsQueue()
         {
             m_num_cmd_buf = 0;
-            void* allocator_memory = Global::GetDefaultAllocator()->Allocate(PER_FRAME_UNIFORM_MEMORY_BYTES, 8);
+            void* allocator_memory = global::get_default_allocator()->Allocate(PER_FRAME_UNIFORM_MEMORY_BYTES, 8);
             m_allocator = T_NEW LinearAllocator(PER_FRAME_UNIFORM_MEMORY_BYTES, allocator_memory);
         }
         
@@ -33,7 +33,7 @@ namespace terminus
             uint32 cmd_buf_idx = m_num_cmd_buf;
          
             // TODO : Use pool allocator;
-            void* mem = Global::GetDefaultAllocator()->Allocate(COMMAND_BUFFER_SIZE_BYTES, 8);
+            void* mem = global::get_default_allocator()->Allocate(COMMAND_BUFFER_SIZE_BYTES, 8);
             m_cmd_buf[cmd_buf_idx].m_memory = mem;
             m_cmd_buf[cmd_buf_idx].m_pos = mem;
             m_cmd_buf[cmd_buf_idx].WriteEnd();

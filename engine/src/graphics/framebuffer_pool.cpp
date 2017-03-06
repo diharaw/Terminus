@@ -1,5 +1,5 @@
-#include <Graphics/framebuffer_pool.h>
-#include <Core/context.h>
+#include <graphics/framebuffer_pool.h>
+#include <core/context.h>
 
 namespace terminus
 {

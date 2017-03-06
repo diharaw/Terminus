@@ -5,8 +5,8 @@
 
 #include <string>
 #include <vector>
-#include <types.h>
-#include <Graphics/render_common.h>
+#include <core/types.h>
+#include <graphics/render_common.h>
 
 namespace terminus
 {

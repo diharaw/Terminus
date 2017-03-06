@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Core/config.h>
+#include <core/config.h>
 
 #if defined(TERMINUS_PROFILING)
 
-#include <Utility/Remotery.h>
+#include <utility/Remotery.h>
 
 	#define TERMINUS_BEGIN_CPU_PROFILE(x) rmt_BeginCPUSample(x, 0);
 	#define TERMINUS_END_CPU_PROFILE rmt_EndCPUSample();

@@ -1,6 +1,6 @@
-#include <Resource/stb_image_loader.h>
-#include <Resource/asset_common.h>
-#include <IO/filesystem.h>
+#include <resource/stb_image_loader.h>
+#include <resource/asset_common.h>
+#include <io/filesystem.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

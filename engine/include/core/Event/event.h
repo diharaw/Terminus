@@ -4,7 +4,7 @@
 #define EVENT_H
 
 #include <string>
-#include <types.h>
+#include <core/types.h>
 
 class Actor;
 class Entity;

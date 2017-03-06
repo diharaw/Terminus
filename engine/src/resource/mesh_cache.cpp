@@ -1,7 +1,7 @@
-#include <Resource/mesh_cache.h>
-#include <Resource/tsm_loader.h>
-#include <Core/context.h>
-#include <IO/filesystem.h>
+#include <resource/mesh_cache.h>
+#include <resource/tsm_loader.h>
+#include <core/context.h>
+#include <io/filesystem.h>
 
 #include <iostream>
 

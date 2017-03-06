@@ -1,6 +1,6 @@
-#include <ECS/transform_system.h>
-#include <ECS/component_types.h>
-#include <ECS/scene.h>
+#include <gameplay/transform_system.h>
+#include <gameplay/component_types.h>
+#include <gameplay/scene.h>
 
 namespace terminus
 {

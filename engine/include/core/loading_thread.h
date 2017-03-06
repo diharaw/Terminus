@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Thread/thread_pool.h>
-#include <Thread/semaphore.h>
+#include <thread/thread_pool.h>
+#include <thread/semaphore.h>
 #include <thread>
 
 namespace terminus

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Resource/asset_common.h>
-#include <types.h>
+#include <resource/asset_common.h>
+#include <core/types.h>
 
 namespace terminus
 {

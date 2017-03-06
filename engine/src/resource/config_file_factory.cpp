@@ -1,5 +1,5 @@
-#include <Resource/config_file_factory.h>
-#include <Core/context.h>
+#include <resource/config_file_factory.h>
+#include <core/context.h>
 
 namespace terminus
 {

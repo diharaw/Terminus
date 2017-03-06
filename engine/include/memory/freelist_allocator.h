@@ -3,7 +3,7 @@
 #ifndef FREELISTALLOCATOR_H
 #define FREELISTALLOCATOR_H
 
-#include <Memory/allocator.h>
+#include <memory/allocator.h>
 
 namespace terminus
 {

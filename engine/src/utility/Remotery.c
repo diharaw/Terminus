@@ -46,7 +46,7 @@
 */
 
 #define RMT_IMPL
-#include "Remotery.h"
+#include <utility/Remotery.h>
 
 
 #ifdef RMT_PLATFORM_WINDOWS

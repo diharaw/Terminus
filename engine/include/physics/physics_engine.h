@@ -3,7 +3,7 @@
 #include <physics/physics_types.h>
 #include <container/packed_array.h>
 
-#include <types.h>
+#include <core/types.h>
 
 #define MAX_RIGID_BODIES 1024
 #define MAX_COLLISION_SHAPES 1024

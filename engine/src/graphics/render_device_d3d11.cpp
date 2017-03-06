@@ -1,6 +1,6 @@
-#include <Graphics/render_device_d3d11.h>
-#include <Core/context.h>
-#include <global.h>
+#include <graphics/render_device_d3d11.h>
+#include <core/context.h>
+#include <core/global.h>
 #include <algorithm>
 
 #if defined(TERMINUS_DIRECT3D11) && defined(WIN32)

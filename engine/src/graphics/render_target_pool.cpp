@@ -1,5 +1,5 @@
-#include <Graphics/render_target_pool.h>
-#include <Core/context.h>
+#include <graphics/render_target_pool.h>
+#include <core/context.h>
 
 namespace terminus
 {

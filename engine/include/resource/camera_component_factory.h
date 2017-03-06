@@ -1,11 +1,9 @@
 #pragma once
 
-#include <types.h>
-#include <ECS/entity.h>
-#include <ECS/component_types.h>
-#include <Core/context.h>
-#include <editor/editor_scene.h>
-#include <editor/editor_entity.h>
+#include <core/types.h>
+#include <gameplay/entity.h>
+#include <gameplay/component_types.h>
+#include <core/context.h>
 
 namespace terminus
 {
@@ -52,8 +50,8 @@ namespace terminus
                     
                     if(aspect_x == 0 && aspect_y == 0)
                     {
-                        aspect_x = context::get_platform().get_width();
-                        aspect_y = context::get_platform().get_height();
+                        aspect_x = context::get_platform()->get_width();
+                        aspect_y = context::get_platform()->get_height();
                     }
                     
                     component.persp_info.aspect_ratio = aspect_x / aspect_y;
@@ -85,20 +83,5 @@ namespace terminus
             CameraComponent& component = scene->attach_camera_component(entity);
             create_internal(component, json);
         }
-        
-#if defined(TERMINUS_WITH_EDITOR)
-        void create_from_desc(CameraDesc* desc, Entity& entity, Scene* scene)
-        {
-            CameraComponent& component = scene->attach_camera_component(entity);
-            component = desc->cmp;
-        }
-        
-        void create(JsonValue& json, EditorEntity& entity)
-        {
-            CameraDesc* desc = new CameraDesc();
-            create_internal(desc->cmp, json);
-            entity.add_component_desc(EditorComponentType::CAMERA, desc);
-        }
-#endif
 	}
 }

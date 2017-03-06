@@ -3,7 +3,7 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include <types.h>
+#include <core/types.h>
 
 namespace terminus
 {

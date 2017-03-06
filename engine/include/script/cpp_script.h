@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Utility/serializable.h>
-#include <Core/macro.h>
-#include <ECS/entity.h>
+#include <utility/serializable.h>
+#include <core/macro.h>
+#include <gameplay/entity.h>
 #include <script/script_interface.h>
 
 namespace terminus

@@ -1,7 +1,7 @@
-#include <Resource/material_factory.h>
-#include <Resource/text_loader.h>
-#include <Resource/texture_cache.h>
-#include <Core/context.h>
+#include <resource/material_factory.h>
+#include <resource/text_loader.h>
+#include <resource/texture_cache.h>
+#include <core/context.h>
 
 namespace terminus
 {

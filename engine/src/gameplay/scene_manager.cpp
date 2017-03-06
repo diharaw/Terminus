@@ -1,16 +1,11 @@
-#include <ECS/scene_manager.h>
-#include <Core/context.h>
+#include <gameplay/scene_manager.h>
+#include <core/context.h>
 
 namespace terminus
 {
     struct SceneLoadData
     {
         char scene_name[100];
-    };
-    
-    struct EditorSceneLoadData
-    {
-        EditorScene* scene;
     };
     
     struct SceneUnloadData
@@ -22,17 +17,6 @@ namespace terminus
     {
         SceneLoadData* load_data = (SceneLoadData*)data;
         Scene* loaded = context::get_scene_cache().load(String(load_data->scene_name));
-        
-        // Fire Scene Load Complete Event
-        
-        SceneLoadEvent* event = new SceneLoadEvent(loaded);
-        EventHandler::queue_event(event);
-    }
-    
-    void editor_scene_load_task(void* data)
-    {
-        EditorSceneLoadData* load_data = (EditorSceneLoadData*)data;
-        Scene* loaded = scene_factory::create(load_data->scene);
         
         // Fire Scene Load Complete Event
         
@@ -89,7 +73,7 @@ namespace terminus
 	{
         Task task;
         
-        LoadingThread& loading_thread = Global::get_context()._loading_thread;
+        LoadingThread& loading_thread = global::get_context()._loading_thread;
         
         SceneLoadData* data = task_data<SceneLoadData>(task);
         
@@ -105,7 +89,7 @@ namespace terminus
 	{
         Task task;
         
-        LoadingThread& loading_thread = Global::get_context()._loading_thread;
+        LoadingThread& loading_thread = global::get_context()._loading_thread;
 
         SceneLoadData* data = task_data<SceneLoadData>(task);
 
@@ -117,20 +101,6 @@ namespace terminus
         loading_thread.enqueue_load_task(task);
 	}
     
-    void SceneManager::load_from_editor_scene(EditorScene* editor_scene)
-    {
-        Task task;
-        
-        LoadingThread& loading_thread = Global::get_context()._loading_thread;
-        
-        EditorSceneLoadData* data = task_data<EditorSceneLoadData>(task);
-        
-        data->scene = editor_scene;
-        task._function.Bind<&editor_scene_load_task>();
-        
-        loading_thread.enqueue_load_task(task);
-    }
-
 	void SceneManager::set_active_scene(String scene)
 	{
 		
@@ -147,7 +117,7 @@ namespace terminus
                 // is an active scene
                 // TODO: more graceful scene unload
                 Task task;
-                LoadingThread& loading_thread = Global::get_context()._loading_thread;
+                LoadingThread& loading_thread = global::get_context()._loading_thread;
                 
                 SceneUnloadData* data = task_data<SceneUnloadData>(task);
                 data->_scene = _active_scenes[i];

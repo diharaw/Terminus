@@ -1,10 +1,7 @@
 #pragma once
 
-#ifndef STBIMAGELOADER_H
-#define STBIMAGELOADER_H
-
-#include <Resource/asset_common.h>
-#include <types.h>
+#include <resource/asset_common.h>
+#include <core/types.h>
 
 namespace terminus
 {
@@ -13,5 +10,3 @@ namespace terminus
 		extern asset_common::ImageLoadData* load(std::string id);
 	};
 }
-
-#endif

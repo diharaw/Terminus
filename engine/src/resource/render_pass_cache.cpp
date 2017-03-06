@@ -1,6 +1,6 @@
-#include <Resource/render_pass_cache.h>
-#include <IO/filesystem.h>
-#include <IO/logger.h>
+#include <resource/render_pass_cache.h>
+#include <io/filesystem.h>
+#include <io/logger.h>
 
 #include <iostream>
 

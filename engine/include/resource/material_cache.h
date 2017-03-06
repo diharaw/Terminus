@@ -1,11 +1,8 @@
 #pragma once
 
-#ifndef MATERIALCACHE_H
-#define MATERIALCACHE_H
-
-#include <Resource/material_factory.h>
-#include <Resource/texture_cache.h>
-#include <types.h>
+#include <resource/material_factory.h>
+#include <resource/texture_cache.h>
+#include <core/types.h>
 
 #include <unordered_map>
 
@@ -23,5 +20,3 @@ namespace terminus
 		void unload(Material* material);
 	};
 }
-
-#endif

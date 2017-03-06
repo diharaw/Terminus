@@ -1,11 +1,14 @@
-#ifndef PlatformBackend_h
-#define PlatformBackend_h
+#pragma once
 
 #include <core/types.h>
 #include <core/config.h>
 #include <utility/timer.h>
-#include <GL/glew.h>
+#include <container/hash_map.h>
 #include <mutex>
+
+#if defined(TERMINUS_OPENGL)
+    #include <GL/glew.h>
+#endif
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 	#include <Windows.h>
@@ -15,6 +18,10 @@
     #include <nfd.h>
     #include <boxer/boxer.h>
 #endif
+
+#define MAX_KEYBOARD_INPUTS 100
+#define MAX_MOUSE_INPUTS 10
+#define MAX_GAMEPAD_INPUTS 20
 
 enum class Selection
 {
@@ -84,6 +91,11 @@ namespace terminus
         HWND get_handle_win32();
 #endif
       
+    public:
+        HashMap<uint32_t, MAX_KEYBOARD_INPUTS>     _keyboard_code_map;
+        HashMap<uint8_t, MAX_MOUSE_INPUTS>        _mouse_code_map;
+        HashMap<uint8_t, MAX_GAMEPAD_INPUTS>      _gamepad_code_map;
+        
     protected:
         int					   _width;
         int					   _height;
@@ -147,5 +159,3 @@ namespace terminus
         }
     }
 }
-
-#endif

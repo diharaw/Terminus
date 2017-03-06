@@ -1,13 +1,10 @@
 #pragma once
 
-#ifndef SHADERFACTORY_H
-#define SHADERFACTORY_H
-
-#include <Graphics/render_common.h>
-#include <Graphics/render_device.h>
-#include <Resource/asset_common.h>
-#include <Resource/shader_key.h>
-#include <Utility/string_utility.h>
+#include <graphics/render_common.h>
+#include <graphics/render_device.h>
+#include <resource/asset_common.h>
+#include <resource/shader_key.h>
+#include <utility/string_utility.h>
 
 namespace terminus
 {
@@ -19,5 +16,3 @@ namespace terminus
         extern ShaderProgram* create_program(Shader* vs, Shader* ps, Shader* tcs, Shader* tes, Shader* gs);
     }
 }
-
-#endif

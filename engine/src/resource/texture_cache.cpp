@@ -1,8 +1,8 @@
-#include <Resource/texture_cache.h>
-#include <Resource/stb_image_loader.h>
-#include <IO/filesystem.h>
-#include <Core/context.h>
-#include <types.h>
+#include <resource/texture_cache.h>
+#include <resource/stb_image_loader.h>
+#include <io/filesystem.h>
+#include <core/context.h>
+#include <core/types.h>
 
 #include <iostream>
 

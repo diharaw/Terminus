@@ -1,9 +1,9 @@
-#include <ECS/render_system.h>
-#include <ECS/scene.h>
-#include <Resource/shader_cache.h>
-#include <ECS/component_types.h>
-#include <Core/context.h>
-#include <Utility/profiler.h>
+#include <gameplay/render_system.h>
+#include <gameplay/scene.h>
+#include <gameplay/component_types.h>
+#include <resource/shader_cache.h>
+#include <core/context.h>
+#include <utility/profiler.h>
 
 namespace terminus
 {    
@@ -17,7 +17,7 @@ namespace terminus
     RenderSystem::RenderSystem()
     {
         _view_count = 0;
-        _thread_pool = Global::GetDefaultThreadPool();
+        _thread_pool = global::get_default_threadpool();
         _renderer = &context::get_renderer();
         _shader_cache = &context::get_shader_cache();
         
@@ -219,6 +219,7 @@ namespace terminus
                 draw_item.material = renderable._mesh->SubMeshes[j]._material;
                 draw_item.vertex_array = renderable._mesh->VertexArray;
                 draw_item.type = renderable._type;
+                draw_item.renderable_id = i;
                 
                 scene_view._num_items++;
             }
@@ -293,6 +294,7 @@ namespace terminus
                     int16 last_program = -1;
                     int16 last_texture = -1;
                     int16 last_sampler = -1;
+                    int   last_renderable = -1;
                     
                     for (int j = 0; j < scene_view._num_items; j++)
                     {
@@ -343,28 +345,33 @@ namespace terminus
                             cmd_buf.Write<BindShaderProgramCmdData>(&cmd6);
                         }
                         
-                        // Bind Per Draw Uniforms
-                        
-                        cmd_buf.Write(CommandType::BindUniformBuffer);
-                        
-                        BindUniformBufferCmdData cmd7;
-                        cmd7.buffer = _renderer->_per_draw_buffer;
-                        cmd7.slot = PER_DRAW_UNIFORM_SLOT;
-                        
-                        cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
-
-                        
-                        // Copy Per Draw Uniforms
-                        
-                        cmd_buf.Write(CommandType::CopyUniformData);
-                        
-                        CopyUniformCmdData cmd8;
-                        cmd8.buffer = _renderer->_per_draw_buffer;
-                        cmd8.data   = draw_item.uniforms;
-                        cmd8.size   = sizeof(PerDrawUniforms);
-                        cmd8.map_type = BufferMapType::WRITE;
-                        
-                        cmd_buf.Write<CopyUniformCmdData>(&cmd8);
+                        if(last_renderable != draw_item.renderable_id)
+                        {
+                            last_renderable = draw_item.renderable_id;
+                            
+                            // Bind Per Draw Uniforms
+                            
+                            cmd_buf.Write(CommandType::BindUniformBuffer);
+                            
+                            BindUniformBufferCmdData cmd7;
+                            cmd7.buffer = _renderer->_per_draw_buffer;
+                            cmd7.slot = PER_DRAW_UNIFORM_SLOT;
+                            
+                            cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
+                            
+                            
+                            // Copy Per Draw Uniforms
+                            
+                            cmd_buf.Write(CommandType::CopyUniformData);
+                            
+                            CopyUniformCmdData cmd8;
+                            cmd8.buffer = _renderer->_per_draw_buffer;
+                            cmd8.data   = draw_item.uniforms;
+                            cmd8.size   = sizeof(PerDrawUniforms);
+                            cmd8.map_type = BufferMapType::WRITE;
+                            
+                            cmd_buf.Write<CopyUniformCmdData>(&cmd8);
+                        }
                         
                         for (int k = 0; k < 5 ; k++)
                         {

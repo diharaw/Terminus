@@ -1,10 +1,10 @@
 #ifndef COMMANDBUFFER_H
 #define COMMANDBUFFER_H
 
-#include <types.h>
-#include <global.h>
-#include <Graphics/render_device.h>
-#include <Memory/allocator.h>
+#include <core/types.h>
+#include <core/global.h>
+#include <graphics/render_device.h>
+#include <memory/allocator.h>
 
 #define COMMAND_BUFFER_SIZE 1
 #define COMMAND_BUFFER_SIZE_BYTES COMMAND_BUFFER_SIZE*MB_IN_BYTES

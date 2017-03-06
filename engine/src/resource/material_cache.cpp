@@ -1,7 +1,7 @@
-#include <Resource/material_cache.h>
-#include <IO/filesystem.h>
-#include <Resource/text_loader.h>
-#include <Core/context.h>
+#include <resource/material_cache.h>
+#include <io/filesystem.h>
+#include <resource/text_loader.h>
+#include <core/context.h>
 #include <iostream>
 #include <rapidjson.h>
 

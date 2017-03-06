@@ -1,5 +1,5 @@
-#include <ECS/script_system.h>
-#include <ECS/scene.h>
+#include <gameplay/script_system.h>
+#include <gameplay/scene.h>
 
 namespace terminus
 {

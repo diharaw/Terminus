@@ -3,7 +3,7 @@
 #ifndef TERMINUS_TYPES_H
 #define TERMINUS_TYPES_H
 
-#include <Utility/string_buffer.h>
+#include <utility/string_buffer.h>
 #include <stdint.h>
 #include <glm.hpp>
 #include <string>

@@ -1,10 +1,7 @@
 #pragma once
 
-#ifndef MATERIALFACTORY_H
-#define MATERIALFACTORY_H
-
-#include <Graphics/material.h>
-#include <types.h>
+#include <graphics/material.h>
+#include <core/types.h>
 
 namespace terminus
 {
@@ -13,5 +10,3 @@ namespace terminus
 		extern Material* create(String material_name);
 	};
 }
-
-#endif

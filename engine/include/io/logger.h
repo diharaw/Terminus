@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <Core/macro.h>
+#include <core/macro.h>
 
 #define T_LOG_INFO(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::INFO)
 #define T_LOG_WARNING(x) logger::log(x, std::string(__FILE__), __LINE__, LogLevel::WARNING)

@@ -1,12 +1,11 @@
 #pragma once
 
-#include <ECS/component_pool.h>
+#include <gameplay/component_pool.h>
 #include <script/lua_script.h>
 #include <script/cpp_script.h>
-#include <Core/Event/event_handler.h>
-#include <Core/Event/event.h>
-#include <types.h>
-
+#include <core/Event/event_handler.h>
+#include <core/Event/event.h>
+#include <core/types.h>
 #include <container/hash_map.h>
 
 #define MAX_SCRIPT_INSTANCES 10

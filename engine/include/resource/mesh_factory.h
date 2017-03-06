@@ -1,11 +1,8 @@
 #pragma once
 
-#ifndef MESHFACTORY_H
-#define MESHFACTORY_H
-
-#include <Resource/mesh.h>
-#include <Graphics/render_device.h>
-#include <global.h>
+#include <resource/mesh.h>
+#include <graphics/render_device.h>
+#include <core/global.h>
 #include <string>
 
 namespace terminus
@@ -15,5 +12,3 @@ namespace terminus
 		extern Mesh* create(String mesh_name);
 	};
 }
-
-#endif

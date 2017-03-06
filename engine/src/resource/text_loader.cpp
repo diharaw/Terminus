@@ -1,6 +1,6 @@
-#include <Resource/text_loader.h>
-#include <Resource/asset_common.h>
-#include <IO/filesystem.h>
+#include <resource/text_loader.h>
+#include <resource/asset_common.h>
+#include <io/filesystem.h>
 
 namespace terminus
 {

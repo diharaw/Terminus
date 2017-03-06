@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-#include <Core/macro.h>
-#include <Utility/murmur_hash.h>
+#include <core/macro.h>
+#include <utility/murmur_hash.h>
 
 #define SERIALIZABLE(x) mark_serializable(HASH(#x), &x, sizeof(x))
 #define MAX_MEMBERS 20

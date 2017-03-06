@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <types.h>
-#include <Core/Event/event_handler.h>
+#include <core/types.h>
+#include <core/Event/event_handler.h>
 
 namespace terminus
 {

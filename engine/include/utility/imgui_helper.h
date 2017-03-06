@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <types.h>
+#include <core/types.h>
 
 namespace imgui_helpers
 {

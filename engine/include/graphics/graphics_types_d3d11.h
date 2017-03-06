@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/config.h>
+#include <core/config.h>
 
 #ifdef TERMINUS_DIRECT3D11
 

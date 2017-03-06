@@ -1,7 +1,7 @@
 #pragma once
 
 #include <container/packed_array.h>
-#include <ECS/entity.h>
+#include <gameplay/entity.h>
 
 #include <iostream>
 #include <array>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Graphics/rendering_path.h>
-#include <types.h>
+#include <graphics/rendering_path.h>
+#include <core/types.h>
 #include <unordered_map>
 
 namespace terminus

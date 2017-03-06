@@ -4,8 +4,8 @@
 #define MATHUTITLTY_H
 
 #include <gtc/matrix_transform.hpp>
-#include <Core/config.h>
-#include <types.h>
+#include <core/config.h>
+#include <core/types.h>
 
 namespace terminus
 {

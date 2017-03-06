@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Graphics/render_device.h>
-#include <types.h>
+#include <graphics/render_device.h>
+#include <core/types.h>
 
 #include <unordered_map>
 

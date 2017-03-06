@@ -1,5 +1,5 @@
-#include <Utility/dynamic_library.h>
-#include <Core/config.h>
+#include <utility/dynamic_library.h>
+#include <core/config.h>
 #include <string>
 #include <cwchar>
 

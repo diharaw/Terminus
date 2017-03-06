@@ -1,12 +1,12 @@
 #pragma once
 
-#include <Core/config.h>
+#include <core/config.h>
 #include <imgui.h>
 
 #if defined(TERMINUS_OPENGL)
-#include <Graphics/graphics_types_gl.h>
+#include <graphics/graphics_types_gl.h>
 #elif defined(TERMINUS_DIRECT3D11)
-#include <Graphics/graphics_types_d3d11.h>
+#include <graphics/graphics_types_d3d11.h>
 #endif
 
 namespace ImGui

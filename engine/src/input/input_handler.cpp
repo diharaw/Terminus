@@ -1,17 +1,17 @@
-#include <Input/input_handler.h>
-#include <Input/player_context.h>
-#include <Core/Event/event.h>
-#include <Core/Event/event_handler.h>
-#include <Utility/murmur_hash.h>
-#include <Resource/text_loader.h>
-#include <IO/filesystem.h>
+#include <input/input_handler.h>
+#include <input/input_map.h>
+#include <platform/platform.h>
+#include <core/Event/event.h>
+#include <core/Event/event_handler.h>
+#include <utility/murmur_hash.h>
+#include <resource/text_loader.h>
+#include <io/filesystem.h>
+#include <core/types.h>
+#include <core/context.h>
 
 #include <vector>
 
 #define MAX_PLAYERS 8
-#define MAX_KEYBOARD_INPUTS 100
-#define MAX_MOUSE_INPUTS 10
-#define MAX_GAMEPAD_INPUTS 20
 
 namespace terminus
 {
@@ -23,9 +23,6 @@ namespace terminus
         MouseDevice                              _mouse_device;
         GamepadDevice                            _gamepad_device; // temp
         PlayerContextHandle                      _default_player_context;
-        HashMap<Sint32, MAX_KEYBOARD_INPUTS>     _keyboard_code_map;
-        HashMap<Uint8, MAX_MOUSE_INPUTS>        _mouse_code_map;
-        HashMap<Uint8, MAX_GAMEPAD_INPUTS>      _gamepad_code_map;
         
         void initialize()
         {
@@ -42,108 +39,6 @@ namespace terminus
                 _keyboard_device.button_states[i] = false;
                 _keyboard_device.button_axis_states[i] = 0.0;
             }
-            
-            // setup keyboard codes
-            _keyboard_code_map.set(HASH("A"), SDLK_a);
-            _keyboard_code_map.set(HASH("B"), SDLK_b);
-            _keyboard_code_map.set(HASH("C"), SDLK_c);
-            _keyboard_code_map.set(HASH("D"), SDLK_d);
-            _keyboard_code_map.set(HASH("E"), SDLK_e);
-            _keyboard_code_map.set(HASH("F"), SDLK_f);
-            _keyboard_code_map.set(HASH("G"), SDLK_g);
-            _keyboard_code_map.set(HASH("H"), SDLK_h);
-            _keyboard_code_map.set(HASH("I"), SDLK_i);
-            _keyboard_code_map.set(HASH("J"), SDLK_j);
-            _keyboard_code_map.set(HASH("K"), SDLK_k);
-            _keyboard_code_map.set(HASH("L"), SDLK_l);
-            _keyboard_code_map.set(HASH("M"), SDLK_m);
-            _keyboard_code_map.set(HASH("N"), SDLK_n);
-            _keyboard_code_map.set(HASH("O"), SDLK_o);
-            _keyboard_code_map.set(HASH("P"), SDLK_p);
-            _keyboard_code_map.set(HASH("Q"), SDLK_q);
-            _keyboard_code_map.set(HASH("R"), SDLK_r);
-            _keyboard_code_map.set(HASH("S"), SDLK_s);
-            _keyboard_code_map.set(HASH("T"), SDLK_t);
-            _keyboard_code_map.set(HASH("U"), SDLK_u);
-            _keyboard_code_map.set(HASH("V"), SDLK_v);
-            _keyboard_code_map.set(HASH("W"), SDLK_w);
-            _keyboard_code_map.set(HASH("X"), SDLK_x);
-            _keyboard_code_map.set(HASH("Y"), SDLK_y);
-            _keyboard_code_map.set(HASH("Z"), SDLK_z);
-            _keyboard_code_map.set(HASH("1"), SDLK_1);
-            _keyboard_code_map.set(HASH("2"), SDLK_2);
-            _keyboard_code_map.set(HASH("3"), SDLK_3);
-            _keyboard_code_map.set(HASH("4"), SDLK_4);
-            _keyboard_code_map.set(HASH("5"), SDLK_5);
-            _keyboard_code_map.set(HASH("6"), SDLK_6);
-            _keyboard_code_map.set(HASH("7"), SDLK_7);
-            _keyboard_code_map.set(HASH("8"), SDLK_8);
-            _keyboard_code_map.set(HASH("9"), SDLK_9);
-            _keyboard_code_map.set(HASH("0"), SDLK_0);
-            _keyboard_code_map.set(HASH("RETURN"), SDLK_RETURN);
-            _keyboard_code_map.set(HASH("ESCAPE"), SDLK_ESCAPE);
-            _keyboard_code_map.set(HASH("BACKSPACE"), SDLK_BACKSPACE);
-            _keyboard_code_map.set(HASH("TAB"), SDLK_TAB);
-            _keyboard_code_map.set(HASH("SPACE"), SDLK_SPACE);
-            _keyboard_code_map.set(HASH("LSHIFT"), SDLK_LSHIFT);
-            _keyboard_code_map.set(HASH("RSHIFR"), SDLK_RSHIFT);
-            _keyboard_code_map.set(HASH("LCTRL"), SDLK_LCTRL);
-            _keyboard_code_map.set(HASH("RCTRL"), SDLK_RCTRL);
-            _keyboard_code_map.set(HASH("INSERT"), SDLK_INSERT);
-            _keyboard_code_map.set(HASH("HOME"), SDLK_HOME);
-            _keyboard_code_map.set(HASH("PAGEUP"), SDLK_PAGEUP);
-            _keyboard_code_map.set(HASH("DELETE"), SDLK_DELETE);
-            _keyboard_code_map.set(HASH("END"), SDLK_END);
-            _keyboard_code_map.set(HASH("PAGEDOWN"), SDLK_PAGEUP);
-            _keyboard_code_map.set(HASH("RIGHT"), SDLK_RIGHT);
-            _keyboard_code_map.set(HASH("LEFT"), SDLK_LEFT);
-            _keyboard_code_map.set(HASH("UP"), SDLK_UP);
-            _keyboard_code_map.set(HASH("DOWN"), SDLK_DOWN);
-            _keyboard_code_map.set(HASH("KP_NUMLOCK"), SDLK_NUMLOCKCLEAR);
-            _keyboard_code_map.set(HASH("KP_DIVIDE"), SDLK_KP_DIVIDE);
-            _keyboard_code_map.set(HASH("KP_MULTIPLY"), SDLK_KP_MULTIPLY);
-            _keyboard_code_map.set(HASH("KP_MINUS"), SDLK_KP_MINUS);
-            _keyboard_code_map.set(HASH("KP_PLUS"), SDLK_KP_PLUS);
-            _keyboard_code_map.set(HASH("KP_ENTER"), SDLK_KP_ENTER);
-            _keyboard_code_map.set(HASH("KP_1"), SDLK_KP_1);
-            _keyboard_code_map.set(HASH("KP_2"), SDLK_KP_2);
-            _keyboard_code_map.set(HASH("KP_3"), SDLK_KP_3);
-            _keyboard_code_map.set(HASH("KP_4"), SDLK_KP_4);
-            _keyboard_code_map.set(HASH("KP_5"), SDLK_KP_5);
-            _keyboard_code_map.set(HASH("KP_6"), SDLK_KP_6);
-            _keyboard_code_map.set(HASH("KP_7"), SDLK_KP_7);
-            _keyboard_code_map.set(HASH("KP_8"), SDLK_KP_8);
-            _keyboard_code_map.set(HASH("KP_9"), SDLK_KP_9);
-            _keyboard_code_map.set(HASH("KP_0"), SDLK_KP_0);
-            _keyboard_code_map.set(HASH("KP_PERIOD"), SDLK_KP_PERIOD);
-            
-            // mouse codes
-            _mouse_code_map.set(HASH("MOUSE_LEFT"), SDL_BUTTON_LEFT);
-            _mouse_code_map.set(HASH("MOUSE_RIGHT"), SDL_BUTTON_RIGHT);
-            _mouse_code_map.set(HASH("MOUSE_MIDDLE"), SDL_BUTTON_MIDDLE);
-            _mouse_code_map.set(HASH("MOUSE_AXIS_X"), MOUSE_AXIS_X);
-            _mouse_code_map.set(HASH("MOUSE_AXIS_Y"), MOUSE_AXIS_Y);
-            _mouse_code_map.set(HASH("MOUSE_WHEEL"), MOUSE_WHEEL);
-            
-            // gamepad codes
-            _gamepad_code_map.set(HASH("GAMEPAD_X"), SDL_CONTROLLER_BUTTON_X);
-            _gamepad_code_map.set(HASH("GAMEPAD_Y"), SDL_CONTROLLER_BUTTON_Y);
-            _gamepad_code_map.set(HASH("GAMEPAD_A"), SDL_CONTROLLER_BUTTON_A);
-            _gamepad_code_map.set(HASH("GAMEPAD_B"), SDL_CONTROLLER_BUTTON_B);
-            _gamepad_code_map.set(HASH("GAMEPAD_LEFT_X"), SDL_CONTROLLER_AXIS_LEFTX);
-            _gamepad_code_map.set(HASH("GAMEPAD_LEFT_Y"), SDL_CONTROLLER_AXIS_LEFTY);
-            _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_X"), SDL_CONTROLLER_AXIS_RIGHTX);
-            _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_Y"), SDL_CONTROLLER_AXIS_RIGHTY);
-            _gamepad_code_map.set(HASH("GAMEPAD_DPAD_LEFT"), SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-            _gamepad_code_map.set(HASH("GAMEPAD_DPAD_RIGHT"), SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-            _gamepad_code_map.set(HASH("GAMEPAD_DPAD_UP"), SDL_CONTROLLER_BUTTON_DPAD_UP);
-            _gamepad_code_map.set(HASH("GAMEPAD_DPAD_DOWN"), SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-            _gamepad_code_map.set(HASH("GAMEPAD_LEFT_STICK"), SDL_CONTROLLER_BUTTON_LEFTSTICK);
-            _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_STICK"), SDL_CONTROLLER_BUTTON_RIGHTSTICK);
-            _gamepad_code_map.set(HASH("GAMEPAD_LEFT_SHOULDER"), SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
-            _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_SHOULDER"), SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-            _gamepad_code_map.set(HASH("GAMEPAD_TRIGGER_LEFT"), SDL_CONTROLLER_AXIS_TRIGGERLEFT);
-            _gamepad_code_map.set(HASH("GAMEPAD_TRIGGER_RIGHT"), SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
             
             filesystem::add_directory("config/input_map");
         }
@@ -165,6 +60,8 @@ namespace terminus
         
         InputMapHandle load_input_map(PlayerContextHandle player, String name)
         {
+            Platform* platform = context::get_platform();
+            
             if(_player_contexts.has(player))
             {
                 PlayerContext* cxt = _player_contexts.get_ptr(player);
@@ -195,9 +92,9 @@ namespace terminus
                                 if(!actions[i]["keyboard"].IsNull())
                                 {
                                     uint64_t kb_hash = HASH(actions[i]["keyboard"].GetString());
-                                    assert(_keyboard_code_map.has(kb_hash));
-                                    Sint32 value;
-                                    _keyboard_code_map.get(kb_hash, value);
+                                    assert(platform->_keyboard_code_map.has(kb_hash));
+                                    uint32_t value;
+                                    platform->_keyboard_code_map.get(kb_hash, value);
                                     
                                     input_map->_action_map._keyboard.set(value, name_hash);
                                 }
@@ -208,9 +105,9 @@ namespace terminus
                                 if(!actions[i]["mouse"].IsNull())
                                 {
                                     uint64_t mouse_hash = HASH(actions[i]["mouse"].GetString());
-                                    assert(_mouse_code_map.has(mouse_hash));
-                                    Uint8 value;
-                                    _mouse_code_map.get(mouse_hash, value);
+                                    assert(platform->_mouse_code_map.has(mouse_hash));
+                                    uint8_t value;
+                                    platform->_mouse_code_map.get(mouse_hash, value);
                                     
                                     input_map->_action_map._mouse.set(value, name_hash);
                                 }
@@ -221,9 +118,9 @@ namespace terminus
                                 if(!actions[i]["gamepad"].IsNull())
                                 {
                                     uint64_t gp_hash = HASH(actions[i]["gamepad"].GetString());
-                                    assert(_gamepad_code_map.has(gp_hash));
-                                    Uint8 value;
-                                    _gamepad_code_map.get(gp_hash, value);
+                                    assert(platform->_gamepad_code_map.has(gp_hash));
+                                    uint8_t value;
+                                    platform->_gamepad_code_map.get(gp_hash, value);
                                     
                                     input_map->_action_map._gamepad.set(value, name_hash);
                                 }
@@ -247,9 +144,9 @@ namespace terminus
                                 if(!states[i]["keyboard"].IsNull())
                                 {
                                     uint64_t kb_hash = HASH(states[i]["keyboard"].GetString());
-                                    assert(_keyboard_code_map.has(kb_hash));
-                                    Sint32 value;
-                                    _keyboard_code_map.get(kb_hash, value);
+                                    assert(platform->_keyboard_code_map.has(kb_hash));
+                                    uint32_t value;
+                                    platform->_keyboard_code_map.get(kb_hash, value);
                                     
                                     input_map->_state_map._keyboard.set(value, name_hash);
                                 }
@@ -260,9 +157,9 @@ namespace terminus
                                 if(!states[i]["mouse"].IsNull())
                                 {
                                     uint64_t mouse_hash = HASH(states[i]["mouse"].GetString());
-                                    assert(_mouse_code_map.has(mouse_hash));
-                                    Uint8 value;
-                                    _mouse_code_map.get(mouse_hash, value);
+                                    assert(platform->_mouse_code_map.has(mouse_hash));
+                                    uint8_t value;
+                                    platform->_mouse_code_map.get(mouse_hash, value);
                                     
                                     input_map->_state_map._mouse.set(value, name_hash);
                                 }
@@ -273,9 +170,9 @@ namespace terminus
                                 if(!states[i]["gamepad"].IsNull())
                                 {
                                     uint64_t gp_hash = HASH(states[i]["gamepad"].GetString());
-                                    assert(_gamepad_code_map.has(gp_hash));
-                                    Uint8 value;
-                                    _gamepad_code_map.get(gp_hash, value);
+                                    assert(platform->_gamepad_code_map.has(gp_hash));
+                                    uint8_t value;
+                                    platform->_gamepad_code_map.get(gp_hash, value);
                                     
                                     input_map->_state_map._gamepad.set(value, name_hash);
                                 }
@@ -301,9 +198,9 @@ namespace terminus
                                     // positive value
                                     {
                                         uint64_t kb_hash = HASH(axis[i]["keyboard_pos"].GetString());
-                                        assert(_keyboard_code_map.has(kb_hash));
-                                        Sint32 value;
-                                        _keyboard_code_map.get(kb_hash, value);
+                                        assert(platform->_keyboard_code_map.has(kb_hash));
+                                        uint32_t value;
+                                        platform->_keyboard_code_map.get(kb_hash, value);
                                         
                                         input_map->_axis_map._keyboard_pos.set(value, name_hash);
                                     }
@@ -311,9 +208,9 @@ namespace terminus
                                     // negative value
                                     {
                                         uint64_t kb_hash = HASH(axis[i]["keyboard_neg"].GetString());
-                                        assert(_keyboard_code_map.has(kb_hash));
-                                        Sint32 value;
-                                        _keyboard_code_map.get(kb_hash, value);
+                                        assert(platform->_keyboard_code_map.has(kb_hash));
+                                        uint32_t value;
+                                        platform->_keyboard_code_map.get(kb_hash, value);
                                         
                                         input_map->_axis_map._keyboard_neg.set(value, name_hash);
                                     }
@@ -325,9 +222,9 @@ namespace terminus
                                 if(!axis[i]["mouse"].IsNull())
                                 {
                                     uint64_t mouse_hash = HASH(axis[i]["mouse"].GetString());
-                                    assert(_mouse_code_map.has(mouse_hash));
-                                    Uint8 value;
-                                    _mouse_code_map.get(mouse_hash, value);
+                                    assert(platform->_mouse_code_map.has(mouse_hash));
+                                    uint8_t value;
+                                    platform->_mouse_code_map.get(mouse_hash, value);
                                     
                                     input_map->_axis_map._mouse.set(value, name_hash);
                                 }
@@ -338,9 +235,9 @@ namespace terminus
                                 if(!axis[i]["gamepad"].IsNull())
                                 {
                                     uint64_t gp_hash = HASH(axis[i]["gamepad"].GetString());
-                                    assert(_gamepad_code_map.has(gp_hash));
-                                    Uint8 value;
-                                    _gamepad_code_map.get(gp_hash, value);
+                                    assert(platform->_gamepad_code_map.has(gp_hash));
+                                    uint8_t value;
+                                    platform->_gamepad_code_map.get(gp_hash, value);
                                     
                                     input_map->_axis_map._gamepad.set(value, name_hash);
                                 }
@@ -382,7 +279,7 @@ namespace terminus
             }
         }
         
-        void process_keyboard_input(Sint32 key, Sint32 scan_code, Uint32 action)
+        void process_keyboard_input(uint32_t key, uint32_t scan_code, uint32_t action)
         {
             PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
             InputMap* input_map = context->_input_maps.get_ptr(context->_active);
@@ -390,7 +287,7 @@ namespace terminus
             if(input_map)
             {
                 // Check if Action
-                if(action == SDL_KEYDOWN)
+                if(action == InputActionType::KEY_DOWN)
                 {
                     if(input_map->_action_map._keyboard.has(key))
                     {
@@ -413,7 +310,7 @@ namespace terminus
                     uint64_t state_hash;
                     input_map->_state_map._keyboard.get(key, state_hash);
                     
-                    if(action == SDL_KEYDOWN)
+                    if(action == InputActionType::KEY_DOWN)
                     {
                         // Fire Pressed Event
                         InputStateEvent* event = new InputStateEvent(state_hash, 1);
@@ -421,7 +318,7 @@ namespace terminus
                         
                         return;
                     }
-                    if(action == SDL_KEYUP)
+                    if(action == InputActionType::KEY_UP)
                     {
                         // Fire Released Event
                         InputStateEvent* event = new InputStateEvent(state_hash, 0);
@@ -434,7 +331,7 @@ namespace terminus
                 }
                 
                 // Check if Axis Press
-                if(action == SDL_KEYDOWN)
+                if(action == InputActionType::KEY_DOWN)
                 {
                     // Check if Positive Axis
                     if(input_map->_axis_map._keyboard_pos.has(key))
@@ -472,7 +369,7 @@ namespace terminus
                 }
                 
                 // Check if Axis Release
-                if(action == SDL_KEYUP)
+                if(action == InputActionType::KEY_UP)
                 {
                     if(input_map->_axis_map._keyboard_pos.has(key))
                     {
@@ -509,7 +406,7 @@ namespace terminus
             }
         }
         
-        void process_mouse_button_input(Uint8 key, Uint32 action)
+        void process_mouse_button_input(uint8_t key, uint32_t action)
         {
             PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
             InputMap* input_map = context->_input_maps.get_ptr(context->_active);
@@ -517,7 +414,7 @@ namespace terminus
             if(input_map)
             {
                 // Check if Action
-                if(action == SDL_KEYDOWN)
+                if(action == InputActionType::MOUSE_BUTTON_DOWN)
                 {
                     if(input_map->_action_map._mouse.has(key))
                     {
@@ -537,7 +434,7 @@ namespace terminus
                     uint64_t state_hash;
                     input_map->_state_map._mouse.get(key, state_hash);
                     
-                    if(action == SDL_MOUSEBUTTONDOWN)
+                    if(action == InputActionType::MOUSE_BUTTON_DOWN)
                     {
                         // Fire Pressed Event
                         InputStateEvent* event = new InputStateEvent(state_hash, 1);
@@ -545,7 +442,7 @@ namespace terminus
                         
                         return;
                     }
-                    if(action == SDL_MOUSEBUTTONUP)
+                    if(action == InputActionType::MOUSE_BUTTON_UP)
                     {
                         // Fire Released Event
                         InputStateEvent* event = new InputStateEvent(state_hash, 0);
@@ -559,7 +456,7 @@ namespace terminus
             _mouse_device.button_states[key] = action;
         }
         
-        void process_cursor_input(Sint32 xpos, Sint32 ypos, Sint32 xrel, Sint32 yrel)
+        void process_cursor_input(int32_t xpos, int32_t ypos, int32_t xrel, int32_t yrel, bool relative)
         {
 			//SDL_bool relative = SDL_GetRelativeMouseMode();
 
@@ -567,7 +464,6 @@ namespace terminus
             {
                 PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
                 InputMap* input_map = context->_input_maps.get_ptr(context->_active);
-				SDL_bool relative = SDL_GetRelativeMouseMode();
 
                 if(input_map)
                 {
@@ -613,7 +509,7 @@ namespace terminus
 			}
         }
         
-        void process_mouse_wheel_input(Uint32 value)
+        void process_mouse_wheel_input(uint32_t value)
         {
             PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
             InputMap* input_map = context->_input_maps.get_ptr(context->_active);
@@ -625,40 +521,10 @@ namespace terminus
                     uint64_t axis_hash;
                     input_map->_axis_map._mouse.get(MOUSE_WHEEL, axis_hash);
                     
-                    Uint32 last_value = _mouse_device.wheel;
+                    uint32_t last_value = _mouse_device.wheel;
                     InputAxisEvent* event = new InputAxisEvent(axis_hash, value, value - last_value);
                     terminus::EventHandler::queue_event(event);
                 }
-            }
-        }
-        
-        void process_window_events(SDL_Event& event)
-        {
-            switch (event.type)
-            {
-                case SDL_MOUSEWHEEL:
-                    process_mouse_wheel_input(event.wheel.y);
-                    break;
-                    
-                case SDL_MOUSEMOTION:
-                    process_cursor_input(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
-                    break;
-                    
-                case SDL_MOUSEBUTTONUP:
-                case SDL_MOUSEBUTTONDOWN:
-                    process_mouse_button_input(event.button.button, event.type);
-                    break;
-                    
-                case SDL_KEYUP:
-                case SDL_KEYDOWN:
-                {
-                    if(event.key.repeat == 0)
-                        process_keyboard_input(event.key.keysym.sym, event.key.keysym.scancode, event.type);
-                }
-                    break;
-                    
-                default:
-                    break;
             }
         }
     }

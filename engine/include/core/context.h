@@ -25,6 +25,7 @@
 #include <script/script_engine.h>
 #include <script/script_interface_impl.h>
 #include <physics/physics_engine.h>
+#include <graphics/imgui_backend.h>
 
 namespace terminus
 {    
@@ -75,6 +76,7 @@ namespace terminus
 		// Script
 		ScriptEngine		_script_engine;
 		ScriptInterfaceImpl _script_interface_impl;
+        ImGuiBackend*       _imgui_backend;
         bool			    _shutdown;
     };
     
@@ -87,6 +89,7 @@ namespace terminus
     {
         T_FORCE_INLINE ConfigFile*			get_engine_config() 			{ return global::get_context()._engine_config; }
         T_FORCE_INLINE Platform*			get_platform() 					{ return global::get_context()._platform; }
+        T_FORCE_INLINE ImGuiBackend*		get_imgui_backend() 			{ return global::get_context()._imgui_backend; }
         T_FORCE_INLINE Renderer&			get_renderer() 					{ return global::get_context()._renderer; }
         T_FORCE_INLINE RenderDevice&		get_render_device()				{ return global::get_context()._render_device; }
         T_FORCE_INLINE RenderTargetPool&	get_render_target_pool()		{ return global::get_context()._render_target_pool; }

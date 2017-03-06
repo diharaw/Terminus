@@ -1,13 +1,10 @@
 #pragma once
 
-#ifndef MESH_H
-#define MESH_H
-
-#include <types.h>
-#include <Resource/asset_common.h>
-#include <Graphics/render_device.h>
-#include <Graphics/render_common.h>
-#include <Graphics/material.h>
+#include <core/types.h>
+#include <resource/asset_common.h>
+#include <graphics/render_device.h>
+#include <graphics/render_common.h>
+#include <graphics/material.h>
 #include <string>
 
 struct VertexArray;
@@ -32,5 +29,3 @@ struct Mesh
     Vector3 m_MinExtents;
 	terminus::VertexArray* VertexArray;
 };
-
-#endif

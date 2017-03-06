@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Graphics/render_pass.h>
-#include <Graphics/render_device.h>
-#include <types.h>
+#include <graphics/render_pass.h>
+#include <graphics/render_device.h>
+#include <core/types.h>
 
 namespace terminus
 {

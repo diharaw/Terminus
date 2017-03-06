@@ -1,8 +1,8 @@
-#include <Core/config.h>
-#include <Core/context.h>
-#include <Resource/shader_cache.h>
-#include <Resource/text_loader.h>
-#include <IO/filesystem.h>
+#include <core/config.h>
+#include <core/context.h>
+#include <resource/shader_cache.h>
+#include <resource/text_loader.h>
+#include <io/filesystem.h>
 
 #include <iostream>
 

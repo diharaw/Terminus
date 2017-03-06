@@ -1,7 +1,7 @@
 #ifndef RENDERINGPATH_H
 #define RENDERINGPATH_H
 
-#include <Graphics/render_pass.h>
+#include <graphics/render_pass.h>
 
 #define MAX_RENDER_PASSES 10
 

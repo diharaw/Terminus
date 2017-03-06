@@ -1,5 +1,5 @@
-#include <Utility/imgui_helper.h>
-#include <Core/context.h>
+#include <utility/imgui_helper.h>
+#include <core/context.h>
 
 namespace imgui_helpers
 {
@@ -7,7 +7,7 @@ namespace imgui_helpers
     {
         if(value < 0.0f || value == 0.0f || value > 1.0f)
             value = 0.5f;
-        float height = terminus::context::get_platform().get_height();
+        float height = terminus::context::get_platform()->get_height();
         
         return height * value;
     }
@@ -16,7 +16,7 @@ namespace imgui_helpers
     {
         if(value < 0.0f || value > 1.0f)
             value = 0.0f;
-        float width = terminus::context::get_platform().get_width();
+        float width = terminus::context::get_platform()->get_width();
         
         return width * value;
     }
@@ -25,15 +25,15 @@ namespace imgui_helpers
     {
         if(value < 0.0f || value > 1.0f)
             value = 0.0f;
-        float height = terminus::context::get_platform().get_height();
+        float height = terminus::context::get_platform()->get_height();
         
         return height * value;
     }
     
     Vector2 get_size_from_ratio(Vector2 ratio)
     {
-        float height = terminus::context::get_platform().get_height();
-        float width = terminus::context::get_platform().get_width();
+        float height = terminus::context::get_platform()->get_height();
+        float width = terminus::context::get_platform()->get_width();
         
         if(ratio.x > 1.0f || ratio.x == 0.0f || ratio.x < 0.0f)
             ratio.x = 0.0f;
@@ -50,8 +50,8 @@ namespace imgui_helpers
     
     Vector2 get_pos_from_rel(Vector2 rel_pos)
     {
-        float height = terminus::context::get_platform().get_height();
-        float width = terminus::context::get_platform().get_width();
+        float height = terminus::context::get_platform()->get_height();
+        float width = terminus::context::get_platform()->get_width();
         
         if(rel_pos.x > 1.0f || rel_pos.x < 0.0f)
             rel_pos.x = 0.0f;
@@ -68,8 +68,8 @@ namespace imgui_helpers
     
     Vector2 get_pos_from_rel_center(Vector2 rel_pos, Vector2 size)
     {
-        float height = terminus::context::get_platform().get_height();
-        float width = terminus::context::get_platform().get_width();
+        float height = terminus::context::get_platform()->get_height();
+        float width = terminus::context::get_platform()->get_width();
         
         if(rel_pos.x > 1.0f || rel_pos.x < 0.0f)
             rel_pos.x = 0.0f;

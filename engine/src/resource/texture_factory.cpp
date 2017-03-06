@@ -1,6 +1,6 @@
-#include <Resource/texture_factory.h>
-#include <Resource/stb_image_loader.h>
-#include <Core/context.h>
+#include <resource/texture_factory.h>
+#include <resource/stb_image_loader.h>
+#include <core/context.h>
 
 namespace terminus
 {

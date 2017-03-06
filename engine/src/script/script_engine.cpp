@@ -1,11 +1,11 @@
 #include <script/script_engine.h>
-#include <Core/context.h>
-#include <ECS/entity.h>
-#include <ECS/scene.h>
-#include <ECS/component_types.h>
-#include <types.h>
-#include <Math/math_utility.h>
-#include <Input/input_handler.h>
+#include <core/context.h>
+#include <core/types.h>
+#include <gameplay/entity.h>
+#include <gameplay/scene.h>
+#include <gameplay/component_types.h>
+#include <math/math_utility.h>
+#include <input/input_handler.h>
 
 namespace terminus
 {
@@ -89,22 +89,22 @@ namespace terminus
 	// platform script api
 	void set_cursor_visibility(bool visible)
 	{
-		context::get_platform().set_cursor_visibility(visible);
+		context::get_platform()->set_cursor_visibility(visible);
 	}
 
 	void set_relative_mouse(bool relative)
 	{
-		context::get_platform().set_relative_mouse(relative);
+		context::get_platform()->set_relative_mouse(relative);
 	}
 
 	void grab_mouse(bool grab)
 	{
-		context::get_platform().grab_mouse(grab);
+		context::get_platform()->grab_mouse(grab);
 	}
 
 	double get_delta_time()
 	{
-		return context::get_platform().get_delta_time();
+		return context::get_platform()->get_delta_time();
 	}
 
 	float dot_product(Vector3& a, Vector3& b)

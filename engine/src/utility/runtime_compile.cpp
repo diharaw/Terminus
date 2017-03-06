@@ -1,7 +1,7 @@
-#include <Utility/runtime_compile.h>
-#include <Utility/process_dispatch.h>
-#include <Core/config.h>
-#include <IO/logger.h>
+#include <utility/runtime_compile.h>
+#include <utility/process_dispatch.h>
+#include <core/config.h>
+#include <io/logger.h>
 
 #include <iostream>
 #include <string>
