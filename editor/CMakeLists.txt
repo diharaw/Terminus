@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set (CMAKE_PREFIX_PATH "C:\\Qt\\5.8\\msvc2015_64")
+IF(WIN32)
+	set (CMAKE_PREFIX_PATH "C:\\Qt\\5.8\\msvc2015_64")
+ENDIF()
+
+IF(APPLE)
+	set (CMAKE_PREFIX_PATH "/Users/diharaw/Qt/5.8/clang_64/lib/cmake")
+ENDIF()
 
 file(GLOB_RECURSE EDITOR_SOURCE  *.cpp
 						  		  *.h
