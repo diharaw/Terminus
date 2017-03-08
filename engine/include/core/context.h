@@ -27,6 +27,8 @@
 #include <physics/physics_engine.h>
 #include <graphics/imgui_backend.h>
 
+#define MAX_ENGINE_OBJECTS 30
+
 namespace terminus
 {    
     struct Context
@@ -85,8 +87,48 @@ namespace terminus
         extern Context& get_context();
     }
     
+    class ContextTypeID
+    {
+    private:
+        static uint16_t counter;
+        
+    public:
+        template<typename T>
+        static uint16_t get()
+        {
+            static uint16_t id = counter++;
+            return id;
+        }
+    };
+    
     namespace context
     {
+        static void* _map[MAX_ENGINE_OBJECTS];
+        
+        template<typename T>
+        static void register_object(T& object)
+        {
+            _map[ContextTypeID::get<T>()] = &object;
+        }
+        
+        template<typename BaseClass, typename T>
+        static void register_object_base(T& object)
+        {
+            _map[ContextTypeID::get<BaseClass>()] = &object;
+        }
+        
+        template<typename T>
+        static void unregister_object()
+        {
+            _map[ContextTypeID::get<T>()] = nullptr;
+        }
+        
+        template<typename T>
+        static T* get_object()
+        {
+            return (T*)_map[ContextTypeID::get<T>()];
+        }
+        
         T_FORCE_INLINE ConfigFile*			get_engine_config() 			{ return global::get_context()._engine_config; }
         T_FORCE_INLINE Platform*			get_platform() 					{ return global::get_context()._platform; }
         T_FORCE_INLINE ImGuiBackend*		get_imgui_backend() 			{ return global::get_context()._imgui_backend; }
