@@ -2,6 +2,7 @@
 #include <core/context.h>
 #include <graphics/imgui_backend.h>
 #include <core/config.h>
+#include <core/sync.h>
 
 #include <utility/profiler.h>
 
@@ -44,7 +45,7 @@ namespace terminus
     {
         Context& context = global::get_context();
         
-        context._main_ready_sema.wait();
+		sync::wait_for_main_ready();
         
         context._render_device.Initialize();
         context._renderer.initialize();
@@ -54,7 +55,7 @@ namespace terminus
         gui_backend->initialize();
         gui_backend->new_frame();
         
-        context._render_ready_sema.notify();
+		sync::notify_renderer_ready();
         
         while (!context._shutdown)
         {
@@ -67,16 +68,16 @@ namespace terminus
             {
                 Task upload_task = concurrent_queue::pop(_graphics_upload_queue);
                 upload_task._function.Invoke(&upload_task._data[0]);
-                context._load_wakeup_sema.notify();
+				sync::notify_loader_wakeup();
             }
 
 			TERMINUS_END_CPU_PROFILE
 
             // notify done
-            context._render_done_sema.notify();
+			sync::notify_renderer_done();
             
             // wait for swap done
-            context._swap_done_sema.wait();
+			sync::wait_for_swap_done();
             
             gui_backend->render();
             

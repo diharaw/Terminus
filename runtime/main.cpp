@@ -1,4 +1,5 @@
 #include <core/application.h>
+#include <core/sync.h>
 #include "platform/platform_sdl2.h"
 #include "graphics/imgui_backend_sdl2.h"
 
@@ -51,9 +52,9 @@ namespace terminus
             context._rendering_thread.run();
             context._loading_thread.run();
             
-            context._main_ready_sema.notify();
-            context._load_wakeup_sema.notify();
-            context._render_ready_sema.wait();
+			sync::notify_main_ready();
+			sync::notify_loader_wakeup();
+			sync::wait_for_renderer_ready();
             
             ImGuiBackend* gui_backend = context::get_imgui_backend();
             
@@ -75,7 +76,7 @@ namespace terminus
                 
                 TERMINUS_END_CPU_PROFILE;
                 // Synchronize Rendering Thread
-                context._render_done_sema.wait();
+				sync::wait_for_renderer_done();
                 
                 // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
                 renderer.swap();
@@ -89,7 +90,7 @@ namespace terminus
                 
                 global::get_per_frame_allocator()->Clear();
                 
-                context._swap_done_sema.notify();
+				sync::notify_swap_done();
                 platform->end_frame();
                 
                 TERMINUS_END_CPU_PROFILE;
@@ -102,9 +103,9 @@ namespace terminus
             
             physics::shutdown();
             
-            context._load_wakeup_sema.notify();
-            context._load_exit_sema.wait();
-            context._render_exit_sema.wait();
+			sync::notify_loader_wakeup();
+			sync::wait_for_loader_exit();
+			sync::wait_for_renderer_exit();
             
             context._loading_thread.exit();
             context._rendering_thread.exit();

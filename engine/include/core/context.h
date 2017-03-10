@@ -62,15 +62,6 @@ namespace terminus
         DynamicLibraryCache _dynamic_library_cache;
         LuaScriptFileCache  _lua_script_file_cache;
         
-        // Thread Syncs
-        Semaphore			_render_ready_sema;
-        Semaphore			_main_ready_sema;
-        Semaphore			_render_done_sema;
-        Semaphore			_swap_done_sema;
-        Semaphore			_render_exit_sema;
-        Semaphore			_load_exit_sema;
-        Semaphore			_load_wakeup_sema;
-        
         // Threads
         RenderingThread		_rendering_thread;
         LoadingThread		_loading_thread;
