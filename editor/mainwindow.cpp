@@ -1,22 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "viewport_dock.h"
 #include <QMessageBox>
 #include <QStyleFactory>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    isRunning = true;
     ui->setupUi(this);
 
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
     setDockNestingEnabled(true);
-    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::onButtonClick);
-    connect(ui->btnExit, &QPushButton::clicked, this, &MainWindow::onBtnExitClick);
     ui->centralWidget->hide();
-    ui->txtStatus->setText("");
+
+	terminus::ViewportDock* viewport = new terminus::ViewportDock(tr("Viewport"), this);
+	viewport->setObjectName("Viewport");
+	viewport->setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::LeftDockWidgetArea, viewport);
 }
 
 MainWindow::~MainWindow()
@@ -24,12 +24,3 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onButtonClick()
-{
-    ui->txtStatus->setText("Pressed!");
-}
-
-void MainWindow::onBtnExitClick()
-{
-    isRunning = false;
-}

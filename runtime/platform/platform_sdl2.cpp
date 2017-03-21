@@ -243,7 +243,7 @@ namespace terminus
 		input_handler::MouseDevice& device = input_handler::get_mouse_device();
 		SDL_GetMouseState(&device.x_position, &device.y_position);
 
-#if defined(TERMINUS_WIN32)
+#if defined(TERMINUS_PLATFORM_WIN32)
 		SDL_SysWMinfo wmInfo;
 		SDL_VERSION(&wmInfo.version);
 		SDL_GetWindowWMInfo(_window, &wmInfo);

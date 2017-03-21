@@ -11,6 +11,7 @@
 #include <gameplay/camera_system.h>
 #include <gameplay/script_system.h>
 #include <gameplay/physics_system.h>
+#include <gameplay/light_system.h>
 
 #include <vector>
 #include <iostream>
@@ -33,6 +34,7 @@ namespace terminus
         ComponentPool<CppScriptComponent>        _cpp_script_pool;
         ComponentPool<RigidBodyComponent>        _rigid_body_pool;
         ComponentPool<ColliderComponent>         _collider_pool;
+		ComponentPool<LightComponent>			 _light_pool;
 
 		// systems
 
@@ -41,7 +43,8 @@ namespace terminus
 		RenderSystem    _render_system;
         ScriptSystem    _script_system;
         PhysicsSystem   _physics_system;
-        
+		LightSystem		_light_system;
+
         StringBuffer32  _name;
 
 	private:
@@ -134,6 +137,11 @@ namespace terminus
         {
             return _rigid_body_pool.create(entity);
         }
+
+		inline LightComponent& attach_light_component(Entity& entity)
+		{
+			return _light_pool.create(entity);
+		}
         
         // get id methods
         
@@ -184,6 +192,10 @@ namespace terminus
             return _rigid_body_pool.lookup(entity);
         }
 
+		inline LightComponent& get_light_component(Entity& entity)
+		{
+			return _light_pool.lookup(entity);
+		}
 
 		// has methods
 
@@ -222,6 +234,11 @@ namespace terminus
             return _rigid_body_pool.has(entity);
         }
 
+		inline bool has_light_component(Entity& entity)
+		{
+			return _light_pool.has(entity);
+		}
+
 		inline Entity& create_entity(std::string name = "")
 		{
 			assert(_entities._num_objects != MAX_ENTITIES);
@@ -252,6 +269,7 @@ namespace terminus
                 _lua_script_pool.remove(entity);
                 _rigid_body_pool.remove(entity);
                 _collider_pool.remove(entity);
+				_light_pool.remove(entity);
 
 				_versions[INDEX_FROM_ID(entity._id)]++;
 				_entities.remove(entity._id);

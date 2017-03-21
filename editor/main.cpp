@@ -1,8 +1,5 @@
 #include "mainwindow.h"
-#include <QApplication>
-#include <QSettings>
-#include <QWidget>
-#include <QFile>
+
 
 #define T_SAFE_DELETE(x) if(x) { delete x; x = nullptr; }
 

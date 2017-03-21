@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 
-namespace Ui {
-class MainWindow;
+namespace Ui 
+{
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -12,12 +13,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    bool isRunning;
-
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void onButtonClick();
-    void onBtnExitClick();
 
 private:
     Ui::MainWindow *ui;

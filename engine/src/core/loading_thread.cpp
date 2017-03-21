@@ -1,6 +1,7 @@
 #include <core/loading_thread.h>
 #include <core/context.h>
 #include <utility/profiler.h>
+#include <core/sync.h>
 
 namespace terminus
 {
@@ -22,7 +23,7 @@ namespace terminus
     void LoadingThread::enqueue_load_task(Task& task)
     {
         concurrent_queue::push(_loading_queue, task);
-        global::get_context()._load_wakeup_sema.notify();
+		sync::notify_loader_wakeup();
     }
     
     void LoadingThread::shutdown()
@@ -39,7 +40,7 @@ namespace terminus
     {
         Context& context = global::get_context();
         
-        context._load_wakeup_sema.wait();
+		sync::wait_for_loader_wakeup();
         
         while (!context._shutdown)
         {
@@ -53,9 +54,9 @@ namespace terminus
                 TERMINUS_END_CPU_PROFILE;
             }
             
-            context._load_wakeup_sema.wait();
+			sync::wait_for_loader_wakeup();
         }
         
-        context._load_exit_sema.notify();
+		sync::notify_loader_exit();
     }
 }

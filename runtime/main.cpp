@@ -59,9 +59,7 @@ namespace terminus
             ImGuiBackend* gui_backend = context::get_imgui_backend();
             
             // begin initial scene load here
-#if !defined(TERMINUS_WITH_EDITOR)
             load_initial_scene();
-#endif
             
             while (!context._shutdown)
             {

@@ -87,7 +87,7 @@ namespace terminus
         
         shutdown();
         
-        context._render_exit_sema.notify();
+		sync::notify_renderer_exit();
     }
     
     void submit_gpu_upload_task(Task& task)
@@ -95,6 +95,6 @@ namespace terminus
         Context& context = global::get_context();
         // queue task into rendering thread.
         context._rendering_thread.enqueue_upload_task(task);
-        context._load_wakeup_sema.wait();
+		sync::wait_for_loader_wakeup();
     }
 }
