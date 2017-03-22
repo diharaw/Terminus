@@ -33,7 +33,6 @@ namespace terminus
 
 	void RenderDevice::InitializeTask(void* data)
 	{
-		m_window = context::get_platform().get_window();
 		assert(InitializeAPI());
 	}
 
@@ -128,9 +127,9 @@ namespace terminus
 
 		for (i = 0; i < numModes; i++)
 		{
-			if (displayModeList[i].Width == (unsigned int)context::get_platform().get_width())
+			if (displayModeList[i].Width == (unsigned int)context::get_platform()->get_width())
 			{
-				if (displayModeList[i].Width == (unsigned int)context::get_platform().get_height())
+				if (displayModeList[i].Width == (unsigned int)context::get_platform()->get_height())
 				{
 					numerator = displayModeList[i].RefreshRate.Numerator;
 					denominator = displayModeList[i].RefreshRate.Denominator;
@@ -168,8 +167,8 @@ namespace terminus
 
 		swapChainDesc.BufferCount = 1;
 
-		swapChainDesc.BufferDesc.Width = context::get_platform().get_width();
-		swapChainDesc.BufferDesc.Height = context::get_platform().get_height();
+		swapChainDesc.BufferDesc.Width = context::get_platform()->get_width();
+		swapChainDesc.BufferDesc.Height = context::get_platform()->get_height();
 
 		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -185,7 +184,7 @@ namespace terminus
 		}
 
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.OutputWindow = context::get_platform().get_handle_win32();
+		swapChainDesc.OutputWindow = context::get_platform()->get_handle_win32();
 		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.SampleDesc.Quality = 0;
 
@@ -243,8 +242,8 @@ namespace terminus
 
 		ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 
-		depthBufferDesc.Width = context::get_platform().get_width();
-		depthBufferDesc.Height = context::get_platform().get_height();
+		depthBufferDesc.Width = context::get_platform()->get_width();
+		depthBufferDesc.Height = context::get_platform()->get_height();
 		depthBufferDesc.MipLevels = 1;
 		depthBufferDesc.ArraySize = 1;
 		depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -302,6 +301,7 @@ namespace terminus
 											 uint mipMapLevels)
 	{
 		Texture2D* texture = new Texture2D();
+		texture->m_resource_id = m_texture_res_id++;
 
 		if (generateMipmaps)
 		{
@@ -361,6 +361,195 @@ namespace terminus
 			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_SINT;
 			break;
 			
+		case TextureFormat::R8G8B8A8_UNORM:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+
+		case TextureFormat::R8G8B8A8_UINT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UINT;
+			break;
+
+		case TextureFormat::D32_FLOAT_S8_UINT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			texture->m_textureDesc.MipLevels = 1;
+			texture->m_textureDesc.MiscFlags = 0;
+			break;
+
+		case TextureFormat::D24_FLOAT_S8_UINT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			texture->m_textureDesc.MipLevels = 1;
+			texture->m_textureDesc.MiscFlags = 0;
+			break;
+
+		case TextureFormat::D16_FLOAT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_D16_UNORM;
+			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;;
+			texture->m_textureDesc.MipLevels = 1;
+			texture->m_textureDesc.MiscFlags = 0;
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+
+		// Set data type depending on bpp property of extraData
+		texture->m_textureDesc.Height = height;
+		texture->m_textureDesc.Width = width;
+		texture->m_textureDesc.ArraySize = 1;
+		texture->m_textureDesc.SampleDesc.Count = 1;
+		texture->m_textureDesc.SampleDesc.Quality = 0;
+		texture->m_textureDesc.Usage = D3D11_USAGE_DEFAULT;
+		texture->m_textureDesc.CPUAccessFlags = 0;
+
+		texture->m_srvDesc.Format = texture->m_textureDesc.Format;
+		texture->m_srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+		texture->m_dsDesc.Format = texture->m_textureDesc.Format;
+		texture->m_dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		texture->m_dsDesc.Texture2D.MipSlice = 0;
+
+		texture->m_rtvDesc.Format = texture->m_textureDesc.Format;
+		texture->m_rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+		texture->m_rtvDesc.Texture2D.MipSlice = 0;
+
+		if (format == TextureFormat::D24_FLOAT_S8_UINT)
+		{
+			texture->m_textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+
+			texture->m_srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			texture->m_srvDesc.Texture2D.MipLevels = texture->m_textureDesc.MipLevels;
+			texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
+
+			texture->m_dsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			texture->m_dsDesc.Flags = 0;
+		}
+
+		HRESULT Result = m_device->CreateTexture2D(&texture->m_textureDesc, NULL, &texture->m_textureD3D);
+		if (FAILED(Result))
+		{
+			//T_LOG_ERROR("Failed to Create Texture2D!");
+			return nullptr;
+		}
+
+		if (!createRenderTargetView)
+		{
+			int rowPitch = (width * 4) * sizeof(unsigned char);
+			m_device_context->UpdateSubresource(texture->m_textureD3D, 0, NULL, data, rowPitch, 0);
+		}
+
+		// Create ShaderResourceView
+
+		Result = m_device->CreateShaderResourceView(texture->m_textureD3D, &texture->m_srvDesc, &texture->m_textureView);
+		if (FAILED(Result))
+		{
+			//T_LOG_ERROR("Failed to Create Texture2D!");
+			return nullptr;
+		}
+
+		if (createRenderTargetView)
+		{
+			// Create DepthStencilView
+
+			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
+			{
+				texture->m_renderTargetView = nullptr;
+
+				Result = m_device->CreateDepthStencilView(texture->m_textureD3D, &texture->m_dsDesc, &texture->m_depthView);
+				if (FAILED(Result))
+				{
+					//T_LOG_ERROR("Failed to Create Texture2D!");
+					return nullptr;
+				}
+			}
+			else // Create RenderTargetView
+			{
+				texture->m_depthView = nullptr;
+
+				Result = m_device->CreateRenderTargetView(texture->m_textureD3D, &texture->m_rtvDesc, &texture->m_renderTargetView);
+				if (FAILED(Result))
+				{
+					//T_LOG_ERROR("Failed to Create Texture2D!");
+					return nullptr;
+				}
+			}
+		}
+
+		return texture;
+	}
+
+	Texture2D* RenderDevice::CreateTexture2D(Texture2D* texture,
+											 uint16 width,
+											 uint16 height,
+											 void* data,
+											 TextureFormat format,
+											 bool createRenderTargetView,
+											 bool generateMipmaps,
+											 uint mipMapLevels)
+	{
+		texture->m_resource_id = m_texture_res_id++;
+
+		if (generateMipmaps)
+		{
+			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
+			{
+				texture->m_textureDesc.MipLevels = 0;
+				texture->m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+				texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
+				texture->m_srvDesc.Texture2D.MipLevels = -1;
+			}
+			else
+			{
+				texture->m_textureDesc.MipLevels = mipMapLevels;
+				texture->m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+				texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
+				texture->m_srvDesc.Texture2D.MipLevels = (mipMapLevels == 0) ? -1 : mipMapLevels;
+			}
+		}
+
+		texture->m_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+		switch (format)
+		{
+		case TextureFormat::R32G32B32_FLOAT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			break;
+
+		case TextureFormat::R32G32B32A32_FLOAT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			break;
+
+		case TextureFormat::R32G32B32_UINT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_UINT;
+			break;
+
+		case TextureFormat::R32G32B32A32_UINT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+			break;
+
+		case TextureFormat::R32G32B32_INT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_SINT;
+			break;
+
+		case TextureFormat::R32G32B32A32_INT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32A32_SINT;
+			break;
+
+		case TextureFormat::R16G16B16A16_FLOAT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			break;
+
+		case TextureFormat::R16G16B16A16_UINT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_UINT;
+			break;
+
+		case TextureFormat::R16G16B16A16_INT:
+			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_SINT;
+			break;
+
 		case TextureFormat::R8G8B8A8_UNORM:
 			texture->m_textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			break;
@@ -505,6 +694,7 @@ namespace terminus
 												   BufferUsageType usageType)
 	{
 		VertexBuffer* vertexBuffer = new VertexBuffer();
+		vertexBuffer->m_resource_id = m_buffer_res_id++;
 
 		vertexBuffer->m_type = BufferType::VERTEX;
 		vertexBuffer->m_usageType = usageType;
@@ -552,6 +742,7 @@ namespace terminus
 												 BufferUsageType usageType)
 	{
 		IndexBuffer* indexBuffer = new IndexBuffer();
+		indexBuffer->m_resource_id = m_buffer_res_id++;
 
 		indexBuffer->m_type = BufferType::VERTEX;
 		indexBuffer->m_usageType = usageType;
@@ -599,6 +790,7 @@ namespace terminus
 													 BufferUsageType usageType)
 	{
 		UniformBuffer* uniformBuffer = new UniformBuffer();
+		uniformBuffer->m_resource_id = m_buffer_res_id++;
 
 		uniformBuffer->m_BufferDescD3D.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		uniformBuffer->m_BufferDescD3D.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -639,6 +831,7 @@ namespace terminus
 												 InputLayout* inputLayout)
 	{
 		VertexArray* vertexArray = new VertexArray();
+		vertexArray->m_resource_id = m_vertex_array_res_id++;
 
 		vertexArray->m_vertexBuffer = vertexBuffer;
 		vertexArray->m_indexBuffer = indexBuffer;
@@ -975,6 +1168,7 @@ namespace terminus
 												   float borderAlpha)
 	{
 		SamplerState* samplerState = new SamplerState();
+		samplerState->m_resource_id = m_sampler_res_id++;
 		
 		switch (wrapModeU)
 		{
@@ -1082,6 +1276,7 @@ namespace terminus
 	Framebuffer* RenderDevice::CreateFramebuffer()
 	{
 		Framebuffer* framebuffer = new Framebuffer();
+		framebuffer->m_resource_id = m_framebuffer_res_id++;
 		return framebuffer;
 	}
 
@@ -1192,6 +1387,7 @@ namespace terminus
 													 Shader* evaluationShader)
 	{
 		ShaderProgram* shaderProgram = new ShaderProgram();
+		shaderProgram->m_resource_id = m_shader_program_res_id++;
 
 		shaderProgram->m_shaderMap[vertexShader->m_type] = vertexShader;
 		shaderProgram->m_shaderMap[pixelShader->m_type] = pixelShader;
@@ -2049,14 +2245,22 @@ namespace terminus
 
 		case FramebufferClearTarget::ALL:
 			{
-				for (auto it : m_current_framebuffer->m_renderTargetViews)
-					m_device_context->ClearRenderTargetView(it, &clearColor.x);
-
-				if (m_current_framebuffer->m_depthStecilView)
+				if (m_current_framebuffer)
 				{
-					m_device_context->ClearDepthStencilView(m_current_framebuffer->m_depthStecilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-					m_device_context->ClearDepthStencilView(m_current_framebuffer->m_depthStecilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
-				}	
+					for (auto it : m_current_framebuffer->m_renderTargetViews)
+						m_device_context->ClearRenderTargetView(it, &clearColor.x);
+
+					if (m_current_framebuffer->m_depthStecilView)
+					{
+						m_device_context->ClearDepthStencilView(m_current_framebuffer->m_depthStecilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+						m_device_context->ClearDepthStencilView(m_current_framebuffer->m_depthStecilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
+					}
+				}
+				else
+				{
+
+				}
+				
 			}
 			break;
 		}

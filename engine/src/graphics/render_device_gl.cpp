@@ -1567,6 +1567,12 @@ namespace terminus
 
 	void RenderDevice::DestroyVertexArray(VertexArray* vertexArray)
 	{
+		if (vertexArray->_ib)
+			DestroyIndexBuffer(vertexArray->_ib);
+
+		if (vertexArray->_vb)
+			DestroyVertexBuffer(vertexArray->_vb);
+
 		GL_CHECK_ERROR(glDeleteVertexArrays(1, &vertexArray->m_id));
 		delete vertexArray;
 	}

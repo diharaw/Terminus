@@ -1,6 +1,8 @@
 #pragma once
 
 #include <core/config.h>
+#include <graphics/render_common.h>
+#include <core/types.h>
 
 #ifdef TERMINUS_DIRECT3D11
 
@@ -17,6 +19,18 @@
 #else
 #define D3D11_CHECK_ERROR(x)	x; 
 #endif
+
+namespace std
+{
+	template<>
+	struct hash<ShaderType>
+	{
+		size_t operator()(const ShaderType& em) const
+		{
+			return std::hash<int>()((int)em);
+		}
+	};
+}
 
 namespace terminus
 {

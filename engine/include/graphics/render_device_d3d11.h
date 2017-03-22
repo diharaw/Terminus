@@ -71,6 +71,14 @@ namespace terminus
 																   bool createRenderTargetView,
 																   bool generateMipmaps = true,
 																   uint mipMapLevels = 10);
+			Texture2D* CreateTexture2D(Texture2D* texture,
+									   uint16 width,
+									   uint16 height,
+									   void* data,
+									   TextureFormat format,
+									   bool createRenderTargetView,
+									   bool generateMipmaps,
+									   uint mipMapLevels);
 			Texture3D*		 CreateTexture3D(uint16 width,
 				uint16 height,
 				uint16 depth,
@@ -223,7 +231,6 @@ namespace terminus
 
 			bool				     m_vsync;
 			int						 m_video_card_memory;
-			SDL_Window*			     m_window;
 			Framebuffer*			 m_current_framebuffer;
 			Framebuffer*			 m_default_framebuffer;
 			Texture2D*				 m_default_render_target;
@@ -236,6 +243,15 @@ namespace terminus
 			ID3D11Device*			 m_device;
 			ID3D11DeviceContext*	 m_device_context;
 			IDXGISwapChain*			 m_swap_chain;
+
+			// Resource IDs
+
+			uint16 m_texture_res_id;
+			uint16 m_buffer_res_id;
+			uint16 m_framebuffer_res_id;
+			uint16 m_vertex_array_res_id;
+			uint16 m_shader_program_res_id;
+			uint16 m_sampler_res_id;
 		};
 } // namespace terminus
 

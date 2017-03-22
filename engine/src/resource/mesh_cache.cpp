@@ -17,8 +17,6 @@ namespace terminus
         MeshUnloadTaskData* task_data = (MeshUnloadTaskData*)data;
         RenderDevice& device = context::get_render_device();
         
-        device.DestroyIndexBuffer(task_data->_mesh->VertexArray->_ib);
-        device.DestroyVertexBuffer(task_data->_mesh->VertexArray->_vb);
         device.DestroyVertexArray(task_data->_mesh->VertexArray);
     }
     

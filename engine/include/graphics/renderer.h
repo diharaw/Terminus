@@ -13,7 +13,7 @@ namespace terminus
 #define PER_DRAW_BONE_OFFSETS_UNIFORM_SLOT 3
     
     // Uniform Buffer Structs
-    struct T_ALIGNED(16) PerFrameUniforms
+	struct T_ALIGNED(16) PerFrameUniforms
     {
         Matrix4 last_view_projection;
         Matrix4 view_projection;
@@ -24,21 +24,21 @@ namespace terminus
         Vector3 view_direction;
     };
     
-    struct T_ALIGNED(16) PerDrawUniforms
+	struct T_ALIGNED(16) PerDrawUniforms
     {
         Matrix4 model_view_projection;
         Matrix4 model;
         Vector3 position;
     };
     
-    struct T_ALIGNED(16) PerDrawMaterialUniforms
+	struct T_ALIGNED(16) PerDrawMaterialUniforms
     {
         Vector4 diffuse;
         float   roughness;
         float   metalness;
     };
     
-    struct T_ALIGNED(16) PerDrawBoneOffsetUniforms
+	struct T_ALIGNED(16) PerDrawBoneOffsetUniforms
     {
         Matrix4 bone_offset[100];
     };

@@ -272,6 +272,7 @@ namespace terminus
                 
                 BindUniformBufferCmdData cmd3;
                 cmd3.buffer = _renderer->_per_frame_buffer;
+				cmd3.shader_type = ShaderType::VERTEX;
                 cmd3.slot = PER_FRAME_UNIFORM_SLOT;
                 
                 cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
@@ -355,6 +356,7 @@ namespace terminus
                             
                             BindUniformBufferCmdData cmd7;
                             cmd7.buffer = _renderer->_per_draw_buffer;
+							cmd7.shader_type = ShaderType::VERTEX;
                             cmd7.slot = PER_DRAW_UNIFORM_SLOT;
                             
                             cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
