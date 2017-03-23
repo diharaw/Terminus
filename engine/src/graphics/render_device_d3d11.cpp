@@ -280,6 +280,10 @@ namespace terminus
 		m_default_framebuffer->m_depthStencilTarget = m_default_depth_target;
 		m_default_framebuffer->m_depthStecilView = depthStencilView;
 
+		
+		_window_width = (float)context::get_platform()->get_width();
+		_window_height = (float)context::get_platform()->get_height();
+
 		return true;
 	}
 
@@ -2270,12 +2274,24 @@ namespace terminus
 	{
 		D3D11_VIEWPORT viewport;
 
-		viewport.Width = (float)width;
-		viewport.Height = (float)height;
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
-		viewport.TopLeftX = topLeftX;
-		viewport.TopLeftY = topLeftY;
+		if (width == 0 && height == 0)
+		{
+			viewport.Width = (float)_window_width;
+			viewport.Height = (float)_window_height;
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+			viewport.TopLeftX = topLeftX;
+			viewport.TopLeftY = topLeftY;
+		}
+		else
+		{
+			viewport.Width = (float)width;
+			viewport.Height = (float)height;
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+			viewport.TopLeftX = topLeftX;
+			viewport.TopLeftY = topLeftY;
+		}
 
 		m_device_context->RSSetViewports(1, &viewport);
 	}

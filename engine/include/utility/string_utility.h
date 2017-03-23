@@ -109,20 +109,22 @@ namespace terminus
 			return internal;
 		}
 
+		inline String remove_special_char(String str)
+		{
+			if (!str.empty() && str[str.size() - 1] == '\r')
+				str.erase(str.size() - 1);
+
+			return str;
+		}
+
 		inline bool DefineExists(String name, StringList defines)
 		{
+			String clean_define = remove_special_char(name);
+
 			for (auto define : defines)
 			{
-#ifdef WIN32
-				String temp = define;
-				//temp += "\r";
-
-				if (name == temp)
+				if (clean_define == define)
 					return true;
-#else
-				if (name == define)
-					return true;
-#endif
 			}
 
 			return false;

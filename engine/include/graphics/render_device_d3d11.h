@@ -238,6 +238,8 @@ namespace terminus
 			char					 m_video_card_desc[128];
 			std::unordered_map<String, Texture2D*> m_render_target_map;
 			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
+			float					 _window_width;
+			float					 _window_height;
 
 			D3D11_PRIMITIVE_TOPOLOGY m_primitive_type;
 			ID3D11Device*			 m_device;
