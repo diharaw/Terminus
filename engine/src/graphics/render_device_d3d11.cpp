@@ -306,7 +306,12 @@ namespace terminus
 	{
 		Texture2D* texture = new Texture2D();
 		texture->m_resource_id = m_texture_res_id++;
-
+        
+        ZeroMemory(&texture->m_textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+        ZeroMemory(&texture->m_srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+        ZeroMemory(&texture->m_dsDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+        ZeroMemory(&texture->m_rtvDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
+    
 		if (generateMipmaps)
 		{
 			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
@@ -495,6 +500,11 @@ namespace terminus
 											 uint mipMapLevels)
 	{
 		texture->m_resource_id = m_texture_res_id++;
+        
+        ZeroMemory(&texture->m_textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+        ZeroMemory(&texture->m_srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+        ZeroMemory(&texture->m_dsDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+        ZeroMemory(&texture->m_rtvDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
 
 		if (generateMipmaps)
 		{
@@ -700,6 +710,8 @@ namespace terminus
 		VertexBuffer* vertexBuffer = new VertexBuffer();
 		vertexBuffer->m_resource_id = m_buffer_res_id++;
 
+        ZeroMemory(&vertexBuffer->m_BufferDescD3D, sizeof(D3D11_BUFFER_DESC));
+        
 		vertexBuffer->m_type = BufferType::VERTEX;
 		vertexBuffer->m_usageType = usageType;
 
@@ -748,6 +760,8 @@ namespace terminus
 		IndexBuffer* indexBuffer = new IndexBuffer();
 		indexBuffer->m_resource_id = m_buffer_res_id++;
 
+        ZeroMemory(&indexBuffer->m_BufferDescD3D, sizeof(D3D11_BUFFER_DESC));
+        
 		indexBuffer->m_type = BufferType::VERTEX;
 		indexBuffer->m_usageType = usageType;
 
@@ -796,6 +810,8 @@ namespace terminus
 		UniformBuffer* uniformBuffer = new UniformBuffer();
 		uniformBuffer->m_resource_id = m_buffer_res_id++;
 
+        ZeroMemory(&uniformBuffer->m_BufferDescD3D, sizeof(D3D11_BUFFER_DESC));
+        
 		uniformBuffer->m_BufferDescD3D.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		uniformBuffer->m_BufferDescD3D.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		uniformBuffer->m_type = BufferType::VERTEX;
@@ -843,6 +859,12 @@ namespace terminus
 		if (layoutType == InputLayoutType::STANDARD_VERTEX)
 		{
 			D3D11_INPUT_ELEMENT_DESC inputElement[4];
+            
+            ZeroMemory(&inputElement[0], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[1], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[2], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[3], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            
 			InputLayout layout;
 			InputElement element;
 
@@ -929,6 +951,14 @@ namespace terminus
 		else if (layoutType == InputLayoutType::STANDARD_SKINNED_VERTEX)
 		{
 			D3D11_INPUT_ELEMENT_DESC inputElement[6];
+            
+            ZeroMemory(&inputElement[0], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[1], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[2], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[3], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[4], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            ZeroMemory(&inputElement[5], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            
 			InputLayout layout;
 			InputElement element;
 
@@ -1047,6 +1077,11 @@ namespace terminus
 		{
 			D3D11_INPUT_ELEMENT_DESC* inputElement = new D3D11_INPUT_ELEMENT_DESC[inputLayout->m_Elements.size()];
 			
+            for(int k = 0; k < inputLayout->m_Elements.size(); k++)
+            {
+                ZeroMemory(&inputElement[k], sizeof(D3D11_INPUT_ELEMENT_DESC));
+            }
+            
 			vertexArray->m_vertexBuffer->m_offset = 0;
 			vertexArray->m_vertexBuffer->m_stride = inputLayout->m_vertexSize;
 
@@ -1123,6 +1158,8 @@ namespace terminus
 		RasterizerState* rasterizerState = new RasterizerState();
 
 		D3D11_RASTERIZER_DESC rasterizerDesc;
+        
+        ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 
 		rasterizerDesc.AntialiasedLineEnable = false;
 
@@ -1173,6 +1210,8 @@ namespace terminus
 	{
 		SamplerState* samplerState = new SamplerState();
 		samplerState->m_resource_id = m_sampler_res_id++;
+        
+        ZeroMemory(&samplerState->m_samplerDesc, sizeof(D3D11_SAMPLER_DESC));
 		
 		switch (wrapModeU)
 		{
@@ -1426,6 +1465,8 @@ namespace terminus
 	{
 		DepthStencilState* depthStencilState = new DepthStencilState();
 
+        ZeroMemory(&depthStencilState->m_depthStencilStateDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+        
 		if (enableDepthTest)
 			depthStencilState->m_depthStencilStateDesc.DepthEnable = true;
 		else
@@ -1848,6 +1889,8 @@ namespace terminus
 	{
 		ID3D11DepthStencilView* depthStencilView;
 		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+        
+        ZeroMemory(&depthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
 
 		// Check Format and set DS format accordingly
 		depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -1859,7 +1902,7 @@ namespace terminus
 			case TextureTarget::TEXTURE2D:
 			{
 				Texture2D* texture = (Texture2D*)renderTarget;
-				m_device->CreateDepthStencilView(texture->m_textureD3D, NULL, &depthStencilView);
+				m_device->CreateDepthStencilView(texture->m_textureD3D, &depthStencilViewDesc, &depthStencilView);
 				break;
 			}
 			default:
