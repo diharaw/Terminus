@@ -18,22 +18,7 @@ namespace terminus
 
 	void RenderDevice::Initialize()
 	{
-		//ThreadPool* thread_pool = Global::GetDefaultThreadPool();
-		//// Create RenderDevice initializationg task
-		//RenderDeviceInitData* data = Global::GetPerFrameAllocator()->NewPerFrame<RenderDeviceInitData>();
-	
-		//TaskData* task = thread_pool->CreateTask();
-		//task->data = data;
-		//task->function.Bind<RenderDevice, &RenderDevice::InitializeTask>(this);
-
-		//thread_pool->SubmitAndWait();
-
-		InitializeTask(nullptr);
-	}
-
-	void RenderDevice::InitializeTask(void* data)
-	{
-		assert(InitializeAPI());
+		InitializeAPI();
 	}
 
 	void RenderDevice::Shutdown()

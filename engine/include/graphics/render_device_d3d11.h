@@ -55,7 +55,6 @@ namespace terminus
 			RenderDevice();
 			~RenderDevice();
 			void Initialize();
-			void InitializeTask(void* data);
 			void Shutdown();
 
 			// Object Creation
