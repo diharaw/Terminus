@@ -56,7 +56,7 @@ namespace terminus
 #endif
 		_platform->destroy_opengl_context();
 	}
-
+    
 	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
 											 void* data,
 											 TextureFormat format,
@@ -533,15 +533,183 @@ namespace terminus
 		return texture;
 	}
 
-	TextureCube* RenderDevice::CreateTextureCube(uint16 width,
-												 uint16 height,
-												 uint16 depth, 
-												 void* data,
-												 TextureFormat format,
-												 bool generateMipmaps,
-												 uint mipMapLevels)
+	TextureCube* RenderDevice::CreateTextureCube(TextureCubeCreateDesc desc)
 	{
-		return nullptr;
+        TextureCube* texture = new TextureCube();
+        texture->m_resource_id = m_texture_res_id++;
+        
+        GL_CHECK_ERROR(glGenTextures(1, &texture->m_id));
+        texture->m_glTextureTarget = GL_TEXTURE_CUBE_MAP;
+        
+        GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texture->m_id));
+        
+        GLenum texformat, textype;
+        
+        switch (desc.format)
+        {
+            case TextureFormat::R32G32B32_FLOAT:
+            {
+                texformat = GL_RGB;
+                textype = GL_FLOAT;
+            }
+                break;
+            case TextureFormat::R32G32B32A32_FLOAT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_FLOAT;
+            }
+                break;
+            case TextureFormat::R32G32B32_UINT:
+            {
+                texformat = GL_RGB;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::R32G32B32A32_UINT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::R32G32B32_INT:
+            {
+                texformat = GL_RGB;
+                textype = GL_INT;
+            }
+                break;
+            case TextureFormat::R32G32B32A32_INT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_INT;
+            }
+                break;
+            case TextureFormat::R16G16B16A16_FLOAT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_FLOAT;
+            }
+                break;
+            case TextureFormat::R16G16B16A16_UINT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::R16G16B16A16_INT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_INT;
+            }
+                break;
+            case TextureFormat::R8G8B8A8_UNORM:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_BYTE;
+            }
+                break;
+            case TextureFormat::R8G8B8A8_UINT:
+            {
+                texformat = GL_RGBA;
+                textype = GL_UNSIGNED_INT;
+            }
+                break;
+            case TextureFormat::D32_FLOAT_S8_UINT:
+            {
+                texformat = GL_DEPTH_STENCIL;
+                textype = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+            }
+                break;
+            case TextureFormat::D24_FLOAT_S8_UINT:
+            {
+                texformat = GL_DEPTH_STENCIL;
+                textype = GL_UNSIGNED_INT_24_8;
+            }
+                break;
+            case TextureFormat::D16_FLOAT:
+            {
+                texformat = GL_DEPTH_COMPONENT;
+                textype = GL_FLOAT;
+            }
+                break;
+            default:
+                break;
+        }
+        
+        // +X
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                    0,
+                                    texformat,
+                                    desc.width,
+                                    desc.height,
+                                    0,
+                                    texformat,
+                                    textype,
+                                    desc.pos_x_data);)
+        
+        // -X
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                    0,
+                                    texformat,
+                                    desc.width,
+                                    desc.height,
+                                    0,
+                                    texformat,
+                                    textype,
+                                    desc.neg_x_data));
+        
+        // +Y
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                                    0,
+                                    texformat,
+                                    desc.width,
+                                    desc.height,
+                                    0,
+                                    texformat,
+                                    textype,
+                                    desc.pos_y_data));
+        
+        // -Y
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                                    0,
+                                    texformat,
+                                    desc.width,
+                                    desc.height,
+                                    0,
+                                    texformat,
+                                    textype,
+                                    desc.neg_y_data));
+        
+        // +Z
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                                    0,
+                                    texformat,
+                                    desc.width,
+                                    desc.height,
+                                    0,
+                                    texformat,
+                                    textype,
+                                    desc.pos_z_data));
+        
+        // -Z
+        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+                                    0,
+                                    texformat,
+                                    desc.width,
+                                    desc.height,
+                                    0,
+                                    texformat,
+                                    textype,
+                                    desc.neg_z_data));
+        
+        
+        if (desc.generate_mipmaps)
+        {
+            GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+        }
+        
+        GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
+        
+        return texture;
 	}
 
 	VertexBuffer* RenderDevice::CreateVertexBuffer(void* data,
@@ -1522,7 +1690,7 @@ namespace terminus
 		GL_CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
 		GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
-
+    
 	void RenderDevice::DestroyTexture1D(Texture1D* texture)
 	{
 		glDeleteTextures(1, &texture->m_id);

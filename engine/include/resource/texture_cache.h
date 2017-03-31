@@ -17,6 +17,7 @@ namespace terminus
 		TextureCache();
 		~TextureCache();
 		Texture* load(std::string id);
+        TextureCube* load_cubemap(std::string id);
 		void unload(Texture* texture);
 	};
 }

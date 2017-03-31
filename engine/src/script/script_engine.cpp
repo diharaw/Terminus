@@ -305,19 +305,11 @@ namespace terminus
                                                  "inherit_yaw", &CameraComponent::inherit_yaw,
                                                  "inherit_roll", &CameraComponent::inherit_roll);
 
-		_lua_state.new_enum("LightType",
-							"POINT", LightType::POINT,
-							"SPOT", LightType::SPOT,
-							"DIRECTIONAL", LightType::DIRECTIONAL);
-
-		_lua_state.new_usertype<LightComponent>("LightComponent",
+		_lua_state.new_usertype<PointLightComponent>("PointLightComponent",
 												sol::constructors<sol::types<>>(),
-												"type", &LightComponent::type,
-												"color", &LightComponent::color,
-												"intensity", &LightComponent::intensity,
-												"casts_shadow", &LightComponent::casts_shadow,
-												"position", &LightComponent::position,
-												"direction", &LightComponent::direction);
+												"color", &PointLightComponent::color,
+												"intensity", &PointLightComponent::intensity,
+												"casts_shadow", &PointLightComponent::casts_shadow);
 
         LuaObject transform_root = _lua_state.create_table("Transform");
         

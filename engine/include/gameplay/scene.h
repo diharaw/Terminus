@@ -18,6 +18,17 @@
 #include <string>
 #include <array>
 
+#define MAX_TRANSFORM_COMPONENTS MAX_ENTITIES
+#define MAX_MESH_COMPONENTS 1024
+#define MAX_CAMERA_COMPONENTS 10
+#define MAX_LUA_COMPONENTS 100
+#define MAX_CPP_COMPONENTS 100
+#define MAX_RIGIDBODY_COMPONENTS 1024
+#define MAX_COLLIDER_COMPONENTS 1024
+#define MAX_POINT_LIGHT_COMPONENTS 100
+#define MAX_SPOT_LIGHT_COMPONENTS 100
+#define MAX_DIRECTIONAL_LIGHT_COMPONENTS 100
+
 namespace terminus
 {
 	class Scene
@@ -27,14 +38,16 @@ namespace terminus
 
 		// component pools
 
-		ComponentPool<TransformComponent>        _transform_pool;
-		ComponentPool<MeshComponent>             _mesh_pool;
-		ComponentPool<CameraComponent>           _camera_pool;
-		ComponentPool<LuaScriptComponent>        _lua_script_pool;
-        ComponentPool<CppScriptComponent>        _cpp_script_pool;
-        ComponentPool<RigidBodyComponent>        _rigid_body_pool;
-        ComponentPool<ColliderComponent>         _collider_pool;
-		ComponentPool<LightComponent>			 _light_pool;
+		ComponentPool<TransformComponent, MAX_TRANSFORM_COMPONENTS>         _transform_pool;
+		ComponentPool<MeshComponent, MAX_MESH_COMPONENTS>                   _mesh_pool;
+		ComponentPool<CameraComponent, MAX_CAMERA_COMPONENTS>               _camera_pool;
+		ComponentPool<LuaScriptComponent, MAX_LUA_COMPONENTS>               _lua_script_pool;
+        ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               _cpp_script_pool;
+        ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         _rigid_body_pool;
+        ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           _collider_pool;
+		ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    _point_light_pool;
+        ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
+        ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
 
 		// systems
 
@@ -71,6 +84,7 @@ namespace terminus
             _render_system.initialize(this);
             _script_system.initialize(this);
             _physics_system.initialize(this);
+            _light_system.initialize(this);
         }
         
         inline void shutdown()
@@ -80,11 +94,13 @@ namespace terminus
             _transform_system.shutdown();
             _render_system.shutdown();
             _physics_system.shutdown();
+            _light_system.shutdown();
         }
 
         inline void update(double dt)
         {
             _script_system.update(dt);
+            _light_system.update(dt);
             _transform_system.update(dt);
             _physics_system.update(dt);
             _camera_system.update(dt);
@@ -138,10 +154,20 @@ namespace terminus
             return _rigid_body_pool.create(entity);
         }
 
-		inline LightComponent& attach_light_component(Entity& entity)
+		inline PointLightComponent& attach_point_light_component(Entity& entity)
 		{
-			return _light_pool.create(entity);
+			return _point_light_pool.create(entity);
 		}
+        
+        inline SpotLightComponent& attach_spot_light_component(Entity& entity)
+        {
+            return _spot_light_pool.create(entity);
+        }
+        
+        inline DirectionalLightComponent& attach_directional_light_component(Entity& entity)
+        {
+            return _directional_light_pool.create(entity);
+        }
         
         // get id methods
         
@@ -192,10 +218,20 @@ namespace terminus
             return _rigid_body_pool.lookup(entity);
         }
 
-		inline LightComponent& get_light_component(Entity& entity)
+		inline PointLightComponent& get_point_light_component(Entity& entity)
 		{
-			return _light_pool.lookup(entity);
+			return _point_light_pool.lookup(entity);
 		}
+        
+        inline SpotLightComponent& get_spot_light_component(Entity& entity)
+        {
+            return _spot_light_pool.lookup(entity);
+        }
+        
+        inline DirectionalLightComponent& get_directional_light_component(Entity& entity)
+        {
+            return _directional_light_pool.lookup(entity);
+        }
 
 		// has methods
 
@@ -234,10 +270,20 @@ namespace terminus
             return _rigid_body_pool.has(entity);
         }
 
-		inline bool has_light_component(Entity& entity)
+		inline bool has_point_light_component(Entity& entity)
 		{
-			return _light_pool.has(entity);
+			return _point_light_pool.has(entity);
 		}
+        
+        inline bool has_spot_light_component(Entity& entity)
+        {
+            return _spot_light_pool.has(entity);
+        }
+        
+        inline bool has_directional_light_component(Entity& entity)
+        {
+            return _directional_light_pool.has(entity);
+        }
 
 		inline Entity& create_entity(std::string name = "")
 		{
@@ -269,7 +315,9 @@ namespace terminus
                 _lua_script_pool.remove(entity);
                 _rigid_body_pool.remove(entity);
                 _collider_pool.remove(entity);
-				_light_pool.remove(entity);
+				_point_light_pool.remove(entity);
+                _spot_light_pool.remove(entity);
+                _directional_light_pool.remove(entity);
 
 				_versions[INDEX_FROM_ID(entity._id)]++;
 				_entities.remove(entity._id);

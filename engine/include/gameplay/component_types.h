@@ -16,22 +16,44 @@ namespace terminus
 	// forward declaration
 	class Scene;
 
-	enum class LightType
-	{
-		POINT = 0,
-		SPOT = 1,
-		DIRECTIONAL = 3
-	};
-
-	struct LightComponent
-	{
-		LightType type;
-		Vector4 color;
-		float intensity;
-		bool casts_shadow;
-		Vector3 position;
-		Vector3 direction;
-	};
+    struct SkyComponent
+    {
+        StringBuffer32 cubemap;
+        TextureCube*   texture;
+    };
+    
+    struct PointLightComponent
+    {
+        Vector4 color;
+        float intensity;
+        bool casts_shadow;
+        Vector3 position;
+        float constant_attenuation;
+        float linear_attenuation;
+        float quadratic_attenuation;
+    };
+    
+    struct SpotLightComponent
+    {
+        Vector4 color;
+        float intensity;
+        bool casts_shadow;
+        Vector3 position;
+        Vector3 direction;
+        float constant_attenuation;
+        float linear_attenuation;
+        float quadratic_attenuation;
+        float inner_cutoff;
+        float outer_cutoff;
+    };
+    
+    struct DirectionalLightComponent
+    {
+        Vector4 color;
+        float intensity;
+        bool casts_shadow;
+        Vector3 direction;
+    };
     
     struct RigidBodyComponent
     {

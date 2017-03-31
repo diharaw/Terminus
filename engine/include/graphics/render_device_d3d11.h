@@ -85,13 +85,7 @@ namespace terminus
 				TextureFormat format,
 				bool generateMipmaps = true,
 				uint mipMapLevels = 10);
-			TextureCube*	 CreateTextureCube(uint16 width,
-				uint16 height,
-				uint16 depth,
-				void* data,
-				TextureFormat format,
-				bool generateMipmaps = true,
-				uint mipMapLevels = 10);
+			TextureCube*	 CreateTextureCube(TextureCubeCreateDesc desc);
 			VertexBuffer*	 CreateVertexBuffer(void* data,
 				uint size,
 				BufferUsageType usageType);

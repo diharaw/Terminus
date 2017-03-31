@@ -49,5 +49,10 @@ namespace terminus
             
             return texture;
         }
+        
+        TextureCube* create_cubemap(String cube_base_name)
+        {
+            
+        }
     }
 }

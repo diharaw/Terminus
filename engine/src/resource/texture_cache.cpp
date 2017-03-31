@@ -49,6 +49,26 @@ namespace terminus
 			return m_AssetMap[id];
 		}
 	}
+    
+    TextureCube* TextureCache::load_cubemap(std::string id)
+    {
+        if (m_AssetMap.find(id) == m_AssetMap.end())
+        {
+            std::cout << "Asset not in Cache. Loading Asset." << std::endl;
+            
+            TextureCube* texture = texture_factory::create_cubemap(id);
+            m_AssetMap[id] = texture;
+            
+            std::cout << "Asset successfully loaded" << std::endl;
+            
+            return texture;
+        }
+        else
+        {
+            std::cout << "Asset already loaded. Returning reference." << std::endl;
+            return (TextureCube*)m_AssetMap[id];
+        }
+    }
 
 	void TextureCache::unload(Texture* texture)
 	{

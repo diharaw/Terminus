@@ -73,17 +73,17 @@ namespace terminus
 
 			// Object Creation
 			Texture1D*		 CreateTexture1D(uint16 width,
-				void* data,
-				TextureFormat format,
-				bool generateMipmaps = true,
-				uint mipMapLevels = 10);
+                                             void* data,
+                                             TextureFormat format,
+                                             bool generateMipmaps = true,
+                                             uint mipMapLevels = 10);
 			Texture2D*		 CreateTexture2D(uint16 width,
-				uint16 height,
-				void* data,
-				TextureFormat format,
-				bool createRenderTargetView,
-				bool generateMipmaps = true,
-				uint mipMapLevels = 10);
+                                             uint16 height,
+                                             void* data,
+                                             TextureFormat format,
+                                             bool createRenderTargetView,
+                                             bool generateMipmaps = true,
+                                             uint mipMapLevels = 10);
             void		 CreateTexture2D(Texture2D* texture,
                                          uint16 width,
                                          uint16 height,
@@ -99,13 +99,9 @@ namespace terminus
 				TextureFormat format,
 				bool generateMipmaps = true,
 				uint mipMapLevels = 10);
-			TextureCube*	 CreateTextureCube(uint16 width,
-				uint16 height,
-				uint16 depth,
-				void* data,
-				TextureFormat format,
-				bool generateMipmaps = true,
-				uint mipMapLevels = 10);
+            
+            
+			TextureCube*	 CreateTextureCube(TextureCubeCreateDesc desc);
 			VertexBuffer*	 CreateVertexBuffer(void* data,
 				uint size,
 				BufferUsageType usageType);

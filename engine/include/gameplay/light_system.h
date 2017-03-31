@@ -3,6 +3,8 @@
 #include <gameplay/entity.h>
 #include <gameplay/component_types.h>
 
+#define MAX_LIGHT_ENTITIES 100
+
 namespace terminus
 {
 	class Scene;
@@ -10,7 +12,11 @@ namespace terminus
 	class LightSystem
 	{
 	private:
-		Scene*   _scene;
+		Scene* _scene;
+        int    _num_point_lights;
+        int    _num_spot_lights;
+        Entity _point_light_list[MAX_LIGHT_ENTITIES];
+        Entity _spot_light_list[MAX_LIGHT_ENTITIES];
 
 	public:
 		LightSystem();

@@ -9,11 +9,11 @@
 
 namespace terminus
 {
-	template <typename T>
+	template <typename T, int N>
 	class ComponentPool
 	{
 	public:
-		PackedArray<T, MAX_ENTITIES> _pool;
+		PackedArray<T, N> _pool;
 	private:
 		std::array<ID, MAX_ENTITIES> _cmp_entity_ref;
 

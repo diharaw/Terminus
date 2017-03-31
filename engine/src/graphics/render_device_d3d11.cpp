@@ -677,13 +677,7 @@ namespace terminus
 		return nullptr;
 	}
 
-	TextureCube* RenderDevice::CreateTextureCube(uint16 width,
-												 uint16 height,
-												 uint16 depth,
-												 void* data,
-												 TextureFormat format,
-												 bool generateMipmaps,
-												 uint mipMapLevels)
+	TextureCube* RenderDevice::CreateTextureCube(TextureCubeCreateDesc desc)
 	{
 		return nullptr;
 	}

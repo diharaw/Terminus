@@ -247,4 +247,57 @@ enum class ShaderType
     PIXEL = 4
 };
 
+// Resource Creation Description Structures
+
+struct Texture1DCreateDesc
+{
+    
+};
+
+struct Texture2DCreateDesc
+{
+    
+};
+
+struct Texture3DCreateDesc
+{
+    
+};
+
+struct TextureCubeCreateDesc
+{
+    uint16 width;
+    uint16 height;
+    void* pos_x_data;
+    void* neg_x_data;
+    void* pos_y_data;
+    void* neg_y_data;
+    void* pos_z_data;
+    void* neg_z_data;
+    TextureFormat format;
+    bool generate_mipmaps;
+    uint mipmap_levels;
+    
+    TextureCubeCreateDesc()
+    {
+        generate_mipmaps = true;
+        mipmap_levels = 10;
+    }
+};
+
+struct FramebufferCreateDesc
+{
+    
+};
+
+struct DepthStencilStateCreateDesc
+{
+    
+};
+
+struct RasterizerStateCreateDesc
+{
+    
+};
+
 #endif 
