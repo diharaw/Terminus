@@ -36,6 +36,7 @@ target_link_libraries(Terminus-Engine BulletInverseDynamics)
 target_link_libraries(Terminus-Engine LinearMath)
 target_link_libraries(Terminus-Engine nfd)
 target_link_libraries(Terminus-Engine Boxer)
+target_link_libraries(Terminus-Engine cmft)
 
 IF(NOT WIN32)
     target_link_libraries(Terminus-Engine openal)

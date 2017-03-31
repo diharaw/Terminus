@@ -24,6 +24,7 @@ set(T_DELEGATES_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/Delegates11")
 set(T_BULLET_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/Bullet 3/src")
 set(T_LUAJIT_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/luajit/src")
 set(T_SOL2_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/sol2")
+set(T_CMFT_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/cmft/include/cmft")
 set(T_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/engine/include")
 
 include_directories("${T_GLEW_INCLUDE_DIRS}" 
@@ -38,6 +39,7 @@ include_directories("${T_GLEW_INCLUDE_DIRS}"
 					"${T_BULLET_INCLUDE_DIRS}"
 					"${T_LUAJIT_INCLUDE_DIRS}"
 					"${T_SOL2_INCLUDE_DIRS}"
+					"${T_CMFT_INCLUDE_DIRS}"
 					"${T_TERMINUS_INCLUDE_DIRS}")
 
 add_subdirectory(external)
