@@ -204,6 +204,10 @@ namespace logger
         {
             g_logger._callback(output, level);
         }
+
+		// Flush stream if error
+		if (level == LogLevel::ERR || level == LogLevel::FATAL)
+			flush();
     }
     
     void log_simple(std::string text, LogLevel level)

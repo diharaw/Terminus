@@ -73,7 +73,10 @@ namespace terminus
     
     struct TextureCube : Texture
     {
-        
+		int m_width;
+		int m_height;
+		D3D11_TEXTURE2D_DESC _desc;
+		ID3D11Texture2D* _texture;
     };
     
     struct Buffer

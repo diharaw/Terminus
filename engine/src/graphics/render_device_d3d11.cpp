@@ -679,7 +679,225 @@ namespace terminus
 
 	TextureCube* RenderDevice::CreateTextureCube(TextureCubeCreateDesc desc)
 	{
-		return nullptr;
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Create engine objects
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		TextureCube* texture = new TextureCube();
+		texture->m_resource_id = m_texture_res_id++;
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Intiailize desc structs.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		ZeroMemory(&texture->_desc, sizeof(D3D11_TEXTURE2D_DESC));
+		ZeroMemory(&texture->m_srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+		ZeroMemory(&texture->m_dsDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+		ZeroMemory(&texture->m_rtvDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Setup mipmapping options.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		if (desc.generate_mipmaps)
+		{
+			if (desc.format == TextureFormat::D32_FLOAT_S8_UINT || desc.format == TextureFormat::D24_FLOAT_S8_UINT || desc.format == TextureFormat::D16_FLOAT)
+			{
+				texture->_desc.MipLevels = 0;
+				texture->_desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+				texture->m_srvDesc.Texture2DArray.MostDetailedMip = 0;
+				texture->m_srvDesc.Texture2DArray.MipLevels = -1;
+			}
+			else
+			{
+				texture->_desc.MipLevels = desc.mipmap_levels;
+				texture->_desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+				texture->m_srvDesc.Texture2DArray.MostDetailedMip = 0;
+				texture->m_srvDesc.Texture2DArray.MipLevels = (desc.mipmap_levels == 0) ? -1 : desc.mipmap_levels;
+			}
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Find DXGI texture format.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		texture->_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+		texture->_desc.Format = get_dxgi_format(desc.format);
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Setup depth target specific options.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		switch (desc.format)
+		{
+		case TextureFormat::D32_FLOAT_S8_UINT:
+			texture->_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			texture->_desc.MipLevels = 1;
+			texture->_desc.MiscFlags = 0;
+			break;
+
+		case TextureFormat::D24_FLOAT_S8_UINT:
+			texture->_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			texture->_desc.MipLevels = 1;
+			texture->_desc.MiscFlags = 0;
+			break;
+
+		case TextureFormat::D16_FLOAT:
+			texture->_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;;
+			texture->_desc.MipLevels = 1;
+			texture->_desc.MiscFlags = 0;
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Fill out Texture2D desc.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		// Set data type depending on bpp property of extraData
+		texture->_desc.Height = desc.height;
+		texture->_desc.Width = desc.width;
+		texture->_desc.ArraySize = 6;
+		texture->_desc.SampleDesc.Count = 1;
+		texture->_desc.SampleDesc.Quality = 0;
+		texture->_desc.Usage = D3D11_USAGE_DEFAULT;
+		texture->_desc.CPUAccessFlags = 0;
+		texture->_desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Fill out shader resource view desc.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		texture->m_srvDesc.Format = texture->_desc.Format;
+		texture->m_srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Fill out depth stencil view desc.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		texture->m_dsDesc.Format = texture->_desc.Format;
+		texture->m_dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+		texture->m_dsDesc.Texture2DArray.FirstArraySlice = 0;
+		texture->m_dsDesc.Texture2DArray.MipSlice = 0;
+		texture->m_dsDesc.Texture2DArray.ArraySize = 6;
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Fill out render target view desc.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		texture->m_rtvDesc.Format = texture->_desc.Format;
+		texture->m_rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+		texture->m_rtvDesc.Texture2DArray.FirstArraySlice = 0;
+		texture->m_rtvDesc.Texture2DArray.MipSlice = 0;
+		texture->m_rtvDesc.Texture2DArray.ArraySize = 6;
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Temporary fallbacks.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		if (desc.format == TextureFormat::D24_FLOAT_S8_UINT)
+		{
+			texture->_desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+
+			texture->m_srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			texture->m_srvDesc.Texture2DArray.MipLevels = texture->_desc.MipLevels;
+			texture->m_srvDesc.Texture2DArray.MostDetailedMip = 0;
+
+			texture->m_dsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			texture->m_dsDesc.Flags = 0;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Setup intial data.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		D3D11_SUBRESOURCE_DATA pData[6];
+		int rowPitch = (desc.width * 4) * sizeof(unsigned char);
+
+		for (int i = 0; i < 6; i++)
+		{
+			//Pointer to the pixel data
+			pData[i].pSysMem = desc.data[i];
+			//Line width in bytes
+			pData[i].SysMemPitch = rowPitch;
+			// This is only used for 3d textures.
+			pData[i].SysMemSlicePitch = 0;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Create Texture2D.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		HRESULT Result;
+
+		if (!desc.create_render_target_view)
+			Result = m_device->CreateTexture2D(&texture->_desc, NULL, &texture->_texture);
+		else
+			Result = m_device->CreateTexture2D(&texture->_desc, &pData[0], &texture->_texture);
+
+		if (FAILED(Result))
+		{
+			T_LOG_ERROR("Failed to Create Texture2D!");
+			return nullptr;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Create shader resource view.
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		Result = m_device->CreateShaderResourceView(texture->_texture, &texture->m_srvDesc, &texture->m_textureView);
+		if (FAILED(Result))
+		{
+			T_LOG_ERROR("Failed to Create Texture2D!");
+			return nullptr;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------------------
+		// Render target view specific initialization
+		//-------------------------------------------------------------------------------------------------------------------------------------
+
+		if (desc.create_render_target_view)
+		{
+			//-------------------------------------------------------------------------------------------------------------------------------------
+			// Create depth stencil view. (if current TextureCube is of a depth-buffer format and has requested a render target view, a depth 
+			// stencil view wil be created for it.)
+			//-------------------------------------------------------------------------------------------------------------------------------------
+
+			if (desc.format == TextureFormat::D32_FLOAT_S8_UINT || desc.format == TextureFormat::D24_FLOAT_S8_UINT || desc.format == TextureFormat::D16_FLOAT)
+			{
+				texture->m_depthView = nullptr;
+
+				Result = m_device->CreateDepthStencilView(texture->_texture, &texture->m_dsDesc, &texture->m_depthView);
+				if (FAILED(Result))
+				{
+					T_LOG_ERROR("Failed to Create DepthStencilView!");
+					return nullptr;
+				}
+			}
+
+			//-------------------------------------------------------------------------------------------------------------------------------------
+			// Create render target view. (if current TextureCube is NOT of a depth-buffer format and has requested a render target view, a render 
+			// target view wil be created for it.)
+			//-------------------------------------------------------------------------------------------------------------------------------------
+
+			else
+			{
+				texture->m_renderTargetView = nullptr;
+
+				Result = m_device->CreateRenderTargetView(texture->_texture, &texture->m_rtvDesc, &texture->m_renderTargetView);
+				if (FAILED(Result))
+				{
+					T_LOG_ERROR("Failed to Create RenderTargetView!");
+					return nullptr;
+				}
+			}
+		}
+
+		return texture;
 	}
 
 	VertexBuffer* RenderDevice::CreateVertexBuffer(void* data,
@@ -919,11 +1137,11 @@ namespace terminus
 
 			if (FAILED(result))
 			{
-				//T_LOG_ERROR("Failed to create Input Layout");
+				T_LOG_ERROR("Failed to create Input Layout");
 				return nullptr;
 			}
 
-			//T_LOG_INFO("Successfully Created Vertex Array");
+			T_LOG_INFO("Successfully Created Vertex Array");
 
 			return vertexArray;
 		}
@@ -1861,7 +2079,7 @@ namespace terminus
 
 		//_framebuffer->attachRenderTarget(_renderTarget);
 		framebuffer->m_renderTargets.push_back(renderTarget);
-		framebuffer->m_renderTargetViews.push_back(renderTarget->m_renderTargetView);
+		framebuffer->m_renderTargetViews.push_back(((Texture2D*)renderTarget)->m_renderTargetView);
 	}
 
 	void RenderDevice::AttachDepthStencilTarget(Framebuffer* framebuffer, Texture* renderTarget)
@@ -1893,7 +2111,7 @@ namespace terminus
 		}
 
 		framebuffer->m_depthStencilTarget = renderTarget;
-		framebuffer->m_depthStecilView = renderTarget->m_depthView;
+		framebuffer->m_depthStecilView = ((Texture2D*)renderTarget)->m_depthView;
 	}
 
 	void RenderDevice::DestroyTexture1D(Texture1D* texture)
@@ -1943,14 +2161,14 @@ namespace terminus
 
 	void RenderDevice::DestroyTextureCube(TextureCube* texture)
 	{
-		if (texture->m_renderTargetView)
+		/*if (texture->m_renderTargetView)
 			texture->m_renderTargetView->Release();
 
 		if (texture->m_textureView)
 			texture->m_textureView->Release();
 
 		if (texture->m_depthView)
-			texture->m_depthView->Release();
+			texture->m_depthView->Release();*/
 
 		delete texture;
 	}
@@ -2429,6 +2647,76 @@ namespace terminus
 		}
 
 		return vertexShaderByteCode;
+	}
+
+	DXGI_FORMAT RenderDevice::get_dxgi_format(TextureFormat format)
+	{
+		DXGI_FORMAT fmt = DXGI_FORMAT_UNKNOWN;
+
+		switch (format)
+		{
+		case TextureFormat::R32G32B32_FLOAT:
+			fmt = DXGI_FORMAT_R32G32B32_FLOAT;
+			break;
+
+		case TextureFormat::R32G32B32A32_FLOAT:
+			fmt = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			break;
+
+		case TextureFormat::R32G32B32_UINT:
+			fmt = DXGI_FORMAT_R32G32B32_UINT;
+			break;
+
+		case TextureFormat::R32G32B32A32_UINT:
+			fmt = DXGI_FORMAT_R32G32B32A32_UINT;
+			break;
+
+		case TextureFormat::R32G32B32_INT:
+			fmt = DXGI_FORMAT_R32G32B32_SINT;
+			break;
+
+		case TextureFormat::R32G32B32A32_INT:
+			fmt = DXGI_FORMAT_R32G32B32A32_SINT;
+			break;
+
+		case TextureFormat::R16G16B16A16_FLOAT:
+			fmt = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			break;
+
+		case TextureFormat::R16G16B16A16_UINT:
+			fmt = DXGI_FORMAT_R16G16B16A16_UINT;
+			break;
+
+		case TextureFormat::R16G16B16A16_INT:
+			fmt = DXGI_FORMAT_R16G16B16A16_SINT;
+			break;
+
+		case TextureFormat::R8G8B8A8_UNORM:
+			fmt = DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+
+		case TextureFormat::R8G8B8A8_UINT:
+			fmt = DXGI_FORMAT_R8G8B8A8_UINT;
+			break;
+
+		case TextureFormat::D32_FLOAT_S8_UINT:
+			fmt = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+			break;
+
+		case TextureFormat::D24_FLOAT_S8_UINT:
+			fmt = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			break;
+
+		case TextureFormat::D16_FLOAT:
+			fmt = DXGI_FORMAT_D16_UNORM;
+			break;
+
+		default:
+			fmt = DXGI_FORMAT_UNKNOWN;
+			break;
+		}
+
+		return fmt;
 	}
 }
 

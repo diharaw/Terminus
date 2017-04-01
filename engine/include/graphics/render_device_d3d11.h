@@ -218,6 +218,9 @@ namespace terminus
 			}
 
 		private:
+			DXGI_FORMAT get_dxgi_format(TextureFormat format);
+
+		private:
 
 			bool InitializeAPI();
 			ID3D10Blob* CreateStubShaderByteCodeFromLayout(InputLayout _layout);

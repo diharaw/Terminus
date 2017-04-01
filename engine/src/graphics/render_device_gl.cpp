@@ -634,73 +634,20 @@ namespace terminus
             default:
                 break;
         }
-        
-        // +X
-        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                                    0,
-                                    texformat,
-                                    desc.width,
-                                    desc.height,
-                                    0,
-                                    texformat,
-                                    textype,
-                                    desc.pos_x_data);)
-        
-        // -X
-        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-                                    0,
-                                    texformat,
-                                    desc.width,
-                                    desc.height,
-                                    0,
-                                    texformat,
-                                    textype,
-                                    desc.neg_x_data));
-        
-        // +Y
-        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-                                    0,
-                                    texformat,
-                                    desc.width,
-                                    desc.height,
-                                    0,
-                                    texformat,
-                                    textype,
-                                    desc.pos_y_data));
-        
-        // -Y
-        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-                                    0,
-                                    texformat,
-                                    desc.width,
-                                    desc.height,
-                                    0,
-                                    texformat,
-                                    textype,
-                                    desc.neg_y_data));
-        
-        // +Z
-        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-                                    0,
-                                    texformat,
-                                    desc.width,
-                                    desc.height,
-                                    0,
-                                    texformat,
-                                    textype,
-                                    desc.pos_z_data));
-        
-        // -Z
-        GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-                                    0,
-                                    texformat,
-                                    desc.width,
-                                    desc.height,
-                                    0,
-                                    texformat,
-                                    textype,
-                                    desc.neg_z_data));
-        
+
+		// Array order [+X, –X, +Y, –Y, +Z, –Z]
+		for (int i = 0; i < 6; i++)
+		{
+			GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+										0,
+										texformat,
+										desc.width,
+										desc.height,
+										0,
+										texformat,
+										textype,
+										desc.data[i]);)
+		}
         
         if (desc.generate_mipmaps)
         {

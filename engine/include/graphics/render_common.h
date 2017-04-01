@@ -264,18 +264,15 @@ struct Texture3DCreateDesc
     
 };
 
+// Array order [+X, –X, +Y, –Y, +Z, –Z]
 struct TextureCubeCreateDesc
 {
     uint16 width;
     uint16 height;
-    void* pos_x_data;
-    void* neg_x_data;
-    void* pos_y_data;
-    void* neg_y_data;
-    void* pos_z_data;
-    void* neg_z_data;
-    TextureFormat format;
-    bool generate_mipmaps;
+	void* data[6];
+	TextureFormat format;
+	bool generate_mipmaps;
+	bool create_render_target_view;
     uint mipmap_levels;
     
     TextureCubeCreateDesc()
