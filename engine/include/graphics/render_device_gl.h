@@ -35,22 +35,6 @@ namespace terminus
 		{
 
 		private:
-			// Allocators 
-			PoolAllocator* m_Texture1DAllocator;
-			PoolAllocator* m_Texture2DAllocator;
-			PoolAllocator* m_Texture3DAllocator;
-			PoolAllocator* m_TextureCubeAllocator;
-			PoolAllocator* m_VertexBufferAllocator;
-			PoolAllocator* m_IndexBufferAllocator;
-			PoolAllocator* m_UniformBufferAllocator;
-			PoolAllocator* m_VertexArrayAllocator;
-			PoolAllocator* m_ShaderAllocator;
-			PoolAllocator* m_ShaderProgramAllocator;
-			PoolAllocator* m_FramebufferAllocator;
-			PoolAllocator* m_RasterizerStateAllocator;
-			PoolAllocator* m_DepthStencilStateAllocator;
-			PoolAllocator* m_SamplerStateAllocator;
-
 			// Stateful Object References for Window mode switching. GL only.
 			PackedArray<VertexArray*, MAX_VERTEX_ARRAY>	m_VertexArrayPool;
 			PackedArray<Framebuffer*, MAX_FRAMEBUFFER> 	m_FramebufferPool;
