@@ -2,6 +2,7 @@
 	"name" : "test",
 	"render_passes" :
 	[
-		"test_render_pass.json"
+		"scene_render_pass.json",
+		"sky_render_pass.json"
 	]
 }

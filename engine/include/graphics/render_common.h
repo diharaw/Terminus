@@ -14,7 +14,8 @@ struct RenderDeviceInitData
 enum class GeometryType
 {
 	SCENE = 0,
-	QUAD = 1
+    SKY = 1,
+	QUAD = 2
 };
 
 enum class DepthTest
@@ -264,21 +265,22 @@ struct Texture3DCreateDesc
     
 };
 
-// Array order [+X, –X, +Y, –Y, +Z, –Z]
+// Array order [+X, -X, +Y, -Y, +Z, -Z]
 struct TextureCubeCreateDesc
 {
-    uint16 width;
-    uint16 height;
+    uint16_t width;
+    uint16_t height;
 	void* data[6];
 	TextureFormat format;
 	bool generate_mipmaps;
 	bool create_render_target_view;
-    uint mipmap_levels;
+    uint16_t mipmap_levels;
     
     TextureCubeCreateDesc()
     {
         generate_mipmaps = true;
         mipmap_levels = 10;
+        create_render_target_view = false;
     }
 };
 

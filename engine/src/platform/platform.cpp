@@ -1,6 +1,11 @@
 #include <platform/platform.h>
 #include <core/context.h>
 
+#if !defined(TERMINUS_PLATFORM_IOS)
+    #include <nfd.h>
+    #include <boxer/boxer.h>
+#endif
+
 namespace terminus
 {
 	Platform::Platform()
@@ -62,4 +67,48 @@ namespace terminus
 	}
 #endif
 
+    namespace platform
+    {
+                Selection show_message_box(String _Message, String _Title, Style _Style, Buttons _Buttons)
+                {
+        #if !defined(TERMINUS_PLATFORM_IOS)
+                    Selection result = (Selection)boxer::show(_Message.c_str(), _Title.c_str(), (boxer::Style)_Style, (boxer::Buttons)_Buttons);
+                    return result;
+        #else
+                    return Selection::OK;
+        #endif
+                }
+        
+                String open_file_dialog(String _Extensions, String _DefaultPath)
+                {
+        #if !defined(TERMINUS_PLATFORM_IOS)
+                    char* openPath = NULL;
+                    nfdresult_t result = NFD_OpenDialog(_Extensions.c_str(), _DefaultPath.c_str(), &openPath);
+                    if (result == NFD_OKAY)
+                    {
+                        return String(openPath);
+                    }
+                    else
+                        return String("");
+        #else
+                    return String("");
+        #endif
+                }
+        
+                String save_file_dialog(String _Extensions, String _DefaultPath)
+                {
+        #if !defined(TERMINUS_PLATFORM_IOS)
+                    char* savePath = NULL;
+                    nfdresult_t result = NFD_SaveDialog(_Extensions.c_str(), _DefaultPath.c_str(), &savePath);
+                    if (result == NFD_OKAY)
+                    {
+                        return String(savePath);
+                    }
+                    else
+                        return String("");
+        #else
+                    return String("");
+        #endif
+                }
+    }
 }

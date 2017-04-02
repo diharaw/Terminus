@@ -39,6 +39,13 @@ namespace terminus
 		CameraComponent* camera_array = _scene->_camera_pool.get_array();
 		int num_cameras = _scene->_camera_pool.get_num_objects();
         
+        _skydome_mesh = context::get_mesh_cache().load("sphere.tsm");
+        
+        if(scene->_sky_pool.get_num_objects() > 0)
+            _sky_cmp = scene->_sky_pool.get_array();
+        else
+            _sky_cmp = nullptr;
+        
         // For each Scene Camera
         for (int i = 0; i < num_cameras; i++)
         {
@@ -294,7 +301,6 @@ namespace terminus
                     int16 last_vao = -1;
                     int16 last_program = -1;
                     int16 last_texture = -1;
-                    int16 last_sampler = -1;
                     int   last_renderable = -1;
                     
                     for (int j = 0; j < scene_view._num_items; j++)
@@ -423,12 +429,14 @@ namespace terminus
                         cmd_buf.Write<DrawIndexedBaseVertexCmdData>(&cmd11);
                     }
                 }
+                else if(render_pass->geometry_type == GeometryType::SKY)
+                {
+                    
+                }
                 else if(render_pass->geometry_type == GeometryType::QUAD)
                 {
                     
                 }
-                
-                
             }
         }
         

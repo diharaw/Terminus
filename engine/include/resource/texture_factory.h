@@ -10,6 +10,6 @@ namespace terminus
 	namespace texture_factory
 	{
 		extern Texture* create(String image_name);
-        extern TextureCube* create_cubemap(String cube_base_name);
+        extern TextureCube* create_cubemap(StringBuffer32 cube_base_name);
 	};
 }

@@ -4,6 +4,15 @@
 
 namespace terminus
 {
+    const char* cube_sides[] = {
+                                "_posx.tga",
+                                "_negx.tga",
+                                "_posy.tga",
+                                "_negy.tga",
+                                "_posz.tga",
+                                "_negz.tga"
+                                };
+    
     namespace texture_factory
     {
         struct CreateTextureTaskData
@@ -24,6 +33,22 @@ namespace terminus
             free(task_data->load_data->bytes);
             free(task_data->load_data);
         }
+        
+        struct CreateTextureCubeTaskData
+        {
+            TextureCubeCreateDesc desc;
+            TextureCube**         texture;
+        };
+        
+        void create_texture_cube_task(void* data)
+        {
+            CreateTextureCubeTaskData* task_data = (CreateTextureCubeTaskData*)data;
+            
+            TextureCubeCreateDesc desc;
+            
+            *task_data->texture = context::get_render_device().CreateTextureCube(task_data->desc);
+        }
+
         
         Texture* create(String image_name)
         {
@@ -50,9 +75,54 @@ namespace terminus
             return texture;
         }
         
-        TextureCube* create_cubemap(String cube_base_name)
+        TextureCube* create_cubemap(StringBuffer32 cube_base_name)
         {
+            Task task;
+            TextureCube* texture = nullptr;
             
+            CreateTextureCubeTaskData* texture_task_data = task_data<CreateTextureCubeTaskData>(task);
+            texture_task_data->texture = &texture;
+            
+            asset_common::ImageLoadData* load_data[6];
+            
+            for(int i = 0; i < 6; i++)
+            {
+                StringBuffer32 file_name = cube_base_name + cube_sides[i];
+                std::cout << "Loading cube map side : " << file_name.c_str() << std::endl;
+                
+                load_data[i] = stb_image_loader::load(file_name.c_str());
+                
+                if(load_data[i] != nullptr)
+                {
+                    texture_task_data->desc.data[i] = (void*)load_data[i]->bytes;
+                    texture_task_data->desc.width = load_data[i]->width;
+                    texture_task_data->desc.height = load_data[i]->height;
+                    texture_task_data->desc.format = TextureFormat::R8G8B8A8_UNORM;
+                }
+                else
+                {
+                    std::cout << "Failed to load cube map side : " << file_name.c_str() << std::endl;
+                    return nullptr;
+                }
+            }
+            
+            task._function.Bind<&create_texture_cube_task>();
+            
+            submit_gpu_upload_task(task);
+            
+            std::cout << "Loaded Texture Cube : " << cube_base_name.c_str() << std::endl;
+            
+            for(int i = 0; i < 6; i++)
+            {
+                if(load_data[i])
+                {
+                    free(load_data[i]->bytes);
+                    free(load_data[i]);
+                }
+            }
+            
+            return texture;
+
         }
     }
 }

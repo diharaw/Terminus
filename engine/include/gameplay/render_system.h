@@ -9,6 +9,7 @@
 #include <resource/mesh.h>
 #include <container/packed_array.h>
 #include <gameplay/entity.h>
+#include <gameplay/component_types.h>
 
 #define MAX_DRAW_ITEMS 1024
 #define MAX_VIEWS 10
@@ -71,6 +72,9 @@ namespace terminus
         Renderer*		   _renderer;
         ShaderCache*	   _shader_cache;
 		Scene*			   _scene;
+        
+        Mesh*              _skydome_mesh;
+        SkyComponent*      _sky_cmp;
         
     public:
         RenderSystem();

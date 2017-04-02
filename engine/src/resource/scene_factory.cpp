@@ -6,6 +6,7 @@
 #include <resource/cpp_script_component_factory.h>
 #include <resource/collider_component_factory.h>
 #include <resource/rigid_body_component_factory.h>
+#include <resource/sky_component_factory.h>
 #include <core/context.h>
 
 namespace terminus
@@ -65,6 +66,10 @@ namespace terminus
                         else if(component_type == "RIGID_BODY")
                         {
                             rigid_body_component_factory::create(components[j], new_entity, scene);
+                        }
+                        else if(component_type == "SKY")
+                        {
+                            sky_component_factory::create(components[j], new_entity, scene);
                         }
                     }
                 }

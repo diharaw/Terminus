@@ -56,6 +56,7 @@ namespace terminus
         UniformBuffer* _per_draw_bone_offsets_buffer;
         RasterizerState* _rasterizer_state;
         DepthStencilState* _depth_stencil_state;
+        DepthStencilState* _sky_ds;
         
     public:
         Renderer();

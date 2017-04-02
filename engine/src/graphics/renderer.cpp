@@ -27,6 +27,7 @@ namespace terminus
         _per_draw_bone_offsets_buffer = device.CreateUniformBuffer(nullptr, sizeof(PerDrawBoneOffsetUniforms), BufferUsageType::DYNAMIC);
         _rasterizer_state = device.CreateRasterizerState();
         _depth_stencil_state = device.CreateDepthStencilState();
+        _sky_ds = device.CreateDepthStencilState(true, false, true, ComparisonFunction::LESS_EQUAL);
     }
     
     void Renderer::shutdown()

@@ -1,0 +1,16 @@
+{
+	"name" : "Sky Pass",
+	"render_pass_type" : "SKY",
+	"global_resources" :
+	{
+		"framebuffers" :[]
+	},
+	"sub_passes" :
+	[
+		{
+			"vs_template" : "vs_sky_template",
+			"ps_template" : "ps_sky_template",
+			"framebuffer_target" : null
+		}
+	]
+}

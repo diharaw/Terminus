@@ -28,6 +28,7 @@
 #define MAX_POINT_LIGHT_COMPONENTS 100
 #define MAX_SPOT_LIGHT_COMPONENTS 100
 #define MAX_DIRECTIONAL_LIGHT_COMPONENTS 100
+#define MAX_SKY_COMPONENTS 1
 
 namespace terminus
 {
@@ -48,6 +49,7 @@ namespace terminus
 		ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    _point_light_pool;
         ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
         ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
+        ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     _sky_pool;
 
 		// systems
 
@@ -169,6 +171,11 @@ namespace terminus
             return _directional_light_pool.create(entity);
         }
         
+        inline SkyComponent& attach_sky_component(Entity& entity)
+        {
+            return _sky_pool.create(entity);
+        }
+        
         // get id methods
         
         inline ID get_transform_id(Entity& entity)
@@ -232,6 +239,11 @@ namespace terminus
         {
             return _directional_light_pool.lookup(entity);
         }
+        
+        inline SkyComponent& get_sky_component(Entity& entity)
+        {
+            return _sky_pool.lookup(entity);
+        }
 
 		// has methods
 
@@ -284,6 +296,11 @@ namespace terminus
         {
             return _directional_light_pool.has(entity);
         }
+        
+        inline bool has_sky_component(Entity& entity)
+        {
+            return _sky_pool.has(entity);
+        }
 
 		inline Entity& create_entity(std::string name = "")
 		{
@@ -318,6 +335,7 @@ namespace terminus
 				_point_light_pool.remove(entity);
                 _spot_light_pool.remove(entity);
                 _directional_light_pool.remove(entity);
+                _sky_pool.remove(entity);
 
 				_versions[INDEX_FROM_ID(entity._id)]++;
 				_entities.remove(entity._id);
