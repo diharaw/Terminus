@@ -1,5 +1,5 @@
 {
-	"name" : "Scene Pass",
+	"name" : "test_render_pass",
 	"render_pass_type" : "GAME_WORLD",
 	"global_resources" :
 	{
@@ -17,7 +17,7 @@
 					},
 					{
 						"name" : "depth_attachment",
-						"format" : "D16_FLOAT"	
+						"format" : "D24_FLOAT_S8_UINT"	
 					}
 				]
 			}

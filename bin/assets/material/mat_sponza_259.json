@@ -1,0 +1,7 @@
+{
+    "diffuse_map": "texture/Sponza_FlagPole_diffuse.tga",
+    "normal_map": "texture/Sponza_FlagPole_normal.tga",
+    "metalness_map": "texture/Metallic_metallic.tga",
+    "roughness_map": "texture/Sponza_FlagPole_roughness.tga",
+    "backface_cull": true
+}

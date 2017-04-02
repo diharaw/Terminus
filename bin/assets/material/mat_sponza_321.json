@@ -1,0 +1,7 @@
+{
+    "diffuse_map": "texture/Sponza_Curtain_Red_diffuse.tga",
+    "normal_map": "texture/Sponza_Curtain_Red_normal.tga",
+    "metalness_map": "texture/Sponza_Curtain_metallic.tga",
+    "roughness_map": "texture/Sponza_Curtain_roughness.tga",
+    "backface_cull": true
+}

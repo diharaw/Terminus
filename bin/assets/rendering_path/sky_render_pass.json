@@ -8,8 +8,8 @@
 	"sub_passes" :
 	[
 		{
-			"vs_template" : "vs_sky_template",
-			"ps_template" : "ps_sky_template",
+			"vs_template" : "sky_vs",
+			"ps_template" : "sky_fs",
 			"framebuffer_target" : null
 		}
 	]

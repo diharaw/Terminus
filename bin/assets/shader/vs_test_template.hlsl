@@ -4,26 +4,26 @@
 
 cbuffer u_PerFrame : register(b0)
 {
-	float4x4 LastViewProjection;
-	float4x4 ViewProjection;
-	float4x4 InverseViewProjection;
-	float4x4 Projection;
-	float4x4 View;
-	float3   ViewPosition;
-	float3   ViewDirection;
+	float4x4 u_last_vp_mat;
+	float4x4 u_vp_mat;
+	float4x4 u_inv_vp_mat;
+	float4x4 u_proj_mat;
+	float4x4 u_view_mat;
+	float3   u_view_pos;
+	float3   u_view_dir;
 };
 
 cbuffer u_PerEntity : register(b1)
 {
-	float4x4 ModelViewProjection;
-	float4x4 Model;	
-	float3   Position;
+	float4x4 u_mvp_mat;
+	float4x4 u_model_mat;	
+	float3   u_pos;
 };
 
 #ifdef SKELETAL_VERTEX
 cbuffer u_Bones : register(b2)
 {
-	float4x4 BoneOffset[100];
+	float4x4 u_bone_offsets[100];
 };
 #endif
 
@@ -67,28 +67,28 @@ PixelInputType VertexMain(VertexInputType input)
 {
 	PixelInputType output;
 
-	input.PS_IN_Position.w = 1.0f;
+	input.VS_IN_Position.w = 1.0f;
 
 #ifdef SKELETAL_VERTEX
-	float4x4 BoneTransform  =  mul(BoneOffset[input.VS_IN_BoneIndices[0]] , input.VS_IN_BoneWeights[0]);
-    BoneTransform 	        += mul(BoneOffset[input.VS_IN_BoneIndices[1]] , input.VS_IN_BoneWeights[1]);
-    BoneTransform 	   		+= mul(BoneOffset[input.VS_IN_BoneIndices[2]] , input.VS_IN_BoneWeights[2]);
-    BoneTransform 	   		+= mul(BoneOffset[input.VS_IN_BoneIndices[3]] , input.VS_IN_BoneWeights[3]);
+	float4x4 bone_transform  =  mul(u_bone_offsets[input.VS_IN_BoneIndices[0]] , input.VS_IN_BoneWeights[0]);
+    bone_transform 	        += mul(u_bone_offsets[input.VS_IN_BoneIndices[1]] , input.VS_IN_BoneWeights[1]);
+    bone_transform 	   		+= mul(u_bone_offsets[input.VS_IN_BoneIndices[2]] , input.VS_IN_BoneWeights[2]);
+    bone_transform 	   		+= mul(u_bone_offsets[input.VS_IN_BoneIndices[3]] , input.VS_IN_BoneWeights[3]);
 
-    output.PS_IN_Position = mul(BoneTransform, input.VS_IN_Position);
-	output.PS_IN_Position = mul(ModelViewProjection, output.PS_IN_Position);
+    output.PS_IN_Position = mul(bone_transform, input.VS_IN_Position);
+	output.PS_IN_Position = mul(u_mvp_mat, output.PS_IN_Position);
 #else
-	output.PS_IN_Position = mul(ModelViewProjection, input.VS_IN_Position);
+	output.PS_IN_Position = mul(u_mvp_mat, input.VS_IN_Position);
 #endif
 	
 	output.PS_IN_TexCoords = input.VS_IN_TexCoord;
 
 #ifdef USE_NORMAL_MAP
-	float3 bitangent = cross(input.VS_IN_Normal, input.VS_IN_Tangent);
-	float3 T = normalize(vec3(Model * vec4(VS_IN_Tangent,   0.0)));
-   	float3 B = normalize(vec3(Model * vec4(bitangent, 0.0)));
-   	float3 N = normalize(vec3(Model * vec4(VS_IN_Normal,    0.0)));
-   	output.PS_IN_TBN = float3x3(T, B, N)
+	// float3 bitangent = cross(input.VS_IN_Normal, input.VS_IN_Tangent);
+	// float3 T = normalize(vec3(u_model_mat * vec4(VS_IN_Tangent,   0.0)));
+ //   	float3 B = normalize(vec3(u_model_mat * vec4(bitangent, 0.0)));
+ //   	float3 N = normalize(vec3(u_model_mat * vec4(VS_IN_Normal,    0.0)));
+ //   	output.PS_IN_TBN = float3x3(T, B, N)
 #endif
 
 	return output;

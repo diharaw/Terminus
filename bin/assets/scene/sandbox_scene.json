@@ -156,6 +156,29 @@
 					"material_overrides" : []
 				}
 			]
+		},
+		{
+			"entity_name" : "test_light",
+			"components" :
+			[
+				{
+					"component_type" : "LIGHT",
+					"light_type" : "POINT",
+					"position" :
+					{
+						"x" : 0.0,
+						"y" : 0.0,
+						"z" : 0.0
+					},
+					"color" :
+					{
+						"x" : 0.2,
+						"y" : 0.2,
+						"z" : 0.2
+					},
+					"intensity" : 1.0
+				}
+			]
 		}
 	]
 }

@@ -1,0 +1,7 @@
+{
+    "diffuse_map": "texture/Sponza_Roof_diffuse.tga",
+    "normal_map": "texture/Sponza_Roof_normal.tga",
+    "metalness_map": "texture/Dielectric_metallic.tga",
+    "roughness_map": "texture/Sponza_Roof_roughness.tga",
+    "backface_cull": true
+}
