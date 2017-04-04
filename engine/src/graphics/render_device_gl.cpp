@@ -1779,14 +1779,14 @@ namespace terminus
 										ShaderType shaderStage,
 										uint slot)
 	{
-        GLuint location = m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot];
+        GLuint location = _current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot];
 		_last_sampler_location = location;
 
         if(location != GL_INVALID_INDEX)
         {
             GL_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + slot));
             GL_CHECK_ERROR(glBindSampler(slot, state->m_id));
-            GL_CHECK_ERROR(glUniform1i(m_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
+            GL_CHECK_ERROR(glUniform1i(_current_program->m_shader_map[shaderStage]->m_sampler_bindings[slot], slot));
         }
 	}
 
@@ -1832,7 +1832,7 @@ namespace terminus
 
 	void RenderDevice::BindShaderProgram(ShaderProgram* program)
 	{
-		m_current_program = program;
+		_current_program = program;
 		GL_CHECK_ERROR(glUseProgram(program->m_id));
 	}
 
@@ -1882,23 +1882,23 @@ namespace terminus
 		switch (_primitive)
 		{
 		case DrawPrimitive::POINTS:
-			m_primitive_type = GL_POINTS;
+			_primitive_type = GL_POINTS;
 			break;
 
 		case DrawPrimitive::TRIANGLES:
-			m_primitive_type = GL_TRIANGLES;
+			_primitive_type = GL_TRIANGLES;
 			break;
 
 		case DrawPrimitive::TRIANGLE_STRIP:
-			m_primitive_type = GL_TRIANGLE_STRIP;
+			_primitive_type = GL_TRIANGLE_STRIP;
 			break;
 
 		case DrawPrimitive::LINES:
-			m_primitive_type = GL_LINES;
+			_primitive_type = GL_LINES;
 			break;
 
 		case DrawPrimitive::LINE_STRIP:
-			m_primitive_type = GL_LINE_STRIP;
+			_primitive_type = GL_LINE_STRIP;
 			break;
 		}
 	}
@@ -1950,19 +1950,19 @@ namespace terminus
 	void RenderDevice::Draw(int firstIndex,
 							int count)
 	{
-		GL_CHECK_ERROR(glDrawArrays(m_primitive_type, firstIndex, count));
+		GL_CHECK_ERROR(glDrawArrays(_primitive_type, firstIndex, count));
 	}
 
 	void RenderDevice::DrawIndexed(int indexCount)
 	{
-		GL_CHECK_ERROR(glDrawElements(m_primitive_type, indexCount, GL_UNSIGNED_INT, 0));
+		GL_CHECK_ERROR(glDrawElements(_primitive_type, indexCount, GL_UNSIGNED_INT, 0));
 	}
 
 	void RenderDevice::DrawIndexedBaseVertex(int indexCount,
 											 unsigned int baseIndex,
 											 unsigned int baseVertex)
 	{
-		GL_CHECK_ERROR(glDrawElementsBaseVertex(m_primitive_type, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * baseIndex), baseVertex));
+		GL_CHECK_ERROR(glDrawElementsBaseVertex(_primitive_type, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * baseIndex), baseVertex));
 	}
 
 	void RenderDevice::DrawInstanced()

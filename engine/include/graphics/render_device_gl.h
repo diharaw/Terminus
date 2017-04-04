@@ -188,36 +188,36 @@ namespace terminus
 
 			inline Framebuffer* GetFramebufferFromPool(String name)
 			{
-				return m_framebuffer_map[name];
+				return _framebuffer_map[name];
 			}
 
 			inline Texture2D* GetRenderTargetFromPool(String name)
 			{
-				return m_render_target_map[name];
+				return _render_target_map[name];
 			}
 
 			inline void AddToRenderTargetPool(String name, Texture2D* texture)
 			{
-				m_render_target_map[name] = texture;
+				_render_target_map[name] = texture;
 			}
 
 			inline void AddToFramebufferPool(String name, Framebuffer* framebuffer)
 			{
-				m_framebuffer_map[name] = framebuffer;
+				_framebuffer_map[name] = framebuffer;
 			}
 
 		private:
-			Framebuffer*							 m_current_framebuffer;
+			Framebuffer*							 _current_framebuffer;
 			Platform*								 _platform;
-			GLenum									 m_primitive_type;
-			ShaderProgram*							 m_current_program;
+			GLenum									 _primitive_type;
+			ShaderProgram*							 _current_program;
 			GLuint									 _last_sampler_location;
 			int										 _drawable_width;
 			int										 _drawable_height;
 			int										 _width;
 			int										 _height;
-			std::unordered_map<String, Texture2D*>	 m_render_target_map;
-			std::unordered_map<String, Framebuffer*> m_framebuffer_map;
+			std::unordered_map<String, Texture2D*>	 _render_target_map;
+			std::unordered_map<String, Framebuffer*> _framebuffer_map;
 		};
 } // namespace terminus
 
