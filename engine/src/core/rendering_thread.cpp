@@ -82,7 +82,6 @@ namespace terminus
             gui_backend->render();
             
             context._render_device.swap_buffers();
-            
         }
         
         shutdown();

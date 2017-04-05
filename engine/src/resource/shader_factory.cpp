@@ -26,13 +26,25 @@ namespace terminus
         void create_shader_task(void* data)
         {
             CreateShaderTaskData* task_data = (CreateShaderTaskData*)data;
-            *task_data->_shader = context::get_render_device().CreateShader(task_data->_type, task_data->_buffer);
+            
+            ShaderCreateDesc desc;
+            
+            desc.type = task_data->_type;
+            desc.shader_source = task_data->_buffer;
+            
+            *task_data->_shader = context::get_render_device().create_shader(desc);
         }
         
         void create_program_task(void* data)
         {
             CreateProgramTaskData* task_data = (CreateProgramTaskData*)data;
-            *task_data->_program = context::get_render_device().CreateShaderProgram(task_data->_vs, task_data->_ps);
+            
+            ShaderProgramCreateDesc desc;
+            
+            desc.vertex = task_data->_vs;
+            desc.pixel = task_data->_ps;
+            
+            *task_data->_program = context::get_render_device().create_shader_program(desc);
         }
         
         Shader* create(asset_common::TextLoadData* data)
@@ -95,7 +107,12 @@ namespace terminus
             
             String pre_processed_source = StringUtility::GenerateSource(shader_source, defines);
             
-            Shader* shader = context::get_render_device().CreateShader(type, pre_processed_source.c_str());
+            ShaderCreateDesc desc;
+            
+            desc.type = type;
+            desc.shader_source = pre_processed_source.c_str();
+            
+            Shader* shader = context::get_render_device().create_shader(desc);
             
             if (!shader)
                 return nullptr;

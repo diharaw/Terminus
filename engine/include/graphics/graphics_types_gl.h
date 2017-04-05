@@ -62,7 +62,7 @@ namespace terminus
 	using BindingMap = std::unordered_map<GLuint, GLuint>;
 	using RenderTargetList = std::vector<Texture*>;
     
-    GLenum g_texture_formats[14][2] =
+    const GLenum g_texture_formats[14][2] =
     {
         { GL_RGB, GL_FLOAT } ,
         { GL_RGBA, GL_FLOAT } ,

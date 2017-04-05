@@ -17,7 +17,7 @@ namespace terminus
     {
         TextureUnloadTaskData* task_data = (TextureUnloadTaskData*)data;
         RenderDevice& device = context::get_render_device();
-        device.DestroyTexture2D((Texture2D*)task_data->_texture);
+        device.destroy_texture_2d((Texture2D*)task_data->_texture);
     }
     
 	TextureCache::TextureCache()

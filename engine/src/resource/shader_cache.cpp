@@ -153,8 +153,16 @@ namespace terminus
 				else
 					tess_control = nullptr;
 			}
+            
+            ShaderProgramCreateDesc desc;
+            
+            desc.vertex = vertex;
+            desc.pixel = pixel;
+            desc.geometry = geometry;
+            desc.tessellation_control = tess_control;
+            desc.tessellation_evaluation = tess_eval;
 			
-			ShaderProgram* program = context::get_render_device().CreateShaderProgram(vertex, pixel, geometry, tess_control, tess_eval);
+            ShaderProgram* program = context::get_render_device().create_shader_program(desc);
 
 			if (program)
 			{
@@ -221,7 +229,14 @@ namespace terminus
                 if(!pixel)
                     return nullptr;
                 
-                ShaderProgram* program = context::get_render_device().CreateShaderProgram(vertex, pixel, nullptr, nullptr, nullptr);
+                ShaderProgramCreateDesc desc;
+                
+                desc.vertex = vertex;
+                desc.pixel = pixel;
+                desc.tessellation_control = nullptr;
+                desc.tessellation_evaluation = nullptr;
+                
+                ShaderProgram* program = context::get_render_device().create_shader_program(desc);
                 
                 // TODO(dihara): THE ABOVE BLOCK SHOULD BE SENT TO THE RENDERING THREAD
                 
@@ -314,7 +329,7 @@ namespace terminus
     void ShaderCache::unload(ShaderProgram* program)
     {
         // TODO : erase from map
-        context::get_render_device().DestoryShaderProgram(program);
+        context::get_render_device().destory_shader_program(program);
     }
 
 } // namespace terminus

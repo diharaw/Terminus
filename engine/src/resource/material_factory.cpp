@@ -15,7 +15,16 @@ namespace terminus
         void create_sampler_task(void* data)
         {
             CreateSamplerTaskData* task_data = (CreateSamplerTaskData*)data;
-            *task_data->sampler = context::get_render_device().CreateSamplerState(TextureFilteringMode::NEAREST_ALL, TextureFilteringMode::LINEAR_ALL, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT, TextureWrapMode::REPEAT);
+            
+            SamplerStateCreateDesc desc;
+            
+            desc.min_filter = TextureFilteringMode::NEAREST_ALL;
+            desc.mag_filter = TextureFilteringMode::LINEAR_ALL;
+            desc.wrap_mode_u = TextureWrapMode::REPEAT;
+            desc.wrap_mode_v = TextureWrapMode::REPEAT;
+            desc.wrap_mode_w = TextureWrapMode::REPEAT;
+            
+            *task_data->sampler = context::get_render_device().create_sampler_state(desc);
         }
 
         

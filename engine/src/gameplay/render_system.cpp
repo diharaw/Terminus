@@ -242,7 +242,7 @@ namespace terminus
                   scene_view._draw_items.begin() + scene_view._num_items,
                   DrawItemSort);
 
-		TERMINUS_END_CPU_PROFILE;
+        TERMINUS_END_CPU_PROFILE;
         
         // Fill CommandBuffer while skipping redundant state changes
 

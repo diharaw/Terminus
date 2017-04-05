@@ -24,11 +24,16 @@ namespace terminus
         void create_texture_task(void* data)
         {
             CreateTextureTaskData* task_data = (CreateTextureTaskData*)data;
-            *task_data->texture = context::get_render_device().CreateTexture2D(task_data->load_data->width,
-                                                                               task_data->load_data->height,
-                                                                               task_data->load_data->bytes,
-                                                                               TextureFormat::R8G8B8A8_UNORM,
-                                                                               false);
+            
+            Texture2DCreateDesc desc;
+            
+            desc.width = task_data->load_data->width;
+            desc.height = task_data->load_data->height;
+            desc.data = task_data->load_data->bytes;
+            desc.format = TextureFormat::R8G8B8A8_UNORM;
+            desc.generate_mipmaps = true;
+            
+            *task_data->texture = context::get_render_device().create_texture_2d(desc);
             
             free(task_data->load_data->bytes);
             free(task_data->load_data);
@@ -43,10 +48,7 @@ namespace terminus
         void create_texture_cube_task(void* data)
         {
             CreateTextureCubeTaskData* task_data = (CreateTextureCubeTaskData*)data;
-            
-            TextureCubeCreateDesc desc;
-            
-            *task_data->texture = context::get_render_device().CreateTextureCube(task_data->desc);
+            *task_data->texture = context::get_render_device().create_texture_cube(task_data->desc);
         }
 
         

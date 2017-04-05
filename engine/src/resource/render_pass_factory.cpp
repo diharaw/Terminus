@@ -26,7 +26,7 @@ namespace terminus
         {
             AttahDepthStencilTargetTaskData* task_data = (AttahDepthStencilTargetTaskData*)data;
             RenderDevice& device = context::get_render_device();
-            device.AttachDepthStencilTarget(task_data->_framebuffer, task_data->_ds_target);
+            device.attach_depth_stencil_target(task_data->_framebuffer, task_data->_ds_target);
             
             T_LOG_INFO("Attached depth stencil target");
         }
@@ -35,7 +35,7 @@ namespace terminus
         {
             AttahRenderTargetTaskData* task_data = (AttahRenderTargetTaskData*)data;
             RenderDevice& device = context::get_render_device();
-            device.AttachRenderTarget(task_data->_framebuffer, task_data->_render_target);
+            device.attach_render_target(task_data->_framebuffer, task_data->_render_target);
             
             T_LOG_INFO("Attached render target");
         }

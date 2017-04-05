@@ -353,6 +353,12 @@ namespace terminus
         uint16_t num_render_targets;
         Texture* render_targets[MAX_RENDER_TARGETS];
         Texture* depth_target;
+        
+        FramebufferCreateDesc()
+        {
+            num_render_targets = 0;
+            depth_target = nullptr;
+        }
     };
     
     struct DepthStencilStateCreateDesc

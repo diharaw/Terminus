@@ -26,21 +26,36 @@ namespace terminus
             RenderDevice& device = context::get_render_device();
             CreateMeshTaskData* task_data = (CreateMeshTaskData*)data;
             
-            IndexBuffer* indexBuffer = device.CreateIndexBuffer(task_data->index_buffer_data, task_data->index_buffer_size, task_data->usageType);
+            BufferCreateDesc desc;
+            
+            desc.data = task_data->index_buffer_data;
+            desc.size = task_data->index_buffer_size;
+            desc.usage_type = task_data->usageType;
+            
+            IndexBuffer* indexBuffer = device.create_index_buffer(desc);
             
             if(!indexBuffer)
             {
                 return;
             }
             
-            VertexBuffer* vertexBuffer = device.CreateVertexBuffer(task_data->vertex_buffer_data, task_data->vertex_buffer_size, task_data->usageType);
+            desc.data = task_data->vertex_buffer_data;
+            desc.size = task_data->vertex_buffer_size;
+            
+            VertexBuffer* vertexBuffer = device.create_vertex_buffer(desc);
             
             if(!vertexBuffer)
             {
                 return;
             }
             
-            task_data->mesh->VertexArray = device.CreateVertexArray(vertexBuffer, indexBuffer, task_data->layoutType);
+            VertexArrayCreateDesc va_desc;
+            
+            va_desc.index_buffer = indexBuffer;
+            va_desc.vertex_buffer = vertexBuffer;
+            va_desc.layout_type = task_data->layoutType;
+            
+            task_data->mesh->VertexArray = device.create_vertex_array(va_desc);
             
             if(!task_data->mesh->VertexArray)
             {
@@ -50,8 +65,6 @@ namespace terminus
         
         Mesh* create(String mesh_name)
         {
-            TERMINUS_BEGIN_CPU_PROFILE(CreateMesh);
-            
             asset_common::MeshLoadData* data = tsm_loader::load(mesh_name);
             
             if(!data)
@@ -109,8 +122,6 @@ namespace terminus
             mesh->id = mesh_name;
             
             T_SAFE_DELETE(data);
-            
-            TERMINUS_END_CPU_PROFILE;
             
             return mesh;
         }
