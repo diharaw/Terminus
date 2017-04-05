@@ -43,9 +43,9 @@ x; {                                                                            
 namespace std
 {
     template<>
-    struct hash<ShaderType>
+    struct hash<terminus::ShaderType>
     {
-        size_t operator()(const ShaderType& em) const
+        size_t operator()(const terminus::ShaderType& em) const
         {
             return std::hash<int>()((int)em);
         }
@@ -61,7 +61,25 @@ namespace terminus
 	using ShaderMap = std::unordered_map<ShaderType, Shader*>;
 	using BindingMap = std::unordered_map<GLuint, GLuint>;
 	using RenderTargetList = std::vector<Texture*>;
-
+    
+    GLenum g_texture_formats[14][2] =
+    {
+        { GL_RGB, GL_FLOAT } ,
+        { GL_RGBA, GL_FLOAT } ,
+        { GL_RGB, GL_UNSIGNED_INT } ,
+        { GL_RGBA, GL_UNSIGNED_INT } ,
+        { GL_RGB, GL_INT } ,
+        { GL_RGBA, GL_INT } ,
+        { GL_RGBA, GL_FLOAT } ,
+        { GL_RGBA, GL_UNSIGNED_INT } ,
+        { GL_RGBA, GL_INT } ,
+        { GL_RGBA, GL_UNSIGNED_BYTE } ,
+        { GL_RGBA, GL_UNSIGNED_INT } ,
+        { GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV } ,
+        { GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 } ,
+        { GL_DEPTH_COMPONENT, GL_FLOAT }
+    };
+    
     struct Texture
     {
         uint16 m_resource_id;
@@ -180,7 +198,8 @@ namespace terminus
     {
         uint16 m_resource_id;
 		GLuint m_id;
-		RenderTargetList m_render_targets;
+        uint16_t _num_render_targets;
+		Texture* m_render_targets[MAX_RENDER_TARGETS];
 		Texture* m_depth_target;
     };
     

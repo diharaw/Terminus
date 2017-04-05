@@ -145,7 +145,7 @@ namespace asset_common
     struct TextLoadData
     {
         char* buffer;
-        ShaderType shader_type; // Optional
+        terminus::ShaderType shader_type; // Optional
     };
     
     struct AudioLoadData

@@ -15,7 +15,16 @@ namespace terminus
     {
         CreateRenderTargetTaskData* task_data = (CreateRenderTargetTaskData*)data;
         RenderDevice& device = context::get_render_device();
-        *task_data->_render_target = device.CreateTexture2D(task_data->_width, task_data->_height, nullptr, task_data->_format, true);
+        
+        Texture2DCreateDesc desc;
+        
+        desc.width = task_data->_width;
+        desc.height = task_data->_height;
+        desc.data = nullptr;
+        desc.format = task_data->_format;
+        desc.create_render_target_view = true;
+        
+        *task_data->_render_target = device.create_texture_2d(desc);
         
         T_LOG_INFO("Created render target");
     }

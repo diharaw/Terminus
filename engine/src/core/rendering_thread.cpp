@@ -33,7 +33,7 @@ namespace terminus
         Context& context = global::get_context();
         
         context._renderer.shutdown();
-        context._render_device.Shutdown();
+        context._render_device.shutdown();
     }
     
     void RenderingThread::exit()
@@ -47,7 +47,7 @@ namespace terminus
         
 		sync::wait_for_main_ready();
         
-        context._render_device.Initialize();
+        context._render_device.initialize();
         context._renderer.initialize();
         
         ImGuiBackend* gui_backend = context::get_imgui_backend();
@@ -81,7 +81,7 @@ namespace terminus
             
             gui_backend->render();
             
-            context._render_device.SwapBuffers();
+            context._render_device.swap_buffers();
             
         }
         

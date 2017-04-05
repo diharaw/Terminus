@@ -12,7 +12,12 @@ namespace terminus
     {
         CreateFramebufferTaskData* task_data = (CreateFramebufferTaskData*)data;
         RenderDevice& device = context::get_render_device();
-        *task_data->_framebuffer = device.CreateFramebuffer();
+        
+        FramebufferCreateDesc desc;
+        
+        desc.num_render_targets = 0;
+        
+        *task_data->_framebuffer = device.create_framebuffer(desc);
         
         T_LOG_INFO("Created framebuffer");
     }
