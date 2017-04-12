@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef  RENDERPASS_H
-#define RENDERPASS_H
-
 #include <string>
 #include <vector>
 #include <core/types.h>
@@ -16,6 +13,7 @@ namespace terminus
 	struct Texture2D;
 	struct Framebuffer;
     struct ShaderProgram;
+    struct PipelineStateObject;
 	struct FramebufferInfo;
 	struct RenderTargetInfo;
 
@@ -132,10 +130,11 @@ namespace terminus
 
 	struct RenderSubPass
 	{
-        String          vs_template;
-        String          ps_template;
-		Framebuffer*    framebuffer_target;
-        ShaderProgram*  program;
+        String               vs_template;
+        String               ps_template;
+		Framebuffer*         framebuffer_target;
+        ShaderProgram*       program;
+        PipelineStateObject* pso;
 	};
 
 	struct RenderTargetInfo
@@ -157,10 +156,13 @@ namespace terminus
 		String				name;
 		RenderPassType	    render_pass_type;
         GeometryType        geometry_type;
-		RenderSubPassList   sub_passes;
-		FramebufferList		framebuffers;
+        uint16_t            num_sub_passes;
+		RenderSubPass       sub_passes[16];
 		FramebufferInfoList framebuffer_info_list;
+        
+        RenderPass()
+        {
+            num_sub_passes = 0;
+        }
 	};
 }
-
-#endif

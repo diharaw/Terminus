@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread/thread_pool.h>
+#include <container/concurrent_queue.h>
 #include <thread/semaphore.h>
 #include <thread>
 

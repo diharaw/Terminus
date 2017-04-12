@@ -6,6 +6,7 @@
 #include <graphics/render_target_pool.h>
 #include <resource/render_pass_cache.h>
 #include <resource/rendering_path_cache.h>
+#include <resource/pipeline_state_object_cache.h>
 #include <graphics/framebuffer_pool.h>
 #include <platform/platform.h>
 #include <io/filesystem.h>
@@ -61,6 +62,7 @@ namespace terminus
         RenderingPathCache  _rendering_path_cache;
         DynamicLibraryCache _dynamic_library_cache;
         LuaScriptFileCache  _lua_script_file_cache;
+        PipelineStateObjectCache _pso_cache;
         
         // Threads
         RenderingThread		_rendering_thread;
@@ -134,6 +136,7 @@ namespace terminus
         T_FORCE_INLINE RenderingPathCache&	get_rendering_path_cache()		{ return global::get_context()._rendering_path_cache; }
         T_FORCE_INLINE DynamicLibraryCache& get_dynamic_library_cache()		{ return global::get_context()._dynamic_library_cache; }
         T_FORCE_INLINE LuaScriptFileCache&	get_lua_script_file_cache()		{ return global::get_context()._lua_script_file_cache; }
+        T_FORCE_INLINE PipelineStateObjectCache&	get_pipeline_state_object_cache()		{ return global::get_context()._pso_cache; }
         T_FORCE_INLINE ShaderCache&			get_shader_cache()				{ return global::get_context()._shader_cache; }
         T_FORCE_INLINE MeshCache&			get_mesh_cache()				{ return global::get_context()._mesh_cache; }
         T_FORCE_INLINE MaterialCache&		get_material_cache()			{ return global::get_context()._material_cache; }

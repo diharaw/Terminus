@@ -194,6 +194,11 @@ namespace terminus
         uint16 m_resource_id;
     };
     
+    struct BlendState
+    {
+    
+    };
+    
     struct Framebuffer
     {
         uint16 m_resource_id;
@@ -208,6 +213,14 @@ namespace terminus
         uint64 sort_key;
         GraphicsCommandType type;
         
+    };
+    
+    struct PipelineStateObject
+    {
+        DepthStencilState* depth_stencil_state;
+        RasterizerState*   rasterizer_state;
+        BlendState*        blend_state;
+        DrawPrimitive      primitive;
     };
     
 } // namespace terminus

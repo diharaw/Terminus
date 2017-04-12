@@ -21,8 +21,7 @@ namespace terminus
         BindVertexArray,
         BindUniformBuffer,
         BindSamplerState,
-        BindRasterizerState,
-        BindDepthStencilState,
+        BindPipelineStateObject,
         BindTexture2D,
         CopyUniformData,
         ClearFramebuffer,
@@ -83,14 +82,9 @@ namespace terminus
         size_t size;
     };
     
-    struct BindRasterizerStateData
+    struct BindPipelineStateObjectData
     {
-        RasterizerState* state;
-    };
-    
-    struct BindDepthStencilStateData
-    {
-        DepthStencilState* state;
+        PipelineStateObject* pso;
     };
     
     struct BindTexture2DCmdData

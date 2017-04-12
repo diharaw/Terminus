@@ -158,7 +158,7 @@ namespace terminus
                 {
                     RenderPass* render_pass = path->_render_passes[j];
                     
-                    if(render_pass->render_pass_type == RenderPassType::GAME_WORLD)
+                    if(render_pass->geometry_type == GeometryType::SCENE)
                     {
                         for(RenderSubPass& sub_pass : render_pass->sub_passes)
                         {
@@ -207,28 +207,37 @@ namespace terminus
         
         // Frustum cull Renderable array and fill DrawItem array
         
+        scene_view._num_items = 0;
+        
         for (int i = 0; i < _renderables._num_objects; i++)
         {
             Renderable& renderable = _renderables._objects[i];
-            
-            for (int j = 0; j < renderable._mesh->MeshCount; j++)
+         
+            if(!renderable._mesh->VertexArray)
             {
-                int index = scene_view._num_items;
-                DrawItem& draw_item = scene_view._draw_items[index];
-                
-                draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
-                draw_item.uniforms->model = *renderable._transform;
-                draw_item.uniforms->position = *renderable._position;
-                draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
-                draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
-                draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
-                draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;
-                draw_item.material = renderable._mesh->SubMeshes[j]._material;
-                draw_item.vertex_array = renderable._mesh->VertexArray;
-                draw_item.type = renderable._type;
-                draw_item.renderable_id = i;
-                
-                scene_view._num_items++;
+                T_LOG_ERROR("NULL Vertex Array");
+            }
+            else
+            {
+                for (int j = 0; j < renderable._mesh->MeshCount; j++)
+                {
+                    int index = scene_view._num_items;
+                    DrawItem& draw_item = scene_view._draw_items[index];
+                    
+                    draw_item.uniforms = uniform_allocator->NewPerFrame<PerDrawUniforms>();
+                    draw_item.uniforms->model = *renderable._transform;
+                    draw_item.uniforms->position = *renderable._position;
+                    draw_item.uniforms->model_view_projection = *scene_view._view_projection_matrix * draw_item.uniforms->model;
+                    draw_item.base_index = renderable._mesh->SubMeshes[j].m_BaseIndex;
+                    draw_item.base_vertex = renderable._mesh->SubMeshes[j].m_BaseVertex;
+                    draw_item.index_count = renderable._mesh->SubMeshes[j].m_IndexCount;
+                    draw_item.material = renderable._mesh->SubMeshes[j]._material;
+                    draw_item.vertex_array = renderable._mesh->VertexArray;
+                    draw_item.type = renderable._type;
+                    draw_item.renderable_id = i;
+                    
+                    scene_view._num_items++;
+                }
             }
         }
         
@@ -252,8 +261,19 @@ namespace terminus
         {
             RenderPass* render_pass = scene_view._rendering_path->_render_passes[i];
             
-            for (auto sub_pass : render_pass->sub_passes)
+            for (int j = 0; j < render_pass->num_sub_passes; j++)
             {
+                RenderSubPass& sub_pass = render_pass->sub_passes[j];
+                
+                // Bind Pipeline State Object
+                
+                cmd_buf.Write(CommandType::BindPipelineStateObject);
+                
+                BindPipelineStateObjectData cmd0;
+                cmd0.pso = sub_pass.pso;
+                
+                cmd_buf.Write<BindPipelineStateObjectData>(&cmd0);
+                
                 // Bind Framebuffer Command
                 
                 cmd_buf.Write(CommandType::BindFramebuffer);
@@ -303,9 +323,9 @@ namespace terminus
                     int16 last_texture = -1;
                     int   last_renderable = -1;
                     
-                    for (int j = 0; j < scene_view._num_items; j++)
+                    for (int k = 0; k < scene_view._num_items; k++)
                     {
-                        DrawItem& draw_item = scene_view._draw_items[j];
+                        DrawItem& draw_item = scene_view._draw_items[k];
                         
                         if(last_vao != draw_item.vertex_array->m_resource_id)
                         {
@@ -381,11 +401,11 @@ namespace terminus
                             cmd_buf.Write<CopyUniformCmdData>(&cmd8);
                         }
                         
-                        for (int k = 0; k < 5 ; k++)
+                        for (int l = 0; l < 5 ; l++)
                         {
                             if(draw_item.material)
                             {
-                                if(draw_item.material->texture_maps[k])
+                                if(draw_item.material->texture_maps[l])
                                 {
                                     // Bind Sampler State
                                     
@@ -393,22 +413,22 @@ namespace terminus
                                     
                                     BindSamplerStateCmdData cmd9;
                                     cmd9.state = draw_item.material->sampler;
-                                    cmd9.slot = k;
+                                    cmd9.slot = l;
                                     cmd9.shader_type = ShaderType::PIXEL;
                                     
                                     cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
                                     
-                                    if(last_texture != draw_item.material->texture_maps[k]->m_resource_id)
+                                    if(last_texture != draw_item.material->texture_maps[l]->m_resource_id)
                                     {
-                                        last_texture = draw_item.material->texture_maps[k]->m_resource_id;
+                                        last_texture = draw_item.material->texture_maps[l]->m_resource_id;
                                         
                                         // Bind Textures
                                         
                                         cmd_buf.Write(CommandType::BindTexture2D);
                                         
                                         BindTexture2DCmdData cmd10;
-                                        cmd10.texture = draw_item.material->texture_maps[k];
-                                        cmd10.slot = k;
+                                        cmd10.texture = draw_item.material->texture_maps[l];
+                                        cmd10.slot = l;
                                         cmd10.shader_type = ShaderType::PIXEL;
                                         
                                         cmd_buf.Write<BindTexture2DCmdData>(&cmd10);

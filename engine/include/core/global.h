@@ -19,7 +19,7 @@ extern void* operator new (size_t size, unsigned line, const char* file);
 
 namespace terminus
 {
-    using DefaultThreadPool = ThreadPool<0, 1000>;
+    using DefaultThreadPool = ThreadPool;
     class Platform;
     class ImGuiBackend;
     

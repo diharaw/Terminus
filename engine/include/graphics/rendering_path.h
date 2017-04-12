@@ -1,5 +1,4 @@
-#ifndef RENDERINGPATH_H
-#define RENDERINGPATH_H
+#pragma once
 
 #include <graphics/render_pass.h>
 
@@ -16,5 +15,3 @@ namespace terminus
         RenderPassArray _render_passes;;
     };
 }
-
-#endif

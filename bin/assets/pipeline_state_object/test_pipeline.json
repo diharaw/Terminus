@@ -1,0 +1,55 @@
+{
+	"depth_stencil_state" :
+	{
+		"depth_test" : true,
+		"stencil_test" : false,
+		"depth_mask" : true,
+		"depth_cmp_func" : "LESS",
+        "front_stencil_fail" : "REPLACE",
+        "front_stencil_pass_depth_fail" : "REPLACE",
+        "front_stencil_pass_depth_pass" : "REPLACE",
+        "front_stencil_cmp_func" : "LESS",
+        "back_stencil_fail" : "REPLACE",
+        "back_stencil_pass_depth_fail" : "REPLACE",
+        "back_stencil_pass_depth_pass" : "REPLACE",
+        "back_stencil_cmp_func" : "LESS",
+        "stencil_mask" : 255
+	},
+	"rasterizer_state" :
+	{
+		"cull_mode" : "BACK",
+        "fill_mode" : "SOLID",
+        "winding_order" : "CCW",
+        "multisample" : false,
+        "scissor" : false
+	},
+	"blend_state" :
+	{
+
+	},
+	"shader_templates" :
+	{
+		"vertex" : "",
+		"geometry" : null,
+		"control" : null,
+		"evaluation" : null,
+		"pixel" : ""
+	},
+	"primitive_type" : "TRIANGLES",
+	"framebuffer" :
+	{
+		"width_divisor" : 1.0,
+		"height_divisor" : 1.0,
+		"render_targets" :
+		[	{
+				"name" : "color_attachment",
+				"format" : "R8G8B8A8_UNORM"
+			}
+		],
+		"depth_target" :
+		{
+			"name" : "depth_attachment",
+			"format" : "D24_FLOAT_S8_UINT"	
+		}
+	}
+}

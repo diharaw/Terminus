@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <thread/thread_pool.h>
+#include <container/concurrent_queue.h>
 
 namespace terminus
 {

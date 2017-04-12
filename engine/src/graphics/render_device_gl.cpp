@@ -57,6 +57,17 @@ namespace terminus
 		_platform->destroy_opengl_context();
 	}
     
+    PipelineStateObject* RenderDevice::create_pipeline_state_object(PipelineStateObjectCreateDesc desc)
+    {
+        PipelineStateObject* pso = new PipelineStateObject();
+        
+        pso->depth_stencil_state = create_depth_stencil_state(desc.depth_stencil_state);
+        pso->rasterizer_state = create_rasterizer_state(desc.rasterizer_state);
+        pso->primitive = desc.primitive;
+        
+        return pso;
+    }
+    
     Texture1D* RenderDevice::create_texture_1d(Texture1DCreateDesc desc)
 	{
 		Texture1D* texture = new Texture1D();
@@ -1090,6 +1101,8 @@ namespace terminus
 			depthStencilState->m_backStencilPassDepthFail = GL_KEEP;
 			break;
 		}
+        
+        depthStencilState->m_stencilMask = desc.stencil_mask;
 
 		return depthStencilState;
 	}
@@ -1123,6 +1136,14 @@ namespace terminus
 		GL_CHECK_ERROR(glBindTexture(renderTarget->m_glTextureTarget, 0));
 		GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
+    
+    void RenderDevice::destroy_pipeline_state_object(PipelineStateObject* pso)
+    {
+        destroy_depth_stencil_state(pso->depth_stencil_state);
+        destroy_rasterizer_state(pso->rasterizer_state);
+        
+        delete pso;
+    }
     
 	void RenderDevice::destroy_texture_1d(Texture1D* texture)
 	{
@@ -1214,6 +1235,13 @@ namespace terminus
 		delete program;
 	}
 
+    void RenderDevice::bind_pipeline_state_object(PipelineStateObject* pso)
+    {
+        bind_depth_stencil_state(pso->depth_stencil_state);
+        bind_rasterizer_state(pso->rasterizer_state);
+        set_primitive_type(pso->primitive);
+    }
+    
 	void RenderDevice::bind_texture(Texture* texture,
 								   ShaderType shaderStage,
 								   uint bufferSlot)

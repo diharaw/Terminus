@@ -58,22 +58,16 @@ namespace terminus
                 render_pass->name = std::string(doc["name"].GetString());
             }
             
-            if (doc.HasMember("render_pass_type"))
+            if (doc.HasMember("geometry_type"))
             {
-                String type = std::string(doc["render_pass_type"].GetString());
+                String type = std::string(doc["geometry_type"].GetString());
                 
-                if (type == "SHADOW_MAP")
-                    render_pass->render_pass_type = RenderPassType::SHADOW_MAP;
-                if (type == "GAME_WORLD")
-                    render_pass->render_pass_type = RenderPassType::GAME_WORLD;
-                if (type == "POST_PROCESS")
-                    render_pass->render_pass_type = RenderPassType::POST_PROCESS;
-                if (type == "UI")
-                    render_pass->render_pass_type = RenderPassType::UI;
-                if (type == "DEBUG")
-                    render_pass->render_pass_type = RenderPassType::DEBUG;
-                if (type == "COMPOSITION")
-                    render_pass->render_pass_type = RenderPassType::COMPOSITION;
+                if (type == "SCENE")
+                    render_pass->geometry_type = GeometryType::SCENE;
+                if (type == "SKY")
+                    render_pass->geometry_type = GeometryType::SKY;
+                if (type == "QUAD")
+                    render_pass->geometry_type = GeometryType::QUAD;
             }
             
             if (doc.HasMember("global_resources"))
@@ -188,7 +182,6 @@ namespace terminus
                             fb_info.render_target_info.push_back(target_info);
                         }
                         
-                        render_pass->framebuffers.push_back(framebuffer);
                         render_pass->framebuffer_info_list.push_back(fb_info);
                     }
                 }
@@ -200,7 +193,7 @@ namespace terminus
                 
                 for (rapidjson::SizeType i = 0; i < sub_passes.Size(); i++)
                 {
-                    RenderSubPass sub_pass;
+                    RenderSubPass& sub_pass = render_pass->sub_passes[render_pass->num_sub_passes++];
                     
                     if(sub_passes[i]["framebuffer_target"].IsNull())
                         sub_pass.framebuffer_target = nullptr; // Default framebuffer
@@ -215,7 +208,6 @@ namespace terminus
 #else defined(TERMINUS_DIRECT3D11)
                     String extension = ".hlsl";
 #endif
-                    
                     if(sub_passes[i].HasMember("vs_template"))
                     {
                         String vs_template = String(sub_passes[i]["vs_template"].GetString());
@@ -240,7 +232,10 @@ namespace terminus
                     
                     // TODO: if not a GAME_WORLD pass, generate shader and store in Render Subpass.
                     
-                    render_pass->sub_passes.push_back(sub_pass);
+                    PipelineStateObjectCache& pso_cache = context::get_pipeline_state_object_cache();
+                    String pipeline_state = String(sub_passes[i]["pipeline_state_object"].GetString());
+                    
+                    sub_pass.pso = pso_cache.load(pipeline_state);
                 }
             }
             

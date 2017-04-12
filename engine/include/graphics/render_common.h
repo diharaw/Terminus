@@ -452,6 +452,19 @@ namespace terminus
             tessellation_evaluation = nullptr;
         }
     };
+    
+    struct BlendStateCreateDesc
+    {
+        
+    };
+    
+    struct PipelineStateObjectCreateDesc
+    {
+        DepthStencilStateCreateDesc depth_stencil_state;
+        RasterizerStateCreateDesc   rasterizer_state;
+        BlendStateCreateDesc        blend_state;
+        DrawPrimitive               primitive;
+    };
 }
 
 #endif

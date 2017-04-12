@@ -56,6 +56,7 @@ namespace terminus
 			void shutdown();
 
 			// Object Creation
+            PipelineStateObject* create_pipeline_state_object(PipelineStateObjectCreateDesc desc);
 			Texture1D* create_texture_1d(Texture1DCreateDesc desc);
 			Texture2D* create_texture_2d(Texture2DCreateDesc desc);
             Texture3D* create_texture_3d(Texture3DCreateDesc desc);
@@ -74,6 +75,7 @@ namespace terminus
 			void attach_depth_stencil_target(Framebuffer* framebuffer, Texture* render_target);
 
 			// Object Destruction
+            void destroy_pipeline_state_object(PipelineStateObject* pso);
 			void destroy_texture_1d(Texture1D* texture);
 			void destroy_texture_2d(Texture2D* texture);
 			void destroy_texture_3d(Texture3D* texture);
@@ -90,6 +92,7 @@ namespace terminus
 			void destory_shader_program(ShaderProgram* program);
 
 			// Object Use
+            void  bind_pipeline_state_object(PipelineStateObject* pso);
 			void  bind_texture(Texture* texture, ShaderType shader_stage, uint32_t buffer_slot);
 			void  bind_uniform_buffer(UniformBuffer* uniform_buffer, ShaderType shader_stage, uint32_t buffer_slot);
 			void  bind_rasterizer_state(RasterizerState* state);
