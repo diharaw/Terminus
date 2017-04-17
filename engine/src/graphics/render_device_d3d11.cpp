@@ -16,21 +16,21 @@ namespace terminus
 
 	}
 
-	void RenderDevice::Initialize()
+	void RenderDevice::initialize()
 	{
-		InitializeAPI();
+		initialize_api();
 	}
 
-	void RenderDevice::Shutdown()
+	void RenderDevice::shutdown()
 	{
 		if (m_swap_chain)
 		{
 			m_swap_chain->SetFullscreenState(false, NULL);
 		}
 
-		DestroyFramebuffer(m_default_framebuffer);
-		DestroyTexture2D(m_default_render_target);
-		DestroyTexture2D(m_default_depth_target);
+		destroy_framebuffer(m_default_framebuffer);
+		destroy_texture_2d(m_default_render_target);
+		destroy_texture_2d(m_default_depth_target);
 
 		if (m_device_context)
 		{
@@ -51,7 +51,7 @@ namespace terminus
 		}
 	}
 
-	bool RenderDevice::InitializeAPI()
+	bool RenderDevice::initialize_api()
 	{
 		HRESULT result;
 		IDXGIFactory* factory;
@@ -272,34 +272,35 @@ namespace terminus
 		return true;
 	}
 
-	Texture1D* RenderDevice::CreateTexture1D(uint16 width,
-										     void* data,
-										     TextureFormat format,
-										     bool generateMipmaps,
-										     uint mipMapLevels)
+	PipelineStateObject* RenderDevice::create_pipeline_state_object(PipelineStateObjectCreateDesc desc)
+	{
+		PipelineStateObject* pso = new PipelineStateObject();
+
+		pso->depth_stencil_state = create_depth_stencil_state(desc.depth_stencil_state);
+		pso->rasterizer_state = create_rasterizer_state(desc.rasterizer_state);
+		pso->primitive = desc.primitive;
+
+		return pso;
+	}
+
+	Texture1D* RenderDevice::create_texture_1d(Texture1DCreateDesc desc)
 	{
 		return nullptr;
 	}
 
-	Texture2D* RenderDevice::CreateTexture2D(uint16 width,
-											 uint16 height,
-											 void* data,
-											 TextureFormat format,
-											 bool createRenderTargetView,
-											 bool generateMipmaps,
-											 uint mipMapLevels)
+	Texture2D* RenderDevice::create_texture_2d(Texture2DCreateDesc desc)
 	{
 		Texture2D* texture = new Texture2D();
 		texture->m_resource_id = m_texture_res_id++;
-        
-        ZeroMemory(&texture->m_textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-        ZeroMemory(&texture->m_srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
-        ZeroMemory(&texture->m_dsDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-        ZeroMemory(&texture->m_rtvDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
-    
-		if (generateMipmaps)
+
+		ZeroMemory(&texture->m_textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+		ZeroMemory(&texture->m_srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+		ZeroMemory(&texture->m_dsDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+		ZeroMemory(&texture->m_rtvDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
+
+		if (desc.generate_mipmaps)
 		{
-			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
+			if (desc.format == TextureFormat::D32_FLOAT_S8_UINT || desc.format == TextureFormat::D24_FLOAT_S8_UINT || desc.format == TextureFormat::D16_FLOAT)
 			{
 				texture->m_textureDesc.MipLevels = 0;
 				texture->m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
@@ -308,210 +309,16 @@ namespace terminus
 			}
 			else
 			{
-				texture->m_textureDesc.MipLevels = mipMapLevels;
+				texture->m_textureDesc.MipLevels = desc.mipmap_levels;
 				texture->m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 				texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
-				texture->m_srvDesc.Texture2D.MipLevels = (mipMapLevels == 0) ? -1 : mipMapLevels;
+				texture->m_srvDesc.Texture2D.MipLevels = (desc.mipmap_levels == 0) ? -1 : desc.mipmap_levels;
 			}
 		}
 
 		texture->m_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 
-		switch (format)
-		{
-		case TextureFormat::R32G32B32_FLOAT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-			break;
-
-		case TextureFormat::R32G32B32A32_FLOAT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-			break;
-
-		case TextureFormat::R32G32B32_UINT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_UINT;
-			break;
-
-		case TextureFormat::R32G32B32A32_UINT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
-			break;
-
-		case TextureFormat::R32G32B32_INT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_SINT;
-			break;
-
-		case TextureFormat::R32G32B32A32_INT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32A32_SINT;
-			break;
-
-		case TextureFormat::R16G16B16A16_FLOAT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-			break;
-
-		case TextureFormat::R16G16B16A16_UINT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_UINT;
-			break;
-
-		case TextureFormat::R16G16B16A16_INT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R16G16B16A16_SINT;
-			break;
-			
-		case TextureFormat::R8G8B8A8_UNORM:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			break;
-
-		case TextureFormat::R8G8B8A8_UINT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UINT;
-			break;
-
-		case TextureFormat::D32_FLOAT_S8_UINT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-			texture->m_textureDesc.MipLevels = 1;
-			texture->m_textureDesc.MiscFlags = 0;
-			break;
-
-		case TextureFormat::D24_FLOAT_S8_UINT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-			texture->m_textureDesc.MipLevels = 1;
-			texture->m_textureDesc.MiscFlags = 0;
-			break;
-
-		case TextureFormat::D16_FLOAT:
-			texture->m_textureDesc.Format = DXGI_FORMAT_D16_UNORM;
-			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;;
-			texture->m_textureDesc.MipLevels = 1;
-			texture->m_textureDesc.MiscFlags = 0;
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
-
-
-		// Set data type depending on bpp property of extraData
-		texture->m_textureDesc.Height = height;
-		texture->m_textureDesc.Width = width;
-		texture->m_textureDesc.ArraySize = 1;
-		texture->m_textureDesc.SampleDesc.Count = 1;
-		texture->m_textureDesc.SampleDesc.Quality = 0;
-		texture->m_textureDesc.Usage = D3D11_USAGE_DEFAULT;
-		texture->m_textureDesc.CPUAccessFlags = 0;
-
-		texture->m_srvDesc.Format = texture->m_textureDesc.Format;
-		texture->m_srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-
-		texture->m_dsDesc.Format = texture->m_textureDesc.Format;
-		texture->m_dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		texture->m_dsDesc.Texture2D.MipSlice = 0;
-
-		texture->m_rtvDesc.Format = texture->m_textureDesc.Format;
-		texture->m_rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-		texture->m_rtvDesc.Texture2D.MipSlice = 0;
-
-		if (format == TextureFormat::D24_FLOAT_S8_UINT)
-		{
-			texture->m_textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-
-			texture->m_srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-			texture->m_srvDesc.Texture2D.MipLevels = texture->m_textureDesc.MipLevels;
-			texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
-
-			texture->m_dsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			texture->m_dsDesc.Flags = 0;
-		}
-
-		HRESULT Result = m_device->CreateTexture2D(&texture->m_textureDesc, NULL, &texture->m_textureD3D);
-		if (FAILED(Result))
-		{
-			//T_LOG_ERROR("Failed to Create Texture2D!");
-			return nullptr;
-		}
-
-		if (!createRenderTargetView)
-		{
-			int rowPitch = (width * 4) * sizeof(unsigned char);
-			m_device_context->UpdateSubresource(texture->m_textureD3D, 0, NULL, data, rowPitch, 0);
-		}
-
-		// Create ShaderResourceView
-
-		Result = m_device->CreateShaderResourceView(texture->m_textureD3D, &texture->m_srvDesc, &texture->m_textureView);
-		if (FAILED(Result))
-		{
-			//T_LOG_ERROR("Failed to Create Texture2D!");
-			return nullptr;
-		}
-
-		if (createRenderTargetView)
-		{
-			// Create DepthStencilView
-
-			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
-			{
-				texture->m_renderTargetView = nullptr;
-
-				Result = m_device->CreateDepthStencilView(texture->m_textureD3D, &texture->m_dsDesc, &texture->m_depthView);
-				if (FAILED(Result))
-				{
-					//T_LOG_ERROR("Failed to Create Texture2D!");
-					return nullptr;
-				}
-			}
-			else // Create RenderTargetView
-			{
-				texture->m_depthView = nullptr;
-
-				Result = m_device->CreateRenderTargetView(texture->m_textureD3D, &texture->m_rtvDesc, &texture->m_renderTargetView);
-				if (FAILED(Result))
-				{
-					//T_LOG_ERROR("Failed to Create Texture2D!");
-					return nullptr;
-				}
-			}
-		}
-
-		return texture;
-	}
-
-	Texture2D* RenderDevice::CreateTexture2D(Texture2D* texture,
-											 uint16 width,
-											 uint16 height,
-											 void* data,
-											 TextureFormat format,
-											 bool createRenderTargetView,
-											 bool generateMipmaps,
-											 uint mipMapLevels)
-	{
-		texture->m_resource_id = m_texture_res_id++;
-        
-        ZeroMemory(&texture->m_textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-        ZeroMemory(&texture->m_srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
-        ZeroMemory(&texture->m_dsDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-        ZeroMemory(&texture->m_rtvDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
-
-		if (generateMipmaps)
-		{
-			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
-			{
-				texture->m_textureDesc.MipLevels = 0;
-				texture->m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-				texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
-				texture->m_srvDesc.Texture2D.MipLevels = -1;
-			}
-			else
-			{
-				texture->m_textureDesc.MipLevels = mipMapLevels;
-				texture->m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-				texture->m_srvDesc.Texture2D.MostDetailedMip = 0;
-				texture->m_srvDesc.Texture2D.MipLevels = (mipMapLevels == 0) ? -1 : mipMapLevels;
-			}
-		}
-
-		texture->m_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-
-		switch (format)
+		switch (desc.format)
 		{
 		case TextureFormat::R32G32B32_FLOAT:
 			texture->m_textureDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -559,14 +366,14 @@ namespace terminus
 
 		case TextureFormat::D32_FLOAT_S8_UINT:
 			texture->m_textureDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;;
+			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 			texture->m_textureDesc.MipLevels = 1;
 			texture->m_textureDesc.MiscFlags = 0;
 			break;
 
 		case TextureFormat::D24_FLOAT_S8_UINT:
 			texture->m_textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;;
+			texture->m_textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 			texture->m_textureDesc.MipLevels = 1;
 			texture->m_textureDesc.MiscFlags = 0;
 			break;
@@ -585,8 +392,8 @@ namespace terminus
 
 
 		// Set data type depending on bpp property of extraData
-		texture->m_textureDesc.Height = height;
-		texture->m_textureDesc.Width = width;
+		texture->m_textureDesc.Height = desc.height;
+		texture->m_textureDesc.Width = desc.width;
 		texture->m_textureDesc.ArraySize = 1;
 		texture->m_textureDesc.SampleDesc.Count = 1;
 		texture->m_textureDesc.SampleDesc.Quality = 0;
@@ -604,7 +411,7 @@ namespace terminus
 		texture->m_rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 		texture->m_rtvDesc.Texture2D.MipSlice = 0;
 
-		if (format == TextureFormat::D24_FLOAT_S8_UINT)
+		if (desc.format == TextureFormat::D24_FLOAT_S8_UINT)
 		{
 			texture->m_textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 
@@ -623,8 +430,11 @@ namespace terminus
 			return nullptr;
 		}
 
-		int rowPitch = (width * 4) * sizeof(unsigned char);
-		m_device_context->UpdateSubresource(texture->m_textureD3D, 0, NULL, data, rowPitch, 0);
+		if (!desc.create_render_target_view)
+		{
+			int rowPitch = (desc.width * 4) * sizeof(unsigned char);
+			m_device_context->UpdateSubresource(texture->m_textureD3D, 0, NULL, desc.data, rowPitch, 0);
+		}
 
 		// Create ShaderResourceView
 
@@ -635,11 +445,11 @@ namespace terminus
 			return nullptr;
 		}
 
-		if (createRenderTargetView)
+		if (desc.create_render_target_view)
 		{
 			// Create DepthStencilView
 
-			if (format == TextureFormat::D32_FLOAT_S8_UINT || format == TextureFormat::D24_FLOAT_S8_UINT || format == TextureFormat::D16_FLOAT)
+			if (desc.format == TextureFormat::D32_FLOAT_S8_UINT || desc.format == TextureFormat::D24_FLOAT_S8_UINT || desc.format == TextureFormat::D16_FLOAT)
 			{
 				texture->m_renderTargetView = nullptr;
 
@@ -666,18 +476,12 @@ namespace terminus
 		return texture;
 	}
 
-	Texture3D* RenderDevice::CreateTexture3D(uint16 width,
-											 uint16 height,
-											 uint16 depth,
-											 void* data,
-											 TextureFormat format,
-											 bool generateMipmaps,
-											 uint mipMapLevels)
+	Texture3D* RenderDevice::create_texture_3d(Texture3DCreateDesc desc)
 	{
 		return nullptr;
 	}
 
-	TextureCube* RenderDevice::CreateTextureCube(TextureCubeCreateDesc desc)
+	TextureCube* RenderDevice::create_texture_cube(TextureCubeCreateDesc desc)
 	{
 		//-------------------------------------------------------------------------------------------------------------------------------------
 		// Create engine objects
@@ -900,9 +704,7 @@ namespace terminus
 		return texture;
 	}
 
-	VertexBuffer* RenderDevice::CreateVertexBuffer(void* data,
-												   uint size,
-												   BufferUsageType usageType)
+	VertexBuffer* RenderDevice::create_vertex_buffer(BufferCreateDesc desc)
 	{
 		VertexBuffer* vertexBuffer = new VertexBuffer();
 		vertexBuffer->m_resource_id = m_buffer_res_id++;
@@ -910,9 +712,9 @@ namespace terminus
         ZeroMemory(&vertexBuffer->m_BufferDescD3D, sizeof(D3D11_BUFFER_DESC));
         
 		vertexBuffer->m_type = BufferType::VERTEX;
-		vertexBuffer->m_usageType = usageType;
+		vertexBuffer->m_usageType = desc.usage_type;
 
-		switch (usageType)
+		switch (desc.usage_type)
 		{
 		case BufferUsageType::STATIC:
 			vertexBuffer->m_BufferDescD3D.Usage = D3D11_USAGE_DEFAULT;
@@ -929,10 +731,10 @@ namespace terminus
 		vertexBuffer->m_BufferDescD3D.MiscFlags = 0;
 		vertexBuffer->m_BufferDescD3D.StructureByteStride = 0;
 
-		vertexBuffer->m_BufferDescD3D.ByteWidth = size;
+		vertexBuffer->m_BufferDescD3D.ByteWidth = desc.size;
 		vertexBuffer->m_BufferDescD3D.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-		vertexBuffer->m_subresourceDataD3D.pSysMem = data;
+		vertexBuffer->m_subresourceDataD3D.pSysMem = desc.data;
 		vertexBuffer->m_subresourceDataD3D.SysMemPitch = 0;
 		vertexBuffer->m_subresourceDataD3D.SysMemSlicePitch = 0;
 
@@ -950,9 +752,7 @@ namespace terminus
 		return vertexBuffer;
 	}
 
-	IndexBuffer* RenderDevice::CreateIndexBuffer(void* data,
-												 uint size,
-												 BufferUsageType usageType)
+	IndexBuffer* RenderDevice::create_index_buffer(BufferCreateDesc desc)
 	{
 		IndexBuffer* indexBuffer = new IndexBuffer();
 		indexBuffer->m_resource_id = m_buffer_res_id++;
@@ -960,9 +760,9 @@ namespace terminus
         ZeroMemory(&indexBuffer->m_BufferDescD3D, sizeof(D3D11_BUFFER_DESC));
         
 		indexBuffer->m_type = BufferType::VERTEX;
-		indexBuffer->m_usageType = usageType;
+		indexBuffer->m_usageType = desc.usage_type;
 
-		switch (usageType)
+		switch (desc.usage_type)
 		{
 		case BufferUsageType::STATIC:
 			indexBuffer->m_BufferDescD3D.Usage = D3D11_USAGE_DEFAULT;
@@ -979,10 +779,10 @@ namespace terminus
 		indexBuffer->m_BufferDescD3D.MiscFlags = 0;
 		indexBuffer->m_BufferDescD3D.StructureByteStride = 0;
 
-		indexBuffer->m_BufferDescD3D.ByteWidth = size;
+		indexBuffer->m_BufferDescD3D.ByteWidth = desc.size;
 		indexBuffer->m_BufferDescD3D.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
-		indexBuffer->m_subresourceDataD3D.pSysMem = data;
+		indexBuffer->m_subresourceDataD3D.pSysMem = desc.data;
 		indexBuffer->m_subresourceDataD3D.SysMemPitch = 0;
 		indexBuffer->m_subresourceDataD3D.SysMemSlicePitch = 0;
 
@@ -1000,9 +800,7 @@ namespace terminus
 		return indexBuffer;
 	}
 
-	UniformBuffer* RenderDevice::CreateUniformBuffer(void* data,
-													 uint size,
-													 BufferUsageType usageType)
+	UniformBuffer* RenderDevice::create_uniform_buffer(BufferCreateDesc desc)
 	{
 		UniformBuffer* uniformBuffer = new UniformBuffer();
 		uniformBuffer->m_resource_id = m_buffer_res_id++;
@@ -1012,9 +810,9 @@ namespace terminus
 		uniformBuffer->m_BufferDescD3D.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		uniformBuffer->m_BufferDescD3D.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		uniformBuffer->m_type = BufferType::VERTEX;
-		uniformBuffer->m_usageType = usageType;
+		uniformBuffer->m_usageType = desc.usage_type;
 
-		switch (usageType)
+		switch (desc.usage_type)
 		{
 		case BufferUsageType::STATIC:
 			uniformBuffer->m_BufferDescD3D.Usage = D3D11_USAGE_DEFAULT;
@@ -1027,7 +825,7 @@ namespace terminus
 
 		uniformBuffer->m_BufferDescD3D.MiscFlags = 0;
 		uniformBuffer->m_BufferDescD3D.StructureByteStride = 0;
-		uniformBuffer->m_BufferDescD3D.ByteWidth = size;
+		uniformBuffer->m_BufferDescD3D.ByteWidth = desc.size;
 
 		HRESULT result = m_device->CreateBuffer(&uniformBuffer->m_BufferDescD3D, NULL, &uniformBuffer->m_BufferD3D);
 
@@ -1042,18 +840,15 @@ namespace terminus
 		return uniformBuffer;
 	}
 
-	VertexArray* RenderDevice::CreateVertexArray(VertexBuffer* vertexBuffer,
-												 IndexBuffer* indexBuffer,
-												 InputLayoutType layoutType,
-												 InputLayout* inputLayout)
+	VertexArray* RenderDevice::create_vertex_array(VertexArrayCreateDesc desc)
 	{
 		VertexArray* vertexArray = new VertexArray();
 		vertexArray->m_resource_id = m_vertex_array_res_id++;
 
-		vertexArray->m_vertexBuffer = vertexBuffer;
-		vertexArray->m_indexBuffer = indexBuffer;
+		vertexArray->m_vertexBuffer = desc.vertex_buffer;
+		vertexArray->m_indexBuffer = desc.index_buffer;
 
-		if (layoutType == InputLayoutType::STANDARD_VERTEX)
+		if (desc.layout_type == InputLayoutType::STANDARD_VERTEX)
 		{
 			D3D11_INPUT_ELEMENT_DESC inputElement[4];
             
@@ -1128,7 +923,7 @@ namespace terminus
 			element.m_semanticName = "TANGENT";
 			layout.m_Elements.push_back(element);
 
-			ID3D10Blob* bytecode = CreateStubShaderByteCodeFromLayout(layout);
+			ID3D10Blob* bytecode = create_stub_shader(layout);
 
 			HRESULT result = m_device->CreateInputLayout(inputElement, 4, bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &vertexArray->m_inputLayoutD3D);
 
@@ -1145,7 +940,7 @@ namespace terminus
 
 			return vertexArray;
 		}
-		else if (layoutType == InputLayoutType::STANDARD_SKINNED_VERTEX)
+		else if (desc.layout_type == InputLayoutType::STANDARD_SKINNED_VERTEX)
 		{
 			D3D11_INPUT_ELEMENT_DESC inputElement[6];
             
@@ -1253,7 +1048,7 @@ namespace terminus
 			element.m_semanticName = "BLENDWEIGHT";
 			layout.m_Elements.push_back(element);
 
-			ID3D10Blob* bytecode = CreateStubShaderByteCodeFromLayout(layout);
+			ID3D10Blob* bytecode = create_stub_shader(layout);
 
 			HRESULT result = m_device->CreateInputLayout(inputElement, 6, bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &vertexArray->m_inputLayoutD3D);
 
@@ -1270,48 +1065,48 @@ namespace terminus
 
 			return vertexArray;
 		}
-		else if (layoutType == InputLayoutType::CUSTOM_VERTEX)
+		else if (desc.layout_type == InputLayoutType::CUSTOM_VERTEX)
 		{
-			D3D11_INPUT_ELEMENT_DESC* inputElement = new D3D11_INPUT_ELEMENT_DESC[inputLayout->m_Elements.size()];
+			D3D11_INPUT_ELEMENT_DESC* inputElement = new D3D11_INPUT_ELEMENT_DESC[desc.layout->m_Elements.size()];
 			
-            for(int k = 0; k < inputLayout->m_Elements.size(); k++)
+            for(int k = 0; k < desc.layout->m_Elements.size(); k++)
             {
                 ZeroMemory(&inputElement[k], sizeof(D3D11_INPUT_ELEMENT_DESC));
             }
             
 			vertexArray->m_vertexBuffer->m_offset = 0;
-			vertexArray->m_vertexBuffer->m_stride = inputLayout->m_vertexSize;
+			vertexArray->m_vertexBuffer->m_stride = desc.layout->m_vertexSize;
 
-			for (int i = 0; i < inputLayout->m_Elements.size(); i++)
+			for (int i = 0; i < desc.layout->m_Elements.size(); i++)
 			{
-				inputElement[i].SemanticName = inputLayout->m_Elements[i].m_semanticName.c_str();
+				inputElement[i].SemanticName = desc.layout->m_Elements[i].m_semanticName.c_str();
 				inputElement[i].SemanticIndex = 0;
 				inputElement[i].InputSlot = 0;
-				inputElement[i].AlignedByteOffset = inputLayout->m_Elements[i].m_offset;
+				inputElement[i].AlignedByteOffset = desc.layout->m_Elements[i].m_offset;
 				inputElement[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 				inputElement[i].InstanceDataStepRate = 0;
 
-				if (inputLayout->m_Elements[i].m_numSubElements == 3 && inputLayout->m_Elements[i].m_type == BufferDataType::FLOAT)
+				if (desc.layout->m_Elements[i].m_numSubElements == 3 && desc.layout->m_Elements[i].m_type == BufferDataType::FLOAT)
 				{
 					inputElement[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 				}
-				else if (inputLayout->m_Elements[i].m_numSubElements == 4 && inputLayout->m_Elements[i].m_type == BufferDataType::FLOAT)
+				else if (desc.layout->m_Elements[i].m_numSubElements == 4 && desc.layout->m_Elements[i].m_type == BufferDataType::FLOAT)
 				{
 					inputElement[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 				}
-				else if (inputLayout->m_Elements[i].m_numSubElements == 3 && inputLayout->m_Elements[i].m_type == BufferDataType::INT)
+				else if (desc.layout->m_Elements[i].m_numSubElements == 3 && desc.layout->m_Elements[i].m_type == BufferDataType::INT)
 				{
 					inputElement[i].Format = DXGI_FORMAT_R32G32B32_SINT;
 				}
-				else if (inputLayout->m_Elements[i].m_numSubElements == 4 && inputLayout->m_Elements[i].m_type == BufferDataType::INT)
+				else if (desc.layout->m_Elements[i].m_numSubElements == 4 && desc.layout->m_Elements[i].m_type == BufferDataType::INT)
 				{
 					inputElement[i].Format = DXGI_FORMAT_R32G32B32A32_SINT;
 				}
-				else if (inputLayout->m_Elements[i].m_numSubElements == 3 && inputLayout->m_Elements[i].m_type == BufferDataType::UINT)
+				else if (desc.layout->m_Elements[i].m_numSubElements == 3 && desc.layout->m_Elements[i].m_type == BufferDataType::UINT)
 				{
 					inputElement[i].Format = DXGI_FORMAT_R32G32B32_UINT;
 				}
-				else if (inputLayout->m_Elements[i].m_numSubElements == 4 && inputLayout->m_Elements[i].m_type == BufferDataType::UINT)
+				else if (desc.layout->m_Elements[i].m_numSubElements == 4 && desc.layout->m_Elements[i].m_type == BufferDataType::UINT)
 				{
 					inputElement[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
 				}
@@ -1321,9 +1116,9 @@ namespace terminus
 				}
 			}
 
-			ID3D10Blob* bytecode = CreateStubShaderByteCodeFromLayout(*inputLayout);
+			ID3D10Blob* bytecode = create_stub_shader(*desc.layout);
 
-			HRESULT result = m_device->CreateInputLayout(&inputElement[0], inputLayout->m_Elements.size(), bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &vertexArray->m_inputLayoutD3D);
+			HRESULT result = m_device->CreateInputLayout(&inputElement[0], desc.layout->m_Elements.size(), bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &vertexArray->m_inputLayoutD3D);
 
 			delete[] inputElement;
 			bytecode->Release();
@@ -1331,26 +1126,22 @@ namespace terminus
 
 			if (FAILED(result))
 			{
-				//T_LOG_ERROR("Failed to create Input Layout");
+				T_LOG_ERROR("Failed to create Input Layout");
 				return nullptr;
 			}
 
-			//T_LOG_INFO("Successfully Created Vertex Array");
+			T_LOG_INFO("Successfully Created Vertex Array");
 
 			return vertexArray;
 		}
 		else
 		{
-			//T_LOG_ERROR("Vertex Array Creation : Unknown layout type");
+			T_LOG_ERROR("Vertex Array Creation : Unknown layout type");
 			return nullptr;
 		}
 	}
 
-	RasterizerState* RenderDevice::CreateRasterizerState(CullMode cullMode,
-														 FillMode fillMode,
-														 bool frontWindingCCW,
-														 bool multisample,
-														 bool scissor)
+	RasterizerState* RenderDevice::create_rasterizer_state(RasterizerStateCreateDesc desc)
 	{
 		RasterizerState* rasterizerState = new RasterizerState();
 
@@ -1360,9 +1151,9 @@ namespace terminus
 
 		rasterizerDesc.AntialiasedLineEnable = false;
 
-		if (cullMode == CullMode::BACK)
+		if (desc.cull_mode == CullMode::BACK)
 			rasterizerDesc.CullMode = D3D11_CULL_BACK;
-		else if (cullMode == CullMode::FRONT)
+		else if (desc.cull_mode == CullMode::FRONT)
 			rasterizerDesc.CullMode = D3D11_CULL_FRONT;
 		else
 			rasterizerDesc.CullMode = D3D11_CULL_NONE;
@@ -1371,46 +1162,37 @@ namespace terminus
 		rasterizerDesc.DepthBiasClamp = 0.0f;
 		rasterizerDesc.DepthClipEnable = true;
 
-		if (fillMode == FillMode::SOLID)
+		if (desc.fill_mode == FillMode::SOLID)
 			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 		else
 			rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
 
-		rasterizerDesc.FrontCounterClockwise = frontWindingCCW;
-		rasterizerDesc.MultisampleEnable = multisample;
-		rasterizerDesc.ScissorEnable = scissor;
+		rasterizerDesc.FrontCounterClockwise = desc.front_winding_ccw;
+		rasterizerDesc.MultisampleEnable = desc.multisample;
+		rasterizerDesc.ScissorEnable = desc.scissor;
 		rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 
 		HRESULT result = m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState->m_RasterizerStateD3D);
 		if (FAILED(result))
 		{
-			//T_LOG_ERROR("Failed to Create Rasterizer State");
+			T_LOG_ERROR("Failed to Create Rasterizer State");
 			T_SAFE_DELETE(rasterizerState);
 			return nullptr;
 		}
 
-		//T_LOG_INFO("Successfully Created Rasterizer State");
+		T_LOG_INFO("Successfully Created Rasterizer State");
 
 		return rasterizerState;
 	}
 
-	SamplerState* RenderDevice::CreateSamplerState(TextureFilteringMode minFilter,
-												   TextureFilteringMode magFilter,
-												   TextureWrapMode wrapModeU,
-												   TextureWrapMode wrapModeV,
-												   TextureWrapMode wrapModeW,
-												   float maxAnisotropy,
-												   float borderRed,
-												   float borderGreen,
-												   float borderBlue,
-												   float borderAlpha)
+	SamplerState* RenderDevice::create_sampler_state(SamplerStateCreateDesc desc)
 	{
 		SamplerState* samplerState = new SamplerState();
 		samplerState->m_resource_id = m_sampler_res_id++;
         
         ZeroMemory(&samplerState->m_samplerDesc, sizeof(D3D11_SAMPLER_DESC));
 		
-		switch (wrapModeU)
+		switch (desc.wrap_mode_u)
 		{
 		case TextureWrapMode::REPEAT:
 			samplerState->m_samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -1426,14 +1208,14 @@ namespace terminus
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
 			samplerState->m_samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-			samplerState->m_samplerDesc.BorderColor[0] = borderRed;
-			samplerState->m_samplerDesc.BorderColor[1] = borderGreen;
-			samplerState->m_samplerDesc.BorderColor[2] = borderBlue;
-			samplerState->m_samplerDesc.BorderColor[3] = borderAlpha;
+			samplerState->m_samplerDesc.BorderColor[0] = desc.border_color.x;
+			samplerState->m_samplerDesc.BorderColor[1] = desc.border_color.y;
+			samplerState->m_samplerDesc.BorderColor[2] = desc.border_color.z;
+			samplerState->m_samplerDesc.BorderColor[3] = desc.border_color.w;
 			break;
 		}
 
-		switch (wrapModeV)
+		switch (desc.wrap_mode_v)
 		{
 		case TextureWrapMode::REPEAT:
 			samplerState->m_samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -1449,14 +1231,14 @@ namespace terminus
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
 			samplerState->m_samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-			samplerState->m_samplerDesc.BorderColor[0] = borderRed;
-			samplerState->m_samplerDesc.BorderColor[1] = borderGreen;
-			samplerState->m_samplerDesc.BorderColor[2] = borderBlue;
-			samplerState->m_samplerDesc.BorderColor[3] = borderAlpha;
+			samplerState->m_samplerDesc.BorderColor[0] = desc.border_color.x;
+			samplerState->m_samplerDesc.BorderColor[1] = desc.border_color.y;
+			samplerState->m_samplerDesc.BorderColor[2] = desc.border_color.z;
+			samplerState->m_samplerDesc.BorderColor[3] = desc.border_color.w;
 			break;
 		}
 
-		switch (wrapModeW)
+		switch (desc.wrap_mode_w)
 		{
 		case TextureWrapMode::REPEAT:
 			samplerState->m_samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -1472,32 +1254,32 @@ namespace terminus
 
 		case TextureWrapMode::CLAMP_TO_BORDER:
 			samplerState->m_samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-			samplerState->m_samplerDesc.BorderColor[0] = borderRed;
-			samplerState->m_samplerDesc.BorderColor[1] = borderGreen;
-			samplerState->m_samplerDesc.BorderColor[2] = borderBlue;
-			samplerState->m_samplerDesc.BorderColor[3] = borderAlpha;
+			samplerState->m_samplerDesc.BorderColor[0] = desc.border_color.x;
+			samplerState->m_samplerDesc.BorderColor[1] = desc.border_color.y;
+			samplerState->m_samplerDesc.BorderColor[2] = desc.border_color.z;
+			samplerState->m_samplerDesc.BorderColor[3] = desc.border_color.w;
 			break;
 		}
 
-		if (minFilter == TextureFilteringMode::LINEAR_ALL && magFilter == TextureFilteringMode::LINEAR_ALL)
+		if (desc.min_filter == TextureFilteringMode::LINEAR_ALL && desc.mag_filter == TextureFilteringMode::LINEAR_ALL)
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		else if (minFilter == TextureFilteringMode::LINEAR_ALL && magFilter == TextureFilteringMode::NEAREST_ALL)
+		else if (desc.min_filter == TextureFilteringMode::LINEAR_ALL && desc.mag_filter == TextureFilteringMode::NEAREST_ALL)
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
-		else if (minFilter == TextureFilteringMode::NEAREST_ALL && magFilter == TextureFilteringMode::LINEAR_ALL)
+		else if (desc.min_filter == TextureFilteringMode::NEAREST_ALL && desc.mag_filter == TextureFilteringMode::LINEAR_ALL)
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
-		else if (minFilter == TextureFilteringMode::NEAREST_ALL && magFilter == TextureFilteringMode::NEAREST_ALL)
+		else if (desc.min_filter == TextureFilteringMode::NEAREST_ALL && desc.mag_filter == TextureFilteringMode::NEAREST_ALL)
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-		else if (minFilter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST && magFilter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST)
+		else if (desc.min_filter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST && desc.mag_filter == TextureFilteringMode::LINEAR_MIPMAP_NEAREST)
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-		else if (minFilter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR && magFilter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR)
+		else if (desc.min_filter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR && desc.mag_filter == TextureFilteringMode::NEAREST_MIPMAP_LINEAR)
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
 		else
 			samplerState->m_samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 
-		if (maxAnisotropy < 1.0)
+		if (desc.max_anisotropy < 1.0)
 			samplerState->m_samplerDesc.MaxAnisotropy = 1.0;
 		else
-			samplerState->m_samplerDesc.MaxAnisotropy = maxAnisotropy;
+			samplerState->m_samplerDesc.MaxAnisotropy = desc.max_anisotropy;
 
 		HRESULT result;
 		result = m_device->CreateSamplerState(&samplerState->m_samplerDesc, &samplerState->m_D3D11SamplerState);
@@ -1505,27 +1287,33 @@ namespace terminus
 		if (FAILED(result))
 		{
 			T_SAFE_DELETE(samplerState);
-			//T_LOG_ERROR("Failed to Create Sampler State!");
+			T_LOG_ERROR("Failed to Create Sampler State!");
 			return nullptr;
 		}
 
-		//T_LOG_INFO("Successfully Created Sampler State!");
+		T_LOG_INFO("Successfully Created Sampler State!");
 		return samplerState;
 	}
 
-	Framebuffer* RenderDevice::CreateFramebuffer()
+	Framebuffer* RenderDevice::create_framebuffer(FramebufferCreateDesc desc)
 	{
 		Framebuffer* framebuffer = new Framebuffer();
 		framebuffer->m_resource_id = m_framebuffer_res_id++;
+
+		for (int i = 0; i < desc.num_render_targets; i++)
+			attach_render_target(framebuffer, desc.render_targets[i]);
+
+		if (desc.depth_target)
+			attach_depth_stencil_target(framebuffer, desc.depth_target);
+
 		return framebuffer;
 	}
 
-	Shader* RenderDevice::CreateShader(ShaderType type,
-									   const char* shaderSource)
+	Shader* RenderDevice::create_shader(ShaderCreateDesc desc)
 	{
 		Shader* shader = new Shader();
-		shader->m_type = type;
-		shader->m_shaderSource = shaderSource;
+		shader->m_type = desc.type;
+		shader->m_shaderSource = desc.shader_source;
 
 		ID3D10Blob* shaderBytecode;
 		ID3D10Blob* errorMessage;
@@ -1534,7 +1322,7 @@ namespace terminus
 		std::string target;
 
 		// TODO: handle different feature levels
-		switch (type)
+		switch (desc.type)
 		{
 		case ShaderType::VERTEX:
 			entryPoint = "VertexMain";
@@ -1562,9 +1350,9 @@ namespace terminus
 			break;
 		}
 
-		size_t size = strlen(shaderSource);
+		size_t size = strlen(desc.shader_source);
 
-		HRESULT result = D3DCompile(shaderSource, size, NULL, NULL, NULL, entryPoint.c_str(), target.c_str(), D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBytecode, &errorMessage);
+		HRESULT result = D3DCompile(desc.shader_source, size, NULL, NULL, NULL, entryPoint.c_str(), target.c_str(), D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBytecode, &errorMessage);
 
 		if (FAILED(result))
 		{
@@ -1583,7 +1371,7 @@ namespace terminus
 			return nullptr;
 		}
 
-		switch (type)
+		switch (desc.type)
 		{
 		case ShaderType::VERTEX:
 			result = m_device->CreateVertexShader(shaderBytecode->GetBufferPointer(), shaderBytecode->GetBufferSize(), NULL, &shader->m_vertexShader);
@@ -1612,7 +1400,7 @@ namespace terminus
 		if (FAILED(result))
 		{
 			T_SAFE_DELETE(shader);
-			//T_LOG_ERROR("Failed to create Shader");
+			T_LOG_ERROR("Failed to create Shader");
 
 			return nullptr;
 		}
@@ -1620,61 +1408,45 @@ namespace terminus
 		return shader;
 	}
 
-	ShaderProgram* RenderDevice::CreateShaderProgram(Shader* vertexShader,
-													 Shader* pixelShader,
-													 Shader* geometryShader,
-													 Shader* controlShader,
-													 Shader* evaluationShader)
+	ShaderProgram* RenderDevice::create_shader_program(ShaderProgramCreateDesc desc)
 	{
 		ShaderProgram* shaderProgram = new ShaderProgram();
 		shaderProgram->m_resource_id = m_shader_program_res_id++;
 
-		shaderProgram->m_shaderMap[vertexShader->m_type] = vertexShader;
-		shaderProgram->m_shaderMap[pixelShader->m_type] = pixelShader;
+		shaderProgram->m_shaderMap[desc.vertex->m_type] = desc.vertex;
+		shaderProgram->m_shaderMap[desc.pixel->m_type] = desc.pixel;
 
-		if (geometryShader)
-			shaderProgram->m_shaderMap[geometryShader->m_type] = geometryShader;
+		if (desc.geometry)
+			shaderProgram->m_shaderMap[desc.geometry->m_type] = desc.geometry;
 
-		if (controlShader && evaluationShader)
+		if (desc.tessellation_control && desc.tessellation_evaluation)
 		{
-			shaderProgram->m_shaderMap[controlShader->m_type] = controlShader;
-			shaderProgram->m_shaderMap[evaluationShader->m_type] = evaluationShader;
+			shaderProgram->m_shaderMap[desc.tessellation_control->m_type] = desc.tessellation_control;
+			shaderProgram->m_shaderMap[desc.tessellation_evaluation->m_type] = desc.tessellation_evaluation;
 		}
 
-		//T_LOG_INFO("Successfully Created Shader Program");
+		T_LOG_INFO("Successfully Created Shader Program");
 
 		return shaderProgram;
 	}
 
-	DepthStencilState* RenderDevice::CreateDepthStencilState(bool enableDepthTest,
-															 bool enableStencilTest,
-															 bool depthMask,
-															 ComparisonFunction depthComparisonFunction,
-															 StencilOperation frontStencilFail,
-															 StencilOperation frontStencilPassDepthFail,
-															 StencilOperation frontStencilPassDepthPass,
-															 ComparisonFunction frontStencilComparisonFunction,
-															 StencilOperation backStencilFail,
-															 StencilOperation backStencilPassDepthFail,
-															 StencilOperation backStencilPassDepthPass,
-															 ComparisonFunction backStencilComparisonFunction,
-															 uint stencilMask)
+	DepthStencilState* RenderDevice::create_depth_stencil_state(DepthStencilStateCreateDesc desc)
 	{
 		DepthStencilState* depthStencilState = new DepthStencilState();
 
         ZeroMemory(&depthStencilState->m_depthStencilStateDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
         
-		if (enableDepthTest)
+		if (desc.enable_depth_test)
 			depthStencilState->m_depthStencilStateDesc.DepthEnable = true;
 		else
 			depthStencilState->m_depthStencilStateDesc.DepthEnable = false;
 
-		if (depthMask)
+		if (desc.depth_mask)
 			depthStencilState->m_depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 		else
 			depthStencilState->m_depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 
-		switch (depthComparisonFunction)
+		switch (desc.depth_cmp_func)
 		{
 		case ComparisonFunction::NEVER:
 			depthStencilState->m_depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_NEVER;
@@ -1715,18 +1487,18 @@ namespace terminus
 
 		// Stencil
 
-		if (enableStencilTest)
+		if (desc.enable_stencil_test)
 			depthStencilState->m_depthStencilStateDesc.StencilEnable = true;
 		else
 			depthStencilState->m_depthStencilStateDesc.StencilEnable = false;
 
 
-		depthStencilState->m_depthStencilStateDesc.StencilReadMask = stencilMask;
-		depthStencilState->m_depthStencilStateDesc.StencilWriteMask = stencilMask;
+		depthStencilState->m_depthStencilStateDesc.StencilReadMask = desc.stencil_mask;
+		depthStencilState->m_depthStencilStateDesc.StencilWriteMask = desc.stencil_mask;
 
 		// Front Stencil Comparison Function
 
-		switch (frontStencilComparisonFunction)
+		switch (desc.front_stencil_cmp_func)
 		{
 		case ComparisonFunction::NEVER:
 			depthStencilState->m_depthStencilStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NEVER;
@@ -1767,7 +1539,7 @@ namespace terminus
 
 		// Front Stencil Operation
 
-		switch (frontStencilFail)
+		switch (desc.front_stencil_fail)
 		{
 		case StencilOperation::KEEP:
 			depthStencilState->m_depthStencilStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
@@ -1806,7 +1578,7 @@ namespace terminus
 			break;
 		}
 
-		switch (frontStencilPassDepthPass)
+		switch (desc.front_stencil_pass_depth_pass)
 		{
 		case StencilOperation::KEEP:
 			depthStencilState->m_depthStencilStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
@@ -1845,7 +1617,7 @@ namespace terminus
 			break;
 		}
 
-		switch (frontStencilPassDepthFail)
+		switch (desc.front_stencil_pass_depth_fail)
 		{
 		case StencilOperation::KEEP:
 			depthStencilState->m_depthStencilStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
@@ -1886,7 +1658,7 @@ namespace terminus
 
 		// Back Stencil Comparison Function
 
-		switch (backStencilComparisonFunction)
+		switch (desc.back_stencil_cmp_func)
 		{
 		case ComparisonFunction::NEVER:
 			depthStencilState->m_depthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
@@ -1927,7 +1699,7 @@ namespace terminus
 
 		// Back Stencil Operation
 
-		switch (backStencilFail)
+		switch (desc.back_stencil_fail)
 		{
 		case StencilOperation::KEEP:
 			depthStencilState->m_depthStencilStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
@@ -1966,7 +1738,7 @@ namespace terminus
 			break;
 		}
 
-		switch (backStencilPassDepthPass)
+		switch (desc.back_stencil_pass_depth_pass)
 		{
 		case StencilOperation::KEEP:
 			depthStencilState->m_depthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
@@ -2005,7 +1777,7 @@ namespace terminus
 			break;
 		}
 
-		switch (backStencilPassDepthFail)
+		switch (desc.back_stencil_pass_depth_fail)
 		{
 		case StencilOperation::KEEP:
 			depthStencilState->m_depthStencilStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
@@ -2047,42 +1819,41 @@ namespace terminus
 		HRESULT result = m_device->CreateDepthStencilState(&depthStencilState->m_depthStencilStateDesc, &depthStencilState->m_depthStencilStateD3D);
 		if (FAILED(result))
 		{
-			//T_LOG_ERROR("Failed to Create Depth Stencil State");
+			T_LOG_ERROR("Failed to Create Depth Stencil State");
 			T_SAFE_DELETE(depthStencilState);
 			return nullptr;
 		}
 
-		//T_LOG_INFO("Successfully Created Depth Stencil State");
+		T_LOG_INFO("Successfully Created Depth Stencil State");
 
 		return depthStencilState;
 	}
 
-	void RenderDevice::AttachRenderTarget(Framebuffer* framebuffer, Texture* renderTarget)
+	void RenderDevice::attach_render_target(Framebuffer* framebuffer, Texture* renderTarget)
 	{
 		ID3D11RenderTargetView* renderTargetView;
 
 		switch (renderTarget->m_type)
 		{
-		case TextureTarget::TEXTURE2D:
-		{
-			Texture2D* texture = (Texture2D*)renderTarget;
-			m_device->CreateRenderTargetView(texture->m_textureD3D, NULL, &renderTargetView);
-			break;
-		}
-		default:
-		{
-			//T_LOG_ERROR("Render Target binding Failed : Invalid Texture Target");
-			return;
-			break;
-		}
+			case TextureTarget::TEXTURE2D:
+			{
+				Texture2D* texture = (Texture2D*)renderTarget;
+				m_device->CreateRenderTargetView(texture->m_textureD3D, NULL, &renderTargetView);
+				break;
+			}
+			default:
+			{
+				T_LOG_ERROR("Render Target binding Failed : Invalid Texture Target");
+				return;
+				break;
+			}
 		}
 
-		//_framebuffer->attachRenderTarget(_renderTarget);
 		framebuffer->m_renderTargets.push_back(renderTarget);
 		framebuffer->m_renderTargetViews.push_back(((Texture2D*)renderTarget)->m_renderTargetView);
 	}
 
-	void RenderDevice::AttachDepthStencilTarget(Framebuffer* framebuffer, Texture* renderTarget)
+	void RenderDevice::attach_depth_stencil_target(Framebuffer* framebuffer, Texture* renderTarget)
 	{
 		ID3D11DepthStencilView* depthStencilView;
 		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
@@ -2104,7 +1875,7 @@ namespace terminus
 			}
 			default:
 			{
-				//T_LOG_ERROR("Render Target binding Failed : Invalid Texture Target");
+				T_LOG_ERROR("Render Target binding Failed : Invalid Texture Target");
 				return;
 				break;
 			}
@@ -2114,7 +1885,15 @@ namespace terminus
 		framebuffer->m_depthStecilView = ((Texture2D*)renderTarget)->m_depthView;
 	}
 
-	void RenderDevice::DestroyTexture1D(Texture1D* texture)
+	void RenderDevice::destroy_pipeline_state_object(PipelineStateObject* pso)
+	{
+		destroy_depth_stencil_state(pso->depth_stencil_state);
+		destroy_rasterizer_state(pso->rasterizer_state);
+
+		delete pso;
+	}
+
+	void RenderDevice::destroy_texture_1d(Texture1D* texture)
 	{
 		if (texture->m_renderTargetView)
 			texture->m_renderTargetView->Release();
@@ -2128,7 +1907,7 @@ namespace terminus
 		delete texture;
 	}
 
-	void RenderDevice::DestroyTexture2D(Texture2D* texture)
+	void RenderDevice::destroy_texture_2d(Texture2D* texture)
 	{
 		if (texture->m_renderTargetView)
 			texture->m_renderTargetView->Release();
@@ -2145,7 +1924,7 @@ namespace terminus
 		delete texture;
 	}
 
-	void RenderDevice::DestroyTexture3D(Texture3D* texture)
+	void RenderDevice::destroy_texture_3d(Texture3D* texture)
 	{
 		if (texture->m_renderTargetView)
 			texture->m_renderTargetView->Release();
@@ -2159,7 +1938,7 @@ namespace terminus
 		delete texture;
 	}
 
-	void RenderDevice::DestroyTextureCube(TextureCube* texture)
+	void RenderDevice::destroy_texture_cube(TextureCube* texture)
 	{
 		/*if (texture->m_renderTargetView)
 			texture->m_renderTargetView->Release();
@@ -2173,7 +1952,7 @@ namespace terminus
 		delete texture;
 	}
 
-	void RenderDevice::DestroyVertexBuffer(VertexBuffer* buffer)
+	void RenderDevice::destroy_vertex_buffer(VertexBuffer* buffer)
 	{
 		if (buffer->m_BufferD3D)
 			buffer->m_BufferD3D->Release();
@@ -2181,7 +1960,7 @@ namespace terminus
 		delete buffer;
 	}
 
-	void RenderDevice::DestroyIndexBuffer(IndexBuffer* buffer)
+	void RenderDevice::destroy_index_buffer(IndexBuffer* buffer)
 	{
 		if (buffer->m_BufferD3D)
 			buffer->m_BufferD3D->Release();
@@ -2189,7 +1968,7 @@ namespace terminus
 		delete buffer;
 	}
 
-	void RenderDevice::DestroyUniformBuffer(UniformBuffer* buffer)
+	void RenderDevice::destroy_uniform_buffer(UniformBuffer* buffer)
 	{
 		if (buffer->m_BufferD3D)
 			buffer->m_BufferD3D->Release();
@@ -2197,21 +1976,21 @@ namespace terminus
 		delete buffer;
 	}
 
-	void RenderDevice::DestroyVertexArray(VertexArray* vertexArray)
+	void RenderDevice::destroy_vertex_array(VertexArray* vertexArray)
 	{
 		if (vertexArray)
 		{
 			if (vertexArray->m_vertexBuffer)
-				DestroyVertexBuffer(vertexArray->m_vertexBuffer);
+				destroy_vertex_buffer(vertexArray->m_vertexBuffer);
 
 			if (vertexArray->m_indexBuffer)
-				DestroyIndexBuffer(vertexArray->m_indexBuffer);
+				destroy_index_buffer(vertexArray->m_indexBuffer);
 			
 			T_SAFE_DELETE(vertexArray);
 		}
 	}
 
-	void RenderDevice::DestroyRasterizerState(RasterizerState* state)
+	void RenderDevice::destroy_rasterizer_state(RasterizerState* state)
 	{
 		if (state->m_RasterizerStateD3D)
 			state->m_RasterizerStateD3D->Release();
@@ -2219,7 +1998,7 @@ namespace terminus
 		delete state;
 	}
 
-	void RenderDevice::DestroySamplerState(SamplerState* state)
+	void RenderDevice::destroy_sampler_state(SamplerState* state)
 	{
 		if (state->m_D3D11SamplerState)
 			state->m_D3D11SamplerState->Release();
@@ -2227,7 +2006,7 @@ namespace terminus
 		delete state;
 	}
 
-	void RenderDevice::DestroyDepthStencilState(DepthStencilState* state)
+	void RenderDevice::destroy_depth_stencil_state(DepthStencilState* state)
 	{
 		if (state->m_depthStencilStateD3D)
 			state->m_depthStencilStateD3D->Release();
@@ -2235,12 +2014,12 @@ namespace terminus
 		delete state;
 	}
 
-	void RenderDevice::DestroyFramebuffer(Framebuffer* framebuffer)
+	void RenderDevice::destroy_framebuffer(Framebuffer* framebuffer)
 	{
 		T_SAFE_DELETE(framebuffer);
 	}
 
-	void RenderDevice::DestroyShader(Shader* shader)
+	void RenderDevice::destroy_shader(Shader* shader)
 	{
 		if (shader->m_computeShader)
 			shader->m_computeShader->Release();
@@ -2263,7 +2042,7 @@ namespace terminus
 		T_SAFE_DELETE(shader);
 	}
 
-	void RenderDevice::DestoryShaderProgram(ShaderProgram* program)
+	void RenderDevice::destory_shader_program(ShaderProgram* program)
 	{
 		for (auto it : program->m_shaderMap)
 		{
@@ -2271,9 +2050,14 @@ namespace terminus
 		}
 	}
 
-	void RenderDevice::BindTexture(Texture* texture,
-								   ShaderType shaderStage,
-								   uint bufferSlot)
+	void RenderDevice::bind_pipeline_state_object(PipelineStateObject* pso)
+	{
+		bind_depth_stencil_state(pso->depth_stencil_state);
+		bind_rasterizer_state(pso->rasterizer_state);
+		set_primitive_type(pso->primitive);
+	}
+
+	void RenderDevice::bind_texture(Texture* texture, ShaderType shaderStage, uint32_t bufferSlot)
 	{
 		switch (shaderStage)
 		{
@@ -2303,9 +2087,7 @@ namespace terminus
 		}
 	}
 
-	void RenderDevice::BindUniformBuffer(UniformBuffer* uniformBuffer,
-										 ShaderType shaderStage,
-										 uint bufferSlot)
+	void RenderDevice::bind_uniform_buffer(UniformBuffer* uniformBuffer, ShaderType shaderStage, uint32_t bufferSlot)
 	{
 		switch (shaderStage)
 		{
@@ -2335,14 +2117,12 @@ namespace terminus
 		}
 	}
 
-	void RenderDevice::BindRasterizerState(RasterizerState* state)
+	void RenderDevice::bind_rasterizer_state(RasterizerState* state)
 	{
 		m_device_context->RSSetState(state->m_RasterizerStateD3D);
 	}
 
-	void RenderDevice::BindSamplerState(SamplerState* state,
-										ShaderType shaderStage,
-										uint slot)
+	void RenderDevice::bind_sampler_state(SamplerState* state, ShaderType shaderStage, uint32_t slot)
 	{
 		switch (shaderStage)
 		{
@@ -2372,7 +2152,7 @@ namespace terminus
 		}
 	}
 
-	void RenderDevice::BindVertexArray(VertexArray* vertexArray)
+	void RenderDevice::bind_vertex_array(VertexArray* vertexArray)
 	{
 		m_device_context->IASetInputLayout(vertexArray->m_inputLayoutD3D);
 		m_device_context->IASetVertexBuffers(0, 1, &vertexArray->m_vertexBuffer->m_BufferD3D,
@@ -2381,7 +2161,7 @@ namespace terminus
 		m_device_context->IASetIndexBuffer(vertexArray->m_indexBuffer->m_BufferD3D, DXGI_FORMAT_R32_UINT, 0);
 	}
 
-	void RenderDevice::BindFramebuffer(Framebuffer* framebuffer)
+	void RenderDevice::bind_framebuffer(Framebuffer* framebuffer)
 	{
 		if (framebuffer)
 			m_current_framebuffer = framebuffer;
@@ -2391,12 +2171,12 @@ namespace terminus
 		m_device_context->OMSetRenderTargets(m_current_framebuffer->m_renderTargetViews.size(), &m_current_framebuffer->m_renderTargetViews[0], m_current_framebuffer->m_depthStecilView);
 	}
 
-	void RenderDevice::BindDepthStencilState(DepthStencilState* state)
+	void RenderDevice::bind_depth_stencil_state(DepthStencilState* state)
 	{
 		m_device_context->OMSetDepthStencilState(state->m_depthStencilStateD3D, 1);
 	}
 
-	void RenderDevice::BindShaderProgram(ShaderProgram* program)
+	void RenderDevice::bind_shader_program(ShaderProgram* program)
 	{
 		m_device_context->VSSetShader(program->m_shaderMap[ShaderType::VERTEX]->m_vertexShader, NULL, 0);
 		m_device_context->PSSetShader(program->m_shaderMap[ShaderType::PIXEL]->m_pixelShader, NULL, 0);
@@ -2411,7 +2191,7 @@ namespace terminus
 		}
 	}
 
-	void* RenderDevice::MapBuffer(Buffer* buffer, BufferMapType type)
+	void* RenderDevice::map_buffer(Buffer* buffer, BufferMapType type)
 	{
 		HRESULT result;
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -2442,12 +2222,12 @@ namespace terminus
 			return (void*)mappedResource.pData;
 	}
 
-	void RenderDevice::UnmapBuffer(Buffer* buffer)
+	void RenderDevice::unmap_buffer(Buffer* buffer)
 	{
 		m_device_context->Unmap(buffer->m_BufferD3D, 0);
 	}
 
-	void RenderDevice::SetPrimitiveType(DrawPrimitive primitive)
+	void RenderDevice::set_primitive_type(DrawPrimitive primitive)
 	{
 		switch (primitive)
 		{
@@ -2479,7 +2259,7 @@ namespace terminus
 		m_device_context->IASetPrimitiveTopology(m_primitive_type);
 	}
 
-	void RenderDevice::ClearFramebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor)
+	void RenderDevice::clear_framebuffer(FramebufferClearTarget clearTarget, Vector4 clearColor)
 	{
 		switch (clearTarget)
 		{
@@ -2510,7 +2290,7 @@ namespace terminus
 		}
 	}
 
-	void RenderDevice::SetViewport(int width, int height, int topLeftX, int topLeftY)
+	void RenderDevice::set_viewport(uint32_t width, uint32_t height, uint32_t top_left_x, uint32_t top_left_y)
 	{
 		D3D11_VIEWPORT viewport;
 
@@ -2520,8 +2300,8 @@ namespace terminus
 			viewport.Height = (float)_window_height;
 			viewport.MinDepth = 0.0f;
 			viewport.MaxDepth = 1.0f;
-			viewport.TopLeftX = topLeftX;
-			viewport.TopLeftY = topLeftY;
+			viewport.TopLeftX = top_left_x;
+			viewport.TopLeftY = top_left_y;
 		}
 		else
 		{
@@ -2529,48 +2309,45 @@ namespace terminus
 			viewport.Height = (float)height;
 			viewport.MinDepth = 0.0f;
 			viewport.MaxDepth = 1.0f;
-			viewport.TopLeftX = topLeftX;
-			viewport.TopLeftY = topLeftY;
+			viewport.TopLeftX = top_left_x;
+			viewport.TopLeftY = top_left_y;
 		}
 
 		m_device_context->RSSetViewports(1, &viewport);
 	}
 
-	void RenderDevice::SwapBuffers()
+	void RenderDevice::swap_buffers()
 	{
 		m_swap_chain->Present(0, 0);
 	}
 
-	void RenderDevice::Draw(int firstIndex,
-							int count)
+	void RenderDevice::draw(uint32_t first_index, uint32_t count)
 	{
-		m_device_context->Draw(count, firstIndex);
+		m_device_context->Draw(count, first_index);
 	}
 
-	void RenderDevice::DrawIndexed(int indexCount)
+	void RenderDevice::draw_indexed(uint32_t index_count)
 	{
-		m_device_context->DrawIndexed(indexCount, 0, 0);
+		m_device_context->DrawIndexed(index_count, 0, 0);
 	}
 
-	void RenderDevice::DrawIndexedBaseVertex(int indexCount,
-											 unsigned int baseIndex,
-											 unsigned int baseVertex)
+	void RenderDevice::draw_indexed_base_vertex(uint32_t index_count, uint32_t base_index, uint32_t base_vertex)
 	{
-		m_device_context->DrawIndexed(indexCount, baseIndex, baseVertex);
+		m_device_context->DrawIndexed(index_count, base_index, base_vertex);
 	}
 
-	void RenderDevice::DrawInstanced()
+	void RenderDevice::draw_instanced()
 	{
 
 
 	}
 
-	void RenderDevice::DrawIndexedInstanced()
+	void RenderDevice::draw_indexed_instanced()
 	{
 
 	}
 
-	ID3D10Blob* RenderDevice::CreateStubShaderByteCodeFromLayout(InputLayout _layout)
+	ID3D10Blob* RenderDevice::create_stub_shader(InputLayout _layout)
 	{
 		ID3D10Blob* vertexShaderByteCode;
 		ID3D10Blob* errorMessage;

@@ -23,9 +23,9 @@
 namespace std
 {
 	template<>
-	struct hash<ShaderType>
+	struct hash<terminus::ShaderType>
 	{
-		size_t operator()(const ShaderType& em) const
+		size_t operator()(const terminus::ShaderType& em) const
 		{
 			return std::hash<int>()((int)em);
 		}
@@ -148,6 +148,11 @@ namespace terminus
 		ID3D11SamplerState* m_D3D11SamplerState;
 		D3D11_SAMPLER_DESC m_samplerDesc;
     };
+
+	struct BlendState
+	{
+
+	};
     
     struct Framebuffer
     {
@@ -157,6 +162,14 @@ namespace terminus
 		ID3D11DepthStencilView* m_depthStecilView;
 		Texture* m_depthStencilTarget;
     };
+
+	struct PipelineStateObject
+	{
+		DepthStencilState* depth_stencil_state;
+		RasterizerState*   rasterizer_state;
+		BlendState*        blend_state;
+		DrawPrimitive      primitive;
+	};
 }
 
 #endif
