@@ -29,6 +29,10 @@ namespace terminus
         
         _per_frame_buffer = device.create_uniform_buffer(desc);
         
+        desc.size = sizeof(PerFrameSkyUniforms);
+        
+        _per_frame_sky_buffer = device.create_uniform_buffer(desc);
+        
         desc.size = sizeof(PerDrawUniforms);
         
         _per_draw_buffer = device.create_uniform_buffer(desc);
@@ -47,6 +51,7 @@ namespace terminus
         RenderDevice& device = context::get_render_device();
         
         device.destroy_uniform_buffer(_per_frame_buffer);
+        device.destroy_uniform_buffer(_per_frame_sky_buffer);
         device.destroy_uniform_buffer(_per_draw_buffer);
         device.destroy_uniform_buffer(_per_draw_material_buffer);
         device.destroy_uniform_buffer(_per_draw_bone_offsets_buffer);
@@ -136,9 +141,9 @@ namespace terminus
                         
                         break;
                     }
-                    case CommandType::BindTexture2D:
+                    case CommandType::BindTexture:
                     {
-                        BindTexture2DCmdData* _cmd_data = _cmd_buf.Read<BindTexture2DCmdData>();
+                        BindTextureCmdData* _cmd_data = _cmd_buf.Read<BindTextureCmdData>();
                         
                         if(_cmd_data->texture)
                             device.bind_texture(_cmd_data->texture, _cmd_data->shader_type, _cmd_data->slot);

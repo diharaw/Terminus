@@ -162,7 +162,7 @@ namespace terminus
         GLenum texformat = g_texture_formats[desc.format][0];
         GLenum textype = g_texture_formats[desc.format][1];
         
-		// Array order [+X, –X, +Y, –Y, +Z, –Z]
+        // Array order [+X, –X, +Y, –Y, +Z, –Z]
 		for (int i = 0; i < 6; i++)
 		{
 			GL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
@@ -178,10 +178,10 @@ namespace terminus
         
         if (desc.generate_mipmaps)
         {
-            GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+            GL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_CUBE_MAP));
         }
         
-        GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0));
+        GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
         
         return texture;
 	}

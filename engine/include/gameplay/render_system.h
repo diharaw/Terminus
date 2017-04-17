@@ -73,6 +73,7 @@ namespace terminus
         ShaderCache*	   _shader_cache;
 		Scene*			   _scene;
         
+        DrawItem           _skydome_item;
         Mesh*              _skydome_mesh;
         SkyComponent*      _sky_cmp;
         

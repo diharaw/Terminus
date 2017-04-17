@@ -89,7 +89,8 @@ namespace terminus
             
             for(int i = 0; i < 6; i++)
             {
-                StringBuffer32 file_name = cube_base_name + cube_sides[i];
+                StringBuffer32 temp_name = cube_base_name;
+                StringBuffer32 file_name = temp_name + cube_sides[i];
                 std::cout << "Loading cube map side : " << file_name.c_str() << std::endl;
                 
                 load_data[i] = stb_image_loader::load(file_name.c_str());
@@ -100,6 +101,8 @@ namespace terminus
                     texture_task_data->desc.width = load_data[i]->width;
                     texture_task_data->desc.height = load_data[i]->height;
                     texture_task_data->desc.format = TextureFormat::R8G8B8A8_UNORM;
+                    texture_task_data->desc.create_render_target_view = false;
+                    texture_task_data->desc.generate_mipmaps = true;
                 }
                 else
                 {

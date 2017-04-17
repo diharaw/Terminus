@@ -22,7 +22,7 @@ namespace terminus
         BindUniformBuffer,
         BindSamplerState,
         BindPipelineStateObject,
-        BindTexture2D,
+        BindTexture,
         CopyUniformData,
         ClearFramebuffer,
         End
@@ -87,11 +87,11 @@ namespace terminus
         PipelineStateObject* pso;
     };
     
-    struct BindTexture2DCmdData
+    struct BindTextureCmdData
     {
-        Texture2D* texture;
+        Texture*   texture;
         ShaderType shader_type;
-        int           slot;
+        int        slot;
     };
     
     struct BindSamplerStateCmdData

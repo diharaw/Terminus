@@ -5,7 +5,7 @@
 #include <core/global.h>
 
 #define MAX_COMMAND_BUFFERS 32
-#define PER_FRAME_UNIFORM_MEMORY 1
+#define PER_FRAME_UNIFORM_MEMORY 2
 #define PER_FRAME_UNIFORM_MEMORY_BYTES PER_FRAME_UNIFORM_MEMORY*MB_IN_BYTES
 
 namespace terminus

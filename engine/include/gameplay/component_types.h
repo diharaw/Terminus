@@ -20,6 +20,7 @@ namespace terminus
     {
         StringBuffer32 cubemap;
         TextureCube*   texture;
+        SamplerState*  sampler;
     };
     
     struct PointLightComponent

@@ -39,7 +39,7 @@ namespace terminus
 		CameraComponent* camera_array = _scene->_camera_pool.get_array();
 		int num_cameras = _scene->_camera_pool.get_num_objects();
         
-        _skydome_mesh = context::get_mesh_cache().load("sphere.tsm");
+        _skydome_mesh = context::get_mesh_cache().load("sky_dome.tsm");
         
         if(scene->_sky_pool.get_num_objects() > 0)
             _sky_cmp = scene->_sky_pool.get_array();
@@ -70,8 +70,30 @@ namespace terminus
         for (int i = 0; i < _scene->_entities._num_objects; i++)
         {
 			Entity& entity = _scene->_entities._objects[i];
-
             on_entity_created(entity);
+        }
+        
+        _skydome_item.base_index = _skydome_mesh->SubMeshes[0].m_BaseIndex;
+        _skydome_item.base_vertex = _skydome_mesh->SubMeshes[0].m_BaseVertex;
+        _skydome_item.index_count = _skydome_mesh->SubMeshes[0].m_IndexCount;
+        _skydome_item.material = _skydome_mesh->SubMeshes[0]._material;
+        _skydome_item.vertex_array = _skydome_mesh->VertexArray;
+        _skydome_item.type = RenderableType::Skybox;
+        
+        for(int i = 0; i < _view_count; i++)
+        {
+            RenderingPath* path = _views[i]._rendering_path;
+            
+            for (int j = 0; j < path->_num_render_passes; j++)
+            {
+                RenderPass* render_pass = path->_render_passes[j];
+                
+                if(render_pass->geometry_type == GeometryType::SKY)
+                {
+                    for(RenderSubPass& sub_pass : render_pass->sub_passes)
+                        _shader_cache->load(RenderableType::Skybox, render_pass->pass_id, &sub_pass, nullptr);
+                }
+            }
         }
     }
     
@@ -202,6 +224,10 @@ namespace terminus
         PerFrameUniforms* per_frame = uniform_allocator->NewPerFrame<PerFrameUniforms>();
         per_frame->projection = *scene_view._projection_matrix;
         per_frame->view       = *scene_view._view_matrix;
+        
+        PerFrameSkyUniforms* per_frame_sky = uniform_allocator->NewPerFrame<PerFrameSkyUniforms>();
+        per_frame_sky->projection = *scene_view._projection_matrix;
+        per_frame_sky->view       = Matrix4(Matrix3(*scene_view._view_matrix));
        
         CommandBuffer& cmd_buf = _renderer->command_buffer(scene_view._cmd_buf_idx);
         
@@ -257,6 +283,8 @@ namespace terminus
 
 		TERMINUS_BEGIN_CPU_PROFILE(command_generation);
         
+        bool cleared_default = false;
+        
         for (int i = 0; i < scene_view._rendering_path->_num_render_passes; i++)
         {
             RenderPass* render_pass = scene_view._rendering_path->_render_passes[i];
@@ -285,24 +313,18 @@ namespace terminus
                 
                 // Clear Framebuffer
                 
-                cmd_buf.Write(CommandType::ClearFramebuffer);
-                
-                ClearFramebufferCmdData cmd2;
-                cmd2.clear_target = FramebufferClearTarget::ALL;
-                cmd2.clear_color  = Vector4(0.3f, 0.3f, 0.3f, 1.0f);
-                
-                cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
-                
-                // Bind Per Frame Global Uniforms
-                
-                cmd_buf.Write(CommandType::BindUniformBuffer);
-                
-                BindUniformBufferCmdData cmd3;
-                cmd3.buffer = _renderer->_per_frame_buffer;
-				cmd3.shader_type = ShaderType::VERTEX;
-                cmd3.slot = PER_FRAME_UNIFORM_SLOT;
-                
-                cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
+                if(sub_pass.framebuffer_target == nullptr && !cleared_default)
+                {
+                    cleared_default = true;
+                    
+                    cmd_buf.Write(CommandType::ClearFramebuffer);
+                    
+                    ClearFramebufferCmdData cmd2;
+                    cmd2.clear_target = FramebufferClearTarget::ALL;
+                    cmd2.clear_color  = Vector4(0.3f, 0.3f, 0.3f, 1.0f);
+                    
+                    cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
+                }
                 
                 // Copy Per Frame data
                 
@@ -315,6 +337,17 @@ namespace terminus
                 cmd4.map_type = BufferMapType::WRITE;
                 
                 cmd_buf.Write<CopyUniformCmdData>(&cmd4);
+                
+                // Bind Per Frame Global Uniforms
+                
+                cmd_buf.Write(CommandType::BindUniformBuffer);
+                
+                BindUniformBufferCmdData cmd3;
+                cmd3.buffer = _renderer->_per_frame_buffer;
+                cmd3.shader_type = ShaderType::VERTEX;
+                cmd3.slot = PER_FRAME_UNIFORM_SLOT;
+                
+                cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
                 
                 if(render_pass->geometry_type == GeometryType::SCENE)
                 {
@@ -376,18 +409,6 @@ namespace terminus
                         {
                             last_renderable = draw_item.renderable_id;
                             
-                            // Bind Per Draw Uniforms
-                            
-                            cmd_buf.Write(CommandType::BindUniformBuffer);
-                            
-                            BindUniformBufferCmdData cmd7;
-                            cmd7.buffer = _renderer->_per_draw_buffer;
-							cmd7.shader_type = ShaderType::VERTEX;
-                            cmd7.slot = PER_DRAW_UNIFORM_SLOT;
-                            
-                            cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
-                            
-                            
                             // Copy Per Draw Uniforms
                             
                             cmd_buf.Write(CommandType::CopyUniformData);
@@ -399,6 +420,17 @@ namespace terminus
                             cmd8.map_type = BufferMapType::WRITE;
                             
                             cmd_buf.Write<CopyUniformCmdData>(&cmd8);
+                            
+                            // Bind Per Draw Uniforms
+                            
+                            cmd_buf.Write(CommandType::BindUniformBuffer);
+                            
+                            BindUniformBufferCmdData cmd7;
+                            cmd7.buffer = _renderer->_per_draw_buffer;
+                            cmd7.shader_type = ShaderType::VERTEX;
+                            cmd7.slot = PER_DRAW_UNIFORM_SLOT;
+                            
+                            cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
                         }
                         
                         for (int l = 0; l < 5 ; l++)
@@ -424,14 +456,14 @@ namespace terminus
                                         
                                         // Bind Textures
                                         
-                                        cmd_buf.Write(CommandType::BindTexture2D);
+                                        cmd_buf.Write(CommandType::BindTexture);
                                         
-                                        BindTexture2DCmdData cmd10;
+                                        BindTextureCmdData cmd10;
                                         cmd10.texture = draw_item.material->texture_maps[l];
                                         cmd10.slot = l;
                                         cmd10.shader_type = ShaderType::PIXEL;
                                         
-                                        cmd_buf.Write<BindTexture2DCmdData>(&cmd10);
+                                        cmd_buf.Write<BindTextureCmdData>(&cmd10);
                                     }
                                 }
                             }
@@ -451,7 +483,87 @@ namespace terminus
                 }
                 else if(render_pass->geometry_type == GeometryType::SKY)
                 {
+                    // Bind Vertex Array
                     
+                    cmd_buf.Write(CommandType::BindVertexArray);
+                    
+                    BindVertexArrayCmdData cmd5;
+                    cmd5.vertex_array = _skydome_item.vertex_array;
+                    
+                    cmd_buf.Write<BindVertexArrayCmdData>(&cmd5);
+                    
+                    ShaderKey key;
+                    
+                    key.encode_mesh_type(_skydome_item.type);
+                    key.encode_renderpass_id(render_pass->pass_id);
+                    
+                    // Send to rendering thread pool
+                    ShaderProgram* program = _shader_cache->load(key);
+                    
+                    // Bind Shader Program
+                    
+                    cmd_buf.Write(CommandType::BindShaderProgram);
+                    
+                    BindShaderProgramCmdData cmd6;
+                    cmd6.program = program;
+                    
+                    cmd_buf.Write<BindShaderProgramCmdData>(&cmd6);
+                    
+                    // Copy Per Frame data
+                    
+                    cmd_buf.Write(CommandType::CopyUniformData);
+                    
+                    CopyUniformCmdData cmd4;
+                    cmd4.buffer = _renderer->_per_frame_sky_buffer;
+                    cmd4.data   = per_frame_sky;
+                    cmd4.size   = sizeof(PerFrameSkyUniforms);
+                    cmd4.map_type = BufferMapType::WRITE;
+                    
+                    cmd_buf.Write<CopyUniformCmdData>(&cmd4);
+                    
+                    // Bind Per Frame Sky Global Uniforms
+                    
+                    cmd_buf.Write(CommandType::BindUniformBuffer);
+                    
+                    BindUniformBufferCmdData cmd3;
+                    cmd3.buffer = _renderer->_per_frame_sky_buffer;
+                    cmd3.shader_type = ShaderType::VERTEX;
+                    cmd3.slot = PER_FRAME_UNIFORM_SLOT;
+                    
+                    cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
+                    
+                    // Bind Sampler State
+                    
+                    cmd_buf.Write(CommandType::BindSamplerState);
+                    
+                    BindSamplerStateCmdData cmd9;
+                    cmd9.state = _sky_cmp->sampler;
+                    cmd9.slot = 0;
+                    cmd9.shader_type = ShaderType::PIXEL;
+                    
+                    cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
+                    
+                    // Bind Cubemap
+                    
+                    cmd_buf.Write(CommandType::BindTexture);
+                    
+                    BindTextureCmdData cmd10;
+                    cmd10.texture = _sky_cmp->texture;
+                    cmd10.slot = 0;
+                    cmd10.shader_type = ShaderType::PIXEL;
+                    
+                    cmd_buf.Write<BindTextureCmdData>(&cmd10);
+                    
+                    // Draw
+                    
+                    cmd_buf.Write(CommandType::DrawIndexedBaseVertex);
+                    
+                    DrawIndexedBaseVertexCmdData cmd11;
+                    cmd11.base_index = _skydome_item.base_index;
+                    cmd11.base_vertex = _skydome_item.base_vertex;
+                    cmd11.index_count = _skydome_item.index_count;
+                    
+                    cmd_buf.Write<DrawIndexedBaseVertexCmdData>(&cmd11);
                 }
                 else if(render_pass->geometry_type == GeometryType::QUAD)
                 {

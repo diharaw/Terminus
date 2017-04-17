@@ -20,8 +20,15 @@ namespace terminus
         Matrix4 inverse_view_projection;
         Matrix4 projection;
         Matrix4 view;
+        Matrix4 view_sky;
         Vector3 view_position;
         Vector3 view_direction;
+    };
+    
+    struct T_ALIGNED(16) PerFrameSkyUniforms
+    {
+        Matrix4 projection;
+        Matrix4 view;
     };
     
 	struct T_ALIGNED(16) PerDrawUniforms
@@ -51,12 +58,10 @@ namespace terminus
         
     public:
         UniformBuffer* _per_frame_buffer;
+        UniformBuffer* _per_frame_sky_buffer;
         UniformBuffer* _per_draw_buffer;
         UniformBuffer* _per_draw_material_buffer;
         UniformBuffer* _per_draw_bone_offsets_buffer;
-        RasterizerState* _rasterizer_state;
-        DepthStencilState* _depth_stencil_state;
-        DepthStencilState* _sky_ds;
         
     public:
         Renderer();
