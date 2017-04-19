@@ -85,106 +85,110 @@ namespace terminus
     void PlatformSDL2::create_input_map()
     {
         // setup keyboard codes
-        _keyboard_code_map.set(HASH("A"), SDLK_a);
-        _keyboard_code_map.set(HASH("B"), SDLK_b);
-        _keyboard_code_map.set(HASH("C"), SDLK_c);
-        _keyboard_code_map.set(HASH("D"), SDLK_d);
-        _keyboard_code_map.set(HASH("E"), SDLK_e);
-        _keyboard_code_map.set(HASH("F"), SDLK_f);
-        _keyboard_code_map.set(HASH("G"), SDLK_g);
-        _keyboard_code_map.set(HASH("H"), SDLK_h);
-        _keyboard_code_map.set(HASH("I"), SDLK_i);
-        _keyboard_code_map.set(HASH("J"), SDLK_j);
-        _keyboard_code_map.set(HASH("K"), SDLK_k);
-        _keyboard_code_map.set(HASH("L"), SDLK_l);
-        _keyboard_code_map.set(HASH("M"), SDLK_m);
-        _keyboard_code_map.set(HASH("N"), SDLK_n);
-        _keyboard_code_map.set(HASH("O"), SDLK_o);
-        _keyboard_code_map.set(HASH("P"), SDLK_p);
-        _keyboard_code_map.set(HASH("Q"), SDLK_q);
-        _keyboard_code_map.set(HASH("R"), SDLK_r);
-        _keyboard_code_map.set(HASH("S"), SDLK_s);
-        _keyboard_code_map.set(HASH("T"), SDLK_t);
-        _keyboard_code_map.set(HASH("U"), SDLK_u);
-        _keyboard_code_map.set(HASH("V"), SDLK_v);
-        _keyboard_code_map.set(HASH("W"), SDLK_w);
-        _keyboard_code_map.set(HASH("X"), SDLK_x);
-        _keyboard_code_map.set(HASH("Y"), SDLK_y);
-        _keyboard_code_map.set(HASH("Z"), SDLK_z);
-        _keyboard_code_map.set(HASH("1"), SDLK_1);
-        _keyboard_code_map.set(HASH("2"), SDLK_2);
-        _keyboard_code_map.set(HASH("3"), SDLK_3);
-        _keyboard_code_map.set(HASH("4"), SDLK_4);
-        _keyboard_code_map.set(HASH("5"), SDLK_5);
-        _keyboard_code_map.set(HASH("6"), SDLK_6);
-        _keyboard_code_map.set(HASH("7"), SDLK_7);
-        _keyboard_code_map.set(HASH("8"), SDLK_8);
-        _keyboard_code_map.set(HASH("9"), SDLK_9);
-        _keyboard_code_map.set(HASH("0"), SDLK_0);
-        _keyboard_code_map.set(HASH("RETURN"), SDLK_RETURN);
-        _keyboard_code_map.set(HASH("ESCAPE"), SDLK_ESCAPE);
-        _keyboard_code_map.set(HASH("BACKSPACE"), SDLK_BACKSPACE);
-        _keyboard_code_map.set(HASH("TAB"), SDLK_TAB);
-        _keyboard_code_map.set(HASH("SPACE"), SDLK_SPACE);
-        _keyboard_code_map.set(HASH("LSHIFT"), SDLK_LSHIFT);
-        _keyboard_code_map.set(HASH("RSHIFR"), SDLK_RSHIFT);
-        _keyboard_code_map.set(HASH("LCTRL"), SDLK_LCTRL);
-        _keyboard_code_map.set(HASH("RCTRL"), SDLK_RCTRL);
-        _keyboard_code_map.set(HASH("INSERT"), SDLK_INSERT);
-        _keyboard_code_map.set(HASH("HOME"), SDLK_HOME);
-        _keyboard_code_map.set(HASH("PAGEUP"), SDLK_PAGEUP);
-        _keyboard_code_map.set(HASH("DELETE"), SDLK_DELETE);
-        _keyboard_code_map.set(HASH("END"), SDLK_END);
-        _keyboard_code_map.set(HASH("PAGEDOWN"), SDLK_PAGEUP);
-        _keyboard_code_map.set(HASH("RIGHT"), SDLK_RIGHT);
-        _keyboard_code_map.set(HASH("LEFT"), SDLK_LEFT);
-        _keyboard_code_map.set(HASH("UP"), SDLK_UP);
-        _keyboard_code_map.set(HASH("DOWN"), SDLK_DOWN);
-        _keyboard_code_map.set(HASH("KP_NUMLOCK"), SDLK_NUMLOCKCLEAR);
-        _keyboard_code_map.set(HASH("KP_DIVIDE"), SDLK_KP_DIVIDE);
-        _keyboard_code_map.set(HASH("KP_MULTIPLY"), SDLK_KP_MULTIPLY);
-        _keyboard_code_map.set(HASH("KP_MINUS"), SDLK_KP_MINUS);
-        _keyboard_code_map.set(HASH("KP_PLUS"), SDLK_KP_PLUS);
-        _keyboard_code_map.set(HASH("KP_ENTER"), SDLK_KP_ENTER);
-        _keyboard_code_map.set(HASH("KP_1"), SDLK_KP_1);
-        _keyboard_code_map.set(HASH("KP_2"), SDLK_KP_2);
-        _keyboard_code_map.set(HASH("KP_3"), SDLK_KP_3);
-        _keyboard_code_map.set(HASH("KP_4"), SDLK_KP_4);
-        _keyboard_code_map.set(HASH("KP_5"), SDLK_KP_5);
-        _keyboard_code_map.set(HASH("KP_6"), SDLK_KP_6);
-        _keyboard_code_map.set(HASH("KP_7"), SDLK_KP_7);
-        _keyboard_code_map.set(HASH("KP_8"), SDLK_KP_8);
-        _keyboard_code_map.set(HASH("KP_9"), SDLK_KP_9);
-        _keyboard_code_map.set(HASH("KP_0"), SDLK_KP_0);
-        _keyboard_code_map.set(HASH("KP_PERIOD"), SDLK_KP_PERIOD);
+        _keyboard_code_map.set(HASH("A"), 					KeyboardButton::A);
+        _keyboard_code_map.set(HASH("B"), 					KeyboardButton::B);
+        _keyboard_code_map.set(HASH("C"), 					KeyboardButton::C);
+        _keyboard_code_map.set(HASH("D"), 					KeyboardButton::D);
+        _keyboard_code_map.set(HASH("E"), 					KeyboardButton::E);
+        _keyboard_code_map.set(HASH("F"), 					KeyboardButton::F);
+        _keyboard_code_map.set(HASH("G"), 					KeyboardButton::G);
+        _keyboard_code_map.set(HASH("H"), 					KeyboardButton::H);
+        _keyboard_code_map.set(HASH("I"), 					KeyboardButton::I);
+        _keyboard_code_map.set(HASH("J"), 					KeyboardButton::J);
+        _keyboard_code_map.set(HASH("K"), 					KeyboardButton::K);
+        _keyboard_code_map.set(HASH("L"), 					KeyboardButton::L);
+        _keyboard_code_map.set(HASH("M"), 					KeyboardButton::M);
+        _keyboard_code_map.set(HASH("N"), 					KeyboardButton::N);
+        _keyboard_code_map.set(HASH("O"), 					KeyboardButton::O);
+        _keyboard_code_map.set(HASH("P"), 					KeyboardButton::P);
+        _keyboard_code_map.set(HASH("Q"), 					KeyboardButton::Q);
+        _keyboard_code_map.set(HASH("R"), 					KeyboardButton::R);
+        _keyboard_code_map.set(HASH("S"), 					KeyboardButton::S);
+        _keyboard_code_map.set(HASH("T"), 					KeyboardButton::T);
+        _keyboard_code_map.set(HASH("U"), 					KeyboardButton::U);
+        _keyboard_code_map.set(HASH("V"), 					KeyboardButton::V);
+        _keyboard_code_map.set(HASH("W"), 					KeyboardButton::W);
+        _keyboard_code_map.set(HASH("X"), 					KeyboardButton::X);
+        _keyboard_code_map.set(HASH("Y"), 					KeyboardButton::Y);
+        _keyboard_code_map.set(HASH("Z"), 					KeyboardButton::Z);
+        _keyboard_code_map.set(HASH("1"), 					KeyboardButton::NUM_1);
+        _keyboard_code_map.set(HASH("2"), 					KeyboardButton::NUM_2);
+        _keyboard_code_map.set(HASH("3"), 					KeyboardButton::NUM_3);
+        _keyboard_code_map.set(HASH("4"), 					KeyboardButton::NUM_4);
+        _keyboard_code_map.set(HASH("5"), 					KeyboardButton::NUM_5);
+        _keyboard_code_map.set(HASH("6"), 					KeyboardButton::NUM_6);
+        _keyboard_code_map.set(HASH("7"), 					KeyboardButton::NUM_7);
+        _keyboard_code_map.set(HASH("8"), 					KeyboardButton::NUM_8);
+        _keyboard_code_map.set(HASH("9"), 					KeyboardButton::NUM_9);
+        _keyboard_code_map.set(HASH("0"), 					KeyboardButton::NUM_0);
+        _keyboard_code_map.set(HASH("RETURN"), 				KeyboardButton::RETURN);
+        _keyboard_code_map.set(HASH("ESCAPE"), 				KeyboardButton::ESCAPE);
+        _keyboard_code_map.set(HASH("BACKSPACE"), 			KeyboardButton::BACKSPACE);
+        _keyboard_code_map.set(HASH("TAB"), 				KeyboardButton::TAB);
+        _keyboard_code_map.set(HASH("SPACE"), 				KeyboardButton::SPACE);
+        _keyboard_code_map.set(HASH("LSHIFT"), 				KeyboardButton::LSHIFT);
+        _keyboard_code_map.set(HASH("RSHIFR"), 				KeyboardButton::RSHIFT);
+        _keyboard_code_map.set(HASH("LCTRL"), 				KeyboardButton::LCTRL);
+        _keyboard_code_map.set(HASH("RCTRL"), 				KeyboardButton::RCTRL);
+        _keyboard_code_map.set(HASH("INSERT"), 				KeyboardButton::INSERT);
+        _keyboard_code_map.set(HASH("HOME"), 				KeyboardButton::HOME);
+        _keyboard_code_map.set(HASH("PAGEUP"), 				KeyboardButton::PAGEUP);
+        _keyboard_code_map.set(HASH("DELETE"), 				KeyboardButton::DELETE);
+        _keyboard_code_map.set(HASH("END"), 				KeyboardButton::END);
+        _keyboard_code_map.set(HASH("PAGEDOWN"), 			KeyboardButton::PAGEUP);
+        _keyboard_code_map.set(HASH("RIGHT"), 				KeyboardButton::RIGHT);
+        _keyboard_code_map.set(HASH("LEFT"), 				KeyboardButton::LEFT);
+        _keyboard_code_map.set(HASH("UP"), 					KeyboardButton::UP);
+        _keyboard_code_map.set(HASH("DOWN"), 				KeyboardButton::DOWN);
+        _keyboard_code_map.set(HASH("KP_NUMLOCK"),  		KeyboardButton::NUMLOCKCLEAR);
+        _keyboard_code_map.set(HASH("KP_DIVIDE"), 			KeyboardButton::KP_DIVIDE);
+        _keyboard_code_map.set(HASH("KP_MULTIPLY"), 		KeyboardButton::KP_MULTIPLY);
+        _keyboard_code_map.set(HASH("KP_MINUS"), 			KeyboardButton::KP_MINUS);
+        _keyboard_code_map.set(HASH("KP_PLUS"), 			KeyboardButton::KP_PLUS);
+        _keyboard_code_map.set(HASH("KP_ENTER"),			KeyboardButton::KP_ENTER);
+        _keyboard_code_map.set(HASH("KP_1"), 				KeyboardButton::KP_1);
+        _keyboard_code_map.set(HASH("KP_2"), 				KeyboardButton::KP_2);
+        _keyboard_code_map.set(HASH("KP_3"), 				KeyboardButton::KP_3);
+        _keyboard_code_map.set(HASH("KP_4"), 				KeyboardButton::KP_4);
+        _keyboard_code_map.set(HASH("KP_5"), 				KeyboardButton::KP_5);
+        _keyboard_code_map.set(HASH("KP_6"), 				KeyboardButton::KP_6);
+        _keyboard_code_map.set(HASH("KP_7"), 				KeyboardButton::KP_7);
+        _keyboard_code_map.set(HASH("KP_8"), 				KeyboardButton::KP_8);
+        _keyboard_code_map.set(HASH("KP_9"), 				KeyboardButton::KP_9);
+        _keyboard_code_map.set(HASH("KP_0"), 				KeyboardButton::KP_0);
+        _keyboard_code_map.set(HASH("KP_PERIOD"), 			KeyboardButton::KP_PERIOD);
         
-        // mouse codes
-        _mouse_code_map.set(HASH("MOUSE_LEFT"), SDL_BUTTON_LEFT);
-        _mouse_code_map.set(HASH("MOUSE_RIGHT"), SDL_BUTTON_RIGHT);
-        _mouse_code_map.set(HASH("MOUSE_MIDDLE"), SDL_BUTTON_MIDDLE);
-        _mouse_code_map.set(HASH("MOUSE_AXIS_X"), MOUSE_AXIS_X);
-        _mouse_code_map.set(HASH("MOUSE_AXIS_Y"), MOUSE_AXIS_Y);
-        _mouse_code_map.set(HASH("MOUSE_WHEEL"), MOUSE_WHEEL);
+        // mouse button codes
+        _mouse_code_map.set(HASH("LEFT"), 					MouseButton::LEFT);
+        _mouse_code_map.set(HASH("RIGHT"), 					MouseButton::RIGHT);
+        _mouse_code_map.set(HASH("MIDDLE"), 				MouseButton::MIDDLE);
         
-        // gamepad codes
-        _gamepad_code_map.set(HASH("GAMEPAD_X"), SDL_CONTROLLER_BUTTON_X);
-        _gamepad_code_map.set(HASH("GAMEPAD_Y"), SDL_CONTROLLER_BUTTON_Y);
-        _gamepad_code_map.set(HASH("GAMEPAD_A"), SDL_CONTROLLER_BUTTON_A);
-        _gamepad_code_map.set(HASH("GAMEPAD_B"), SDL_CONTROLLER_BUTTON_B);
-        _gamepad_code_map.set(HASH("GAMEPAD_LEFT_X"), SDL_CONTROLLER_AXIS_LEFTX);
-        _gamepad_code_map.set(HASH("GAMEPAD_LEFT_Y"), SDL_CONTROLLER_AXIS_LEFTY);
-        _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_X"), SDL_CONTROLLER_AXIS_RIGHTX);
-        _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_Y"), SDL_CONTROLLER_AXIS_RIGHTY);
-        _gamepad_code_map.set(HASH("GAMEPAD_DPAD_LEFT"), SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-        _gamepad_code_map.set(HASH("GAMEPAD_DPAD_RIGHT"), SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-        _gamepad_code_map.set(HASH("GAMEPAD_DPAD_UP"), SDL_CONTROLLER_BUTTON_DPAD_UP);
-        _gamepad_code_map.set(HASH("GAMEPAD_DPAD_DOWN"), SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-        _gamepad_code_map.set(HASH("GAMEPAD_LEFT_STICK"), SDL_CONTROLLER_BUTTON_LEFTSTICK);
-        _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_STICK"), SDL_CONTROLLER_BUTTON_RIGHTSTICK);
-        _gamepad_code_map.set(HASH("GAMEPAD_LEFT_SHOULDER"), SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
-        _gamepad_code_map.set(HASH("GAMEPAD_RIGHT_SHOULDER"), SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-        _gamepad_code_map.set(HASH("GAMEPAD_TRIGGER_LEFT"), SDL_CONTROLLER_AXIS_TRIGGERLEFT);
-        _gamepad_code_map.set(HASH("GAMEPAD_TRIGGER_RIGHT"), SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+        // mouse axis codes
+        _mouse_code_map.set(HASH("AXIS_X"), 				MouseAxis::X);
+        _mouse_code_map.set(HASH("AXIS_Y"), 				MouseAxis::Y);
+        _mouse_code_map.set(HASH("WHEEL"), 					MouseAxis::WHEEL);
+        
+        // gamepad button codes
+        _gamepad_code_map.set(HASH("X"), 		   			GamepadButton::X);
+        _gamepad_code_map.set(HASH("Y"), 		   			GamepadButton::Y);
+        _gamepad_code_map.set(HASH("A"), 		   			GamepadButton::A);
+        _gamepad_code_map.set(HASH("B"), 		   			GamepadButton::B);
+        _gamepad_code_map.set(HASH("DPAD_LEFT"), 			GamepadButton::DPAD_LEFT);
+        _gamepad_code_map.set(HASH("DPAD_RIGHT"), 			GamepadButton::DPAD_RIGHT);
+        _gamepad_code_map.set(HASH("DPAD_UP"), 				GamepadButton::DPAD_UP);
+        _gamepad_code_map.set(HASH("DPAD_DOWN"), 			GamepadButton::DPAD_DOWN);
+        _gamepad_code_map.set(HASH("LEFT_STICK"), 			GamepadButton::LEFT_STICK);
+        _gamepad_code_map.set(HASH("RIGHT_STICK"), 			GamepadButton::RIGHT_STICK);
+        _gamepad_code_map.set(HASH("LEFT_SHOULDER"), 		GamepadButton::LEFT_SHOULDER);
+        _gamepad_code_map.set(HASH("RIGHT_SHOULDER"), 		GamepadButton::RIGHT_SHOULDER);
+
+        // gamepad axis codes
+        _gamepad_code_map.set(HASH("AXIS_TRIGGER_LEFT"), 	GamepadAxis::TRIGGER_LEFT);
+        _gamepad_code_map.set(HASH("AXIS_TRIGGER_RIGHT"), 	GamepadAxis::TRIGGER_RIGHT);
+        _gamepad_code_map.set(HASH("AXIS_LEFT_STICK_X"), 	GamepadAxis::LEFT_STICK_X);
+        _gamepad_code_map.set(HASH("AXIS_LEFT_STICK_Y"), 	GamepadAxis::LEFT_STICK_Y);
+        _gamepad_code_map.set(HASH("AXIS_RIGHT_STICK_X"),	GamepadAxis::RIGHT_STICK_X);
+        _gamepad_code_map.set(HASH("AXIS_RIGHT_STICK_Y"),	GamepadAxis::RIGHT_STICK_Y);
     }
 
 	bool PlatformSDL2::initialize()
@@ -305,7 +309,7 @@ namespace terminus
                         if(event.type == SDL_KEYUP)
                             type = InputActionType::KEY_UP;
                         
-                        input_handler::process_keyboard_input(event.key.keysym.sym, event.key.keysym.scancode, type);
+                        input_handler::process_keyboard_input(event.key.keysym.scancode, type);
                     }
                         
                         

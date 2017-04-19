@@ -279,7 +279,7 @@ namespace terminus
             }
         }
         
-        void process_keyboard_input(uint32_t key, uint32_t scan_code, uint32_t action)
+        void process_keyboard_input(uint32_t scan_code, uint32_t action)
         {
             PlayerContext* context = _player_contexts.get_ptr(_default_player_context);
             InputMap* input_map = context->_input_maps.get_ptr(context->_active);
@@ -289,10 +289,10 @@ namespace terminus
                 // Check if Action
                 if(action == InputActionType::KEY_DOWN)
                 {
-                    if(input_map->_action_map._keyboard.has(key))
+                    if(input_map->_action_map._keyboard.has(scan_code))
                     {
                         uint64_t action_hash;
-                        input_map->_action_map._keyboard.get(key, action_hash);
+                        input_map->_action_map._keyboard.get(scan_code, action_hash);
                         
                         // Fire Event
                         InputActionEvent* event = new InputActionEvent(action);
@@ -305,10 +305,10 @@ namespace terminus
                 }
                 
                 // Check if State
-                if(input_map->_state_map._keyboard.has(key))
+                if(input_map->_state_map._keyboard.has(scan_code))
                 {
                     uint64_t state_hash;
-                    input_map->_state_map._keyboard.get(key, state_hash);
+                    input_map->_state_map._keyboard.get(scan_code, state_hash);
                     
                     if(action == InputActionType::KEY_DOWN)
                     {
@@ -334,10 +334,10 @@ namespace terminus
                 if(action == InputActionType::KEY_DOWN)
                 {
                     // Check if Positive Axis
-                    if(input_map->_axis_map._keyboard_pos.has(key))
+                    if(input_map->_axis_map._keyboard_pos.has(scan_code))
                     {
                         uint64_t axis_hash;
-                        input_map->_axis_map._keyboard_pos.get(key, axis_hash);
+                        input_map->_axis_map._keyboard_pos.get(scan_code, axis_hash);
                         
                         double last_value = _keyboard_device.button_axis_states[scan_code];
                         
@@ -351,10 +351,10 @@ namespace terminus
                     }
                     
                     // Check if Negative Axis
-                    if(input_map->_axis_map._keyboard_neg.has(key))
+                    if(input_map->_axis_map._keyboard_neg.has(scan_code))
                     {
                         uint64_t axis_hash;
-                        input_map->_axis_map._keyboard_neg.get(key, axis_hash);
+                        input_map->_axis_map._keyboard_neg.get(scan_code, axis_hash);
                         
                         double last_value = (double)_keyboard_device.button_axis_states[scan_code];
                         
@@ -371,10 +371,10 @@ namespace terminus
                 // Check if Axis Release
                 if(action == InputActionType::KEY_UP)
                 {
-                    if(input_map->_axis_map._keyboard_pos.has(key))
+                    if(input_map->_axis_map._keyboard_pos.has(scan_code))
                     {
                         uint64_t axis_hash;
-                        input_map->_axis_map._keyboard_pos.get(key, axis_hash);
+                        input_map->_axis_map._keyboard_pos.get(scan_code, axis_hash);
                         
                         double last_value = (double)_keyboard_device.button_axis_states[scan_code];
                         
@@ -386,10 +386,10 @@ namespace terminus
                         
                         return;
                     }
-                    if(input_map->_axis_map._keyboard_neg.has(key))
+                    if(input_map->_axis_map._keyboard_neg.has(scan_code))
                     {
                         uint64_t axis_hash;
-                        input_map->_axis_map._keyboard_neg.get(key, axis_hash);
+                        input_map->_axis_map._keyboard_neg.get(scan_code, axis_hash);
                         
                         double last_value = (double)_keyboard_device.button_axis_states[scan_code];
                         
@@ -467,10 +467,10 @@ namespace terminus
 
                 if(input_map)
                 {
-                    if(input_map->_axis_map._mouse.has(MOUSE_AXIS_X))
+                    if(input_map->_axis_map._mouse.has(MouseAxis::X))
                     {
                         uint64_t axis_hash;
-                        input_map->_axis_map._mouse.get(MOUSE_AXIS_X, axis_hash);
+                        input_map->_axis_map._mouse.get(MouseAxis::X, axis_hash);
                         
                         double last_position = _mouse_device.x_position;
                         // Fire Mouse Axis Event
@@ -483,10 +483,10 @@ namespace terminus
 
                         terminus::EventHandler::queue_event(event);
                     }
-                    if(input_map->_axis_map._mouse.has(MOUSE_AXIS_Y))
+                    if(input_map->_axis_map._mouse.has(MouseAxis::Y))
                     {
                         uint64_t axis_hash;
-                        input_map->_axis_map._mouse.get(MOUSE_AXIS_Y, axis_hash);
+                        input_map->_axis_map._mouse.get(MouseAxis::Y, axis_hash);
                         
                         double last_position = _mouse_device.y_position;
                         // Fire Mouse Axis Event
@@ -516,10 +516,10 @@ namespace terminus
             
             if(input_map)
             {
-                if(input_map->_axis_map._mouse.has(MOUSE_WHEEL))
+                if(input_map->_axis_map._mouse.has(MouseAxis::WHEEL))
                 {
                     uint64_t axis_hash;
-                    input_map->_axis_map._mouse.get(MOUSE_WHEEL, axis_hash);
+                    input_map->_axis_map._mouse.get(MouseAxis::WHEEL, axis_hash);
                     
                     uint32_t last_value = _mouse_device.wheel;
                     InputAxisEvent* event = new InputAxisEvent(axis_hash, value, value - last_value);
