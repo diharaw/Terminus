@@ -15,6 +15,7 @@ ENDIF()
 set(T_GLEW_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/glew/include")
 set(T_SDL2_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/SDL2/include")
 set(T_RAPIDJSON_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/rapidjson")
+set(T_JSON_INCLUDE_DIRS 		  	  "${PROJECT_SOURCE_DIR}/external/json")
 set(T_IMGUI_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/imgui")
 set(T_GLM_INCLUDE_DIRS 			  	  "${PROJECT_SOURCE_DIR}/external/glm")
 set(T_LIBZIP_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/Libzip/lib")
@@ -29,6 +30,7 @@ set(T_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/engine/include")
 
 include_directories("${T_GLEW_INCLUDE_DIRS}" 
 					"${T_SDL2_INCLUDE_DIRS}"
+					"${T_JSON_INCLUDE_DIRS}"
 					"${T_RAPIDJSON_INCLUDE_DIRS}"
 					"${T_IMGUI_INCLUDE_DIRS}"
 					"${T_GLM_INCLUDE_DIRS}"

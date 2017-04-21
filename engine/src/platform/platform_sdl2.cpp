@@ -5,8 +5,8 @@
 #include <graphics/imgui_backend.h>
 #include <io/filesystem.h>
 
-#include "platform_sdl2.h"
-#include "../graphics/imgui_backend_sdl2.h"
+#include <platform/platform_sdl2.h>
+#include <graphics/imgui_backend_sdl2.h>
 
 #include <string>
 #include <SDL_syswm.h>

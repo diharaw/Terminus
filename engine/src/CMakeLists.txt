@@ -16,6 +16,7 @@ set_target_properties( Terminus-Engine
     				   LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/engine"
     				   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/" )
 
+target_link_libraries(Terminus-Engine SDL2-static)
 target_link_libraries(Terminus-Engine glew_s)
 target_link_libraries(Terminus-Engine assimp)
 target_link_libraries(Terminus-Engine imgui)

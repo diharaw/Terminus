@@ -20,5 +20,4 @@ IF(WIN32) # Check if we are on Windows
   endif()
 ENDIF()
 
-target_link_libraries(Terminus-Runtime SDL2-static)
 target_link_libraries(Terminus-Runtime Terminus-Engine)

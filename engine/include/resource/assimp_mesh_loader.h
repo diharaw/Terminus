@@ -5,9 +5,6 @@
 
 #include <resource/asset_common.h>
 #include <core/types.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <vector>
 
