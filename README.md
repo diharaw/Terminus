@@ -1,5 +1,5 @@
 # Terminus-Engine
-![TerminusLogo](Docs/TerminusLogo2.png)
+![TerminusLogo](docs/logo.png)
 ## What is it?
 
 An Open Source, Cross Platform Game Engine with Rendering backends for OpenGL and Direct3D.
