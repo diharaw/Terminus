@@ -30,11 +30,6 @@ namespace terminus
     using EntityArray     = std::array<ID, MAX_ENTITIES>;
     using RenderableArray = PackedArray<Renderable, MAX_ENTITIES>;
     
-    struct RenderPrepareTaskData
-    {
-        int _scene_index;
-    };
-    
     struct Renderable
     {
         Mesh*               _mesh;
@@ -68,11 +63,9 @@ namespace terminus
         uint16			   _view_count;
         EntityArray        _entity_renderable_ref;
         RenderableArray	   _renderables;
-        DefaultThreadPool* _thread_pool;
-        Renderer*		   _renderer;
-        ShaderCache*	   _shader_cache;
 		Scene*			   _scene;
         
+    public:
         DrawItem           _skydome_item;
         Mesh*              _skydome_mesh;
         SkyComponent*      _sky_cmp;
@@ -85,6 +78,11 @@ namespace terminus
         void shutdown();
         void on_entity_created(Entity entity);
         void on_entity_destroyed(Entity entity);
+        
+        SceneView* scene_views();
+        uint16_t   view_count();
+        Renderable* renderables();
+        uint32_t    renderable_count();
         
     private:
         TASK_METHOD_DECLARATION(RenderPrepareTask);

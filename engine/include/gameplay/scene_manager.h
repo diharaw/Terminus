@@ -32,6 +32,7 @@ namespace terminus
 		void preload(String scene);
 		void set_active_scene(String scene);
 		void unload(String scene);
+        SceneVector& active_scenes();
 
 	private:
 		void initialize_scene(Scene* scene);

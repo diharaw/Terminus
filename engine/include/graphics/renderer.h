@@ -50,11 +50,21 @@ namespace terminus
         Matrix4 bone_offset[100];
     };
     
+    class Scene;
+    class ShaderCache;
+    
+    struct RenderPrepareTaskData
+    {
+        int    _scene_index;
+        Scene* _scene;
+    };
+
 	class Renderer
 	{
     private:
-        bool          _front_queue_index;
-        GraphicsQueue _graphics_queues[2];
+        bool               _front_queue_index;
+        GraphicsQueue      _graphics_queues[2];
+        DefaultThreadPool* _thread_pool;
         
     public:
         UniformBuffer* _per_frame_buffer;
@@ -68,6 +78,7 @@ namespace terminus
         ~Renderer();
         void initialize();
         void shutdown();
+        void generate_commands(Scene* scene);
         void submit();
         void swap();
         uint32 create_command_buffer();
@@ -77,7 +88,7 @@ namespace terminus
     private:
         GraphicsQueue& graphics_queue_front();
         GraphicsQueue& graphics_queue_back();
-        
+        void generate_commands_view(void* data);
 	};
 
 }

@@ -35,21 +35,35 @@ namespace terminus
             TERMINUS_BEGIN_CPU_PROFILE(simulation);
             
             platform->begin_frame();
+            
+            // Update platform.
             platform->update();
             EventHandler::update();
-            physics::update(platform->get_delta_time());
             
+            // Update Scene
+            physics::update(platform->get_delta_time());
             context._scene_manager.update(platform->get_delta_time());
+            
+            // Render Scene
+            SceneVector& scenes = context._scene_manager.active_scenes();
+            
+            for(auto& scene : scenes)
+            {
+                renderer.generate_commands(scene);
+            }
             
             TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread
             sync::wait_for_renderer_done();
             
+            // ----------------------------------------------------------------------------------------------------
+            // SYNCHRONIZED REGION START
+            // ----------------------------------------------------------------------------------------------------
+            
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
             
-            TERMINUS_BEGIN_CPU_PROFILE(gui_update);
-            //temp_render();
+            
             gui_backend->new_frame();
             imgui_console::draw();
             static bool tw = true;
@@ -57,10 +71,12 @@ namespace terminus
             
             global::get_per_frame_allocator()->Clear();
             
+            // ----------------------------------------------------------------------------------------------------
+            // SYNCHRONIZED REGION END
+            // ----------------------------------------------------------------------------------------------------
+            
             sync::notify_swap_done();
             platform->end_frame();
-            
-            TERMINUS_END_CPU_PROFILE;
         }
 
     }

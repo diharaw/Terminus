@@ -184,7 +184,7 @@ namespace terminus
 
 		ShaderProgram* ShaderCache::load(ShaderKey key)
 		{
-            if (m_ShaderProgramKeyMap.find(key._key) == m_ShaderProgramKeyMap.end())
+            if (m_ShaderProgramKeyMap.find(0) == m_ShaderProgramKeyMap.end())
             {
                 StringList defines;
                 

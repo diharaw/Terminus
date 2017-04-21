@@ -68,6 +68,11 @@ namespace terminus
             scene->update(dt);
         }
     }
+    
+    SceneVector& SceneManager::active_scenes()
+    {
+        return _active_scenes;
+    }
 
 	void SceneManager::load(String scene)
 	{
