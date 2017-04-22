@@ -69,6 +69,16 @@ enum class WindowMode
 
 namespace terminus
 {
+	struct PlatformInitDesc
+	{
+		Vector2			window_rect;
+		WindowMode		window_mode;
+		bool			vsync;
+		bool			resizable;
+		StringBuffer128 title;
+		uint32_t		refresh_rate;
+	};
+
     /**
      *  Platform base class. Provides the engine with access to window creation, input and other platform specifics.
      *  Must be implemented in order to build engine.
@@ -137,6 +147,12 @@ namespace terminus
          * @param The desired Height of window.
          */
         virtual void set_window_size(uint width, uint height) = 0;
+
+		/**
+		* Changes the title of current window.
+		* @param Window title string.
+		*/
+		virtual void set_window_size(StringBuffer128 title) = 0;
         
         /**
          * Requests platform shutdown. This will cause the main loop to exit upon the start of the next frame.
@@ -274,7 +290,7 @@ namespace terminus
         /**
          * Window title.
          */
-        StringBuffer64         _title;
+        StringBuffer128        _title;
         
         /**
          * A mutex. What is this used for again?

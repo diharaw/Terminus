@@ -868,8 +868,8 @@ namespace terminus
             io.KeyMap[ImGuiKey_Z] = SDL_SCANCODE_Z;
             
             io.RenderDrawListsFn = render_callback;   // Alternatively you can set this to NULL and call ImGui::GetDrawData() after ImGui::Render() to get the same ImDrawData pointer.
-            io.SetClipboardTextFn = set_clipboard_text;
-            io.GetClipboardTextFn = get_clipboard_text;
+            //io.SetClipboardTextFn = set_clipboard_text;
+            //io.GetClipboardTextFn = get_clipboard_text;
             //io.ClipboardUserData = NULL;
             
 #ifdef _WIN32

@@ -74,6 +74,16 @@ namespace terminus
 			}
 		}
 
+		Scene(StringBuffer32 name)
+		{
+			_name = name;
+
+			for (int& version : _versions)
+			{
+				version = 0;
+			}
+		}
+
 		~Scene()
 		{
 

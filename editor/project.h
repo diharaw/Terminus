@@ -9,6 +9,8 @@ namespace terminus
 	private:
 		nlohmann::json _project_json;
 
-
+	public:
+		Project(const char* json);
+		~Project();
 	};
 }

@@ -67,7 +67,7 @@ namespace terminus
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
             
-			editor::update();
+			editor::update(platform->get_delta_time());
             
             global::get_per_frame_allocator()->Clear();
             

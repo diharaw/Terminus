@@ -37,7 +37,7 @@ namespace terminus
 	bool PlatformSDL2::create_platform_window()
 	{
 		Uint32 window_flags = 0;
-
+		
 		if (_resizable)
 			window_flags = SDL_WINDOW_RESIZABLE;
 
@@ -206,7 +206,7 @@ namespace terminus
 		_resizable = config->get_bool(CONFIG_WINDOW_RESIZABLE, false);
 		_vsync = config->get_bool(CONFIG_WINDOW_VSYNC, false);
 
-		StringBuffer64 mode = config->get_string(CONFIG_WINDOW_MODE, "windowed");
+		StringBuffer128 mode = config->get_string(CONFIG_WINDOW_MODE, "windowed").c_str();
 
 		if (mode == "fullscreen")
 			_window_mode = WindowMode::FULLSCREEN;
@@ -215,18 +215,18 @@ namespace terminus
 		else
 			_window_mode = WindowMode::WINDOWED;
 
-		_title = config->get_string(CONFIG_WINDOW_TITLE, "Terminus App");
+		_title = config->get_string(CONFIG_WINDOW_TITLE, "Terminus App").c_str();
 
 		if (config->has_value(CONFIG_APP_VERSION))
 		{
 			_title += " ";
-			_title += config->get_string(CONFIG_APP_VERSION);
+			_title += config->get_string(CONFIG_APP_VERSION).c_str();
 		}
 
 		if (config->has_value(CONFIG_ENGINE_VERSION))
 		{
 			_title += " - Terminus Engine ";
-			_title += config->get_string(CONFIG_ENGINE_VERSION);
+			_title += config->get_string(CONFIG_ENGINE_VERSION).c_str();
 		}
 
 		create_platform_window();
@@ -338,6 +338,12 @@ namespace terminus
 		_height = height;
 
 		SDL_SetWindowSize(_window, width, height);
+	}
+
+	void PlatformSDL2::set_window_size(StringBuffer128 title)
+	{
+		_title = title;
+		SDL_SetWindowTitle(_window, title.c_str());
 	}
 
 	void PlatformSDL2::set_relative_mouse(bool relative)

@@ -1,6 +1,9 @@
 #include <utility/imgui_helper.h>
 #include <core/context.h>
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+
 namespace imgui_helpers
 {
     uint32_t get_size_from_ratio(float value)
@@ -82,5 +85,16 @@ namespace imgui_helpers
         pos.y = (height * rel_pos.y) - (size.y / 2.0f) ;
         
         return pos;
-    }
+	}
+
+	Vector2 get_dock_size()
+	{
+		ImVec2 rect = ImGui::GetWindowSize();
+		ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
+		ImVec2 frame_padding = ImGui::GetStyle().FramePadding;
+
+		ImVec2 size = rect + window_padding + frame_padding;
+		
+		return Vector2(size.x, size.y);
+	}
 }

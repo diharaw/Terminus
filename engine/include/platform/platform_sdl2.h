@@ -15,6 +15,7 @@ namespace terminus
 		virtual void update() override;
 		virtual void set_cursor_visibility(bool visible) override;
 		virtual void set_relative_mouse(bool relative) override;
+		virtual void set_window_size(StringBuffer128 title) override;
 		virtual void grab_mouse(bool grab) override;
 		virtual void set_window_mode(WindowMode mode) override;
 		virtual void set_window_size(uint width, uint height) override;

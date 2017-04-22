@@ -152,4 +152,26 @@ struct LuaScriptUpdatedEvent : public Event
     inline std::string get_script_name()                  { return _script; }
 };
 
+struct WindowRectEvent : public Event
+{
+	static const EventType sk_Type;
+	Vector2				   _size;
+
+	WindowRectEvent(Vector2 size) : _size(size) {}
+	virtual ~WindowRectEvent() {}
+	inline virtual EventType GetType() { return sk_Type; }
+	inline virtual std::string GetName() { return "Window Rect Resize Event"; }
+};
+
+struct DrawableRectEvent : public Event
+{
+	static const EventType sk_Type;
+	Vector2				   _size;
+
+	DrawableRectEvent(Vector2 size) : _size(size) {}
+	virtual ~DrawableRectEvent() {}
+	inline virtual EventType GetType() { return sk_Type; }
+	inline virtual std::string GetName() { return "Drawable Rect Resize Event"; }
+};
+
 #endif

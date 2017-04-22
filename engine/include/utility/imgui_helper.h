@@ -11,4 +11,5 @@ namespace imgui_helpers
     extern Vector2 get_size_from_ratio(Vector2 ratio);
     extern Vector2 get_pos_from_rel(Vector2 rel_pos);
     extern Vector2 get_pos_from_rel_center(Vector2 rel_pos, Vector2 size);
+	extern Vector2 get_dock_size();
 }

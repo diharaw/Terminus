@@ -10,3 +10,5 @@ const EventType FileWatcherEvent::sk_Type(0x791dc446);
 const EventType SceneLoadEvent::sk_Type(0x8bd7b76e);
 const EventType ScenePreloadEvent::sk_Type(0x8bd7b36e);
 const EventType LuaScriptUpdatedEvent::sk_Type(0x8bd7b32e);
+const EventType WindowRectEvent::sk_Type(0x9bd7b32e);
+const EventType DrawableRectEvent::sk_Type(0x4bd7b32e);
