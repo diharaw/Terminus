@@ -14,8 +14,5 @@ namespace terminus
     protected:
         bool initialize_app() override;
         void shutdown_app() override;
-        
-    private:
-        void load_last_project();
     };
 }

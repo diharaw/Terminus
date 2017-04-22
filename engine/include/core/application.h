@@ -1,5 +1,7 @@
 #pragma once
 
+#include <core/config.h>
+
 #if defined(TERMINUS_PLATFORM_WIN32)
 
 #define TERMINUS_DELCARE_MAIN(AppClass)                                                             \

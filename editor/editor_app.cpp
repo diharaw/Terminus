@@ -1,4 +1,5 @@
 #include "editor_app.h"
+#include "editor.h"
 
 #include <core/terminus.h>
 #include <core/sync.h>
@@ -13,7 +14,7 @@ namespace terminus
 {
     EditorApp::EditorApp()
     {
-        
+
     }
     
     EditorApp::~EditorApp()
@@ -27,55 +28,63 @@ namespace terminus
         Platform* platform = context::get_platform();
         Renderer& renderer = context::get_renderer();
         
-        ImGuiBackend* gui_backend = context::get_imgui_backend();
-        
         while (!context._shutdown)
         {
-            TERMINUS_BEGIN_CPU_PROFILE(simulation);
+            
             
             platform->begin_frame();
             platform->update();
             EventHandler::update();
-            physics::update(platform->get_delta_time());
+
+			if (editor::play_mode())
+			{
+				TERMINUS_BEGIN_CPU_PROFILE(simulation);
+
+				// Update Scene
+				physics::update(platform->get_delta_time());
+				editor::update_play_mode(platform->get_delta_time());
+
+				TERMINUS_END_CPU_PROFILE;
+
+				TERMINUS_BEGIN_CPU_PROFILE(command_generation_play);
+
+				// Render Scene
+				renderer.generate_commands(editor::active_scene());
+
+				TERMINUS_END_CPU_PROFILE;
+			}
+			else
+			{
+				TERMINUS_BEGIN_CPU_PROFILE(command_generation_edit);
+
+				TERMINUS_END_CPU_PROFILE;
+			}
+
             
-            context._scene_manager.update(platform->get_delta_time());
-            
-            TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread
             sync::wait_for_renderer_done();
             
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
             
-            TERMINUS_BEGIN_CPU_PROFILE(gui_update);
-            //temp_render();
-            gui_backend->new_frame();
-            imgui_console::draw();
-            static bool tw = true;
-            ImGui::ShowTestWindow(&tw);
+			editor::update();
             
             global::get_per_frame_allocator()->Clear();
             
             sync::notify_swap_done();
             platform->end_frame();
-            
-            TERMINUS_END_CPU_PROFILE;
         }
         
     }
     
     bool EditorApp::initialize_app()
     {
+		editor::initialize();
         return true;
     }
     
     void EditorApp::shutdown_app()
     {
-        
-    }
-    
-    void EditorApp::load_last_project()
-    {
-        
+		editor::shutdown();
     }
 }

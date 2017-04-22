@@ -75,7 +75,6 @@ namespace terminus
         context::get_platform()->shutdown();
         
         TERMINUS_DESTROY_PROFILER
-
     }
     
     void Application::initialize_input()
