@@ -59,16 +59,9 @@ namespace terminus
         
         while (!context._shutdown)
         {
-            // wait for swap done
-            sync::wait_for_swap_done();
-            
             TERMINUS_BEGIN_CPU_PROFILE(renderer)
             // submit api calls
             context._renderer.submit();
-            
-            gui_backend->render();
-            
-            context._render_device.swap_buffers();
             
             // do resource uploading. one task per frame for now.
             if(!concurrent_queue::empty(_graphics_upload_queue))
@@ -82,9 +75,15 @@ namespace terminus
 
             // notify done
 			sync::notify_renderer_done();
+            
+            // wait for swap done
+			sync::wait_for_swap_done();
+            
+            gui_backend->render();
+            
+            context._render_device.swap_buffers();
         }
         
-        sync::notify_renderer_done();
         shutdown();
         
 		sync::notify_renderer_exit();

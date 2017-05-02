@@ -38,14 +38,6 @@ namespace terminus
             
             // Update platform.
             platform->update();
-            
-            gui_backend->new_frame();
-            imgui_console::draw();
-            static bool tw = true;
-            ImGui::ShowTestWindow(&tw);
-            
-            sync::notify_swap_done();
-            
             EventHandler::update();
             
             // Update Scene
@@ -64,10 +56,26 @@ namespace terminus
             // Synchronize Rendering Thread
             sync::wait_for_renderer_done();
             
+            // ----------------------------------------------------------------------------------------------------
+            // SYNCHRONIZED REGION START
+            // ----------------------------------------------------------------------------------------------------
+            
             // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
             renderer.swap();
+            
+            
+            gui_backend->new_frame();
+            imgui_console::draw();
+            static bool tw = true;
+            ImGui::ShowTestWindow(&tw);
+            
             global::get_per_frame_allocator()->Clear();
             
+            // ----------------------------------------------------------------------------------------------------
+            // SYNCHRONIZED REGION END
+            // ----------------------------------------------------------------------------------------------------
+            
+            sync::notify_swap_done();
             platform->end_frame();
         }
 
