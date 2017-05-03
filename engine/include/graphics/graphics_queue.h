@@ -31,14 +31,7 @@ namespace terminus
         inline uint32 CreateCommandBuffer()
         {
             uint32 cmd_buf_idx = m_num_cmd_buf;
-         
-            // TODO : Use pool allocator;
-            void* mem = global::get_default_allocator()->Allocate(COMMAND_BUFFER_SIZE_BYTES, 8);
-            m_cmd_buf[cmd_buf_idx].m_memory = mem;
-            m_cmd_buf[cmd_buf_idx].m_pos = mem;
-            m_cmd_buf[cmd_buf_idx].WriteEnd();
             m_num_cmd_buf++;
-            
             return cmd_buf_idx;
         }
         

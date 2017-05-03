@@ -9,8 +9,123 @@
 
 namespace terminus
 {
-    // Sort Method
+	namespace gpu_dispatch
+	{
+		typedef void(*DispatchFunction)(RenderDevice&, CommandBuffer&);
+
+		void draw(RenderDevice& device, CommandBuffer& buffer)
+		{
+			DrawCmdData data;
+			buffer.read<DrawCmdData>(data);
+			device.draw(data.first_index, data.count);
+		}
+
+		void draw_indexed(RenderDevice& device, CommandBuffer& buffer)
+		{
+			DrawIndexedCmdData data;
+			buffer.read<DrawIndexedCmdData>(data);
+			device.draw_indexed(data.index_count);
+		}
+
+		void draw_indexed_base_vertex(RenderDevice& device, CommandBuffer& buffer)
+		{
+			DrawIndexedBaseVertexCmdData data;
+			buffer.read<DrawIndexedBaseVertexCmdData>(data);
+			device.draw_indexed_base_vertex(data.index_count, data.base_index, data.base_vertex);
+		}
+
+		void bind_framebuffer(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindFramebufferCmdData data;
+			buffer.read<BindFramebufferCmdData>(data);
+			device.bind_framebuffer(data.framebuffer);
+
+			// temp
+			device.set_viewport(0, 0, 0, 0);
+		}
+
+		void bind_shader_program(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindShaderProgramCmdData data;
+			buffer.read<BindShaderProgramCmdData>(data);
+			device.bind_shader_program(data.program);
+		}
+
+		void bind_sampler_state(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindSamplerStateCmdData data;
+			buffer.read<BindSamplerStateCmdData>(data);
+			device.bind_sampler_state(data.state, data.shader_type, data.slot);
+		}
+
+		void bind_vertex_array(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindVertexArrayCmdData data;
+			buffer.read<BindVertexArrayCmdData>(data);
+			device.bind_vertex_array(data.vertex_array);
+		}
+
+		void bind_uniform_buffer(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindUniformBufferCmdData data;
+			buffer.read<BindUniformBufferCmdData>(data);
+			device.bind_uniform_buffer(data.buffer, data.shader_type, data.slot);
+		}
+		
+		void bind_pipeline_state_object(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindPipelineStateObjectData data;
+			buffer.read<BindPipelineStateObjectData>(data);
+			
+			if (data.pso)
+				device.bind_pipeline_state_object(data.pso);
+		}
+
+		void bind_texture(RenderDevice& device, CommandBuffer& buffer)
+		{
+			BindTextureCmdData data;
+			buffer.read<BindTextureCmdData>(data);
+
+			if (data.texture)
+				device.bind_texture(data.texture, data.shader_type, data.slot);
+		}
+	
+		void copy_uniform_data(RenderDevice& device, CommandBuffer& buffer)
+		{
+			CopyUniformCmdData data;
+			buffer.read<CopyUniformCmdData>(data);
+
+			void* ptr = device.map_buffer(data.buffer, data.map_type);
+			memcpy(ptr, data.data, data.size);
+			device.unmap_buffer(data.buffer);
+		}
+	
+		void clear_framebuffer(RenderDevice& device, CommandBuffer& buffer)
+		{
+			ClearFramebufferCmdData data;
+			buffer.read<ClearFramebufferCmdData>(data);
+			device.clear_framebuffer(data.clear_target, data.clear_color);
+		}
+
+		static const DispatchFunction g_dispatch_table[] =
+		{
+			&draw,
+			&draw_indexed,
+			&draw_indexed_base_vertex,
+			&bind_framebuffer,
+			&bind_shader_program,
+			&bind_vertex_array,
+			&bind_uniform_buffer,
+			&bind_sampler_state,
+			&bind_pipeline_state_object,
+			&bind_texture,
+			&copy_uniform_data,
+			&clear_framebuffer
+		};
+	}
     
+	// Sort Method
+
     bool DrawItemSort(DrawItem i, DrawItem j)
     {
         return i.sort_key.key > j.sort_key.key;
@@ -126,115 +241,20 @@ namespace terminus
         {
 			TERMINUS_BEGIN_CPU_PROFILE(gpu_dispatch);
 
-            CommandBuffer& _cmd_buf = queue.m_cmd_buf[i];
-            CommandType* _cmd;
-            bool is_done = false;
+            CommandBuffer& buffer = queue.m_cmd_buf[i];
+            uint32_t type;
  
-            do
+            while(true)
             {
-                _cmd = _cmd_buf.Read<CommandType>();
-				
-                switch(*_cmd)
-                {
-                    case CommandType::Draw:
-                    {
-                        DrawCmdData* _cmd_data = _cmd_buf.Read<DrawCmdData>();
-                        device.draw(_cmd_data->first_index, _cmd_data->count);
-                        break;
-                    }
-                    case CommandType::DrawIndexed:
-                    {
-                        DrawIndexedCmdData* _cmd_data = _cmd_buf.Read<DrawIndexedCmdData>();
-                        device.draw_indexed(_cmd_data->index_count);
-                        break;
-                    }
-                    case CommandType::DrawIndexedBaseVertex:
-                    {
-                        DrawIndexedBaseVertexCmdData* _cmd_data = _cmd_buf.Read<DrawIndexedBaseVertexCmdData>();
-                        device.draw_indexed_base_vertex(_cmd_data->index_count, _cmd_data->base_index, _cmd_data->base_vertex);
-                        break;
-                    }
-                    case CommandType::BindFramebuffer:
-                    {
-                        BindFramebufferCmdData* _cmd_data = _cmd_buf.Read<BindFramebufferCmdData>();
-                        device.bind_framebuffer(_cmd_data->framebuffer);
-                        
-                        // temp
-                        device.set_viewport(0, 0, 0, 0);
-                        
-                        break;
-                    }
-                    case CommandType::BindShaderProgram:
-                    {
-                        BindShaderProgramCmdData* _cmd_data = _cmd_buf.Read<BindShaderProgramCmdData>();
-                        device.bind_shader_program(_cmd_data->program);
-                        break;
-                    }
-                    case CommandType::BindSamplerState:
-                    {
-						BindSamplerStateCmdData* _cmd_data = _cmd_buf.Read<BindSamplerStateCmdData>();
-                        device.bind_sampler_state(_cmd_data->state, _cmd_data->shader_type, _cmd_data->slot);
-                        break;
-                    }
-                    case CommandType::BindVertexArray:
-                    {
-                        BindVertexArrayCmdData* _cmd_data = _cmd_buf.Read<BindVertexArrayCmdData>();
-                        device.bind_vertex_array(_cmd_data->vertex_array);
-                        break;
-                    }
-                    case CommandType::BindUniformBuffer:
-                    {
-                        BindUniformBufferCmdData* _cmd_data = _cmd_buf.Read<BindUniformBufferCmdData>();
-                        device.bind_uniform_buffer(_cmd_data->buffer, _cmd_data->shader_type, _cmd_data->slot);
-                        break;
-                    }
-                    case CommandType::BindPipelineStateObject:
-                    {
-                        BindPipelineStateObjectData* _cmd_data = _cmd_buf.Read<BindPipelineStateObjectData>();
-                        
-                        if(_cmd_data->pso)
-                            device.bind_pipeline_state_object(_cmd_data->pso);
-                        
-                        break;
-                    }
-                    case CommandType::BindTexture:
-                    {
-                        BindTextureCmdData* _cmd_data = _cmd_buf.Read<BindTextureCmdData>();
-                        
-                        if(_cmd_data->texture)
-                            device.bind_texture(_cmd_data->texture, _cmd_data->shader_type, _cmd_data->slot);
-                        
-                        break;
-                    }
-                    case CommandType::CopyUniformData:
-                    {
-                        CopyUniformCmdData* _cmd_data = _cmd_buf.Read<CopyUniformCmdData>();
-                        
-                        void* ptr = device.map_buffer(_cmd_data->buffer, _cmd_data->map_type);
-                        memcpy(ptr, _cmd_data->data, _cmd_data->size);
-                        device.unmap_buffer(_cmd_data->buffer);
-                        break;
-                    }
-                    case CommandType::ClearFramebuffer:
-                    {
-                        ClearFramebufferCmdData* _cmd_data = _cmd_buf.Read<ClearFramebufferCmdData>();
-                        device.clear_framebuffer(_cmd_data->clear_target, _cmd_data->clear_color);
-                        break;
-                    }
-                    case CommandType::End:
-                    {
-                        is_done = true;
-                        _cmd_buf.Clear();
-                        break;
-                    }
-                    default:
-                    {
-                        assert(false);
-                        break;
-                    }
-                }
+				buffer.read(type);
 
-            } while(!is_done);
+				if (type >= CommandBuffer::End)
+					break;
+
+				gpu_dispatch::g_dispatch_table[type](device ,buffer);
+            }
+
+			buffer.reset();
 
 			TERMINUS_END_CPU_PROFILE
         }
@@ -354,6 +374,9 @@ namespace terminus
         TERMINUS_BEGIN_CPU_PROFILE(command_generation);
         
         bool cleared_default = false;
+		uint32_t command_type;
+
+		cmd_buf.start();
         
         for (int i = 0; i < scene_view._rendering_path->_num_render_passes; i++)
         {
@@ -364,22 +387,24 @@ namespace terminus
                 RenderSubPass& sub_pass = render_pass->sub_passes[j];
                 
                 // Bind Pipeline State Object
+				command_type = CommandBuffer::BindPipelineStateObject;
                 
-                cmd_buf.Write(CommandType::BindPipelineStateObject);
+                cmd_buf.write(command_type);
                 
                 BindPipelineStateObjectData cmd0;
                 cmd0.pso = sub_pass.pso;
                 
-                cmd_buf.Write<BindPipelineStateObjectData>(&cmd0);
+                cmd_buf.write<BindPipelineStateObjectData>(cmd0);
                 
                 // Bind Framebuffer Command
                 
-                cmd_buf.Write(CommandType::BindFramebuffer);
+				command_type = CommandBuffer::BindFramebuffer;
+                cmd_buf.write(command_type);
                 
                 BindFramebufferCmdData cmd1;
                 cmd1.framebuffer = sub_pass.framebuffer_target;
                 
-                cmd_buf.Write<BindFramebufferCmdData>(&cmd1);
+                cmd_buf.write<BindFramebufferCmdData>(cmd1);
                 
                 // Clear Framebuffer
                 
@@ -387,18 +412,20 @@ namespace terminus
                 {
                     cleared_default = true;
                     
-                    cmd_buf.Write(CommandType::ClearFramebuffer);
+					command_type = CommandBuffer::ClearFramebuffer;
+                    cmd_buf.write(command_type);
                     
                     ClearFramebufferCmdData cmd2;
                     cmd2.clear_target = FramebufferClearTarget::ALL;
                     cmd2.clear_color  = Vector4(0.3f, 0.3f, 0.3f, 1.0f);
                     
-                    cmd_buf.Write<ClearFramebufferCmdData>(&cmd2);
+                    cmd_buf.write<ClearFramebufferCmdData>(cmd2);
                 }
                 
                 // Copy Per Frame data
-                
-                cmd_buf.Write(CommandType::CopyUniformData);
+
+				command_type = CommandBuffer::CopyUniformData;
+                cmd_buf.write(command_type);
                 
                 CopyUniformCmdData cmd4;
                 cmd4.buffer = _per_frame_buffer;
@@ -406,18 +433,19 @@ namespace terminus
                 cmd4.size   = sizeof(PerFrameUniforms);
                 cmd4.map_type = BufferMapType::WRITE;
                 
-                cmd_buf.Write<CopyUniformCmdData>(&cmd4);
+                cmd_buf.write<CopyUniformCmdData>(cmd4);
                 
                 // Bind Per Frame Global Uniforms
                 
-                cmd_buf.Write(CommandType::BindUniformBuffer);
+				command_type = CommandBuffer::BindUniformBuffer;
+                cmd_buf.write(command_type);
                 
                 BindUniformBufferCmdData cmd3;
                 cmd3.buffer = _per_frame_buffer;
                 cmd3.shader_type = ShaderType::VERTEX;
                 cmd3.slot = PER_FRAME_UNIFORM_SLOT;
                 
-                cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
+                cmd_buf.write<BindUniformBufferCmdData>(cmd3);
                 
                 if(render_pass->geometry_type == GeometryType::SCENE)
                 {
@@ -436,12 +464,13 @@ namespace terminus
                             
                             // Bind Vertex Array
                             
-                            cmd_buf.Write(CommandType::BindVertexArray);
+							command_type = CommandBuffer::BindVertexArray;
+                            cmd_buf.write(command_type);
                             
                             BindVertexArrayCmdData cmd5;
                             cmd5.vertex_array = draw_item.vertex_array;
                             
-                            cmd_buf.Write<BindVertexArrayCmdData>(&cmd5);
+                            cmd_buf.write<BindVertexArrayCmdData>(cmd5);
                         }
                         
                         ShaderKey key;
@@ -467,12 +496,13 @@ namespace terminus
                             
                             // Bind Shader Program
                             
-                            cmd_buf.Write(CommandType::BindShaderProgram);
+							command_type = CommandBuffer::BindShaderProgram;
+                            cmd_buf.write(command_type);
                             
                             BindShaderProgramCmdData cmd6;
                             cmd6.program = program;
                             
-                            cmd_buf.Write<BindShaderProgramCmdData>(&cmd6);
+                            cmd_buf.write<BindShaderProgramCmdData>(cmd6);
                         }
                         
                         if(last_renderable != draw_item.renderable_id)
@@ -481,7 +511,8 @@ namespace terminus
                             
                             // Copy Per Draw Uniforms
                             
-                            cmd_buf.Write(CommandType::CopyUniformData);
+							command_type = CommandBuffer::CopyUniformData;
+                            cmd_buf.write(command_type);
                             
                             CopyUniformCmdData cmd8;
                             cmd8.buffer = _per_draw_buffer;
@@ -489,18 +520,19 @@ namespace terminus
                             cmd8.size   = sizeof(PerDrawUniforms);
                             cmd8.map_type = BufferMapType::WRITE;
                             
-                            cmd_buf.Write<CopyUniformCmdData>(&cmd8);
+                            cmd_buf.write<CopyUniformCmdData>(cmd8);
                             
                             // Bind Per Draw Uniforms
                             
-                            cmd_buf.Write(CommandType::BindUniformBuffer);
+							command_type = CommandBuffer::BindUniformBuffer;
+                            cmd_buf.write(command_type);
                             
                             BindUniformBufferCmdData cmd7;
                             cmd7.buffer = _per_draw_buffer;
                             cmd7.shader_type = ShaderType::VERTEX;
                             cmd7.slot = PER_DRAW_UNIFORM_SLOT;
                             
-                            cmd_buf.Write<BindUniformBufferCmdData>(&cmd7);
+                            cmd_buf.write<BindUniformBufferCmdData>(cmd7);
                         }
                         
                         for (int l = 0; l < 5 ; l++)
@@ -511,14 +543,15 @@ namespace terminus
                                 {
                                     // Bind Sampler State
                                     
-                                    cmd_buf.Write(CommandType::BindSamplerState);
+									command_type = CommandBuffer::BindSamplerState;
+                                    cmd_buf.write(command_type);
                                     
                                     BindSamplerStateCmdData cmd9;
                                     cmd9.state = draw_item.material->sampler;
                                     cmd9.slot = l;
                                     cmd9.shader_type = ShaderType::PIXEL;
                                     
-                                    cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
+                                    cmd_buf.write<BindSamplerStateCmdData>(cmd9);
                                     
                                     if(last_texture != draw_item.material->texture_maps[l]->m_resource_id)
                                     {
@@ -526,14 +559,15 @@ namespace terminus
                                         
                                         // Bind Textures
                                         
-                                        cmd_buf.Write(CommandType::BindTexture);
+										command_type = CommandBuffer::BindTexture;
+                                        cmd_buf.write(command_type);
                                         
                                         BindTextureCmdData cmd10;
                                         cmd10.texture = draw_item.material->texture_maps[l];
                                         cmd10.slot = l;
                                         cmd10.shader_type = ShaderType::PIXEL;
                                         
-                                        cmd_buf.Write<BindTextureCmdData>(&cmd10);
+                                        cmd_buf.write<BindTextureCmdData>(cmd10);
                                     }
                                 }
                             }
@@ -541,26 +575,28 @@ namespace terminus
                         
                         // Draw
                         
-                        cmd_buf.Write(CommandType::DrawIndexedBaseVertex);
+						command_type = CommandBuffer::DrawIndexedBaseVertex;
+                        cmd_buf.write(command_type);
                         
                         DrawIndexedBaseVertexCmdData cmd11;
                         cmd11.base_index = draw_item.base_index;
                         cmd11.base_vertex = draw_item.base_vertex;
                         cmd11.index_count = draw_item.index_count;
                         
-                        cmd_buf.Write<DrawIndexedBaseVertexCmdData>(&cmd11);
+                        cmd_buf.write<DrawIndexedBaseVertexCmdData>(cmd11);
                     }
                 }
                 else if(render_pass->geometry_type == GeometryType::SKY)
                 {
                     // Bind Vertex Array
                     
-                    cmd_buf.Write(CommandType::BindVertexArray);
-                    
+					command_type = CommandBuffer::BindVertexArray;
+                    cmd_buf.write(command_type);
+                   
                     BindVertexArrayCmdData cmd5;
                     cmd5.vertex_array = render_system._skydome_item.vertex_array;
                     
-                    cmd_buf.Write<BindVertexArrayCmdData>(&cmd5);
+                    cmd_buf.write<BindVertexArrayCmdData>(cmd5);
                     
                     ShaderKey key;
                     
@@ -572,16 +608,18 @@ namespace terminus
                     
                     // Bind Shader Program
                     
-                    cmd_buf.Write(CommandType::BindShaderProgram);
+					command_type = CommandBuffer::BindShaderProgram;
+                    cmd_buf.write(command_type);
                     
                     BindShaderProgramCmdData cmd6;
                     cmd6.program = program;
                     
-                    cmd_buf.Write<BindShaderProgramCmdData>(&cmd6);
+                    cmd_buf.write<BindShaderProgramCmdData>(cmd6);
                     
                     // Copy Per Frame data
                     
-                    cmd_buf.Write(CommandType::CopyUniformData);
+					command_type = CommandBuffer::CopyUniformData;
+                    cmd_buf.write(command_type);
                     
                     CopyUniformCmdData cmd4;
                     cmd4.buffer = _per_frame_sky_buffer;
@@ -589,51 +627,55 @@ namespace terminus
                     cmd4.size   = sizeof(PerFrameSkyUniforms);
                     cmd4.map_type = BufferMapType::WRITE;
                     
-                    cmd_buf.Write<CopyUniformCmdData>(&cmd4);
+                    cmd_buf.write<CopyUniformCmdData>(cmd4);
                     
                     // Bind Per Frame Sky Global Uniforms
                     
-                    cmd_buf.Write(CommandType::BindUniformBuffer);
+					command_type = CommandBuffer::BindUniformBuffer;
+                    cmd_buf.write(command_type);
                     
                     BindUniformBufferCmdData cmd3;
                     cmd3.buffer = _per_frame_sky_buffer;
                     cmd3.shader_type = ShaderType::VERTEX;
                     cmd3.slot = PER_FRAME_UNIFORM_SLOT;
                     
-                    cmd_buf.Write<BindUniformBufferCmdData>(&cmd3);
+                    cmd_buf.write<BindUniformBufferCmdData>(cmd3);
                     
                     // Bind Sampler State
                     
-                    cmd_buf.Write(CommandType::BindSamplerState);
+					command_type = CommandBuffer::BindSamplerState;
+                    cmd_buf.write(command_type);
                     
                     BindSamplerStateCmdData cmd9;
                     cmd9.state = render_system._sky_cmp->sampler;
                     cmd9.slot = 0;
                     cmd9.shader_type = ShaderType::PIXEL;
                     
-                    cmd_buf.Write<BindSamplerStateCmdData>(&cmd9);
+                    cmd_buf.write<BindSamplerStateCmdData>(cmd9);
                     
                     // Bind Cubemap
                     
-                    cmd_buf.Write(CommandType::BindTexture);
+					command_type = CommandBuffer::BindTexture;
+                    cmd_buf.write(command_type);
                     
                     BindTextureCmdData cmd10;
                     cmd10.texture = render_system._sky_cmp->texture;
                     cmd10.slot = 0;
                     cmd10.shader_type = ShaderType::PIXEL;
                     
-                    cmd_buf.Write<BindTextureCmdData>(&cmd10);
+                    cmd_buf.write<BindTextureCmdData>(cmd10);
                     
                     // Draw
                     
-                    cmd_buf.Write(CommandType::DrawIndexedBaseVertex);
+					command_type = CommandBuffer::DrawIndexedBaseVertex;
+                    cmd_buf.write(command_type);
                     
                     DrawIndexedBaseVertexCmdData cmd11;
                     cmd11.base_index = render_system._skydome_item.base_index;
                     cmd11.base_vertex = render_system._skydome_item.base_vertex;
                     cmd11.index_count = render_system._skydome_item.index_count;
                     
-                    cmd_buf.Write<DrawIndexedBaseVertexCmdData>(&cmd11);
+                    cmd_buf.write<DrawIndexedBaseVertexCmdData>(cmd11);
                 }
                 else if(render_pass->geometry_type == GeometryType::QUAD)
                 {
@@ -642,7 +684,7 @@ namespace terminus
             }
         }
         
-        cmd_buf.WriteEnd();
+        cmd_buf.end();
         
         // reset
         scene_view._num_items = 0;

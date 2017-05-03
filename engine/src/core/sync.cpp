@@ -12,6 +12,7 @@ namespace terminus
 		Semaphore			_renderer_exit;
 		Semaphore			_loader_exit;
 		Semaphore			_loader_wakeup;
+		Semaphore			_renderer_begin;
 
 		void wait_for_main_ready()
 		{
@@ -80,6 +81,16 @@ namespace terminus
 		void notify_loader_exit()
 		{
 			_loader_exit.notify();
+		}
+
+		void wait_for_renderer_begin()
+		{
+			_renderer_begin.wait();
+		}
+
+		void notify_renderer_begin()
+		{
+			_renderer_begin.notify();
 		}
 	}
 }

@@ -31,5 +31,9 @@ namespace terminus
 		// loader exit
 		extern void wait_for_loader_exit();
 		extern void notify_loader_exit();
+
+		// renderer begin
+		extern void wait_for_renderer_begin();
+		extern void notify_renderer_begin();
 	}
 }

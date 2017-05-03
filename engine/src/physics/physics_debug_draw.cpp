@@ -39,7 +39,7 @@ namespace terminus
 
 	int PhysicsDebugDraw::getDebugMode() const
 	{
-
+		return 0;
 	}
 
 	void PhysicsDebugDraw::render()

@@ -34,6 +34,8 @@ namespace terminus
         {
             TERMINUS_BEGIN_CPU_PROFILE(simulation);
             
+			renderer.swap();
+			sync::notify_renderer_begin();
             platform->begin_frame();
             
             // Update platform.
@@ -55,26 +57,14 @@ namespace terminus
             TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread
             sync::wait_for_renderer_done();
-            
-            // ----------------------------------------------------------------------------------------------------
-            // SYNCHRONIZED REGION START
-            // ----------------------------------------------------------------------------------------------------
-            
-            // Only swap Graphics Queues when Front-Buffer Command generation and Back-Buffer Command Submission has completed.
-            renderer.swap();
-            
-            
-            gui_backend->new_frame();
-            imgui_console::draw();
-            static bool tw = true;
-            ImGui::ShowTestWindow(&tw);
-            
+           
+			gui_backend->new_frame();
+			imgui_console::draw();
+			static bool tw = true;
+			ImGui::ShowTestWindow(&tw);
+        
             global::get_per_frame_allocator()->Clear();
-            
-            // ----------------------------------------------------------------------------------------------------
-            // SYNCHRONIZED REGION END
-            // ----------------------------------------------------------------------------------------------------
-            
+          
             sync::notify_swap_done();
             platform->end_frame();
         }

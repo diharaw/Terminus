@@ -6,44 +6,28 @@
 #include <graphics/render_device.h>
 #include <memory/allocator.h>
 
-#define COMMAND_BUFFER_SIZE 1
-#define COMMAND_BUFFER_SIZE_BYTES COMMAND_BUFFER_SIZE*MB_IN_BYTES
+#define MAX_COMMAND_BUFFER_SIZE 1
+#define MAX_COMMAND_BUFFER_SIZE_BYTES MAX_COMMAND_BUFFER_SIZE*MB_IN_BYTES
 
 namespace terminus
 {
-    enum class CommandType
-    {
-        Draw = 0,
-        DrawIndexed,
-        DrawIndexedBaseVertex,
-        BindFramebuffer,
-        BindShaderProgram,
-        BindVertexArray,
-        BindUniformBuffer,
-        BindSamplerState,
-        BindPipelineStateObject,
-        BindTexture,
-        CopyUniformData,
-        ClearFramebuffer,
-        End
-    };
-    
+
     struct DrawCmdData
     {
-        int first_index;
-        int count;
+        uint32_t first_index;
+		uint32_t count;
     };
     
     struct DrawIndexedCmdData
     {
-        int index_count;
+		uint32_t index_count;
     };
     
     struct DrawIndexedBaseVertexCmdData
     {
-        int index_count;
-        unsigned int base_index;
-        unsigned int base_vertex;
+		uint32_t index_count;
+        uint32_t base_index;
+        uint32_t base_vertex;
     };
     
     struct BindFramebufferCmdData
@@ -70,8 +54,8 @@ namespace terminus
     struct BindUniformBufferCmdData
     {
         UniformBuffer* buffer;
-        ShaderType shader_type;
-        uint slot;
+        ShaderType	   shader_type;
+		uint32_t	   slot;
     };
     
     struct CopyUniformCmdData
@@ -91,104 +75,103 @@ namespace terminus
     {
         Texture*   texture;
         ShaderType shader_type;
-        int        slot;
+		uint32_t   slot;
     };
     
     struct BindSamplerStateCmdData
     {
         SamplerState* state;
-        ShaderType shader_type;
-        int           slot;
+        ShaderType	  shader_type;
+		uint32_t      slot;
     };
     
-    struct CommandBuffer
-    {
-        void*  m_memory;
-        void*  m_pos;
-        size_t m_total;
-        size_t m_used;
-        
-        CommandBuffer()
-        {
-            m_total = COMMAND_BUFFER_SIZE_BYTES;
-            m_used = 0;
-        }
-        
-        ~CommandBuffer()
-        {
-            m_memory = nullptr;
-            m_pos = nullptr;
-            m_total = 0;
-            m_used = 0;
-        }
-        
-        inline void WriteEnd()
-        {
-            Write(CommandType::End);
-            m_pos = m_memory;
-        }
-        
-        inline void Write(CommandType cmd)
-        {
-            Write(&cmd, sizeof(CommandType));
-        }
-        
-        inline void Write(void* cmd, size_t size)
-        {
-            assert((m_used + size) <= m_total);
-            memcpy(m_pos, cmd, size);
-            Move(size);
-            m_used += size;
-        }
-        
-        template<typename T>
-        inline void Write(T* cmd)
-        {
-            size_t size = sizeof(T);
-            assert((m_used + size) <= m_total);
-            memcpy(m_pos, cmd, size);
-            Move(size);
-            m_used += size;
-        }
-        
-        inline void ReadCmd(CommandType& cmd)
-        {
-            Read<CommandType>(cmd);
-        }
-        
-        inline void Read(void* data, size_t size)
-        {
-            // TODO : assert position
-            memcpy(data, m_pos, size);
-            Move(size);
-        }
-
-		template<typename T>
-		inline T* Read()
+	struct CommandBuffer
+	{
+		enum CommandType
 		{
-			T* cmd = (T*)m_pos;
-			Move(sizeof(T));
-			return cmd;
+			Draw = 0,
+			DrawIndexed,
+			DrawIndexedBaseVertex,
+			BindFramebuffer,
+			BindShaderProgram,
+			BindVertexArray,
+			BindUniformBuffer,
+			BindSamplerState,
+			BindPipelineStateObject,
+			BindTexture,
+			CopyUniformData,
+			ClearFramebuffer,
+			End,
+			TotalCommands
+		};
+
+		CommandBuffer()
+		{
+			_pos = 0;
+			_size = MAX_COMMAND_BUFFER_SIZE_BYTES;
+			end();
 		}
-        
-        inline void Move(size_t size)
-        {
-            m_pos = AllocatorUtility::Add(m_pos, size);
-        }
-        
-        template<typename T>
-        inline void Read(T& data)
-        {
-            Read(&data, sizeof(T));
-        }
-        
-        inline void Clear()
-        {
-            m_used = 0;
-            m_pos = m_memory;
-        }
-        
-    };
+
+		inline void write(const void* data, uint32_t size)
+		{
+			assert(_size == MAX_COMMAND_BUFFER_SIZE_BYTES && "Called write outside start/finish?");
+			assert(_pos < _size && "CommandBuffer::write error.");
+
+			memcpy(&_buffer[_pos], data, size);
+			_pos += size;
+		}
+
+		template<typename Type>
+		inline void write(const Type& in)
+		{
+			align(alignof(Type));
+			write(reinterpret_cast<const uint8_t*>(&in), sizeof(Type));
+		}
+
+		void read(void* data, uint32_t size)
+		{
+			assert(_pos < _size && "CommandBuffer::read error.");
+			memcpy(data, &_buffer[_pos], size);
+			_pos += size;
+		}
+
+		template<typename Type>
+		inline void read(Type& in)
+		{
+			align(alignof(Type));
+			read(reinterpret_cast<uint8_t*>(&in), sizeof(Type));
+		}
+
+		inline void align(uint32_t alignment)
+		{
+			const uint32_t mask = alignment - 1;
+			const uint32_t pos = (_pos + mask) & (~mask);
+			_pos = pos;
+		}
+
+		inline void reset()
+		{
+			_pos = 0;
+		}
+
+		inline void start()
+		{
+			_pos = 0;
+			_size = MAX_COMMAND_BUFFER_SIZE_BYTES;
+		}
+
+		inline void end()
+		{
+			uint32_t cmd = End;
+			write(cmd);
+			_size = _pos;
+			_pos = 0;
+		}
+
+		uint32_t _pos;
+		uint32_t _size;
+		uint8_t  _buffer[MAX_COMMAND_BUFFER_SIZE_BYTES];
+	};
 }
 
 #endif
