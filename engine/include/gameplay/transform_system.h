@@ -10,14 +10,14 @@ namespace terminus
 	class TransformSystem
 	{
     private:
-        Scene* _scene;
+		Scene* _scene;
         TransformComponent* _component_array;
         
 	public:
 		TransformSystem();
 		~TransformSystem();
 		void initialize(Scene* scene);
-		void update(double delta);
+		void simulate(double delta);
 		void shutdown();
 		void on_entity_created(Entity entity);
 		void on_entity_destroyed(Entity entity);

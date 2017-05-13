@@ -1,10 +1,8 @@
 #pragma once
 
-#include <gameplay/component_types.h>
-#include <graphics/render_device.h>
-#include <core/types.h>
-#include <container/packed_array.h>
+#include <container/hash_map.h>
 #include <gameplay/component_pool.h>
+#include <gameplay/component_types.h>
 #include <gameplay/entity.h>
 #include <gameplay/transform_system.h>
 #include <gameplay/render_system.h>
@@ -12,11 +10,8 @@
 #include <gameplay/script_system.h>
 #include <gameplay/physics_system.h>
 #include <gameplay/light_system.h>
-
-#include <vector>
-#include <iostream>
-#include <string>
-#include <array>
+#include <gameplay/render_world.h>
+#include <physics/physics_types.h>
 
 #define MAX_TRANSFORM_COMPONENTS MAX_ENTITIES
 #define MAX_MESH_COMPONENTS 1024
@@ -32,10 +27,67 @@
 
 namespace terminus
 {
+	struct FramePacket;
+	class  PhysicsWorld;
+
 	class Scene
 	{
+		friend class WorldManager;
+
+	public:
+		Scene();
+		~Scene();
+		void initialize();
+		void simulate(FramePacket* pkt, double dt);
+		void shutdown();
+		Entity* get_entity_array();
+		uint32_t get_num_entities();
+		PhysicsScene& physics_scene();
+		TransformComponent& attach_transform_component(Entity& entity);
+		MeshComponent& attach_mesh_component(Entity& entity);
+		ColliderComponent& attach_collider_component(Entity& entity);
+		CameraComponent& attach_camera_component(Entity& entity);
+		LuaScriptComponent& attach_lua_script_component(Entity& entity);
+		CppScriptComponent& attach_cpp_script_component(Entity& entity);
+		RigidBodyComponent& attach_rigid_body_component(Entity& entity);
+		PointLightComponent& attach_point_light_component(Entity& entity);
+		SpotLightComponent& attach_spot_light_component(Entity& entity);
+		DirectionalLightComponent& attach_directional_light_component(Entity& entity);
+		SkyComponent& attach_sky_component(Entity& entity);
+		ID get_transform_id(Entity& entity);
+		ID get_rigid_body_id(Entity& entity);
+		ID get_collision_shape_id(Entity& entity);
+		TransformComponent& get_transform_component(Entity& entity);
+		MeshComponent& get_mesh_component(Entity& entity);
+		ColliderComponent& get_collider_component(Entity& entity);
+		CameraComponent& get_camera_component(Entity& entity);
+		LuaScriptComponent& get_lua_script_component(Entity& entity);
+		CppScriptComponent& get_cpp_script_component(Entity& entity);
+		RigidBodyComponent& get_rigid_body_component(Entity& entity);
+		PointLightComponent& get_point_light_component(Entity& entity);
+		SpotLightComponent& get_spot_light_component(Entity& entity);
+		DirectionalLightComponent& get_directional_light_component(Entity& entity);
+		SkyComponent& get_sky_component(Entity& entity);
+		bool has_transform_component(Entity& entity);
+		bool has_mesh_component(Entity& entity);
+		bool has_camera_component(Entity& entity);
+		bool has_lua_script_component(Entity& entity);
+		bool has_cpp_script_component(Entity& entity);
+		bool has_collider_component(Entity& entity);
+		bool has_rigid_body_component(Entity& entity);
+		bool has_point_light_component(Entity& entity);
+		bool has_spot_light_component(Entity& entity);
+		bool has_directional_light_component(Entity& entity);
+		bool has_sky_component(Entity& entity);
+		Entity& create_entity(std::string name = "");
+		Entity& create_entity_from_prefab(std::string prefab);
+		void destroy_entity(Entity& entity);
+		bool is_alive(Entity& entity);
+		void set_name(const char* name);
+
 	public:
 		PackedArray<Entity, MAX_ENTITIES> _entities;
+		std::array<int, MAX_ENTITIES>	  _versions;
 
 		// component pools
 
@@ -43,393 +95,23 @@ namespace terminus
 		ComponentPool<MeshComponent, MAX_MESH_COMPONENTS>                   _mesh_pool;
 		ComponentPool<CameraComponent, MAX_CAMERA_COMPONENTS>               _camera_pool;
 		ComponentPool<LuaScriptComponent, MAX_LUA_COMPONENTS>               _lua_script_pool;
-        ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               _cpp_script_pool;
-        ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         _rigid_body_pool;
-        ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           _collider_pool;
+		ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               _cpp_script_pool;
+		ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         _rigid_body_pool;
+		ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           _collider_pool;
 		ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    _point_light_pool;
-        ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
-        ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
-        ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     _sky_pool;
+		ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
+		ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
+		ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     _sky_pool;
 
 		// systems
 
 		CameraSystem	_camera_system;
 		TransformSystem _transform_system;
 		RenderSystem    _render_system;
-        ScriptSystem    _script_system;
-        PhysicsSystem   _physics_system;
+		ScriptSystem    _script_system;
+		PhysicsSystem   _physics_system;
 		LightSystem		_light_system;
-
-        StringBuffer32  _name;
-
-	private:
-		std::array<int, MAX_ENTITIES> _versions;
-
-	public:
-		Scene()
-		{
-			for (int& version : _versions)
-			{
-				version = 0;
-			}
-		}
-
-		Scene(StringBuffer32 name)
-		{
-			_name = name;
-
-			for (int& version : _versions)
-			{
-				version = 0;
-			}
-		}
-
-		~Scene()
-		{
-
-		}
-        
-        inline void initialize()
-        {
-            _camera_system.initialize(this);
-            _transform_system.initialize(this);
-            _render_system.initialize(this);
-            _script_system.initialize(this);
-            _physics_system.initialize(this);
-            _light_system.initialize(this);
-        }
-        
-        inline void shutdown()
-        {
-            _script_system.shutdown();
-            _camera_system.shutdown();
-            _transform_system.shutdown();
-            _render_system.shutdown();
-            _physics_system.shutdown();
-            _light_system.shutdown();
-        }
-
-        inline void update(double dt)
-        {
-            _script_system.update(dt);
-            _light_system.update(dt);
-            _transform_system.update(dt);
-            _physics_system.update(dt);
-            _camera_system.update(dt);
-            _render_system.update(dt);
-        }
-        
-        inline Entity* get_entity_array()
-        {
-            return &_entities._objects[0];
-        }
-        
-        inline uint32_t get_num_entities()
-        {
-            return _entities._num_objects;
-        }
-        
-		// attach methods
-
-		inline TransformComponent& attach_transform_component(Entity& entity)
-		{
-			return _transform_pool.create(entity);
-		}
-
-		inline MeshComponent& attach_mesh_component(Entity& entity)
-		{
-			return _mesh_pool.create(entity);
-		}
-        
-        inline ColliderComponent& attach_collider_component(Entity& entity)
-        {
-            return _collider_pool.create(entity);
-        }
-
-		inline CameraComponent& attach_camera_component(Entity& entity)
-		{
-			return _camera_pool.create(entity);
-		}
-
-		inline LuaScriptComponent& attach_lua_script_component(Entity& entity)
-		{
-			return _lua_script_pool.create(entity);
-		}
-        
-        inline CppScriptComponent& attach_cpp_script_component(Entity& entity)
-        {
-            return _cpp_script_pool.create(entity);
-        }
-        
-        inline RigidBodyComponent& attach_rigid_body_component(Entity& entity)
-        {
-            return _rigid_body_pool.create(entity);
-        }
-
-		inline PointLightComponent& attach_point_light_component(Entity& entity)
-		{
-			return _point_light_pool.create(entity);
-		}
-        
-        inline SpotLightComponent& attach_spot_light_component(Entity& entity)
-        {
-            return _spot_light_pool.create(entity);
-        }
-        
-        inline DirectionalLightComponent& attach_directional_light_component(Entity& entity)
-        {
-            return _directional_light_pool.create(entity);
-        }
-        
-        inline SkyComponent& attach_sky_component(Entity& entity)
-        {
-            return _sky_pool.create(entity);
-        }
-        
-        // get id methods
-        
-        inline ID get_transform_id(Entity& entity)
-        {
-            return _transform_pool.get_id(entity);
-        }
-        
-        inline ID get_rigid_body_id(Entity& entity)
-        {
-            return _rigid_body_pool.get_id(entity);
-        }
-
-		// get methods
-
-		inline TransformComponent& get_transform_component(Entity& entity)
-		{
-			return _transform_pool.lookup(entity);
-		}
-
-		inline MeshComponent& get_mesh_component(Entity& entity)
-		{
-			return _mesh_pool.lookup(entity);
-		}
-
-		inline ColliderComponent& get_collider_component(Entity& entity)
-		{
-			return _collider_pool.lookup(entity);
-		}
-
-		inline CameraComponent& get_camera_component(Entity& entity)
-		{
-			return _camera_pool.lookup(entity);
-		}
-
-		inline LuaScriptComponent& get_lua_script_component(Entity& entity)
-		{
-			return _lua_script_pool.lookup(entity);
-		}
-        
-        inline CppScriptComponent& get_cpp_script_component(Entity& entity)
-        {
-            return _cpp_script_pool.lookup(entity);
-        }
-        
-        inline RigidBodyComponent& get_rigid_body_component(Entity& entity)
-        {
-            return _rigid_body_pool.lookup(entity);
-        }
-
-		inline PointLightComponent& get_point_light_component(Entity& entity)
-		{
-			return _point_light_pool.lookup(entity);
-		}
-        
-        inline SpotLightComponent& get_spot_light_component(Entity& entity)
-        {
-            return _spot_light_pool.lookup(entity);
-        }
-        
-        inline DirectionalLightComponent& get_directional_light_component(Entity& entity)
-        {
-            return _directional_light_pool.lookup(entity);
-        }
-        
-        inline SkyComponent& get_sky_component(Entity& entity)
-        {
-            return _sky_pool.lookup(entity);
-        }
-
-		// has methods
-
-		inline bool has_transform_component(Entity& entity)
-		{
-			return _transform_pool.has(entity);
-		}
-
-		inline bool has_mesh_component(Entity& entity)
-		{
-			return _mesh_pool.has(entity);
-		}
-
-		inline bool has_camera_component(Entity& entity)
-		{
-			return _camera_pool.has(entity);
-		}
-
-		inline bool has_lua_script_component(Entity& entity)
-		{
-			return _lua_script_pool.has(entity);
-		}
-        
-        inline bool has_cpp_script_component(Entity& entity)
-        {
-            return _cpp_script_pool.has(entity);
-        }
-        
-        inline bool has_collider_component(Entity& entity)
-        {
-            return _collider_pool.has(entity);
-        }
-        
-        inline bool has_rigid_body_component(Entity& entity)
-        {
-            return _rigid_body_pool.has(entity);
-        }
-
-		inline bool has_point_light_component(Entity& entity)
-		{
-			return _point_light_pool.has(entity);
-		}
-        
-        inline bool has_spot_light_component(Entity& entity)
-        {
-            return _spot_light_pool.has(entity);
-        }
-        
-        inline bool has_directional_light_component(Entity& entity)
-        {
-            return _directional_light_pool.has(entity);
-        }
-        
-        inline bool has_sky_component(Entity& entity)
-        {
-            return _sky_pool.has(entity);
-        }
-
-		inline Entity& create_entity(std::string name = "")
-		{
-			assert(_entities._num_objects != MAX_ENTITIES);
-
-			ID id = _entities.add();
-			Entity& entity = _entities.lookup(id);
-			entity._name = name;
-			entity._id = id;
-			entity._version = _versions[INDEX_FROM_ID(id)]++;
-
-			return entity;
-		}
-
-		inline Entity& create_entity_from_prefab(std::string prefab)
-		{
-			Entity& entity = create_entity();
-			return entity;
-		}
-
-		inline void destroy_entity(Entity& entity)
-		{
-			if (entity._id != INVALID_ID && is_alive(entity))
-			{
-				// remove all components belonging to entity
-				_transform_pool.remove(entity);
-				_mesh_pool.remove(entity);
-                _cpp_script_pool.remove(entity);
-                _lua_script_pool.remove(entity);
-                _rigid_body_pool.remove(entity);
-                _collider_pool.remove(entity);
-				_point_light_pool.remove(entity);
-                _spot_light_pool.remove(entity);
-                _directional_light_pool.remove(entity);
-                _sky_pool.remove(entity);
-
-				_versions[INDEX_FROM_ID(entity._id)]++;
-				_entities.remove(entity._id);
-			}
-		}
-
-		inline bool is_alive(Entity& entity)
-		{
-			return (entity._version == _versions[INDEX_FROM_ID(entity._id)] - 1);
-		}
-
-#if defined(TERMINUS_WITH_EDITOR)
-
-		inline void serialize(JsonDocument& doc)
-		{
-			JsonValue scene(_name.c_str(), doc.GetAllocator());
-			doc.AddMember("scene_name", scene, doc.GetAllocator());
-			
-			JsonValue entities(rapidjson::kArrayType);
-
-			for (int i = 0; i < _entities.size(); i++)
-			{
-				Entity& current_entity = _entities._objects[i];
-
-				JsonValue entity(rapidjson::kObjectType);
-
-				JsonValue entity_name(current_entity._name.c_str(), doc.GetAllocator());
-				entity.AddMember("entity_name", entity_name, doc.GetAllocator());
-
-				// add components
-
-				JsonValue components(rapidjson::kArrayType);
-
-				{
-					// transform
-					if (has_transform_component(current_entity))
-					{
-						TransformComponent& cmp = get_transform_component(current_entity);
-						JsonValue json_cmp = component_serialize(cmp, doc);
-						components.PushBack(json_cmp, doc.GetAllocator());
-					}
-
-					// mesh
-					if (has_mesh_component(current_entity))
-					{
-						MeshComponent& cmp = get_mesh_component(current_entity);
-						JsonValue json_cmp = component_serialize(cmp, doc);
-						components.PushBack(json_cmp, doc.GetAllocator());
-					}
-
-					// lua script
-					if (has_lua_script_component(current_entity))
-					{
-						LuaScriptComponent& cmp = get_lua_script_component(current_entity);
-						JsonValue json_cmp = component_serialize(cmp, doc);
-						components.PushBack(json_cmp, doc.GetAllocator());
-					}
-
-					// cpp script
-					if (has_cpp_script_component(current_entity))
-					{
-						CppScriptComponent& cmp = get_cpp_script_component(current_entity);
-						JsonValue json_cmp = component_serialize(cmp, doc);
-						components.PushBack(json_cmp, doc.GetAllocator());
-					}
-
-					// camera
-					if (has_camera_component(current_entity))
-					{
-						CameraComponent& cmp = get_camera_component(current_entity);
-						JsonValue json_cmp = component_serialize(cmp, doc);
-						components.PushBack(json_cmp, doc.GetAllocator());
-					}
-				}
-
-				entity.AddMember("components", components, doc.GetAllocator());
-
-				entities.PushBack(entity, doc.GetAllocator());
-			}
-
-			doc.AddMember("entities", entities, doc.GetAllocator());
-		}
-
-#endif
-
+		StringBuffer32  _name;
+		PhysicsScene	_physics_scene;
 	};
 }

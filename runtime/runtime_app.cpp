@@ -34,6 +34,8 @@ namespace terminus
         {
             TERMINUS_BEGIN_CPU_PROFILE(simulation);
             
+			pass_packets();
+
 			renderer.swap();
 			sync::notify_renderer_begin();
             platform->begin_frame();

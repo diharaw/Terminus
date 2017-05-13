@@ -1,92 +1,47 @@
-#ifndef RENDERSYSTEM_H
-#define RENDERSYSTEM_H
+#pragma once
 
-#include <core/global.h>
-#include <graphics/rendering_path.h>
-#include <graphics/draw_item.h>
-#include <graphics/renderer.h>
-#include <resource/shader_cache.h>
-#include <resource/mesh.h>
+#include <core/macro.h>
 #include <container/packed_array.h>
 #include <gameplay/entity.h>
-#include <gameplay/component_types.h>
+#include <graphics/renderer/scene_view.h>
+#include <gameplay/entity_data_map.h>
 
 #define MAX_DRAW_ITEMS 1024
-#define MAX_VIEWS 10
-#define MAX_RENDERABLES 1024
 
-namespace terminus
+TERMINUS_BEGIN_NAMESPACE
+
+// Forward Declarations
+
+class  Scene;
+struct Entity;
+struct FramePacket;
+struct SkyComponent;
+
+// Type Definitions
+
+using DrawItemArray   = std::array<DrawItem, MAX_DRAW_ITEMS>;
+using SceneViewArray  = PackedArray<SceneView, MAX_VIEWS>;
+
+class RenderSystem
 {
-    // Forward Declarations
-    class  Scene;
-    struct Entity;
-    struct SceneView;
-    struct Renderable;
+private:
+	EntityDataMap<StaticRenderable, MAX_ENTITIES> m_static_renderables;
+	EntityDataMap<SceneView, MAX_VIEWS>			  m_scene_views;
+	Scene*										  m_scene;
     
-    // Type Definitions
+public:
+    DrawItem      m_skydome_item;
+    Mesh*         m_skydome_mesh;
+    SkyComponent* m_sky_cmp;
     
-    using DrawItemArray   = std::array<DrawItem, MAX_DRAW_ITEMS>;
-    using SceneViewArray  = std::array<SceneView, MAX_VIEWS>;
-    using EntityArray     = std::array<ID, MAX_ENTITIES>;
-    using RenderableArray = PackedArray<Renderable, MAX_ENTITIES>;
-    
-    struct Renderable
-    {
-        Mesh*               _mesh;
-        bool                _sub_mesh_cull;
-        float               _radius;
-		Matrix4*			_transform;
-		Vector3*			_position;
-        RenderableType		_type;
-        // TODO : Accomodate material overrides.
-        // TODO : Union containing Renderable type (Mesh, Ocean, Terrain etc)
-    };
-    
-    struct SceneView
-    {
-        DrawItemArray  _draw_items;
-        int            _num_items;
-        Matrix4*       _view_matrix;
-        Matrix4*       _projection_matrix;
-        Matrix4*       _view_projection_matrix;
-        Vector4        _screen_rect;
-        Texture*       _render_target;
-        bool           _is_shadow;
-        uint32         _cmd_buf_idx;
-        RenderingPath* _rendering_path;
-    };
-    
-    class RenderSystem
-    {
-    private:
-        SceneViewArray	   _views;
-        uint16			   _view_count;
-        EntityArray        _entity_renderable_ref;
-        RenderableArray	   _renderables;
-		Scene*			   _scene;
-        
-    public:
-        DrawItem           _skydome_item;
-        Mesh*              _skydome_mesh;
-        SkyComponent*      _sky_cmp;
-        
-    public:
-        RenderSystem();
-        ~RenderSystem();
-        void initialize(Scene* scene);
-        void update(double delta);
-        void shutdown();
-        void on_entity_created(Entity entity);
-        void on_entity_destroyed(Entity entity);
-        
-        SceneView* scene_views();
-        uint16_t   view_count();
-        Renderable* renderables();
-        uint32_t    renderable_count();
-        
-    private:
-        TASK_METHOD_DECLARATION(RenderPrepareTask);
-    };
-}
+public:
+    RenderSystem();
+    ~RenderSystem();
+    void initialize(Scene* scene);
+    void simulate(FramePacket* pkt, double delta);
+    void shutdown();
+    void on_entity_created(Entity entity);
+    void on_entity_destroyed(Entity entity);
+};
 
-#endif
+TERMINUS_END_NAMESPACE

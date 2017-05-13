@@ -27,6 +27,35 @@ namespace terminus
     {
         btRigidBody*   _rigid_body;
         btMotionState* _motion_state;
+
+		inline void set_rigid_body_user_data(void* user_data)
+		{
+			_rigid_body->setUserPointer(user_data);
+		}
+
+		inline Matrix4 get_world_transform()
+		{
+			btTransform bullet_transform;
+			_motion_state->getWorldTransform(bullet_transform);
+
+			return physics::convert(bullet_transform);
+		}
+
+		inline Vector3 get_position()
+		{
+			btTransform bullet_transform;
+			_motion_state->getWorldTransform(bullet_transform);
+
+			return physics::convert(bullet_transform.getOrigin());
+		}
+
+		inline Quaternion get_rotation()
+		{
+			btTransform bullet_transform;
+			_motion_state->getWorldTransform(bullet_transform);
+
+			return physics::convert(bullet_transform.getRotation());
+		}
     };
     
     struct CollisionShape
@@ -121,4 +150,52 @@ namespace terminus
             _type = CollisionShapeType::HEIGHT_FIELD;
         }
     };
+
+	struct PhysicsScene
+	{
+		btDynamicsWorld* _world;
+		Vector3 _gravity;
+
+		PhysicsScene()
+		{
+			_world = nullptr;
+		}
+
+		~PhysicsScene()
+		{
+
+		}
+
+		inline void simulate(double dt)
+		{
+			assert(_world);
+			_world->stepSimulation(dt);
+		}
+
+		inline bool active()
+		{
+			return (_world != nullptr);
+		}
+
+		inline void add_rigid_body(RigidBody& rigid_body)
+		{
+			assert(_world);
+			if (rigid_body._rigid_body)
+				_world->addRigidBody(rigid_body._rigid_body);
+		}
+
+		inline void remove_rigid_body(RigidBody& rigid_body)
+		{
+			assert(_world);
+			if (rigid_body._rigid_body)
+				_world->removeRigidBody(rigid_body._rigid_body);
+		}
+
+		inline void set_gravity(Vector3 gravity)
+		{
+			assert(_world);
+			_world->setGravity(physics::convert(gravity));
+			_gravity = gravity;
+		}
+	};
 }

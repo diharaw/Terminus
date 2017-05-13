@@ -1,31 +1,33 @@
 #pragma once
 
+#include <core/macro.h>
 #include <core/types.h>
-#include <resource/asset_common.h>
-#include <graphics/render_device.h>
-#include <graphics/render_common.h>
-#include <graphics/material.h>
 #include <string>
 
+TERMINUS_BEGIN_NAMESPACE
+
+struct Material;
 struct VertexArray;
 
 struct SubMesh
 {
-    terminus::Material* _material;
-	uint32 m_IndexCount;
-	uint32 m_BaseVertex;
-	uint32 m_BaseIndex;
-	Vector3 m_MaxExtents;
-	Vector3 m_MinExtents;
+    Material* material;
+	uint32_t  index_count;
+	uint32_t  base_vertex;
+	uint32_t  base_index;
+	Vector3   max_extents;
+	Vector3   min_extents;
 };
 
 struct Mesh
 {
-	std::string id;
-	bool IsSkeletal;
-	uint MeshCount;
-	SubMesh* SubMeshes;
-    Vector3 m_MaxExtents;
-    Vector3 m_MinExtents;
-	terminus::VertexArray* VertexArray;
+	std::string  id;
+	bool		 is_skeletal;
+	uint32_t	 mesh_count;
+	SubMesh*	 sub_meshes;
+    Vector3		 max_extents;
+    Vector3		 min_extents;
+	VertexArray* vertex_array;
 };
+
+TERMINUS_END_NAMESPACE

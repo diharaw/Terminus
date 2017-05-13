@@ -1,10 +1,9 @@
 #pragma once
 
-#ifndef TERMINUS_TYPES_H
-#define TERMINUS_TYPES_H
-
-#include <utility/string_buffer.h>
 #include <stdint.h>
+#include <climits>
+#include <utility/string_buffer.h>
+#include <core/macro.h>
 #include <glm.hpp>
 #include <string>
 #include <array>
@@ -18,18 +17,6 @@
 #include "document.h"
 #include "stringbuffer.h"
 #include "writer.h"
-
-#define T_SAFE_DELETE(x) if(x){ delete x; x = nullptr; }
-#define T_SAFE_DELETE_ARRAY(x) if(x) { delete[] x; x = nullptr; }
-#define HANDLE_VALID(x) x != USHRT_MAX
-
-#if defined(_MSC_VER)
-    #define T_ALIGNED(x) __declspec(align(x))
-#else
-#if defined(__GNUC__) || defined(__clang__)
-    #define T_ALIGNED(x) __attribute__ ((aligned(x)))
-#endif
-#endif
 
 using uint = unsigned int;
 using uint8 = uint8_t;
@@ -87,5 +74,3 @@ public:
 		return id;
 	}
 };
-
-#endif

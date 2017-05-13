@@ -29,7 +29,7 @@ namespace terminus
         }
 	}
 
-	void CameraSystem::update(double delta)
+	void CameraSystem::simulate(double delta)
 	{
         for(int i = 0; i < 16; i++)
         {

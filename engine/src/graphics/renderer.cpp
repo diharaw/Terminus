@@ -4,126 +4,12 @@
 #include <core/context.h>
 #include <gameplay/scene.h>
 #include <resource/shader_cache.h>
-
+#include <core/frame_packet.h>
 #include <utility/profiler.h>
+#include <core/sync.h>
 
 namespace terminus
 {
-	namespace gpu_dispatch
-	{
-		typedef void(*DispatchFunction)(RenderDevice&, CommandBuffer&);
-
-		void draw(RenderDevice& device, CommandBuffer& buffer)
-		{
-			DrawCmdData data;
-			buffer.read<DrawCmdData>(data);
-			device.draw(data.first_index, data.count);
-		}
-
-		void draw_indexed(RenderDevice& device, CommandBuffer& buffer)
-		{
-			DrawIndexedCmdData data;
-			buffer.read<DrawIndexedCmdData>(data);
-			device.draw_indexed(data.index_count);
-		}
-
-		void draw_indexed_base_vertex(RenderDevice& device, CommandBuffer& buffer)
-		{
-			DrawIndexedBaseVertexCmdData data;
-			buffer.read<DrawIndexedBaseVertexCmdData>(data);
-			device.draw_indexed_base_vertex(data.index_count, data.base_index, data.base_vertex);
-		}
-
-		void bind_framebuffer(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindFramebufferCmdData data;
-			buffer.read<BindFramebufferCmdData>(data);
-			device.bind_framebuffer(data.framebuffer);
-
-			// temp
-			device.set_viewport(0, 0, 0, 0);
-		}
-
-		void bind_shader_program(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindShaderProgramCmdData data;
-			buffer.read<BindShaderProgramCmdData>(data);
-			device.bind_shader_program(data.program);
-		}
-
-		void bind_sampler_state(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindSamplerStateCmdData data;
-			buffer.read<BindSamplerStateCmdData>(data);
-			device.bind_sampler_state(data.state, data.shader_type, data.slot);
-		}
-
-		void bind_vertex_array(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindVertexArrayCmdData data;
-			buffer.read<BindVertexArrayCmdData>(data);
-			device.bind_vertex_array(data.vertex_array);
-		}
-
-		void bind_uniform_buffer(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindUniformBufferCmdData data;
-			buffer.read<BindUniformBufferCmdData>(data);
-			device.bind_uniform_buffer(data.buffer, data.shader_type, data.slot);
-		}
-		
-		void bind_pipeline_state_object(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindPipelineStateObjectData data;
-			buffer.read<BindPipelineStateObjectData>(data);
-			
-			if (data.pso)
-				device.bind_pipeline_state_object(data.pso);
-		}
-
-		void bind_texture(RenderDevice& device, CommandBuffer& buffer)
-		{
-			BindTextureCmdData data;
-			buffer.read<BindTextureCmdData>(data);
-
-			if (data.texture)
-				device.bind_texture(data.texture, data.shader_type, data.slot);
-		}
-	
-		void copy_uniform_data(RenderDevice& device, CommandBuffer& buffer)
-		{
-			CopyUniformCmdData data;
-			buffer.read<CopyUniformCmdData>(data);
-
-			void* ptr = device.map_buffer(data.buffer, data.map_type);
-			memcpy(ptr, data.data, data.size);
-			device.unmap_buffer(data.buffer);
-		}
-	
-		void clear_framebuffer(RenderDevice& device, CommandBuffer& buffer)
-		{
-			ClearFramebufferCmdData data;
-			buffer.read<ClearFramebufferCmdData>(data);
-			device.clear_framebuffer(data.clear_target, data.clear_color);
-		}
-
-		static const DispatchFunction g_dispatch_table[] =
-		{
-			&draw,
-			&draw_indexed,
-			&draw_indexed_base_vertex,
-			&bind_framebuffer,
-			&bind_shader_program,
-			&bind_vertex_array,
-			&bind_uniform_buffer,
-			&bind_sampler_state,
-			&bind_pipeline_state_object,
-			&bind_texture,
-			&copy_uniform_data,
-			&clear_framebuffer
-		};
-	}
-    
 	// Sort Method
 
     bool DrawItemSort(DrawItem i, DrawItem j)
@@ -142,34 +28,47 @@ namespace terminus
         
     }
     
-    void Renderer::initialize()
+    void Renderer::initialize(FramePacket* pkts)
     {
-        RenderDevice& device = context::get_render_device();
-        
-        BufferCreateDesc desc;
-        
-        desc.data = nullptr;
-        desc.usage_type = BufferUsageType::DYNAMIC;
-        desc.size = sizeof(PerFrameUniforms);
-        
-        _per_frame_buffer = device.create_uniform_buffer(desc);
-        
-        desc.size = sizeof(PerFrameSkyUniforms);
-        
-        _per_frame_sky_buffer = device.create_uniform_buffer(desc);
-        
-        desc.size = sizeof(PerDrawUniforms);
-        
-        _per_draw_buffer = device.create_uniform_buffer(desc);
-        
-        desc.size = sizeof(PerDrawMaterialUniforms);
-        
-        _per_draw_material_buffer = device.create_uniform_buffer(desc);
-        
-        desc.size = sizeof(PerDrawBoneOffsetUniforms);
-        
-        _per_draw_bone_offsets_buffer = device.create_uniform_buffer(desc);
+		_pkt = pkts;
+		_thread = std::thread(&Renderer::render_loop, this);
+		sync::notify_main_ready();
+		sync::wait_for_renderer_ready();
     }
+
+	void Renderer::initialize_internal()
+	{
+		RenderDevice& device = context::get_render_device();
+
+		// Initialize the CommandPools in each FramePacket.
+
+		for (int i = 0; i < 0; i++)
+			_pkt[i].cmd_pool = device.create_command_pool();
+
+		BufferCreateDesc desc;
+
+		desc.data = nullptr;
+		desc.usage_type = BufferUsageType::DYNAMIC;
+		desc.size = sizeof(PerFrameUniforms);
+
+		_per_frame_buffer = device.create_uniform_buffer(desc);
+
+		desc.size = sizeof(PerFrameSkyUniforms);
+
+		_per_frame_sky_buffer = device.create_uniform_buffer(desc);
+
+		desc.size = sizeof(PerDrawUniforms);
+
+		_per_draw_buffer = device.create_uniform_buffer(desc);
+
+		desc.size = sizeof(PerDrawMaterialUniforms);
+
+		_per_draw_material_buffer = device.create_uniform_buffer(desc);
+
+		desc.size = sizeof(PerDrawBoneOffsetUniforms);
+
+		_per_draw_bone_offsets_buffer = device.create_uniform_buffer(desc);
+	}
     
     void Renderer::shutdown()
     {
@@ -181,12 +80,15 @@ namespace terminus
         device.destroy_uniform_buffer(_per_draw_material_buffer);
         device.destroy_uniform_buffer(_per_draw_bone_offsets_buffer);
     }
+
+	void Renderer::enqueue_upload_task(Task& task)
+	{
+		concurrent_queue::push(_graphics_upload_queue, task);
+	}
     
     void Renderer::generate_commands(Scene* scene)
     {
         uint16_t view_count = scene->_render_system.view_count();
-        
-        uniform_allocator()->Clear();
         
         int worker_count = _thread_pool->get_num_worker_threads();
         
@@ -227,70 +129,74 @@ namespace terminus
         _thread_pool->wait();
 
     }
-    
-    void Renderer::submit()
-    {
-        RenderDevice& device = context::get_render_device();
-        
-        GraphicsQueue& queue = graphics_queue_back();
-        
-        if(queue.m_num_cmd_buf == 0)
-            device.clear_framebuffer(FramebufferClearTarget::ALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
-        
-        for (int i = 0; i < queue.m_num_cmd_buf; i++)
-        {
-			TERMINUS_BEGIN_CPU_PROFILE(gpu_dispatch);
 
-            CommandBuffer& buffer = queue.m_cmd_buf[i];
-            uint32_t type;
- 
-            while(true)
-            {
-				buffer.read(type);
+	void Renderer::render_loop()
+	{
+		Context& context = global::get_context();
 
-				if (type >= CommandBuffer::End)
-					break;
+		sync::wait_for_main_ready();
 
-				gpu_dispatch::g_dispatch_table[type](device ,buffer);
-            }
+		context._render_device.initialize();
+		initialize_internal();
 
-			buffer.reset();
+		ImGuiBackend* gui_backend = context::get_imgui_backend();
 
-			TERMINUS_END_CPU_PROFILE
-        }
-    }
-    
-    void Renderer::swap()
-    {
-        // Swap Queues
-        _front_queue_index = !_front_queue_index;
-    }
+		gui_backend->initialize();
+		gui_backend->new_frame();
 
-    uint32 Renderer::create_command_buffer()
-    {
-        _graphics_queues[0].CreateCommandBuffer();
-        return _graphics_queues[1].CreateCommandBuffer();
-    }
-    
-    CommandBuffer& Renderer::command_buffer(uint32 index)
-    {
-        return _graphics_queues[_front_queue_index].m_cmd_buf[index];
-    }
-    
-    GraphicsQueue& Renderer::graphics_queue_front()
-    {
-        return _graphics_queues[_front_queue_index];
-    }
-    
-    GraphicsQueue& Renderer::graphics_queue_back()
-    {
-        return _graphics_queues[!_front_queue_index];
-    }
-    
-    LinearAllocator* Renderer::uniform_allocator()
-    {
-        return _graphics_queues[_front_queue_index].m_allocator;
-    }
+		sync::notify_renderer_ready();
+
+		while (!context._shutdown)
+		{
+			sync::wait_for_renderer_begin();
+
+			TERMINUS_BEGIN_CPU_PROFILE(renderer);
+
+			// submit api calls
+			context._render_device.submit_command_queue(_graphics_queue, _pkt->cmd_buffers, _pkt->cmd_buffer_count);
+
+			// optional waiting in Vulkan/Direct3D 12 API's.
+
+			// do resource uploading. one task per frame for now.
+			if (!concurrent_queue::empty(_graphics_upload_queue))
+			{
+				Task upload_task = concurrent_queue::pop(_graphics_upload_queue);
+				upload_task._function.Invoke(&upload_task._data[0]);
+				sync::notify_loader_wakeup();
+			}
+
+			TERMINUS_END_CPU_PROFILE;
+
+			// notify done
+			sync::notify_renderer_done();
+
+
+			gui_backend->render();
+			context._render_device.swap_buffers();
+		}
+
+		shutdown();
+
+		sync::notify_renderer_exit();
+	}
+
+	void Renderer::submit(FramePacket* pkt)
+	{
+		_pkt = pkt;
+		sync::notify_renderer_begin();
+
+		RenderDevice& device = context::get_render_device();
+
+
+		//device.submit_command_queue(_graphics_queue, )
+
+		// Wait for submission end
+	}
+
+	void Renderer::render(FramePacket* pkt)
+	{
+
+	}
     
     void Renderer::generate_commands_view(void* data)
     {
@@ -329,7 +235,7 @@ namespace terminus
         {
             Renderable& renderable = renderable_array[i];
             
-            if(!renderable._mesh->VertexArray)
+            if(!renderable._mesh->vertex_array)
             {
                 T_LOG_ERROR("NULL Vertex Array");
             }
@@ -690,6 +596,13 @@ namespace terminus
         scene_view._num_items = 0;
         
         TERMINUS_END_CPU_PROFILE;
-
     }
+
+	void submit_gpu_upload_task(Task& task)
+	{
+		Context& context = global::get_context();
+		// queue task into rendering thread.
+		context._rendering_thread.enqueue_upload_task(task);
+		sync::wait_for_loader_wakeup();
+	}
 }

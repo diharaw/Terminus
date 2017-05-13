@@ -10,13 +10,13 @@ namespace terminus
     class ScriptSystem
     {
     private:
-        Scene*   _scene;
+		Scene* _scene;
         
     public:
         ScriptSystem();
         ~ScriptSystem();
         void initialize(Scene* scene);
-        void update(double delta);
+        void simulate(double delta);
         void shutdown();
         void on_entity_created(Entity entity);
         void on_entity_destroyed(Entity entity);

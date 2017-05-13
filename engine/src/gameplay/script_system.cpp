@@ -36,7 +36,7 @@ namespace terminus
         }
     }
     
-    void ScriptSystem::update(double delta)
+    void ScriptSystem::simulate(double delta)
     {
         CppScriptComponent* cpp_scripts = _scene->_cpp_script_pool.get_array();
         int num_cpp_scripts = _scene->_cpp_script_pool.get_num_objects();

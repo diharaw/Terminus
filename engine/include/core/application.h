@@ -51,7 +51,8 @@ int main()                                                                      
 
 namespace terminus
 {
-    class ThreadPool;
+    class  ThreadPool;
+	struct FramePacket;
     
 	class Application
 	{
@@ -75,12 +76,22 @@ namespace terminus
         void initialize_audio();
         void initialize_ecs();
         void initialize_script();
-        
+
     public:
         virtual void run() = 0;
         
     protected:
         virtual bool initialize_app() = 0;
         virtual void shutdown_app() = 0;
+		FramePacket* sim_packet();
+		FramePacket* cmd_packet();
+		FramePacket* dispatch_packet();
+		void pass_packets();
+
+	private:
+		FramePacket* _sim_pkt;
+		FramePacket* _cmd_pkt;
+		FramePacket* _dispatch_pkt;
+		FramePacket  _pool[3];
 	};
 }

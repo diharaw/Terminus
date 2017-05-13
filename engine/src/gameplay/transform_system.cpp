@@ -38,7 +38,7 @@ namespace terminus
         }
 	}
 
-	void TransformSystem::update(double delta)
+	void TransformSystem::simulate(double delta)
 	{
         int num_component = _scene->_transform_pool.get_num_objects();
         

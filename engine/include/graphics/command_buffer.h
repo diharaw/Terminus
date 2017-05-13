@@ -4,14 +4,12 @@
 #include <core/types.h>
 #include <core/global.h>
 #include <graphics/render_device.h>
-#include <memory/allocator.h>
 
 #define MAX_COMMAND_BUFFER_SIZE 1
 #define MAX_COMMAND_BUFFER_SIZE_BYTES MAX_COMMAND_BUFFER_SIZE*MB_IN_BYTES
 
 namespace terminus
 {
-
     struct DrawCmdData
     {
         uint32_t first_index;
@@ -170,6 +168,7 @@ namespace terminus
 
 		uint32_t _pos;
 		uint32_t _size;
+		uint32_t _id;
 		uint8_t  _buffer[MAX_COMMAND_BUFFER_SIZE_BYTES];
 	};
 }

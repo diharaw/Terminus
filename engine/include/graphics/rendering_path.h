@@ -11,7 +11,7 @@ namespace terminus
     struct RenderingPath
     {
         StringBuffer32  _name;
-        int             _num_render_passes;
+        uint32_t        _num_render_passes;
         RenderPassArray _render_passes;;
     };
 }
