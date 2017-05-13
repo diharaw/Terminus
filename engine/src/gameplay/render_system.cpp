@@ -82,13 +82,19 @@ void RenderSystem::simulate(FramePacket* pkt, double delta)
 			   sizeof(StaticRenderable) * m_static_renderables.size());
 
 		render_state.num_renderables = m_static_renderables.size();
+		render_state.view_count = m_scene_views.size();
+
+		SceneView* views = m_scene_views.array();
+
+		for (uint32_t i = 0; i < m_scene_views.size(); i++)
+			views[i].scene_index = pkt->scene_count;
 
 		// Copy Scene View Array
-		memcpy(&render_state.views[render_state.view_count], 
+		memcpy(&pkt->views[pkt->total_views],
 			   m_scene_views.array(), 
 			   sizeof(SceneView) * m_scene_views.size());
 
-		render_state.view_count += m_scene_views.size();
+		pkt->total_views += m_scene_views.size();
 
 		pkt->scene_count++;
 	}

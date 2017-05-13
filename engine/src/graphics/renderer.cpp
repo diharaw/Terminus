@@ -17,6 +17,10 @@ namespace terminus
         return i.sort_key.key > j.sort_key.key;
     }
 
+	bool scene_view_z_index_sort(SceneView i, SceneView j)
+	{
+		return i.z_index > j.z_index;
+	}
     
     Renderer::Renderer()
     {
@@ -195,7 +199,11 @@ namespace terminus
 
 	void Renderer::render(FramePacket* pkt)
 	{
-
+		if (pkt)
+		{
+			// Sort SceneViews according to Z-Index.
+			std::sort(std::begin(pkt->views), std::end(pkt->views), scene_view_z_index_sort);
+		}
 	}
     
     void Renderer::generate_commands_view(void* data)

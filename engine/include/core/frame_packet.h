@@ -13,7 +13,6 @@ struct SceneRenderState
 	uint32_t		 num_renderables;
 	StaticRenderable static_renderables[MAX_RENDERABLES];
 	uint16_t		 view_count;
-	SceneView		 views[MAX_VIEWS];
 };
 
 struct FramePacket
@@ -23,6 +22,8 @@ struct FramePacket
 	CommandBuffer*	 cmd_buffers;
 	uint16_t		 scene_count;
 	SceneRenderState scene_render_states[10];
+	uint16_t		 total_views;
+	SceneView		 views[MAX_VIEWS];
 };
 
 TERMINUS_END_NAMESPACE

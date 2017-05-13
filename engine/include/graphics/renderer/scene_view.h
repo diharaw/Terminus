@@ -10,15 +10,16 @@ struct RenderingPath;
 
 struct SceneView
 {
-	Entity			 camera_entity;
-	uint16_t		 z_index;
-	Matrix4			 view_matrix;
-	Matrix4			 projection_matrix;
-	Matrix4			 view_projection_matrix;
-	Vector4			 screen_rect;
-	Texture*		 render_target;
-	bool			 is_shadow;
-	RenderingPath*	 rendering_path;
+	Entity		   camera_entity;
+	uint16_t	   z_index;
+	uint16_t	   scene_index;
+	Matrix4		   view_matrix;
+	Matrix4		   projection_matrix;
+	Matrix4		   view_projection_matrix;
+	Vector4		   screen_rect;
+	Texture*	   render_target;
+	bool		   is_shadow;
+	RenderingPath* rendering_path;
 };
 
 TERMINUS_END_NAMESPACE
