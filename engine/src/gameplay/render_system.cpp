@@ -72,6 +72,28 @@ void RenderSystem::initialize(Scene* scene)
 
 void RenderSystem::simulate(FramePacket* pkt, double delta)
 {
+	StaticRenderable* renderables = m_static_renderables.array();
+
+	for (uint32_t i = 0; i < m_static_renderables.size(); i++)
+	{
+		StaticRenderable& renderable = renderables[i];
+		TransformComponent& transform_component = m_scene->get_transform_component(renderable.entity);
+		renderable.transform = transform_component._global_transform;
+		renderable.position = transform_component._position;
+	}
+
+	SceneView* views = m_scene_views.array();
+
+	for (uint32_t i = 0; i < m_scene_views.size(); i++)
+	{
+		SceneView& view = views[i];
+		CameraComponent& camera_component = m_scene->get_camera_component(view.camera_entity);
+		view.screen_rect = camera_component.screen_rect;
+		view.projection_matrix = camera_component.projection_matrix;
+		view.view_matrix = camera_component.view_matrix;
+		view.view_projection_matrix = camera_component.view_projection_matrix;
+	}
+
 	if (pkt)
 	{
 		SceneRenderState& render_state = pkt->scene_render_states[pkt->scene_count];

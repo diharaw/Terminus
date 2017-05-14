@@ -10,7 +10,6 @@
 #include <gameplay/script_system.h>
 #include <gameplay/physics_system.h>
 #include <gameplay/light_system.h>
-#include <gameplay/render_world.h>
 #include <physics/physics_types.h>
 
 #define MAX_TRANSFORM_COMPONENTS MAX_ENTITIES
@@ -86,6 +85,32 @@ namespace terminus
 		void set_name(const char* name);
 
 	public:
+		struct RemovedEntity
+		{
+			Entity	 entity;
+			uint16_t counter;
+		};
+
+		struct DeferredRemovalQueue
+		{
+			uint16_t count;
+			RemovedEntity entities[MAX_ENTITIES];
+
+			DeferredRemovalQueue()
+			{
+				count = 0;
+			}
+
+			void add(Entity entity)
+			{
+				RemovedEntity& result = entities[count];
+
+				result.entity = entity;
+				result.counter = 0;
+			}
+		};
+
+		DeferredRemovalQueue			  _removal_queue;
 		PackedArray<Entity, MAX_ENTITIES> _entities;
 		std::array<int, MAX_ENTITIES>	  _versions;
 

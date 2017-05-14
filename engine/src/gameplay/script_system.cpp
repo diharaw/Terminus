@@ -1,5 +1,7 @@
 #include <gameplay/script_system.h>
 #include <gameplay/scene.h>
+#include <script/lua_script.h>
+#include <script/cpp_script.h>
 
 namespace terminus
 {

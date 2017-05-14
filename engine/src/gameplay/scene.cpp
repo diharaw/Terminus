@@ -1,6 +1,5 @@
-#include <gameplay/game_world.h>
+#include <gameplay/scene.h>
 #include <core/frame_packet.h>
-#include <gameplay/physics_world.h>
 #include <core/context.h>
 
 namespace terminus
@@ -41,6 +40,8 @@ namespace terminus
 
 	void Scene::simulate(FramePacket* pkt, double dt)
 	{
+
+
 		if (_physics_scene.active())
 			_physics_scene.simulate(dt);
 
@@ -277,6 +278,8 @@ namespace terminus
 
 	void Scene::destroy_entity(Entity& entity)
 	{
+		_removal_queue.add(entity);
+
 		if (entity._id != INVALID_ID && is_alive(entity))
 		{
 			// remove all components belonging to entity

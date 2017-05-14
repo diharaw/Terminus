@@ -25,11 +25,29 @@ struct EntityDataMap
 			return nullptr;
 	}
 
+	T* get(Entity& entity)
+	{
+		ID id;
+
+		if (entites.get(entity.id, id))
+		{
+			if (cache.has(id))
+			{
+				T& item = cache.get(id);
+				return &item;
+			}
+			else
+				return nullptr;
+		}
+		else
+			return nullptr;
+	}
+
 	void remove(Entity& entity)
 	{
 		ID id;
 
-		if (entites.get(id))
+		if (entites.get(entity.id, id))
 		{
 			cache.remove(id);
 			entites.remove(entity.id);
