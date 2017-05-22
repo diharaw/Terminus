@@ -34,28 +34,22 @@ namespace terminus
         {
             TERMINUS_BEGIN_CPU_PROFILE(simulation);
             
+			platform->begin_frame();
 			pass_packets();
 
-			renderer.swap();
-			sync::notify_renderer_begin();
-            platform->begin_frame();
-            
+			// Submit frame N-2 draw commands.
+			renderer.submit(_dispatch_pkt);
+
+			// Generate commands for frame N-1.
+			renderer.render(_cmd_pkt);
+
             // Update platform.
             platform->update();
             EventHandler::update();
             
             // Update Scene
-            physics::update(platform->get_delta_time());
             context._scene_manager.update(platform->get_delta_time());
-            
-            // Render Scene
-            SceneVector& scenes = context._scene_manager.active_scenes();
-            
-            for(auto& scene : scenes)
-            {
-                renderer.generate_commands(scene);
-            }
-            
+
             TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread
             sync::wait_for_renderer_done();

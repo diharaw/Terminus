@@ -1,13 +1,17 @@
-//
-//  terrain_renderer.h
-//  Terminus
-//
-//  Created by Dihara Wijetunga on 4/21/17.
-//
-//
+#pragma once 
 
-#ifndef terrain_renderer_h
-#define terrain_renderer_h
+#include <core/macro.h>
 
+TERMINUS_BEGIN_NAMESPACE
 
-#endif /* terrain_renderer_h */
+struct FramePacket;
+
+class TerrainRenderer
+{
+public:
+	TerrainRenderer();
+	~TerrainRenderer();
+	void render(FramePacket* pkt);
+};
+
+TERMINUS_END_NAMESPACE

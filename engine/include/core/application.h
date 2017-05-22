@@ -88,7 +88,7 @@ namespace terminus
 		FramePacket* dispatch_packet();
 		void pass_packets();
 
-	private:
+	protected:
 		FramePacket* _sim_pkt;
 		FramePacket* _cmd_pkt;
 		FramePacket* _dispatch_pkt;

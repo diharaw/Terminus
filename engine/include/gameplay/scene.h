@@ -24,119 +24,147 @@
 #define MAX_DIRECTIONAL_LIGHT_COMPONENTS 100
 #define MAX_SKY_COMPONENTS 1
 
-namespace terminus
+#define MAX_DEFERRED_ITEMS 1024u
+#define DEFERRED_QUEUE_MASK MAX_DEFERRED_ITEMS - 1u
+
+TERMINUS_BEGIN_NAMESPACE
+
+struct FramePacket;
+class  PhysicsWorld;
+
+class Scene
 {
-	struct FramePacket;
-	class  PhysicsWorld;
+	friend class SceneManager;
 
-	class Scene
+public:
+	Scene();
+	~Scene();
+	void initialize();
+	void simulate(FramePacket* pkt, double dt);
+	void shutdown();
+	Entity* get_entity_array();
+	uint32_t get_num_entities();
+	PhysicsScene& physics_scene();
+	TransformComponent& attach_transform_component(Entity& entity);
+	MeshComponent& attach_mesh_component(Entity& entity);
+	ColliderComponent& attach_collider_component(Entity& entity);
+	CameraComponent& attach_camera_component(Entity& entity);
+	LuaScriptComponent& attach_lua_script_component(Entity& entity);
+	CppScriptComponent& attach_cpp_script_component(Entity& entity);
+	RigidBodyComponent& attach_rigid_body_component(Entity& entity);
+	PointLightComponent& attach_point_light_component(Entity& entity);
+	SpotLightComponent& attach_spot_light_component(Entity& entity);
+	DirectionalLightComponent& attach_directional_light_component(Entity& entity);
+	SkyComponent& attach_sky_component(Entity& entity);
+	ID get_transform_id(Entity& entity);
+	ID get_rigid_body_id(Entity& entity);
+	ID get_collision_shape_id(Entity& entity);
+	TransformComponent& get_transform_component(Entity& entity);
+	MeshComponent& get_mesh_component(Entity& entity);
+	ColliderComponent& get_collider_component(Entity& entity);
+	CameraComponent& get_camera_component(Entity& entity);
+	LuaScriptComponent& get_lua_script_component(Entity& entity);
+	CppScriptComponent& get_cpp_script_component(Entity& entity);
+	RigidBodyComponent& get_rigid_body_component(Entity& entity);
+	PointLightComponent& get_point_light_component(Entity& entity);
+	SpotLightComponent& get_spot_light_component(Entity& entity);
+	DirectionalLightComponent& get_directional_light_component(Entity& entity);
+	SkyComponent& get_sky_component(Entity& entity);
+	bool has_transform_component(Entity& entity);
+	bool has_mesh_component(Entity& entity);
+	bool has_camera_component(Entity& entity);
+	bool has_lua_script_component(Entity& entity);
+	bool has_cpp_script_component(Entity& entity);
+	bool has_collider_component(Entity& entity);
+	bool has_rigid_body_component(Entity& entity);
+	bool has_point_light_component(Entity& entity);
+	bool has_spot_light_component(Entity& entity);
+	bool has_directional_light_component(Entity& entity);
+	bool has_sky_component(Entity& entity);
+	Entity& create_entity(std::string name = "");
+	Entity& create_entity_from_prefab(std::string prefab);
+	void destroy_entity(Entity& entity);
+	bool is_alive(Entity& entity);
+	void set_name(const char* name);
+	void update_deferred_removal_list();
+
+public:
+	struct RemovedEntity
 	{
-		friend class WorldManager;
-
-	public:
-		Scene();
-		~Scene();
-		void initialize();
-		void simulate(FramePacket* pkt, double dt);
-		void shutdown();
-		Entity* get_entity_array();
-		uint32_t get_num_entities();
-		PhysicsScene& physics_scene();
-		TransformComponent& attach_transform_component(Entity& entity);
-		MeshComponent& attach_mesh_component(Entity& entity);
-		ColliderComponent& attach_collider_component(Entity& entity);
-		CameraComponent& attach_camera_component(Entity& entity);
-		LuaScriptComponent& attach_lua_script_component(Entity& entity);
-		CppScriptComponent& attach_cpp_script_component(Entity& entity);
-		RigidBodyComponent& attach_rigid_body_component(Entity& entity);
-		PointLightComponent& attach_point_light_component(Entity& entity);
-		SpotLightComponent& attach_spot_light_component(Entity& entity);
-		DirectionalLightComponent& attach_directional_light_component(Entity& entity);
-		SkyComponent& attach_sky_component(Entity& entity);
-		ID get_transform_id(Entity& entity);
-		ID get_rigid_body_id(Entity& entity);
-		ID get_collision_shape_id(Entity& entity);
-		TransformComponent& get_transform_component(Entity& entity);
-		MeshComponent& get_mesh_component(Entity& entity);
-		ColliderComponent& get_collider_component(Entity& entity);
-		CameraComponent& get_camera_component(Entity& entity);
-		LuaScriptComponent& get_lua_script_component(Entity& entity);
-		CppScriptComponent& get_cpp_script_component(Entity& entity);
-		RigidBodyComponent& get_rigid_body_component(Entity& entity);
-		PointLightComponent& get_point_light_component(Entity& entity);
-		SpotLightComponent& get_spot_light_component(Entity& entity);
-		DirectionalLightComponent& get_directional_light_component(Entity& entity);
-		SkyComponent& get_sky_component(Entity& entity);
-		bool has_transform_component(Entity& entity);
-		bool has_mesh_component(Entity& entity);
-		bool has_camera_component(Entity& entity);
-		bool has_lua_script_component(Entity& entity);
-		bool has_cpp_script_component(Entity& entity);
-		bool has_collider_component(Entity& entity);
-		bool has_rigid_body_component(Entity& entity);
-		bool has_point_light_component(Entity& entity);
-		bool has_spot_light_component(Entity& entity);
-		bool has_directional_light_component(Entity& entity);
-		bool has_sky_component(Entity& entity);
-		Entity& create_entity(std::string name = "");
-		Entity& create_entity_from_prefab(std::string prefab);
-		void destroy_entity(Entity& entity);
-		bool is_alive(Entity& entity);
-		void set_name(const char* name);
-
-	public:
-		struct RemovedEntity
-		{
-			Entity	 entity;
-			uint16_t counter;
-		};
-
-		struct DeferredRemovalQueue
-		{
-			uint16_t count;
-			RemovedEntity entities[MAX_ENTITIES];
-
-			DeferredRemovalQueue()
-			{
-				count = 0;
-			}
-
-			void add(Entity entity)
-			{
-				RemovedEntity& result = entities[count];
-
-				result.entity = entity;
-				result.counter = 0;
-			}
-		};
-
-		DeferredRemovalQueue			  _removal_queue;
-		PackedArray<Entity, MAX_ENTITIES> _entities;
-		std::array<int, MAX_ENTITIES>	  _versions;
-
-		// component pools
-
-		ComponentPool<TransformComponent, MAX_TRANSFORM_COMPONENTS>         _transform_pool;
-		ComponentPool<MeshComponent, MAX_MESH_COMPONENTS>                   _mesh_pool;
-		ComponentPool<CameraComponent, MAX_CAMERA_COMPONENTS>               _camera_pool;
-		ComponentPool<LuaScriptComponent, MAX_LUA_COMPONENTS>               _lua_script_pool;
-		ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               _cpp_script_pool;
-		ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         _rigid_body_pool;
-		ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           _collider_pool;
-		ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    _point_light_pool;
-		ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
-		ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
-		ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     _sky_pool;
-
-		// systems
-
-		CameraSystem	_camera_system;
-		TransformSystem _transform_system;
-		RenderSystem    _render_system;
-		ScriptSystem    _script_system;
-		PhysicsSystem   _physics_system;
-		LightSystem		_light_system;
-		StringBuffer32  _name;
-		PhysicsScene	_physics_scene;
+		Entity	 entity;
+		uint16_t counter;
 	};
-}
+
+	struct DeferredRemovalQueue
+	{
+		uint16_t count;
+		uint32_t front;
+		uint32_t back;
+		RemovedEntity entities[MAX_ENTITIES];
+
+		DeferredRemovalQueue()
+		{
+			front = 0;
+			back = 0;
+			count = 0;
+		}
+
+		void push_back(Entity entity)
+		{
+			RemovedEntity& result = entities[count];
+
+			result.entity = entity;
+			result.counter = 0;
+
+			entities[back & DEFERRED_QUEUE_MASK] = result;
+			++back;
+		}
+
+		void pop_front()
+		{
+			++front;
+		}
+
+		uint32_t front()
+		{
+			return front;
+		}
+
+		uint32_t back()
+		{
+			return back;
+		}
+	};
+
+	DeferredRemovalQueue			  _removal_queue;
+	PackedArray<Entity, MAX_ENTITIES> _entities;
+	std::array<int, MAX_ENTITIES>	  _versions;
+
+	// component pools
+
+	ComponentPool<TransformComponent, MAX_TRANSFORM_COMPONENTS>         _transform_pool;
+	ComponentPool<MeshComponent, MAX_MESH_COMPONENTS>                   _mesh_pool;
+	ComponentPool<CameraComponent, MAX_CAMERA_COMPONENTS>               _camera_pool;
+	ComponentPool<LuaScriptComponent, MAX_LUA_COMPONENTS>               _lua_script_pool;
+	ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               _cpp_script_pool;
+	ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         _rigid_body_pool;
+	ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           _collider_pool;
+	ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    _point_light_pool;
+	ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
+	ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
+	ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     _sky_pool;
+
+	// systems
+
+	CameraSystem	_camera_system;
+	TransformSystem _transform_system;
+	RenderSystem    _render_system;
+	ScriptSystem    _script_system;
+	PhysicsSystem   _physics_system;
+	LightSystem		_light_system;
+	StringBuffer32  _name;
+	uint32_t		_scene_id;
+	PhysicsScene	_physics_scene;
+};
+
+TERMINUS_END_NAMESPACE

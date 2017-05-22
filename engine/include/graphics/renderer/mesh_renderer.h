@@ -1,13 +1,17 @@
-//
-//  mesh_renderer.h
-//  Terminus
-//
-//  Created by Dihara Wijetunga on 4/21/17.
-//
-//
+#pragma once 
 
-#ifndef mesh_renderer_h
-#define mesh_renderer_h
+#include <core/macro.h>
 
+TERMINUS_BEGIN_NAMESPACE
 
-#endif /* mesh_renderer_h */
+struct FramePacket;
+
+class MeshRenderer
+{
+public:
+	MeshRenderer();
+	~MeshRenderer();
+	void render(FramePacket* pkt);
+};
+
+TERMINUS_END_NAMESPACE

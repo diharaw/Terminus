@@ -8,18 +8,21 @@ TERMINUS_BEGIN_NAMESPACE
 struct CommandPool;
 struct CommandBuffer;
 
+#define MAX_COMMAND_POOLS 10
+
 struct SceneRenderState
 {
 	uint32_t		 num_renderables;
 	StaticRenderable static_renderables[MAX_RENDERABLES];
 	uint16_t		 view_count;
+	CommandPool*	 cmd_pool;
+	CommandBuffer*	 cmd_buffers[4];
 };
 
 struct FramePacket
 {
-	CommandPool*	 cmd_pool;
 	uint32_t		 cmd_buffer_count;
-	CommandBuffer*	 cmd_buffers;
+	CommandBuffer*	 cmd_buffers[32];
 	uint16_t		 scene_count;
 	SceneRenderState scene_render_states[10];
 	uint16_t		 total_views;

@@ -169,7 +169,7 @@ namespace terminus
 
 	void RenderDevice::destroy_command_pool(CommandPool* pool)
 	{
-		T_SAFE_DELETE(pool);
+		TE_SAFE_DELETE(pool);
 	}
 
 	CommandBuffer* RenderDevice::create_command_buffer(CommandPool* pool)

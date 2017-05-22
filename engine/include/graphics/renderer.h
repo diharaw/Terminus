@@ -88,7 +88,7 @@ namespace terminus
         Renderer();
         ~Renderer();
         void initialize(FramePacket* pkts);
-        void shutdown();
+        void shutdown(FramePacket* pkts);
         void submit(FramePacket* pkt);
 		void render(FramePacket* pkt);
 		void enqueue_upload_task(Task& task);
@@ -96,6 +96,7 @@ namespace terminus
         
     private:
 		void initialize_internal();
+		void shutdown_internal();
 		void render_loop();
         void generate_commands_view(void* data);
 	};

@@ -1,5 +1,7 @@
 #include <gameplay/scene_manager.h>
+#include <gameplay/scene.h>
 #include <core/context.h>
+#include <memory/pool_allocator.h>
 
 namespace terminus
 {
@@ -40,7 +42,7 @@ namespace terminus
         SceneUnloadData* task_data = (SceneUnloadData*)data;
         task_data->_scene->shutdown();
         
-        T_SAFE_DELETE(task_data->_scene);
+        TE_SAFE_DELETE(task_data->_scene);
     }
     
 	SceneManager::SceneManager()
@@ -57,24 +59,19 @@ namespace terminus
     
 	void SceneManager::initialize()
 	{
-		
-        
+		void* memory = global::get_default_allocator()->Allocate(sizeof(Scene) * MAX_SCENES, 8);
+		m_allocator = TE_NEW(global::get_default_allocator()) PoolAllocator(sizeof(Scene), 8, sizeof(Scene) * MAX_SCENES, memory);
 	}
     
-    void SceneManager::update(double dt)
+    void SceneManager::simulate(FramePacket* pkt, double dt)
     {
         for (auto scene : _active_scenes)
         {
-            scene->update(dt);
+            scene->simulate(pkt, dt);
         }
     }
-    
-    SceneVector& SceneManager::active_scenes()
-    {
-        return _active_scenes;
-    }
 
-	void SceneManager::load(String scene)
+	void SceneManager::load(StringBuffer32 scene)
 	{
         Task task;
         
@@ -90,7 +87,7 @@ namespace terminus
         loading_thread.enqueue_load_task(task);
 	}
 
-	void SceneManager::preload(String scene)
+	void SceneManager::preload(StringBuffer32 scene)
 	{
         Task task;
         
@@ -106,12 +103,12 @@ namespace terminus
         loading_thread.enqueue_load_task(task);
 	}
     
-	void SceneManager::set_active_scene(String scene)
+	void SceneManager::set_active_scene(StringBuffer32 scene)
 	{
 		
 	}
 
-	void SceneManager::unload(String scene)
+	void SceneManager::unload(StringBuffer32 scene)
 	{
         for(int i = 0; i < _active_scenes.size(); i++)
         {
@@ -136,18 +133,34 @@ namespace terminus
         }
 	}
 
+	Scene* SceneManager::allocate()
+	{
+		return TE_NEW(m_allocator) Scene();
+	}
+
+	void SceneManager::deallocate(Scene* scene)
+	{
+		if (scene)
+		{
+			TE_DELETE(scene, m_allocator);
+		}
+	}
+
 	void SceneManager::initialize_scene(Scene* scene)
 	{
 
 	}
     
-    EVENT_METHOD_DEFINITION(SceneManager, on_scene_load_complete)
+    void SceneManager::on_scene_load_complete(Event* event)
     {
         SceneLoadEvent* event_data = (SceneLoadEvent*)event;
-        _active_scenes.push_back(event_data->GetScene());
+
+		Scene* scene = event_data->GetScene();
+        
     }
     
-    EVENT_METHOD_DEFINITION(SceneManager, on_scene_preload_complete)
+
+	void SceneManager::on_scene_preload_complete(Event* event)
     {
         
     }

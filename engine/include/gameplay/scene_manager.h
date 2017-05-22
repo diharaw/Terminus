@@ -1,46 +1,46 @@
 #pragma once
 
-#ifndef  SCENEMANAGER_H
-#define SCENEMANAGER_H
-
-#include <gameplay/scene.h>
 #include <core/global.h>
 #include <core/types.h>
 #include <resource/scene_cache.h>
 #include <core/Event/event_handler.h>
+#include <container/packed_array.h>
+#include <container/hash_map.h>
 
-#include <vector>
+#define MAX_SCENES 10
 
-namespace terminus
+TERMINUS_BEGIN_NAMESPACE
+
+struct FramePacket;
+class  Scene;
+class  PoolAllocator;
+
+class SceneManager
 {
-    using SceneMap = std::unordered_map<String, Scene*>;
-    using SceneVector = std::vector<Scene*>;
+private:
+	HashMap<Scene*, MAX_SCENES>		m_scene_map;
+	PackedArray<Scene*, MAX_SCENES> m_active_scenes;
+	PoolAllocator*					m_allocator;
 
-	class SceneManager
-	{
-	private:
-		SceneMap 	_scene_map;
-        SceneVector _active_scenes;
-        SceneVector _queued_scenes;
+public:
+	SceneManager();
+	~SceneManager();
+    void initialize();
+    void simulate(FramePacket* pkt, double dt);
+	void load(StringBuffer32 scene);
+	void preload(StringBuffer32 scene);
+	void set_active_scene(StringBuffer32 scene);
+	void unload(StringBuffer32 scene);
 
-	public:
-		SceneManager();
-		~SceneManager();
-        void initialize();
-        void update(double dt);
-		void load(String scene);
-		void preload(String scene);
-		void set_active_scene(String scene);
-		void unload(String scene);
-        SceneVector& active_scenes();
+private:
+	void initialize_scene(Scene* scene);
+	Scene* allocate();
+	void deallocate(Scene* scene);
+    void on_scene_load_complete(Event* event);
+    void on_scene_preload_complete(Event* event);
+};
 
-	private:
-		void initialize_scene(Scene* scene);
-        EVENT_METHOD_DECLARATION(on_scene_load_complete);
-        EVENT_METHOD_DECLARATION(on_scene_preload_complete);
-	};
-
-}
+TERMINUS_END_NAMESPACE
 
 struct SceneLoadEvent : public Event
 {
@@ -65,6 +65,3 @@ struct ScenePreloadEvent : public Event
     inline virtual EventType GetType() { return sk_Type; }
     inline virtual terminus::Scene* GetScene() { return m_scene; }
 };
-
-
-#endif

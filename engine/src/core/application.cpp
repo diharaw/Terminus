@@ -54,7 +54,6 @@ namespace terminus
         context._rendering_thread.run();
         context._loading_thread.run();
         
-        
 		context._renderer.initialize(&_pool[0]);
 		sync::notify_loader_wakeup();
         
@@ -66,14 +65,14 @@ namespace terminus
         Context& context = global::get_context();
         
 		context._physics_engine.shutdown();
+		context._renderer.shutdown(&_pool[0]);
         
         sync::notify_loader_wakeup();
         sync::wait_for_loader_exit();
         sync::wait_for_renderer_exit();
         
         context._loading_thread.exit();
-        context._rendering_thread.exit();
-        
+
         context::get_dynamic_library_cache().shutdown();
         context::get_platform()->shutdown();
         
