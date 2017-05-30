@@ -136,35 +136,35 @@ public:
 		}
 	};
 
-	DeferredRemovalQueue			  _removal_queue;
-	PackedArray<Entity, MAX_ENTITIES> _entities;
-	std::array<int, MAX_ENTITIES>	  _versions;
+	DeferredRemovalQueue			  m_removal_queue;
+	PackedArray<Entity, MAX_ENTITIES> m_entities;
+	std::array<int, MAX_ENTITIES>	  m_versions;
 
 	// component pools
 
-	ComponentPool<TransformComponent, MAX_TRANSFORM_COMPONENTS>         _transform_pool;
-	ComponentPool<MeshComponent, MAX_MESH_COMPONENTS>                   _mesh_pool;
-	ComponentPool<CameraComponent, MAX_CAMERA_COMPONENTS>               _camera_pool;
-	ComponentPool<LuaScriptComponent, MAX_LUA_COMPONENTS>               _lua_script_pool;
-	ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               _cpp_script_pool;
-	ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         _rigid_body_pool;
-	ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           _collider_pool;
-	ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    _point_light_pool;
-	ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> _directional_light_pool;
-	ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> _spot_light_pool;
-	ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     _sky_pool;
+	ComponentPool<TransformComponent, MAX_TRANSFORM_COMPONENTS>         m_transform_pool;
+	ComponentPool<MeshComponent, MAX_MESH_COMPONENTS>                   m_mesh_pool;
+	ComponentPool<CameraComponent, MAX_CAMERA_COMPONENTS>               m_camera_pool;
+	ComponentPool<LuaScriptComponent, MAX_LUA_COMPONENTS>               m_lua_script_pool;
+	ComponentPool<CppScriptComponent, MAX_CPP_COMPONENTS>               m_cpp_script_pool;
+	ComponentPool<RigidBodyComponent, MAX_RIGIDBODY_COMPONENTS>         m_rigid_body_pool;
+	ComponentPool<ColliderComponent, MAX_COLLIDER_COMPONENTS>           m_collider_pool;
+	ComponentPool<PointLightComponent, MAX_POINT_LIGHT_COMPONENTS>	    m_point_light_pool;
+	ComponentPool<DirectionalLightComponent, MAX_SPOT_LIGHT_COMPONENTS> m_directional_light_pool;
+	ComponentPool<SpotLightComponent, MAX_DIRECTIONAL_LIGHT_COMPONENTS> m_spot_light_pool;
+	ComponentPool<SkyComponent, MAX_SKY_COMPONENTS>                     m_sky_pool;
 
 	// systems
 
-	CameraSystem	_camera_system;
-	TransformSystem _transform_system;
-	RenderSystem    _render_system;
-	ScriptSystem    _script_system;
-	PhysicsSystem   _physics_system;
-	LightSystem		_light_system;
-	StringBuffer32  _name;
-	uint32_t		_scene_id;
-	PhysicsScene	_physics_scene;
+	CameraSystem	m_camera_system;
+	TransformSystem m_transform_system;
+	RenderSystem    m_render_system;
+	ScriptSystem    m_script_system;
+	PhysicsSystem   m_physics_system;
+	LightSystem		m_light_system;
+	StringBuffer32  m_name;
+	uint32_t		m_scene_id;
+	PhysicsScene	m_physics_scene;
 };
 
 TERMINUS_END_NAMESPACE

@@ -29,7 +29,10 @@ public:
     void simulate(FramePacket* pkt, double dt);
 	void load(StringBuffer32 scene);
 	void preload(StringBuffer32 scene);
-	void set_active_scene(StringBuffer32 scene);
+	void activate_scene(StringBuffer32 name);
+	void activate_scene(Scene* scene);
+	void deactivate_scene(StringBuffer32 name);
+	void deactivate_scene(Scene* scene);
 	void unload(StringBuffer32 scene);
 
 private:

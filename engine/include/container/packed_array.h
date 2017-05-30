@@ -49,6 +49,17 @@ struct PackedArray
     {
         return _objects[_indices[id & INDEX_MASK].index];
     }
+
+	inline bool set(ID id, T object)
+	{
+		if (!has(id))
+			return false;
+		else
+		{
+			_objects[_indices[id & INDEX_MASK].index] = object;
+			return true;
+		}
+	}
     
     inline ID add()
     {
@@ -58,6 +69,16 @@ struct PackedArray
         in.index = _num_objects++;
         return in.id;
     }
+
+	T* array()
+	{
+		return _objects[0];
+	}
+
+	T& operator[] (int i)
+	{
+		return _objects[i];
+	}
     
     inline uint32_t size()
     {
