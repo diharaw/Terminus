@@ -5,7 +5,9 @@
 #include <gameplay/entity.h>
 #include <graphics/draw_item.h>
 
-#define MAX_RENDERABLES 1024
+#define MAX_STATIC_RENDERABLES 1024
+#define MAX_SKELETAL_RENDERABLES 512
+#define MAX_TERRAINS 10
 #define MAX_BONES 100
 
 TERMINUS_BEGIN_NAMESPACE

@@ -1,5 +1,7 @@
 #include <resource/collider_component_factory.h>
 #include <physics/physics_engine.h>
+#include <core/context.h>
+
 
 namespace terminus
 {
@@ -13,10 +15,10 @@ namespace terminus
             if(set_from_mesh && scene->has_mesh_component(entity))
             {
                 MeshComponent& mesh = scene->get_mesh_component(entity);
-                radius = glm::distance(mesh.mesh->m_MaxExtents, mesh.mesh->m_MinExtents) / 2.0f;
+                radius = glm::distance(mesh.mesh->max_extents, mesh.mesh->min_extents) / 2.0f;
             }
             
-            physics::create_sphere_shape(cmp._sphere, radius);
+			context::get_physics_engine().create_sphere_shape(cmp._sphere, radius);
         }
         
         void create_box_collider(JsonValue& json, Entity& entity, Scene* scene, ColliderComponent& cmp)
@@ -33,10 +35,10 @@ namespace terminus
             if(set_from_mesh && scene->has_mesh_component(entity))
             {
                 MeshComponent& mesh = scene->get_mesh_component(entity);
-                half_extents = (mesh.mesh->m_MaxExtents - mesh.mesh->m_MinExtents) / 2.0f;
+                half_extents = (mesh.mesh->max_extents - mesh.mesh->min_extents) / 2.0f;
             }
             
-            physics::create_box_shape(cmp._box, half_extents);
+			context::get_physics_engine().create_box_shape(cmp._box, half_extents);
         }
         
         void create_cylinder_collider(JsonValue& json, Entity& entity, Scene* scene, ColliderComponent& cmp)
@@ -53,10 +55,10 @@ namespace terminus
             if(set_from_mesh && scene->has_mesh_component(entity))
             {
                 MeshComponent& mesh = scene->get_mesh_component(entity);
-                half_extents = (mesh.mesh->m_MaxExtents - mesh.mesh->m_MinExtents) / 2.0f;
+                half_extents = (mesh.mesh->max_extents - mesh.mesh->min_extents) / 2.0f;
             }
             
-            physics::create_cylinder_shape(cmp._cylinder, half_extents);
+			context::get_physics_engine().create_cylinder_shape(cmp._cylinder, half_extents);
         }
         
         void create_capsule_collider(JsonValue& json, Entity& entity, Scene* scene, ColliderComponent& cmp)
@@ -68,13 +70,13 @@ namespace terminus
             if(set_from_mesh && scene->has_mesh_component(entity))
             {
                 MeshComponent& mesh = scene->get_mesh_component(entity);
-                radius = glm::distance(Vector2(mesh.mesh->m_MaxExtents.x, mesh.mesh->m_MaxExtents.z),
-                                       Vector2(mesh.mesh->m_MinExtents.x, mesh.mesh->m_MinExtents.z)) / 2.0f;
+                radius = glm::distance(Vector2(mesh.mesh->max_extents.x, mesh.mesh->max_extents.z),
+                                       Vector2(mesh.mesh->min_extents.x, mesh.mesh->min_extents.z)) / 2.0f;
                 
-                height = mesh.mesh->m_MaxExtents.y - mesh.mesh->m_MinExtents.y;
+                height = mesh.mesh->max_extents.y - mesh.mesh->min_extents.y;
             }
             
-            physics::create_capsule_shape(cmp._capsule, radius, height);
+			context::get_physics_engine().create_capsule_shape(cmp._capsule, radius, height);
         }
 
         
@@ -89,11 +91,15 @@ namespace terminus
             
             float constant = json["constant"].GetFloat();
             
-            physics::create_staic_plane_shape(cmp._plane, normal, constant);
+			context::get_physics_engine().create_staic_plane_shape(cmp._plane, normal, constant);
         }
         
         void create(JsonValue& json, Entity& entity, Scene* scene)
         {
+			// @NOTE: Come up with a more elegant way to set gravity.
+			if (!scene->m_physics_scene.active())
+				context::get_physics_engine().create_scene(scene->m_physics_scene, Vector3(0.0f, -10.0f, 0.0f));
+
             String collider_type = String(json["collider_type"].GetString());
             ColliderComponent& cmp = scene->attach_collider_component(entity);
             

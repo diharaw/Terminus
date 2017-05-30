@@ -48,7 +48,7 @@ namespace terminus
             EventHandler::update();
             
             // Update Scene
-            context._scene_manager.update(platform->get_delta_time());
+            context._scene_manager.simulate(_sim_pkt, platform->get_delta_time());
 
             TERMINUS_END_CPU_PROFILE;
             // Synchronize Rendering Thread

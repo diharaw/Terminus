@@ -24,7 +24,7 @@ bool scene_view_z_index_sort(SceneView i, SceneView j)
 
 Renderer::Renderer()
 {
-    _thread_pool = global::get_default_threadpool();
+    m_thread_pool = global::get_default_threadpool();
 }
 
 Renderer::~Renderer()
@@ -34,8 +34,8 @@ Renderer::~Renderer()
 
 void Renderer::initialize(FramePacket* pkts)
 {
-	_pkt = pkts;
-	_thread = std::thread(&Renderer::render_loop, this);
+	m_pkt = pkts;
+	m_thread = std::thread(&Renderer::render_loop, this);
 	sync::notify_main_ready();
 	sync::wait_for_renderer_ready();
 }
@@ -44,7 +44,7 @@ void Renderer::initialize_internal()
 {
 	RenderDevice& device = context::get_render_device();
 
-	_graphics_queue = device.create_command_queue();
+	m_graphics_queue = device.create_command_queue();
 
 	// Initialize the CommandPools in each FramePacket.
 
@@ -52,10 +52,11 @@ void Renderer::initialize_internal()
 	{
 		for (int j = 0; j < 10; j++)
 		{
-			_pkt[i].scene_render_states[j].cmd_pool = device.create_command_pool();
-			
 			for (int k = 0; k < 4; k++)
-				_pkt[i].scene_render_states[j].cmd_buffers[k] = device.create_command_buffer(_pkt[i].scene_render_states[j].cmd_pool);
+			{
+				m_pkt[i].scene_render_states[j].cmd_pool[k] = device.create_command_pool();
+				m_pkt[i].scene_render_states[j].cmd_buffers[k] = device.create_command_buffer(m_pkt[i].scene_render_states[j].cmd_pool[k]);
+			}
 		}
 	}
 
@@ -65,65 +66,66 @@ void Renderer::initialize_internal()
 	desc.usage_type = BufferUsageType::DYNAMIC;
 	desc.size = sizeof(PerFrameUniforms);
 
-	_per_frame_buffer = device.create_uniform_buffer(desc);
+	m_per_frame_buffer = device.create_uniform_buffer(desc);
 
 	desc.size = sizeof(PerFrameSkyUniforms);
 
-	_per_frame_sky_buffer = device.create_uniform_buffer(desc);
+	m_per_frame_sky_buffer = device.create_uniform_buffer(desc);
 
 	desc.size = sizeof(PerDrawUniforms);
 
-	_per_draw_buffer = device.create_uniform_buffer(desc);
+	m_per_draw_buffer = device.create_uniform_buffer(desc);
 
 	desc.size = sizeof(PerDrawMaterialUniforms);
 
-	_per_draw_material_buffer = device.create_uniform_buffer(desc);
+	m_per_draw_material_buffer = device.create_uniform_buffer(desc);
 
 	desc.size = sizeof(PerDrawBoneOffsetUniforms);
 
-	_per_draw_bone_offsets_buffer = device.create_uniform_buffer(desc);
+	m_per_draw_bone_offsets_buffer = device.create_uniform_buffer(desc);
 }
 
 void Renderer::shutdown_internal()
 {
 	RenderDevice& device = context::get_render_device();
 
-	device.destroy_uniform_buffer(_per_frame_buffer);
-	device.destroy_uniform_buffer(_per_frame_sky_buffer);
-	device.destroy_uniform_buffer(_per_draw_buffer);
-	device.destroy_uniform_buffer(_per_draw_material_buffer);
-	device.destroy_uniform_buffer(_per_draw_bone_offsets_buffer);
+	device.destroy_uniform_buffer(m_per_frame_buffer);
+	device.destroy_uniform_buffer(m_per_frame_sky_buffer);
+	device.destroy_uniform_buffer(m_per_draw_buffer);
+	device.destroy_uniform_buffer(m_per_draw_material_buffer);
+	device.destroy_uniform_buffer(m_per_draw_bone_offsets_buffer);
 
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 10; j++)
 		{
 			for (int k = 0; k < 4; k++)
-				device.destroy_command_buffer(_pkt[i].scene_render_states[j].cmd_pool, _pkt[i].scene_render_states[j].cmd_buffers[k]);
-
-			device.destroy_command_pool(_pkt[i].scene_render_states[j].cmd_pool);
+			{
+				device.destroy_command_buffer(m_pkt[i].scene_render_states[j].cmd_pool[k], m_pkt[i].scene_render_states[j].cmd_buffers[k]);
+				device.destroy_command_pool(m_pkt[i].scene_render_states[j].cmd_pool[k]);
+			}
 		}
 	}
 
-	device.destroy_command_queue(_graphics_queue);
+	device.destroy_command_queue(m_graphics_queue);
 }
 
 void Renderer::shutdown(FramePacket* pkts)
 {
-	_pkt = pkts;
+	m_pkt = pkts;
 	sync::notify_renderer_begin();
 }
 
 void Renderer::enqueue_upload_task(Task& task)
 {
-	concurrent_queue::push(_graphics_upload_queue, task);
+	concurrent_queue::push(m_graphics_upload_queue, task);
 }
 
 void Renderer::generate_commands(Scene* scene)
 {
-    uint16_t view_count = scene->_render_system.view_count();
+    uint16_t view_count = scene->m_render_system.view_count();
     
-    int worker_count = _thread_pool->get_num_worker_threads();
+    int worker_count = m_thread_pool->get_num_worker_threads();
     
     // Assign views to threads and frustum cull, sort and fill command buffers in parallel.
     
@@ -189,14 +191,14 @@ void Renderer::render_loop()
 		TERMINUS_BEGIN_CPU_PROFILE(renderer);
 
 		// submit api calls
-		context._render_device.submit_command_queue(_graphics_queue, _pkt->cmd_buffers[0], _pkt->cmd_buffer_count);
+		context._render_device.submit_command_queue(m_graphics_queue, m_pkt->cmd_buffers[0], m_pkt->cmd_buffer_count);
 
 		// optional waiting in Vulkan/Direct3D 12 API's.
 
 		// do resource uploading. one task per frame for now.
-		if (!concurrent_queue::empty(_graphics_upload_queue))
+		if (!concurrent_queue::empty(m_graphics_upload_queue))
 		{
-			Task upload_task = concurrent_queue::pop(_graphics_upload_queue);
+			Task upload_task = concurrent_queue::pop(m_graphics_upload_queue);
 			upload_task._function.Invoke(&upload_task._data[0]);
 			sync::notify_loader_wakeup();
 		}
@@ -205,7 +207,6 @@ void Renderer::render_loop()
 
 		// notify done
 		sync::notify_renderer_done();
-
 
 		gui_backend->render();
 		context._render_device.swap_buffers();
@@ -220,7 +221,7 @@ void Renderer::submit(FramePacket* pkt)
 {
 	if (pkt)
 	{
-		_pkt = pkt;
+		m_pkt = pkt;
 		sync::notify_renderer_begin();
 	}
 	// Wait for submission end
@@ -232,6 +233,13 @@ void Renderer::render(FramePacket* pkt)
 	{
 		// Sort SceneViews according to Z-Index.
 		std::sort(std::begin(pkt->views), std::end(pkt->views), scene_view_z_index_sort);
+
+		for (uint32_t i = 0; i < pkt->total_views; i++)
+		{
+			SceneView& view = pkt->views[i];
+
+			//
+		}
 	}
 }
 

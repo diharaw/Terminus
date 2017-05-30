@@ -3,6 +3,7 @@
 #include <core/macro.h>
 #include <container/concurrent_queue.h>
 #include <thread/thread_pool.h>
+#include <graphics/renderer/mesh_renderer.h>
 
 // Uniform Slots
 
@@ -70,19 +71,20 @@ struct RenderPrepareTaskData
 class Renderer
 {
 private:
-    DefaultThreadPool*  _thread_pool;
-	GraphicsUploadQueue _graphics_upload_queue;
-	std::thread         _thread;
-	FramePacket*		_pkt;
-	CommandQueue*		_graphics_queue;
-	bool				_running;
+    DefaultThreadPool*  m_thread_pool;
+	GraphicsUploadQueue m_graphics_upload_queue;
+	std::thread         m_thread;
+	FramePacket*		m_pkt;
+	CommandQueue*		m_graphics_queue;
+	bool				m_running;
+	MeshRenderer		m_mesh_renderer;
     
 public:
-    UniformBuffer* _per_frame_buffer;
-    UniformBuffer* _per_frame_sky_buffer;
-    UniformBuffer* _per_draw_buffer;
-    UniformBuffer* _per_draw_material_buffer;
-    UniformBuffer* _per_draw_bone_offsets_buffer;
+    UniformBuffer* m_per_frame_buffer;
+    UniformBuffer* m_per_frame_sky_buffer;
+    UniformBuffer* m_per_draw_buffer;
+    UniformBuffer* m_per_draw_material_buffer;
+    UniformBuffer* m_per_draw_bone_offsets_buffer;
     
 public:
     Renderer();

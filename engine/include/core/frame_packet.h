@@ -12,11 +12,12 @@ struct CommandBuffer;
 
 struct SceneRenderState
 {
-	uint32_t		 num_renderables;
-	StaticRenderable static_renderables[MAX_RENDERABLES];
-	uint16_t		 view_count;
-	CommandPool*	 cmd_pool;
-	CommandBuffer*	 cmd_buffers[4];
+	uint32_t		   num_renderables;
+	StaticRenderable   static_renderables[MAX_STATIC_RENDERABLES];
+	SkeletalRenderable skeletal_renderables[MAX_SKELETAL_RENDERABLES];
+	uint16_t		   view_count;
+	CommandPool*	   cmd_pool[4];
+	CommandBuffer*	   cmd_buffers[4];
 };
 
 struct FramePacket
