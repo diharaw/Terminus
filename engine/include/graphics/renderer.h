@@ -3,7 +3,7 @@
 #include <core/macro.h>
 #include <container/concurrent_queue.h>
 #include <thread/thread_pool.h>
-#include <graphics/renderer/mesh_renderer.h>
+#include <graphics/renderer/scene_renderer.h>
 
 // Uniform Slots
 
@@ -77,14 +77,12 @@ private:
 	FramePacket*		m_pkt;
 	CommandQueue*		m_graphics_queue;
 	bool				m_running;
-	MeshRenderer		m_mesh_renderer;
-    
-public:
-    UniformBuffer* m_per_frame_buffer;
-    UniformBuffer* m_per_frame_sky_buffer;
-    UniformBuffer* m_per_draw_buffer;
-    UniformBuffer* m_per_draw_material_buffer;
-    UniformBuffer* m_per_draw_bone_offsets_buffer;
+	SceneRenderer		m_scene_renderer;
+    UniformBuffer*		m_per_frame_buffer;
+    UniformBuffer*		m_per_frame_sky_buffer;
+    UniformBuffer*		m_per_draw_buffer;
+    UniformBuffer*		m_per_draw_material_buffer;
+    UniformBuffer*		m_per_draw_bone_offsets_buffer;
     
 public:
     Renderer();

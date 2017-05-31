@@ -6,6 +6,7 @@
 #include <resource/shader_cache.h>
 #include <core/frame_packet.h>
 #include <utility/profiler.h>
+#include <graphics/command_buffer.h>
 #include <core/sync.h>
 
 TERMINUS_BEGIN_NAMESPACE
@@ -232,13 +233,56 @@ void Renderer::render(FramePacket* pkt)
 	if (pkt)
 	{
 		// Sort SceneViews according to Z-Index.
-		std::sort(std::begin(pkt->views), std::end(pkt->views), scene_view_z_index_sort);
+		std::sort(std::begin(pkt->views), std::begin(pkt->views) + pkt->total_views, scene_view_z_index_sort);
 
 		for (uint32_t i = 0; i < pkt->total_views; i++)
 		{
 			SceneView& view = pkt->views[i];
 
-			//
+			for (uint32_t j = 0; j < view.rendering_path->_num_render_passes; j++)
+			{
+				RenderPass* render_pass = view.rendering_path->_render_passes[j];
+
+				switch (render_pass->render_pass_type)
+				{
+				case RenderPassType::SHADOW_MAP:
+				{
+					break;
+				}
+				case RenderPassType::SCENE:
+				{
+					m_scene_renderer.render(render_pass, pkt);
+					break;
+				}
+				case RenderPassType::SKY:
+				{
+					break;
+				}
+				case RenderPassType::UI:
+				{
+					break;
+				}
+				case RenderPassType::DEBUG:
+				{
+					break;
+				}
+				case RenderPassType::POST_PROCESS:
+				{
+					break;
+				}
+				case RenderPassType::COMPOSITION:
+				{
+					break;
+				}
+				}
+
+				for (uint32_t k = 0; k < render_pass->num_sub_passes; k++)
+				{
+					RenderSubPass& sub_pass = render_pass->sub_passes[k];
+
+					
+				}
+			}
 		}
 	}
 }

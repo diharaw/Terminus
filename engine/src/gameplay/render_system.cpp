@@ -23,13 +23,13 @@ void RenderSystem::initialize(Scene* scene)
 {
     m_scene = scene;
     
-	CameraComponent* camera_array = m_scene->_camera_pool.get_array();
-	uint32_t num_cameras = m_scene->_camera_pool.get_num_objects();
+	CameraComponent* camera_array = m_scene->m_camera_pool.get_array();
+	uint32_t num_cameras = m_scene->m_camera_pool.get_num_objects();
     
     m_skydome_mesh = context::get_mesh_cache().load("sky_dome.tsm");
     
-    if(scene->_sky_pool.get_num_objects() > 0)
-        m_sky_cmp = scene->_sky_pool.get_array();
+    if(scene->m_sky_pool.get_num_objects() > 0)
+        m_sky_cmp = scene->m_sky_pool.get_array();
     else
         m_sky_cmp = nullptr;
     
@@ -37,9 +37,9 @@ void RenderSystem::initialize(Scene* scene)
     
     // TODO : For each Shadow Camera, add SceneView
 
-    for (int i = 0; i < m_scene->_entities._num_objects; i++)
+    for (int i = 0; i < m_scene->m_entities._num_objects; i++)
     {
-		Entity& entity = m_scene->_entities._objects[i];
+		Entity& entity = m_scene->m_entities._objects[i];
         on_entity_created(entity);
     }
     
@@ -61,10 +61,10 @@ void RenderSystem::initialize(Scene* scene)
         {
             RenderPass* render_pass = path->_render_passes[j];
             
-            if(render_pass->geometry_type == GeometryType::SKY)
+            if(render_pass->render_pass_type == RenderPassType::SKY)
             {
-                for(RenderSubPass& sub_pass : render_pass->sub_passes)
-                    shader_cache->load(RenderableType::Skybox, render_pass->pass_id, &sub_pass, nullptr);
+                for(uint32_t k = 0; k < render_pass->num_sub_passes; k++)
+                    shader_cache->load(RenderableType::Skybox, render_pass->pass_id, &render_pass->sub_passes[k], nullptr);
             }
         }
     }
@@ -167,7 +167,7 @@ void RenderSystem::on_entity_created(Entity entity)
             {
                 RenderPass* render_pass = path->_render_passes[j];
                 
-                if(render_pass->geometry_type == GeometryType::SCENE)
+                if(render_pass->render_pass_type == RenderPassType::SCENE)
                 {
                     for(RenderSubPass& sub_pass : render_pass->sub_passes)
                     {

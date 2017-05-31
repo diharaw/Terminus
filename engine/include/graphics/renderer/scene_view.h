@@ -16,6 +16,7 @@ struct SceneView
 	Matrix4		   view_matrix;
 	Matrix4		   projection_matrix;
 	Matrix4		   view_projection_matrix;
+	Vector3		   camera_pos;
 	Vector4		   screen_rect;
 	Texture*	   render_target;
 	bool		   is_shadow;

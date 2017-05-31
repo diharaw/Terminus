@@ -14,7 +14,7 @@ MeshRenderer::~MeshRenderer()
 
 }
 
-void MeshRenderer::render(FramePacket* pkt)
+void MeshRenderer::render(RenderSubPass& sub_pass, FramePacket* pkt)
 {
 
 }

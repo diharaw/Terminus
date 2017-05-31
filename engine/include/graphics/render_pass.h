@@ -7,8 +7,6 @@
 
 namespace terminus
 {
-	using TextureHandle = uint16_t;
-
 	struct RenderSubPass;
 	struct Texture2D;
 	struct Framebuffer;
@@ -24,65 +22,17 @@ namespace terminus
 		SU_LIGHT_INFO, // Spot, Directional, Point Light information
 	};
 
-	enum VariantType
-	{
-		VARIANT_NONE = 0,
-		VARIANT_INT,        // 4-byte
-		VARIANT_UINT8,      // 1-byte
-		VARIANT_UINT16,     // 2-byte
-		VARIANT_UINT32,     // 4-byte
-		VARIANT_UINT64,     // 8-byte
-		VARIANT_FLOAT,      // 4-byte
-		VARIANT_DOUBLE,     // 8-byte
-		VARIANT_UINT,       // 4-byte
-		VARIANT_VECTOR2,    // 8-byte
-		VARIANT_VECTOR3,    // 12-byte
-		VARIANT_VECTOR4,    // 16-byte
-	};
-
 	enum class RenderPassType
 	{
 		SHADOW_MAP = 0,
-		GAME_WORLD,
+		SCENE,
+		SKY,
 		POST_PROCESS,
 		UI,
 		DEBUG,
 		COMPOSITION
 	};
 
-	struct Variant
-	{
-		void* data;
-		VariantType type;
-		size_t size;
-
-		Variant(int* _value)
-		{
-			data = (void*)_value;
-			type = VARIANT_INT;
-			size = sizeof(*_value);
-		}
-
-		Variant(float* _value)
-		{
-			data = (void*)_value;
-			type = VARIANT_FLOAT;
-			size = sizeof(*_value);
-		}
-
-		Variant(double* _value)
-		{
-			data = (void*)_value;
-			type = VARIANT_DOUBLE;
-			size = sizeof(*_value);
-		}
-	};
-
-	using VariantList = std::vector<Variant>;
-	using HandleList = std::vector<ResourceHandle>;
-	using RenderSubPassList = std::vector<RenderSubPass>;
-	using RenderTargetInfoList = std::vector<RenderTargetInfo>;
-	using FramebufferList = std::vector<Framebuffer*>;
 	using FramebufferInfoList = std::vector<FramebufferInfo>;
 
 	//struct RenderSubPass
@@ -155,7 +105,6 @@ namespace terminus
         uint16              pass_id;
 		String				name;
 		RenderPassType	    render_pass_type;
-        GeometryType        geometry_type;
         uint16_t            num_sub_passes;
 		RenderSubPass       sub_passes[16];
 		FramebufferInfoList framebuffer_info_list;

@@ -15,13 +15,6 @@ namespace terminus
         size_t size;
     };
     
-    enum class GeometryType
-    {
-        SCENE = 0,
-        SKY = 1,
-        QUAD = 2
-    };
-    
     enum class DepthTest
     {
         DISABLE = 0,
