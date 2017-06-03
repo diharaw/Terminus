@@ -16,8 +16,8 @@ namespace terminus
             InputLayout* layout;
             void* index_buffer_data;
             void* vertex_buffer_data;
-            uint index_buffer_size;
-            uint vertex_buffer_size;
+            uint32_t index_buffer_size;
+            uint32_t vertex_buffer_size;
             BufferUsageType usageType;
         };
         
@@ -55,9 +55,9 @@ namespace terminus
             va_desc.vertex_buffer = vertexBuffer;
             va_desc.layout_type = task_data->layoutType;
             
-            task_data->mesh->VertexArray = device.create_vertex_array(va_desc);
+            task_data->mesh->vertex_array = device.create_vertex_array(va_desc);
             
-            if(!task_data->mesh->VertexArray)
+            if(!task_data->mesh->vertex_array)
             {
                 return;
             }
@@ -70,14 +70,15 @@ namespace terminus
             if(!data)
                 return nullptr;
             
-            Task task;
+            Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             CreateMeshTaskData* gpu_task_data = task_data<CreateMeshTaskData>(task);
             
             Mesh* mesh = new Mesh();
             
             gpu_task_data->mesh = mesh;
             gpu_task_data->index_buffer_data = &data->indices[0];
-            gpu_task_data->index_buffer_size = sizeof(uint) * data->header.m_IndexCount;
+            gpu_task_data->index_buffer_size = sizeof(uint32_t) * data->header.m_IndexCount;
             gpu_task_data->usageType = BufferUsageType::STATIC;
             
             if (data->IsSkeletal)
@@ -96,32 +97,32 @@ namespace terminus
             }
             
             
-            task._function.Bind<&create_mesh_task>();
+            task->_function.Bind<&create_mesh_task>();
             
-            submit_gpu_upload_task(task);
+            renderer->enqueue_upload_task(task);
             
-            mesh->SubMeshes = new SubMesh[data->header.m_MeshCount];
-            mesh->m_MinExtents = data->header.m_MinExtents;
-            mesh->m_MaxExtents = data->header.m_MaxExtents;
+            mesh->sub_meshes = new SubMesh[data->header.m_MeshCount];
+            mesh->min_extents = data->header.m_MinExtents;
+            mesh->max_extents = data->header.m_MaxExtents;
             
             for (int i = 0; i < data->header.m_MeshCount; i++)
             {
-                mesh->SubMeshes[i].m_BaseIndex = data->meshes[i].m_BaseIndex;
-                mesh->SubMeshes[i].m_IndexCount = data->meshes[i].m_IndexCount;
-                mesh->SubMeshes[i].m_BaseVertex = data->meshes[i].m_BaseVertex;
-                mesh->SubMeshes[i].m_MinExtents = data->meshes[i].m_MinExtents;
-                mesh->SubMeshes[i].m_MaxExtents = data->meshes[i].m_MaxExtents;
+                mesh->sub_meshes[i].base_index = data->meshes[i].m_BaseIndex;
+                mesh->sub_meshes[i].index_count = data->meshes[i].m_IndexCount;
+                mesh->sub_meshes[i].base_vertex = data->meshes[i].m_BaseVertex;
+                mesh->sub_meshes[i].min_extents = data->meshes[i].m_MinExtents;
+                mesh->sub_meshes[i].max_extents = data->meshes[i].m_MaxExtents;
                 
                 int mat_index = (int)data->meshes[i].m_MaterialIndex;
                 String mat_path = std::string(data->materials[mat_index].material);
                 
-                mesh->SubMeshes[i]._material = context::get_material_cache().load(mat_path);
+                mesh->sub_meshes[i].material = context::get_material_cache().load(mat_path);
             }
             
-            mesh->MeshCount = data->header.m_MeshCount;
+            mesh->mesh_count = data->header.m_MeshCount;
             mesh->id = mesh_name;
             
-            T_SAFE_DELETE(data);
+            TE_SAFE_DELETE(data);
             
             return mesh;
         }

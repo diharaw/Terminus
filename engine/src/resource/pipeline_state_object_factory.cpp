@@ -164,18 +164,20 @@ namespace terminus
             JsonDocument doc;
             doc.Parse(load_data->buffer);
             
-            Task task;
+			Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             PipelineStateObject* pipeline_state = nullptr;
             CreatePipelineState* pso_task_data = task_data<CreatePipelineState>(task);
             pso_task_data->pso = &pipeline_state;
-            task._function.Bind<&create_pipeline_state_task>();
+
+            task->_function.Bind<&create_pipeline_state_task>();
             
             parse_depth_stencil_state(doc, pso_task_data->desc.depth_stencil_state);
             parse_rasterizer_state(doc, pso_task_data->desc.rasterizer_state);
             parse_blend_state(doc, pso_task_data->desc.blend_state);
             parse_draw_primitive(doc, pso_task_data->desc.primitive);
             
-            submit_gpu_upload_task(task);
+            renderer->enqueue_upload_task(task);
             
             if(!pipeline_state->depth_stencil_state || !pipeline_state->rasterizer_state)
             {

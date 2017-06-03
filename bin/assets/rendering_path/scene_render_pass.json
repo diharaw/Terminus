@@ -1,34 +1,25 @@
 {
 	"name" : "test_render_pass",
-	"render_pass_type" : "GAME_WORLD",
-	"global_resources" :
-	{
-		"framebuffers" :
-		[
-			{
-				"name" : "color_buffer",
-				"width_divisor" : 1.0,
-				"height_divisor" : 1.0,
-				"render_targets" :
-				[
-					{
-						"name" : "color_attachment",
-						"format" : "R8G8B8A8_UNORM"
-					},
-					{
-						"name" : "depth_attachment",
-						"format" : "D24_FLOAT_S8_UINT"	
-					}
-				]
-			}
-		]
-	},
+	"sub_pass_type" : "GAME_WORLD",
 	"sub_passes" :
 	[
 		{
 			"vs_template" : "vs_test_template",
 			"ps_template" : "ps_test_template",
-			"framebuffer_target" : null
+			"framebuffer_target" : null,
+			"uniforms" :
+			[
+				{
+					"name"  	  : "Radius",
+					"data_type"	  : "FLOAT",
+					"shader_type" : "PIXEL",
+					"value" 	  : 24.3
+				}
+			],
+			"textures" : 
+			[
+
+			]
 		}
 	]
 }

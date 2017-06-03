@@ -7,6 +7,8 @@
 
 namespace terminus
 {
+	#define MAX_SUB_PASSES 16
+
 	struct RenderSubPass;
 	struct Texture2D;
 	struct Framebuffer;
@@ -22,7 +24,7 @@ namespace terminus
 		SU_LIGHT_INFO, // Spot, Directional, Point Light information
 	};
 
-	enum class RenderPassType
+	enum class SubPassType
 	{
 		SHADOW_MAP = 0,
 		SCENE,
@@ -85,6 +87,7 @@ namespace terminus
 		Framebuffer*         framebuffer_target;
         ShaderProgram*       program;
         PipelineStateObject* pso;
+		SubPassType			 sub_pass_type;
 	};
 
 	struct RenderTargetInfo
@@ -104,9 +107,8 @@ namespace terminus
 	{
         uint16              pass_id;
 		String				name;
-		RenderPassType	    render_pass_type;
         uint16_t            num_sub_passes;
-		RenderSubPass       sub_passes[16];
+		RenderSubPass       sub_passes[MAX_SUB_PASSES];
 		FramebufferInfoList framebuffer_info_list;
         
         RenderPass()

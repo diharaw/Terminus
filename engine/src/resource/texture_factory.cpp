@@ -60,7 +60,8 @@ namespace terminus
             if(!data)
                 return nullptr;
             
-            Task task;
+			Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             Texture2D* texture;
             
             CreateTextureTaskData* texture_task_data = task_data<CreateTextureTaskData>(task);
@@ -68,9 +69,9 @@ namespace terminus
             texture_task_data->load_data = data;
             texture_task_data->texture = &texture;
             
-            task._function.Bind<&create_texture_task>();
+            task->_function.Bind<&create_texture_task>();
             
-            submit_gpu_upload_task(task);
+            renderer->enqueue_upload_task(task);
             
             std::cout << "Loaded Texture : " << image_name << std::endl;
             

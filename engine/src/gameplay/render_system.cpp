@@ -21,6 +21,9 @@ RenderSystem::~RenderSystem()
 
 void RenderSystem::initialize(Scene* scene)
 {
+	if (!scene)
+		return;
+
     m_scene = scene;
     
 	CameraComponent* camera_array = m_scene->m_camera_pool.get_array();
@@ -61,11 +64,11 @@ void RenderSystem::initialize(Scene* scene)
         {
             RenderPass* render_pass = path->_render_passes[j];
             
-            if(render_pass->render_pass_type == RenderPassType::SKY)
-            {
-                for(uint32_t k = 0; k < render_pass->num_sub_passes; k++)
-                    shader_cache->load(RenderableType::Skybox, render_pass->pass_id, &render_pass->sub_passes[k], nullptr);
-            }
+			for (uint32_t k = 0; k < render_pass->num_sub_passes; k++)
+			{
+				if (render_pass->sub_passes[k].sub_pass_type == SubPassType::SKY)
+					shader_cache->load(RenderableType::Skybox, render_pass->pass_id, &render_pass->sub_passes[k], nullptr);
+			}    
         }
     }
 }
@@ -167,17 +170,17 @@ void RenderSystem::on_entity_created(Entity entity)
             {
                 RenderPass* render_pass = path->_render_passes[j];
                 
-                if(render_pass->render_pass_type == RenderPassType::SCENE)
+                for(RenderSubPass& sub_pass : render_pass->sub_passes)
                 {
-                    for(RenderSubPass& sub_pass : render_pass->sub_passes)
-                    {
-                        for (int x = 0; x < renderable->mesh->mesh_count; x++)
-                        {
-                            Material* mat = renderable->mesh->sub_meshes[x].material;
-                            shader_cache->load(renderable->type, render_pass->pass_id, &sub_pass, mat);
-                        }
-                    }
-                }
+					if (sub_pass.sub_pass_type == SubPassType::SCENE)
+					{
+						for (int x = 0; x < renderable->mesh->mesh_count; x++)
+						{
+							Material* mat = renderable->mesh->sub_meshes[x].material;
+							shader_cache->load(renderable->type, render_pass->pass_id, &sub_pass, mat);
+						}
+					}
+				}
             }
         }
     }

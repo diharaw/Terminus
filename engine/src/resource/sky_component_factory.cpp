@@ -35,12 +35,13 @@ namespace terminus
             component.cubemap = json["cubemap"].GetString();
             component.texture = cache.load_cubemap(std::string(component.cubemap.c_str()));
             
-            Task task;
+			Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             CreateSamplerTaskData* sampler_task_data = task_data<CreateSamplerTaskData>(task);
             
             sampler_task_data->sampler = &component.sampler;
-            task._function.Bind<&create_sampler_task>();
-            submit_gpu_upload_task(task);
+            task->_function.Bind<&create_sampler_task>();
+            renderer->enqueue_upload_task(task);
         }
     }
 }

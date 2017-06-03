@@ -9,14 +9,17 @@
 #include <graphics/command_buffer.h>
 #include <core/sync.h>
 
+#define PER_FRAME_ALLOCATOR_SIZE 1 * MB_IN_BYTES
+
 TERMINUS_BEGIN_NAMESPACE
 
 // Sort Method
 
-bool DrawItemSort(DrawItem i, DrawItem j)
+struct GenerateViewCommandsTask
 {
-    return i.sort_key.key > j.sort_key.key;
-}
+	SceneView*		  scene_view;
+	SceneRenderState* scene_state;
+};
 
 bool scene_view_z_index_sort(SceneView i, SceneView j)
 {
@@ -51,12 +54,15 @@ void Renderer::initialize_internal()
 
 	for (int i = 0; i < 3; i++)
 	{
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < MAX_VIEWS; j++)
 		{
+			m_pkt[i].views[j].cmd_pool = device.create_command_pool();
+			void* mem = global::get_default_allocator()->Allocate(PER_FRAME_ALLOCATOR_SIZE, 8);
+			m_pkt[i].views[j].allocator = TE_NEW(global::get_default_allocator()) LinearAllocator(PER_FRAME_ALLOCATOR_SIZE, mem);
+
 			for (int k = 0; k < 4; k++)
 			{
-				m_pkt[i].scene_render_states[j].cmd_pool[k] = device.create_command_pool();
-				m_pkt[i].scene_render_states[j].cmd_buffers[k] = device.create_command_buffer(m_pkt[i].scene_render_states[j].cmd_pool[k]);
+				m_pkt[i].views[j].cmd_buffers[k] = device.create_command_buffer(m_pkt[i].views[j].cmd_pool);
 			}
 		}
 	}
@@ -98,13 +104,12 @@ void Renderer::shutdown_internal()
 
 	for (int i = 0; i < 3; i++)
 	{
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < MAX_VIEWS; j++)
 		{
 			for (int k = 0; k < 4; k++)
-			{
-				device.destroy_command_buffer(m_pkt[i].scene_render_states[j].cmd_pool[k], m_pkt[i].scene_render_states[j].cmd_buffers[k]);
-				device.destroy_command_pool(m_pkt[i].scene_render_states[j].cmd_pool[k]);
-			}
+				device.destroy_command_buffer(m_pkt[i].views[j].cmd_pool, m_pkt[i].views[j].cmd_buffers[k]);
+
+			device.destroy_command_pool(m_pkt[i].views[j].cmd_pool);
 		}
 	}
 
@@ -117,53 +122,15 @@ void Renderer::shutdown(FramePacket* pkts)
 	sync::notify_renderer_begin();
 }
 
-void Renderer::enqueue_upload_task(Task& task)
+Task* Renderer::create_upload_task()
 {
-	concurrent_queue::push(m_graphics_upload_queue, task);
+	return m_graphics_upload_queue.allocate();
 }
 
-void Renderer::generate_commands(Scene* scene)
+void Renderer::enqueue_upload_task(Task* task)
 {
-    uint16_t view_count = scene->m_render_system.view_count();
-    
-    int worker_count = m_thread_pool->get_num_worker_threads();
-    
-    // Assign views to threads and frustum cull, sort and fill command buffers in parallel.
-    
-    int items_per_thread = std::floor((float)view_count / (float)worker_count);
-    
-    if(items_per_thread == 0)
-        items_per_thread = view_count;
-    
-    int submitted_items = 0;
-    int scene_index = 0;
-    bool is_done = false;
-    
-    while(!is_done)
-    {
-        int remaining_items = view_count - submitted_items;
-        
-        if(remaining_items <= items_per_thread)
-        {
-            is_done = true;
-            items_per_thread = remaining_items;
-        }
-        
-        Task task;
-        RenderPrepareTaskData* data = task_data<RenderPrepareTaskData>(task);
-        
-        data->_scene_index = scene_index++;
-        data->_scene = scene;
-        
-        task._function.Bind<Renderer, &Renderer::generate_commands_view>(this);
-        
-        submitted_items += items_per_thread;
-        
-        _thread_pool->enqueue(task);
-    }
-    
-    _thread_pool->wait();
-
+	m_graphics_upload_queue.push(task);
+	sync::wait_for_loader_wakeup();
 }
 
 void Renderer::render_loop()
@@ -197,11 +164,15 @@ void Renderer::render_loop()
 		// optional waiting in Vulkan/Direct3D 12 API's.
 
 		// do resource uploading. one task per frame for now.
-		if (!concurrent_queue::empty(m_graphics_upload_queue))
+		if (!m_graphics_upload_queue.empty())
 		{
-			Task upload_task = concurrent_queue::pop(m_graphics_upload_queue);
-			upload_task._function.Invoke(&upload_task._data[0]);
-			sync::notify_loader_wakeup();
+			Task* upload_task = m_graphics_upload_queue.pop();
+
+			if (upload_task)
+			{
+				upload_task->_function.Invoke(&upload_task->_data[0]);
+				sync::notify_loader_wakeup();
+			}
 		}
 
 		TERMINUS_END_CPU_PROFILE;
@@ -232,56 +203,72 @@ void Renderer::render(FramePacket* pkt)
 {
 	if (pkt)
 	{
-		// Sort SceneViews according to Z-Index.
+		// Sort SceneViews by Z-Index.
 		std::sort(std::begin(pkt->views), std::begin(pkt->views) + pkt->total_views, scene_view_z_index_sort);
 
 		for (uint32_t i = 0; i < pkt->total_views; i++)
 		{
-			SceneView& view = pkt->views[i];
+			SceneView* view = &pkt->views[i];
+			Task* task = m_thread_pool->allocate();
+			task->_function.Bind<Renderer, &Renderer::generate_view_commands>(this);
 
-			for (uint32_t j = 0; j < view.rendering_path->_num_render_passes; j++)
+			GenerateViewCommandsTask* data = task_data<GenerateViewCommandsTask>(task);
+
+			data->scene_view = view;
+			data->scene_state = &pkt->scene_render_states[view->scene_index];
+
+			m_thread_pool->enqueue(task);
+		}
+	}
+}
+
+void Renderer::generate_view_commands(void* data)
+{
+	GenerateViewCommandsTask* cmd_data = (GenerateViewCommandsTask*)data;
+
+	uint16_t num_passes = cmd_data->scene_view->rendering_path->_num_render_passes;
+
+	for (uint32_t j = 0; j < num_passes; j++)
+	{
+		RenderPass* render_pass = cmd_data->scene_view->rendering_path->_render_passes[j];
+		uint16_t num_sub_passes = render_pass->num_sub_passes;
+
+		for (uint32_t k = 0; k < num_sub_passes; k++)
+		{
+			RenderSubPass* sub_pass = &render_pass->sub_passes[k];
+			
+			switch (sub_pass->sub_pass_type)
 			{
-				RenderPass* render_pass = view.rendering_path->_render_passes[j];
-
-				switch (render_pass->render_pass_type)
-				{
-				case RenderPassType::SHADOW_MAP:
-				{
-					break;
-				}
-				case RenderPassType::SCENE:
-				{
-					m_scene_renderer.render(render_pass, pkt);
-					break;
-				}
-				case RenderPassType::SKY:
-				{
-					break;
-				}
-				case RenderPassType::UI:
-				{
-					break;
-				}
-				case RenderPassType::DEBUG:
-				{
-					break;
-				}
-				case RenderPassType::POST_PROCESS:
-				{
-					break;
-				}
-				case RenderPassType::COMPOSITION:
-				{
-					break;
-				}
-				}
-
-				for (uint32_t k = 0; k < render_pass->num_sub_passes; k++)
-				{
-					RenderSubPass& sub_pass = render_pass->sub_passes[k];
-
-					
-				}
+			case SubPassType::SHADOW_MAP:
+			{
+				break;
+			}
+			case SubPassType::SCENE:
+			{
+				m_scene_renderer.render(sub_pass, cmd_data->scene_state, cmd_data->scene_view);
+				break;
+			}
+			case SubPassType::SKY:
+			{
+				break;
+			}
+			case SubPassType::UI:
+			{
+				break;
+			}
+			case SubPassType::DEBUG:
+			{
+				break;
+			}
+			case SubPassType::POST_PROCESS:
+			{
+				m_post_process_renderer.render(sub_pass, cmd_data->scene_state, cmd_data->scene_view);
+				break;
+			}
+			case SubPassType::COMPOSITION:
+			{
+				break;
+			}
 			}
 		}
 	}
@@ -685,14 +672,6 @@ void Renderer::generate_commands_view(void* data)
     scene_view._num_items = 0;
     
     TERMINUS_END_CPU_PROFILE;
-}
-
-void submit_gpu_upload_task(Task& task)
-{
-	Context& context = global::get_context();
-	// queue task into rendering thread.
-	context._rendering_thread.enqueue_upload_task(task);
-	sync::wait_for_loader_wakeup();
 }
 
 TERMINUS_END_NAMESPACE

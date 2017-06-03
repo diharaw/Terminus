@@ -6,14 +6,13 @@
 TERMINUS_BEGIN_NAMESPACE
 
 struct FramePacket;
-struct RenderPass;
 
 class SceneRenderer
 {
 public:
 	SceneRenderer();
 	~SceneRenderer();
-	void render(RenderPass* render_pass, FramePacket* pkt);
+	void render(RenderSubPass* sub_pass, SceneRenderState* scene_state, SceneView* view);
 
 private:
 	MeshRenderer m_mesh_renderer;

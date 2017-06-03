@@ -50,15 +50,16 @@ namespace terminus
         Shader* create(asset_common::TextLoadData* data)
         {
             Shader* shader = nullptr;
-            Task task;
+			Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             CreateShaderTaskData* shader_task_data = task_data<CreateShaderTaskData>(task);
             
             shader_task_data->_buffer = data->buffer;
             shader_task_data->_type = data->shader_type;
             shader_task_data->_shader = &shader;
-            task._function.Bind<&create_shader_task>();
+            task->_function.Bind<&create_shader_task>();
             
-            submit_gpu_upload_task(task);
+            renderer->enqueue_upload_task(task);
             
             if (!shader)
                 return nullptr;
@@ -125,22 +126,24 @@ namespace terminus
             String pre_processed_source = StringUtility::GenerateSource(shader_template, defines);
             
             Shader* shader = nullptr;
-            Task task;
+			Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             CreateShaderTaskData* shader_task_data = task_data<CreateShaderTaskData>(task);
             
             shader_task_data->_buffer = (char*)pre_processed_source.c_str();
             shader_task_data->_type = type;
             shader_task_data->_shader = &shader;
-            task._function.Bind<&create_shader_task>();
+            task->_function.Bind<&create_shader_task>();
             
-            submit_gpu_upload_task(task);
+            renderer->enqueue_upload_task(task);
             return shader;
         }
         
         ShaderProgram* create_program(Shader* vs, Shader* ps, Shader* tcs, Shader* tes, Shader* gs)
         {
             ShaderProgram* program = nullptr;
-            Task task;
+			Renderer* renderer = &context::get_renderer();
+			Task* task = renderer->create_upload_task();
             CreateProgramTaskData* program_task_data = task_data<CreateProgramTaskData>(task);
             
             program_task_data->_vs = vs;
@@ -150,9 +153,9 @@ namespace terminus
             program_task_data->_gs = gs;
             program_task_data->_program = &program;
             
-            task._function.Bind<&create_program_task>();
+            task->_function.Bind<&create_program_task>();
             
-            submit_gpu_upload_task(task);
+            renderer->enqueue_upload_task(task);
             return program;
         }
     }

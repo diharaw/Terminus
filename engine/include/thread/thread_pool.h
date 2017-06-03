@@ -32,6 +32,12 @@ inline T* task_data(Task& task)
 	return (T*)(&task._data[0]);
 }
 
+template <typename T>
+inline T* task_data(Task* task)
+{
+	return (T*)(&task->_data[0]);
+}
+
 struct WorkQueue
 {
 	std::mutex			  _critical_section;

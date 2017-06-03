@@ -14,7 +14,7 @@ PostProcessRenderer::~PostProcessRenderer()
 
 }
 
-void PostProcessRenderer::render(FramePacket* pkt)
+void PostProcessRenderer::render(RenderSubPass* sub_pass, SceneRenderState* scene_state, SceneView* view)
 {
 
 }

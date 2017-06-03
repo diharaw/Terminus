@@ -2,24 +2,26 @@
 
 #include <core/macro.h>
 #include <graphics/draw_item.h>
-#include <graphics/render_pass.h>
+#include <graphics/renderer/scene_view.h>
 
 #define MAX_STATIC_MESH_DRAW_ITEMS 1024
 
 TERMINUS_BEGIN_NAMESPACE
 
-struct FramePacket;
+struct RenderSubPass;
+struct SceneRenderState;
+struct SceneView;
 
 class MeshRenderer
 {
 public:
 	MeshRenderer();
 	~MeshRenderer();
-	void render(RenderSubPass& sub_pass, FramePacket* pkt);
+	void render(RenderSubPass* sub_pass, SceneRenderState* scene_state, SceneView* view);
 
 private:
-	DrawItem m_draw_items[MAX_STATIC_MESH_DRAW_ITEMS];
-	uint32_t m_num_draw_items;
+	DrawItem m_draw_items[MAX_VIEWS][MAX_STATIC_MESH_DRAW_ITEMS];
+	uint32_t m_num_draw_items[MAX_VIEWS];
 };
 
 TERMINUS_END_NAMESPACE

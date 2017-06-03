@@ -12,6 +12,6 @@ namespace terminus
     {
         StringBuffer32  _name;
         uint32_t        _num_render_passes;
-        RenderPassArray _render_passes;;
+        RenderPassArray _render_passes;
     };
 }
