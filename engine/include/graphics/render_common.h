@@ -181,12 +181,13 @@ namespace terminus
     
     // Texture Common
     
-    enum class FramebufferClearTarget
+    enum FramebufferClearTarget
     {
+		NONE = 0,
         COLOR = 1,
         DEPTH = 2,
         STENCIL = 4,
-        ALL = 8
+        ALL = COLOR | DEPTH | STENCIL
     };
     
     enum class TextureTarget

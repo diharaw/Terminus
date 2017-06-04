@@ -88,6 +88,8 @@ namespace terminus
         ShaderProgram*       program;
         PipelineStateObject* pso;
 		SubPassType			 sub_pass_type;
+		uint32_t			 clear_types;
+		Vector4				 clear_color;
 	};
 
 	struct RenderTargetInfo

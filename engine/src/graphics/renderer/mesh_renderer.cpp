@@ -4,7 +4,6 @@
 #include <graphics/renderer/renderable.h>
 #include <resource/mesh.h>
 #include <core/frame_packet.h>
-#include <graphics/renderer/renderer_common.h>
 #include <graphics/draw_item.h>
 #include <io/logger.h>
 #include <utility/profiler.h>
@@ -46,7 +45,7 @@ void MeshRenderer::render(RenderSubPass* sub_pass, SceneRenderState* scene_state
 				draw_item.uniforms = TE_NEW(view->allocator) PerDrawUniforms();
 				draw_item.uniforms->model = renderable.transform;
 				draw_item.uniforms->position = renderable.position;
-				draw_item.uniforms->model_view_projection = view->view_projection_matrix * draw_item.uniforms->model;
+				draw_item.uniforms->model_view_projection = view->per_frame_uniforms.view_projection * draw_item.uniforms->model;
 				draw_item.base_index = renderable.mesh->sub_meshes[j].base_index;
 				draw_item.base_vertex = renderable.mesh->sub_meshes[j].base_vertex;
 				draw_item.index_count = renderable.mesh->sub_meshes[j].index_count;
@@ -59,15 +58,34 @@ void MeshRenderer::render(RenderSubPass* sub_pass, SceneRenderState* scene_state
 			}
 		}
 
-		// Sort DrawItem array
-
 		TERMINUS_BEGIN_CPU_PROFILE(sort);
-
+		
+		// Sort DrawItem array
 		std::sort(std::begin(m_draw_items[view->scene_index]),
 				  std::begin(m_draw_items[view->scene_index]) + index,
 				  draw_item_sort);
 
 		TERMINUS_END_CPU_PROFILE;
+
+		// Generate commands
+		renderer::bind_sub_pass(view->cmd_buffers[0], 
+								sub_pass, 
+								m_per_frame_buf, 
+								&view->per_frame_uniforms);
+
+		for (uint32_t i = 0; i < index; i++)
+		{
+			DrawItem& item = draw_item_array[i];
+
+			renderer::bind_draw_data(view->cmd_buffers[0],
+									 m_per_draw_buf,
+									 item.uniforms);
+
+			renderer::bind_material(view->cmd_buffers[0],
+									m_per_material_buf,
+									item.material,
+									nullptr);
+		}
 	}
 }
 

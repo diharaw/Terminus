@@ -92,9 +92,12 @@ void RenderSystem::simulate(FramePacket* pkt, double delta)
 		SceneView& view = views[i];
 		CameraComponent& camera_component = m_scene->get_camera_component(view.camera_entity);
 		view.screen_rect = camera_component.screen_rect;
-		view.projection_matrix = camera_component.projection_matrix;
-		view.view_matrix = camera_component.view_matrix;
-		view.view_projection_matrix = camera_component.view_projection_matrix;
+		view.per_frame_uniforms.projection = camera_component.projection_matrix;
+		view.per_frame_uniforms.view = camera_component.view_matrix;
+		view.per_frame_uniforms.view_projection = camera_component.view_projection_matrix;
+		view.per_frame_uniforms.inverse_view_projection = glm::inverse(view.per_frame_uniforms.view_projection);
+		view.per_frame_uniforms.view_dir = camera_component.transform._forward;
+		view.per_frame_uniforms.view_pos = camera_component.transform._position;
 	}
 
 	if (pkt)
@@ -194,9 +197,12 @@ void RenderSystem::on_entity_created(Entity entity)
 		view->screen_rect = camera_component.screen_rect;
 		view->is_shadow = false;
 		view->rendering_path = camera_component.rendering_path;
-		view->projection_matrix = camera_component.projection_matrix;
-		view->view_matrix = camera_component.view_matrix;
-		view->view_projection_matrix = camera_component.view_projection_matrix;
+		view->per_frame_uniforms.projection = camera_component.projection_matrix;
+		view->per_frame_uniforms.view = camera_component.view_matrix;
+		view->per_frame_uniforms.view_projection = camera_component.view_projection_matrix;
+		view->per_frame_uniforms.inverse_view_projection = glm::inverse(view->per_frame_uniforms.view_projection);
+		view->per_frame_uniforms.view_dir = camera_component.transform._forward;
+		view->per_frame_uniforms.view_pos = camera_component.transform._position;
 	}
 	if (m_scene->has_point_light_component(entity))
 	{

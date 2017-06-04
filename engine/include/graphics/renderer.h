@@ -6,13 +6,6 @@
 #include <graphics/renderer/scene_renderer.h>
 #include <graphics/renderer/post_process_renderer.h>
 
-// Uniform Slots
-
-#define PER_FRAME_UNIFORM_SLOT 0
-#define PER_DRAW_UNIFORM_SLOT 1
-#define PER_DRAW_MATERIAL_UNIFORM_SLOT 2
-#define PER_DRAW_BONE_OFFSETS_UNIFORM_SLOT 3
-
 TERMINUS_BEGIN_NAMESPACE
 
 // Forward Declarations
