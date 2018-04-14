@@ -42,10 +42,24 @@ set_target_properties(test_platform PROPERTIES FOLDER "tests")
 
 # Link Platform
 target_link_libraries(test_platform tePlatform)
-target_link_libraries(test_platform debug "${TE_SDL2_DEBUG_LIB}" optimized "${TE_SDL2_RELEASE_LIB}")
-target_link_libraries(test_platform debug "${TE_SDL2_MAIN_DEBUG_LIB}" optimized "${TE_SDL2_MAIN_RELEASE_LIB}")
+target_link_libraries(test_platform "${TE_SDL2_LIBS}")
 
-if(APPLE)
+if(WIN32)
+    target_link_libraries(test_platform "user32.lib"
+                                        "gdi32.lib"
+                                        "winmm.lib"
+                                        "imm32.lib"
+                                        "ole32.lib"
+                                        "oleaut32.lib"
+                                        "version.lib"
+                                        "uuid.lib"
+                                        "dinput8.lib"
+                                        "kernel32.lib"
+                                        "winspool.lib"
+                                        "shell32.lib"
+                                        "comdlg32.lib"
+                                        "advapi32.lib")
+elseif(APPLE)
     # Link Apple Frameworks
     target_link_libraries(test_platform "-framework CoreVideo"
                                         "-framework Cocoa"

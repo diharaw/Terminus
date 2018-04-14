@@ -169,7 +169,7 @@ void SDL_EventLoop()
     }
 }
 
-int main()
+extern "C" int main(int argc, char *argv[])
 {
     uint32_t flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
     

@@ -9,7 +9,7 @@
 #define TE_END_GFX_NAMESPACE }
 
 // Bitflag Macros
-#define TE_HAS_BIT_FLAG(x, y) (y & x) == x
+#define TE_HAS_BIT_FLAG(FLAG, VARIABLE) (VARIABLE & FLAG) == FLAG
 
 // OpenGL Error Checking
 #define TERMINUS_ENABLE_ERROR_CHECK

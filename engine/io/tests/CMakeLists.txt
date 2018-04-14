@@ -45,12 +45,26 @@ target_link_libraries(test_io teIO)
 target_link_libraries(test_io teMemory)
 target_link_libraries(test_io teEvent)
 target_link_libraries(test_io tePlatform)
-target_link_libraries(test_io debug "${TE_LIBZIP_DEBUG_LIB}" optimized "${TE_LIBZIP_RELEASE_LIB}")
-target_link_libraries(test_io debug "${TE_ZLIB_DEBUG_LIB}" optimized "${TE_ZLIB_RELEASE_LIB}")
-target_link_libraries(test_io debug "${TE_SDL2_DEBUG_LIB}" optimized "${TE_SDL2_RELEASE_LIB}")
-target_link_libraries(test_io debug "${TE_SDL2_MAIN_DEBUG_LIB}" optimized "${TE_SDL2_MAIN_RELEASE_LIB}")
+target_link_libraries(test_io "${TE_LIBZIP_LIBS}")
+target_link_libraries(test_io "${TE_ZLIB_LIBS}")
+target_link_libraries(test_io "${TE_SDL2_LIBS}")
 
-if(APPLE)
+if(WIN32)
+    target_link_libraries(test_io "user32.lib"
+                                  "gdi32.lib"
+                                  "winmm.lib"
+                                  "imm32.lib"
+                                  "ole32.lib"
+                                  "oleaut32.lib"
+                                  "version.lib"
+                                  "uuid.lib"
+                                  "dinput8.lib"
+                                  "kernel32.lib"
+                                  "winspool.lib"
+                                  "shell32.lib"
+                                  "comdlg32.lib"
+                                  "advapi32.lib")
+elseif(APPLE)
     # Link Apple Frameworks
     target_link_libraries(test_io "-framework CoreVideo"
                                   "-framework Cocoa"

@@ -119,14 +119,14 @@ void* Window::native_handle()
     SDL_SysWMinfo info;
     SDL_GetWindowWMInfo(m_sdl_window, &info);
     
-#if defined(TE_PLATFORM_WIN32)
+#if defined(TERMINUS_PLATFORM_WIN32)
     return (void*)info.info.win.window;
 #elif defined(TERMINUS_PLATFORM_MACOS)
     return (void*)info.info.cocoa.window;
 #elif defined(TERMINUS_PLATFORM_LINUX)
     return (void*)info.info.x11.window;
 #else
-    return nullptr
+	return nullptr;
 #endif
 }
 

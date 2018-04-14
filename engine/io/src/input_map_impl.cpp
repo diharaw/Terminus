@@ -64,59 +64,119 @@ void InputMapImpl::set_action(uint64_t hash, int32_t mouse, int32_t keyboard, in
 {
     if(mouse != -1)
         m_action_map.mouse[mouse] = hash;
-    else
-        m_action_map.mouse[mouse] = UINT64_MAX;
-    
+	else
+	{
+		for (auto& input_hash : m_action_map.mouse)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
+ 
     if(keyboard != -1)
         m_action_map.keyboard[keyboard] = hash;
-    else
-        m_action_map.keyboard[keyboard] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_action_map.keyboard)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
     
     if(gamepad != -1)
         m_action_map.gamepad[gamepad] = hash;
-    else
-        m_action_map.gamepad[gamepad] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_action_map.gamepad)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
 }
 
 void InputMapImpl::set_state(uint64_t hash, int32_t mouse, int32_t keyboard, int32_t gamepad)
 {
     if(mouse != -1)
         m_state_map.mouse[mouse] = hash;
-    else
-        m_state_map.mouse[mouse] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_state_map.mouse)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
     
     if(keyboard != -1)
         m_state_map.keyboard[keyboard] = hash;
-    else
-        m_state_map.keyboard[keyboard] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_state_map.keyboard)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
     
     if(gamepad != -1)
         m_state_map.gamepad[gamepad] = hash;
-    else
-        m_state_map.gamepad[gamepad] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_state_map.gamepad)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
 }
 
 void InputMapImpl::set_axis(uint64_t hash, int32_t mouse, int32_t keyboard_pos, int32_t keyboard_neg, int32_t gamepad)
 {
     if(mouse != -1)
         m_axis_map.mouse[mouse - 9] = hash;
-    else
-        m_axis_map.mouse[mouse - 9] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_axis_map.mouse)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
     
     if(keyboard_pos != -1)
         m_axis_map.keyboard_pos[keyboard_pos] = hash;
-    else
-        m_axis_map.keyboard_pos[keyboard_pos] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_axis_map.keyboard_pos)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
     
     if(keyboard_neg != -1)
         m_axis_map.keyboard_neg[keyboard_neg] = hash;
-    else
-        m_axis_map.keyboard_neg[keyboard_neg] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_axis_map.keyboard_neg)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
     
     if(gamepad != -1)
         m_axis_map.gamepad[gamepad] = hash;
-    else
-        m_axis_map.gamepad[gamepad] = UINT64_MAX;
+	else
+	{
+		for (auto& input_hash : m_axis_map.gamepad)
+		{
+			if (input_hash == hash)
+				input_hash = UINT64_MAX;
+		}
+	}
 }
 
 void InputMapImpl::clear_action(StringHash hash)
