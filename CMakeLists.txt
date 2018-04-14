@@ -1,51 +1,92 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# PROJECT
+# -----------------------------------------------------------------------------------------------------------------------------
 
 project("Terminus")
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/external")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/external")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-IF(APPLE)
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-	set(CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000")
-ENDIF()
+# -----------------------------------------------------------------------------------------------------------------------------
+# DEPENDANCIES
+# -----------------------------------------------------------------------------------------------------------------------------
 
-set(T_GLEW_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/glew/include")
-set(T_SDL2_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/SDL2/include")
-set(T_RAPIDJSON_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/rapidjson")
-set(T_JSON_INCLUDE_DIRS 		  	  "${PROJECT_SOURCE_DIR}/external/json")
-set(T_IMGUI_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/imgui")
-set(T_GLM_INCLUDE_DIRS 			  	  "${PROJECT_SOURCE_DIR}/external/glm")
-set(T_LIBZIP_INCLUDE_DIRS 			  "${PROJECT_SOURCE_DIR}/external/Libzip/lib")
-set(T_SIMPLEFILEWATCHER_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/external/simplefilewatcher")
-set(T_STB_INCLUDE_DIRS 	  		  	  "${PROJECT_SOURCE_DIR}/external/stb")
-set(T_DELEGATES_INCLUDE_DIRS 		  "${PROJECT_SOURCE_DIR}/external/Delegates11")
-set(T_BULLET_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/Bullet 3/src")
-set(T_LUAJIT_INCLUDE_DIRS    		  "${PROJECT_SOURCE_DIR}/external/luajit/src")
-set(T_SOL2_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/sol2")
-set(T_CMFT_INCLUDE_DIRS 	  		  "${PROJECT_SOURCE_DIR}/external/cmft/include/cmft")
-set(T_TERMINUS_INCLUDE_DIRS  		  "${PROJECT_SOURCE_DIR}/engine/include")
+# Setup platform specific library options
+if(WIN32)
+    set(TE_LIB_PREFFIX "")
+    set(TE_STATIC_LIB_SUFFIX ".lib")
+    set(TE_SHARED_LIB_SUFFIX ".dll")
+elseif(APPLE)
+    set(TE_LIB_PREFFIX "lib")
+    set(TE_STATIC_LIB_SUFFIX ".a")
+    set(TE_SHARED_LIB_SUFFIX ".dylib")
+else()
+    set(TE_LIB_PREFFIX "lib")
+    set(TE_STATIC_LIB_SUFFIX ".o")
+    set(TE_SHARED_LIB_SUFFIX ".so")
+endif()
 
-include_directories("${T_GLEW_INCLUDE_DIRS}" 
-					"${T_SDL2_INCLUDE_DIRS}"
-					"${T_JSON_INCLUDE_DIRS}"
-					"${T_RAPIDJSON_INCLUDE_DIRS}"
-					"${T_IMGUI_INCLUDE_DIRS}"
-					"${T_GLM_INCLUDE_DIRS}"
-					"${T_LIBZIP_INCLUDE_DIRS}"
-					"${T_SIMPLEFILEWATCHER_INCLUDE_DIRS}"
-					"${T_STB_INCLUDE_DIRS}"
-					"${T_DELEGATES_INCLUDE_DIRS}"
-					"${T_BULLET_INCLUDE_DIRS}"
-					"${T_LUAJIT_INCLUDE_DIRS}"
-					"${T_SOL2_INCLUDE_DIRS}"
-					"${T_CMFT_INCLUDE_DIRS}"
-					"${T_TERMINUS_INCLUDE_DIRS}")
+# Setup library paths
+set(TE_LIB_PATH "${PROJECT_SOURCE_DIR}/lib/external")
 
-add_subdirectory(external)
-add_subdirectory(engine/src)
-add_subdirectory(runtime)
-add_subdirectory(editor)
+# SDL2
+set(TE_SDL2_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}SDL2${TE_STATIC_LIB_SUFFIX}" 
+                 "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}SDL2main${TE_STATIC_LIB_SUFFIX}")
+
+# LibZip
+set(TE_LIBZIP_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}zipstatic${TE_STATIC_LIB_SUFFIX}")
+
+# Zlib
+if(WIN32)
+    set(TE_ZLIB_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}zlibstaticd${TE_STATIC_LIB_SUFFIX}")
+else()
+    set(TE_ZLIB_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}z${TE_STATIC_LIB_SUFFIX}")
+endif()
+
+# Recast
+set(TE_RECAST_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}Recast${TE_STATIC_LIB_SUFFIX}")
+
+# Detour
+set(TE_DETOUR_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}Detour${TE_STATIC_LIB_SUFFIX}")
+
+# Detour Crowd
+set(TE_DETOUR_CROWD_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}DetourCrowd${TE_STATIC_LIB_SUFFIX}")
+
+# Detour Tile Cache
+set(TE_DETOUR_TILE_CACHE_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}DetourTileCache${TE_STATIC_LIB_SUFFIX}")
+
+# Assimp
+set(TE_ASSIMP_LIBS "${TE_LIB_PATH_DEBUG}/${TE_LIB_PREFFIX}assimp${TE_STATIC_LIB_SUFFIX}")
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# INCLUDES
+# -----------------------------------------------------------------------------------------------------------------------------
+
+# Setup engine include paths
+set(TE_ENGINE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/engine")
+
+# Setup external include paths
+set(TE_SDL2_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/SDL/include")
+set(TE_LIBZIP_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/libzip")
+set(TE_ASSIMP_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/assimp/include")
+
+# Set includes
+include_directories("${TE_ENGINE_INCLUDE_PATH}"
+                    "${TE_SDL2_INCLUDE_PATH}"
+                    "${TE_LIBZIP_INCLUDE_PATH}"
+                    "${TE_ASSIMP_INCLUDE_PATH}")
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# SUB-DIRECTORIES
+# -----------------------------------------------------------------------------------------------------------------------------                    
+
+# Add engine projects
+add_subdirectory("engine/memory")
+add_subdirectory("engine/concurrency")
+add_subdirectory("engine/platform")
+add_subdirectory("engine/event")
+add_subdirectory("engine/io")
+# add_subdirectory("engine/core")
+# add_subdirectory("engine/stl")
 

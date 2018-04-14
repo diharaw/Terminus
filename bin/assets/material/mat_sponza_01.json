@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/VasePlant_diffuse.tga",
-    "normal_map": "texture/VasePlant_normal.tga",
-    "metalness_map": "texture/Dielectric_metallic.tga",
-    "roughness_map": "texture/VasePlant_roughness.tga",
-    "backface_cull": true
-}

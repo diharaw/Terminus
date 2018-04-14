@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/Sponza_Bricks_a_Albedo.tga",
-    "normal_map": "texture/Sponza_Bricks_a_Normal.tga",
-    "metalness_map": "texture/Dielectric_metallic.tga",
-    "roughness_map": "texture/Sponza_Bricks_a_Roughness.tga",
-    "backface_cull": true
-}

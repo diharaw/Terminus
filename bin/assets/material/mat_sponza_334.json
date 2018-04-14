@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/VaseHanging_diffuse.tga",
-    "normal_map": "texture/VaseHanging_normal.tga",
-    "metalness_map": "texture/Metallic_metallic.tga",
-    "roughness_map": "texture/VaseHanging_roughness.tga",
-    "backface_cull": true
-}

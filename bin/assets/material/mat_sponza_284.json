@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/Sponza_Fabric_Red_diffuse.tga",
-    "normal_map": "texture/Sponza_Fabric_Red_normal.tga",
-    "metalness_map": "texture/Sponza_Fabric_metallic.tga",
-    "roughness_map": "texture/Sponza_Fabric_roughness.tga",
-    "backface_cull": true
-}

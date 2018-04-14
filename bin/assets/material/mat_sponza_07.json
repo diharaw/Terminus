@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/Sponza_Arch_diffuse.tga",
-    "normal_map": "texture/Sponza_Arch_normal.tga",
-    "metalness_map": "texture/Dielectric_metallic.tga",
-    "roughness_map": "texture/Sponza_Arch_roughness.tga",
-    "backface_cull": true
-}

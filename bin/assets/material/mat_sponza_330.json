@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/ChainTexture_Albedo.tga",
-    "normal_map": "texture/ChainTexture_Normal.tga",
-    "metalness_map": "texture/ChainTexture_Metallic.tga",
-    "roughness_map": "texture/ChainTexture_Roughness.tga",
-    "backface_cull": true
-}

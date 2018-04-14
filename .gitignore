@@ -31,6 +31,10 @@
 # GLEW pc
 *.pc
 
+external/Assimp
+external/Libzip
+external/*
+external/
 projects/
 bin/editor/
 bin/runtime/

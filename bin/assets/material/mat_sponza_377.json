@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/Lion_Albedo.tga",
-    "normal_map": "texture/Lion_Normal.tga",
-    "metalness_map": "texture/Dielectric_metallic.tga",
-    "roughness_map": "texture/Lion_Roughness.tga",
-    "backface_cull": true
-}

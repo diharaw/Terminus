@@ -1,7 +1,0 @@
-{
-    "diffuse_map": "texture/VaseRound_diffuse.tga",
-    "normal_map": "texture/VaseRound_normal.tga",
-    "metalness_map": "texture/Dielectric_metallic.tga",
-    "roughness_map": "texture/VaseRound_roughness.tga",
-    "backface_cull": true
-}
