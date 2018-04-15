@@ -22,19 +22,24 @@ size_t ZipFile::size()
 	return m_size;
 }
 
-size_t ZipFile::read(void* buffer, size_t size, size_t count)
+FileType ZipFile::type()
+{
+	return TE_FILE_ZIP;
+}
+
+size_t ZipFile::read(void* buffer, const size_t& size, const size_t& count)
 {
 	return zip_fread((zip_file_t*)m_handle, buffer, size);
 }
 
-size_t ZipFile::write(void* data, size_t size, size_t count)
+size_t ZipFile::write(void* data, const size_t& size, const size_t& count)
 {
 	// NOT ALLOWED.
 	assert(false);
 	return 0;
 }
 
-void ZipFile::seek(size_t offset)
+void ZipFile::seek(const size_t& offset)
 {
 	// NOT ALLOWED.
 	assert(false);

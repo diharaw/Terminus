@@ -5,7 +5,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-class StackAllocator : public Allocator
+class StackAllocator : public IAllocator
 {
 private:
     struct AllocationHeader
@@ -24,7 +24,7 @@ private:
 public:
 	StackAllocator();
 	virtual ~StackAllocator();
-	void initialize(Allocator* backing, size_t max_size);
+	void initialize(IAllocator* backing, size_t max_size);
 	void initialize(void* memory, size_t max_size);
 	void* allocate(size_t size, size_t count, size_t align) override;
 	void free(void* ptr) override;

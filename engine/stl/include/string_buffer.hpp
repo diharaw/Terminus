@@ -32,7 +32,7 @@ public:
         _length = strlen(str.c_str());
     }
     
-    inline size_t find_first(char c)
+    inline size_t find_first(char c) const
     {
         for(int i = 0; i < _length; i++)
         {
@@ -43,7 +43,7 @@ public:
         return END;
     }
     
-    inline size_t find_last(char c)
+    inline size_t find_last(char c) const
     {
         size_t pos = END;
         
@@ -56,12 +56,12 @@ public:
         return pos;
     }
     
-    inline size_t size()
+    inline size_t size() const
     {
         return SIZE;
     }
     
-    inline StringBuffer substring(size_t start, size_t end)
+    inline StringBuffer substring(size_t start, size_t end) const
     {
         StringBuffer buf;
         
@@ -75,9 +75,9 @@ public:
         return buf;
     }
     
-    inline const char* c_str() { return &_buffer[0]; }
+    inline const char* c_str() const { return &_buffer[0]; }
     
-    inline size_t length() { return _length; }
+    inline size_t length() const { return _length; }
     
     StringBuffer& operator = (const StringBuffer& buf)
     {
@@ -122,6 +122,11 @@ public:
     {
         return (strcmp(this->c_str(), buf.c_str()) == 0);
     }
+
+	bool operator == (const StringBuffer& buf)
+	{
+		return (strcmp(this->c_str(), buf.c_str()) == 0);
+	}
     
     bool operator != (StringBuffer& buf)
     {

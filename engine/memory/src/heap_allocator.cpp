@@ -15,7 +15,7 @@ HeapAllocator::~HeapAllocator()
 
 }
 
-void HeapAllocator::initialize(Allocator* backing, size_t max_size)
+void HeapAllocator::initialize(IAllocator* backing, size_t max_size)
 {
 	// Prevent initialize from being called.
 	assert(false);

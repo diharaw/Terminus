@@ -27,7 +27,7 @@ void StackAllocator::initialize_internal()
 #endif
 }
 
-void StackAllocator::initialize(Allocator* backing, size_t max_size)
+void StackAllocator::initialize(IAllocator* backing, size_t max_size)
 {
 	// Only init once.
 	assert(m_memory == nullptr);

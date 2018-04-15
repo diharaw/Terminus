@@ -20,17 +20,22 @@ size_t OsFile::size()
 	return size;
 }
 
-size_t OsFile::read(void* buffer, size_t size, size_t count)
+FileType OsFile::type()
+{
+	return TE_FILE_OS;
+}
+
+size_t OsFile::read(void* buffer, const size_t& size, const size_t& count)
 {
 	return fread(buffer, size, count, (FILE*)m_handle);
 }
 
-size_t OsFile::write(void* data, size_t size, size_t count)
+size_t OsFile::write(void* data, const size_t& size, const size_t& count)
 {
 	return fwrite(data, size, count, (FILE*)m_handle);
 }
 
-void OsFile::seek(size_t offset)
+void OsFile::seek(const size_t& offset)
 {
 	if (offset == END)
 		fseek((FILE*)m_handle, 0, SEEK_END);

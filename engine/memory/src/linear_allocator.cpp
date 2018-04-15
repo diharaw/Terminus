@@ -14,7 +14,7 @@ LinearAllocator::~LinearAllocator()
 
 }
 
-void LinearAllocator::initialize(Allocator* backing, size_t max_size)
+void LinearAllocator::initialize(IAllocator* backing, size_t max_size)
 {
 	// Only init once.
 	assert(m_memory == nullptr);

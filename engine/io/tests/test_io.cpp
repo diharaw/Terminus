@@ -178,10 +178,9 @@ void SDL_EventLoop()
 
 void test_filesystem()
 {
-    fs.vfs_mount_dir("/Users/diharaw/Desktop/fs", "somedir");
-    //te::filesystem::mount_dir("/Users/diharaw/Desktop/fs/ar.zip", "somedir");
-    
-    te::IFile* test = fs.vfs_open_file("somedir/inner/test.txt", TE_FS_READ | TE_FS_TEXT);
+	fs.add_directory("Test");
+	fs.add_package("Test/lol_zip.zip");
+    te::IFile* test = fs.open_file("lol_zip.txt", TE_FS_READ | TE_FS_TEXT);
     
     size_t size = test->size();
     char* buf = (char*)malloc(size + 1);
@@ -191,7 +190,7 @@ void test_filesystem()
     
     std::cout << buf << std::endl;
     
-    test->close();
+	fs.close_file(test);
     
     free(buf);
 }
@@ -223,6 +222,8 @@ void on_axis_input(te::Event* e)
 
 extern "C" int main(int argc, char *argv[])
 {
+	test_filesystem();
+
     uint32_t flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
     
     if (SDL_Init(flags) != 0)

@@ -2,78 +2,51 @@
 
 #include <io/include/filesystem.hpp>
 #include <stl/include/murmur_hash.hpp>
-#include <stl/include/hash_map.hpp>
-#include <memory/src/buffer_linear_allocator.hpp>
+#include <stl/include/packed_array.hpp>
+#include <memory/src/buffer_pool_allocator.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-using DirectoryMap = HashMap<IDirectory*, TE_MAX_DIRECTORIES>;
-using FreeSlotList = Deque<uint32_t, TE_VIRTUAL_DIR_POOL>;
-
-struct VirtualDirectory
-{
-    using IndexMap = HashMap<uint32_t, TE_MAX_DIRECTORIES>;
-    
-    uint32_t	 m_num_dir;
-    IndexMap	 m_virtual_dir_index_map;
-    IDirectory*  m_contents[TE_MAX_DIRECTORIES];
-    FSNameBuffer m_name;
-    
-    VirtualDirectory() : m_num_dir(0), m_name("") // root dir
-    {
-        for (int i = 0; i < TE_VIRTUAL_DIR_POOL; i++)
-            m_virtual_dir_index_map._data[i].value = TE_VIRTUAL_DIR_POOL;
-    }
-    
-    VirtualDirectory(FSNameBuffer name) : m_num_dir(0), m_name(name)
-    {
-        
-    }
-    
-    inline void set_name(FSNameBuffer name) { m_name = name; }
-    
-    inline FSNameBuffer name() { return m_name; }
-    
-    inline void add_dir(IDirectory* dir)
-    {
-        m_contents[m_num_dir] = dir;
-        m_num_dir++;
-    }
-    
-    inline void attach_child(uint32_t index, FSNameBuffer name)
-    {
-        uint64_t sub_dir_hash = TE_HASH(name.c_str());
-        m_virtual_dir_index_map.set(sub_dir_hash, index);
-    }
-    
-    inline uint32_t get(uint64_t hash)
-    {
-        uint32_t obj = TE_VIRTUAL_DIR_POOL;
-        m_virtual_dir_index_map.get(hash, obj);
-        return obj;
-    }
-};
+class Package;
 
 class FileSystem : public IFileSystem
 {
 public:
     FileSystem();
     ~FileSystem();
-    void         vfs_mount_dir(FSNameBuffer dir, FSNameBuffer point) override;
-    IFile*       vfs_open_file(FSNameBuffer file, uint32_t mode) override;
-    FSNameBuffer file_extension(FSNameBuffer file) override;
-    
-private:
-    VirtualDirectory* find_virtual_dir(FSNameBuffer path, FSNameBuffer& append);
-    uint32_t create_virtual_dir(VirtualDirectory* parent, FSNameBuffer name);
-    
-private:
-    DirectoryMap                          m_directory_map;
-    VirtualDirectory                      m_virtual_dir_pool[TE_VIRTUAL_DIR_POOL];
-    FreeSlotList                          m_free_slots;
-    uint32_t                              m_root_index;
-    BufferLinearAllocator<TE_MEGABYTE(2)> m_allocator;
+	virtual bool		 add_directory(const FSNameBuffer& path) override;
+	virtual bool		 add_package(const FSNameBuffer& file) override;
+	virtual bool		 remove_directory(const FSNameBuffer& path) override;
+	virtual bool		 remove_package(const FSNameBuffer& file) override;
+	virtual bool		 file_exists(const FSNameBuffer& file) override;
+	virtual bool		 directory_exists(const FSNameBuffer& file) override;
+	virtual bool		 create_directory(const FSNameBuffer& file) override;
+	virtual IFile*       open_file(const FSNameBuffer& file, const uint32_t& mode, const bool& absolute = false) override;
+	virtual void		 close_file(IFile* file) override;
+	virtual FSNameBuffer file_extension(const FSNameBuffer& file) override;
 
+private:
+	IFile* open_file_internal(const FSNameBuffer& path, const uint32_t& mode);
+    
+private:
+	struct DirectoryEntry
+	{
+		FSNameBuffer name;
+		uint32_t	 handle;
+	};
+
+	struct PackageEntry
+	{
+		FSNameBuffer name;
+		uint32_t	 handle;
+		Package*	 package;
+	};
+
+	PackedArray<DirectoryEntry, 16>		m_directories;
+	PackedArray<PackageEntry, 16>		m_packages;
+    BufferPoolAllocator<TE_KILOBYTE(1)> m_zip_file_allocator;
+	BufferPoolAllocator<TE_KILOBYTE(1)> m_os_file_allocator;
+	BufferPoolAllocator<TE_KILOBYTE(1)> m_package_allocator;
 };
 
 TE_END_TERMINUS_NAMESPACE

@@ -10,9 +10,10 @@ public:
 	OsFile(void* handle);
 	~OsFile();
 	size_t size() override;
-	size_t read(void* buffer, size_t size, size_t count) override;
-	size_t write(void* data, size_t size, size_t count) override;
-	void seek(size_t offset) override;
+	virtual FileType type() override;
+	size_t read(void* buffer, const size_t& size, const size_t& count) override;
+	size_t write(void* data, const size_t& size, const size_t& count) override;
+	void seek(const size_t& offset) override;
 	void* handle() override;
     void close() override;
 

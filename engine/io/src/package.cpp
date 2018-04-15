@@ -1,4 +1,4 @@
-#include <io/src/zip_directory.hpp>
+#include <io/src/package.hpp>
 #include <io/src/zip_file.hpp>
 #include <memory/include/allocator.hpp>
 
@@ -7,23 +7,23 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-ZipDirectory::ZipDirectory()
+Package::Package()
 {
 	m_zip = nullptr;
 }
 
-ZipDirectory::ZipDirectory(FSNameBuffer name)
+Package::Package(const FSNameBuffer& name)
 {
 	int err;
 	m_zip = zip_open(name.c_str(), 0, &err);
 }
 
-ZipDirectory::~ZipDirectory()
+Package::~Package()
 {
 	zip_close((zip_t*)m_zip);
 }
 
-IFile* ZipDirectory::open_file(FSNameBuffer file, uint32_t mode, Allocator* allocator)
+IFile* Package::open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator)
 {
 	if (allocator)
 	{
