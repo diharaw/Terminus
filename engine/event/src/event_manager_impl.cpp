@@ -1,4 +1,5 @@
 #include <event/src/event_manager_impl.hpp>
+#include <concurrency/include/scoped_lock.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -16,7 +17,7 @@ EventManagerImpl::~EventManagerImpl()
     
 }
 
-uint32_t EventManagerImpl::register_callback(uint16_t type, EventCallback callback)
+CallbackID EventManagerImpl::register_callback(const uint16_t& type, EventCallback callback)
 {
     if(type < 16)
     {
@@ -28,7 +29,7 @@ uint32_t EventManagerImpl::register_callback(uint16_t type, EventCallback callba
         return 0;
 }
 
-void EventManagerImpl::unregister_callback(uint16_t type, uint32_t callback_id)
+void EventManagerImpl::unregister_callback(const uint16_t& type, const CallbackID& callback_id)
 {
     if(type < 16)
     {
@@ -39,7 +40,7 @@ void EventManagerImpl::unregister_callback(uint16_t type, uint32_t callback_id)
     }    
 }
 
-Event* EventManagerImpl::allocate_event(uint16_t type)
+Event* EventManagerImpl::allocate_event(const uint16_t& type)
 {
     uint32_t event_index = m_num_events++;
     Event* e = &m_event_pool[event_index & TE_EVENT_MASK];
@@ -49,7 +50,7 @@ Event* EventManagerImpl::allocate_event(uint16_t type)
 
 void EventManagerImpl::queue_event(Event* event)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    ScopedLock lock(m_mutex);
     
     m_event_queue[m_back & TE_EVENT_MASK] = event;
     ++m_back;
@@ -57,7 +58,7 @@ void EventManagerImpl::queue_event(Event* event)
 
 Event* EventManagerImpl::pop_event()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+	ScopedLock lock(m_mutex);
     
     const uint32_t event_count = m_back - m_front;
     if (event_count <= 0)

@@ -17,7 +17,7 @@ Window::~Window()
     
 }
 
-bool Window::initialize(WindowCreateDesc& desc)
+bool Window::initialize(const WindowCreateDesc& desc)
 {
     m_width = desc.w;
     m_height = desc.h;
@@ -45,15 +45,14 @@ bool Window::initialize(WindowCreateDesc& desc)
     if (desc.y == TE_WINDOW_POS_CENTERED)
         m_y_pos = SDL_WINDOWPOS_CENTERED;
     
-    set_title(&desc.title[0]);
+    set_title(desc.title);
     
-    m_sdl_window = SDL_CreateWindow(&m_title[0],
-                                         m_x_pos,
-                                         m_y_pos,
-                                         m_width,
-                                         m_height,
-                                         window_flags);
-    
+    m_sdl_window = SDL_CreateWindow(m_title.c_str(),
+                                    m_x_pos,
+                                    m_y_pos,
+                                    m_width,
+                                    m_height,
+                                    window_flags);
     if (!m_sdl_window)
         return false;
     
@@ -86,12 +85,12 @@ void Window::shutdown()
 
 void Window::hide()
 {
-    
+	SDL_HideWindow(m_sdl_window);
 }
 
 void Window::show()
 {
-    
+	SDL_ShowWindow(m_sdl_window);
 }
 
 uint32_t Window::id()
@@ -138,15 +137,14 @@ void Window::resize(uint32_t w, uint32_t h)
     SDL_SetWindowSize(m_sdl_window, m_width, m_height);
 }
 
-const char* Window::title()
+StringBuffer64 Window::title()
 {
-    return &m_title[0];
+    return m_title;
 }
 
-void Window::set_title(const char* title)
+void Window::set_title(const StringBuffer64& title)
 {
-    if (title)
-        strcpy(&m_title[0], title);
+	m_title = title;
 }
 
 void Window::make_windowed()
@@ -157,21 +155,22 @@ void Window::make_windowed()
 void Window::make_fullscreen()
 {
     m_flags |= SDL_WINDOW_FULLSCREEN;
+	SDL_SetWindowFullscreen(m_sdl_window, m_flags);
 }
 
 void Window::remove_border()
 {
-    
+	SDL_SetWindowBordered(m_sdl_window, SDL_FALSE);
 }
 
 void Window::add_border()
 {
-    
+	SDL_SetWindowBordered(m_sdl_window, SDL_TRUE);
 }
 
 bool Window::shown()
 {
-    return m_shown;
+    return TE_HAS_BIT_FLAG(SDL_WINDOW_SHOWN, SDL_GetWindowFlags(m_sdl_window));
 }
 
 TE_END_TERMINUS_NAMESPACE

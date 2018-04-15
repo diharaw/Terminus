@@ -44,7 +44,7 @@ private:
 	uint32_t	m_drawable_height = 600;
 	int32_t		m_x_pos = 0;
 	int32_t		m_y_pos = 0;
-	char		m_title[TE_WINDOW_TITLE_LENGTH] = "Terminus Engine";
+	StringBuffer64		m_title = "Terminus Engine";
 	uint32_t    m_flags = 0;
 	bool		m_running = false;
     bool		m_shown = false;
@@ -55,7 +55,7 @@ private:
 public:
     Window();
     ~Window();
-    bool        initialize(WindowCreateDesc& desc) override;
+    bool        initialize(const WindowCreateDesc& desc) override;
     void        shutdown() override;
     void        hide() override;
     void        show() override;
@@ -69,8 +69,8 @@ public:
     void        make_fullscreen() override;
     void        remove_border() override;
     void        add_border() override;
-    const char* title() override;
-    void        set_title(const char* title) override;
+	StringBuffer64 title() override;
+    void        set_title(const StringBuffer64& title) override;
     bool        shown() override;
 };
 

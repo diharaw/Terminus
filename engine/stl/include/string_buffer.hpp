@@ -134,3 +134,9 @@ public:
     }
     
 };
+
+using StringBuffer16  = StringBuffer<16>;
+using StringBuffer32  = StringBuffer<32>;
+using StringBuffer64  = StringBuffer<64>;
+using StringBuffer128 = StringBuffer<128>;
+using StringBuffer256 = StringBuffer<256>;
