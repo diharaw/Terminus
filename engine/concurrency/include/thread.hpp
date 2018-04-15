@@ -1,12 +1,15 @@
 #pragma once
 
 #include <functional>
-#include "thread_common.hpp"
+#include <concurrency/include/thread_common.hpp>
+#include <core/include/terminus_macros.hpp>
 
 #if defined(_WIN32)
 #else
 #include <pthread.h>
 #endif
+
+TE_BEGIN_TERMINUS_NAMESPACE
 
 class Thread
 {
@@ -36,3 +39,5 @@ private:
     void*     m_args;
     std::function<void(void*)> m_run_function;
 };
+
+TE_END_TERMINUS_NAMESPACE

@@ -1,7 +1,12 @@
 #include <concurrency/include/thread.hpp>
 
-#if defined(_WIN32)
+#if defined(TERMINUS_PLATFORM_WIN32)
 #include <process.h>
+#endif
+
+TE_BEGIN_TERMINUS_NAMESPACE
+
+#if defined(TERMINUS_PLATFORM_WIN32)
 
 Thread::Thread()
 {
@@ -86,3 +91,5 @@ void Thread::thread_run()
 }
 
 #endif
+
+TE_END_TERMINUS_NAMESPACE
