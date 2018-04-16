@@ -2,6 +2,8 @@
 
 #include "mutex.hpp"
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 class ScopedLock
 {
 public:
@@ -10,4 +12,6 @@ public:
 private:
     Mutex& m_mutex;
 };
+
+TE_END_TERMINUS_NAMESPACE
 

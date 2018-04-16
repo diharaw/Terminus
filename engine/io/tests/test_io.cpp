@@ -10,7 +10,7 @@
 
 using namespace te;
 
-FileSystem fs;
+FileSystemImpl fs;
 InputManagerImpl input_manager;
 EventManagerImpl event_manager;
 
@@ -180,7 +180,7 @@ void test_filesystem()
 {
 	fs.add_directory("Test");
 	fs.add_package("Test/lol_zip.zip");
-    te::IFile* test = fs.open_file("lol_zip.txt", TE_FS_READ | TE_FS_TEXT);
+    te::File* test = fs.open_file_ex("lol_zip.txt", TE_FS_READ);
     
     size_t size = test->size();
     char* buf = (char*)malloc(size + 1);

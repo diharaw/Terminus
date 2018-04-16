@@ -43,7 +43,7 @@ private:
     AxisMap    m_axis_map;
     
 public:
-    InputMapImpl();
+	InputMapImpl();
     ~InputMapImpl();
     StringHash name() override;
     uint32_t num_states() override;

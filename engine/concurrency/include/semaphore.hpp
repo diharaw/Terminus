@@ -3,6 +3,8 @@
 #include <assert.h>
 #include "thread_common.hpp"
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 class Semaphore
 {
 public:
@@ -19,3 +21,5 @@ private:
     pthread_cond_t  m_cond;
 #endif
 };
+
+TE_END_TERMINUS_NAMESPACE

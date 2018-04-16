@@ -1,5 +1,7 @@
 #include <concurrency/include/semaphore.hpp>
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 #if defined(_WIN32)
 
 Semaphore::Semaphore()
@@ -47,3 +49,5 @@ void Semaphore::wait()
 }
 
 #endif
+
+TE_END_TERMINUS_NAMESPACE

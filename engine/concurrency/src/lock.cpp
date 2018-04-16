@@ -1,5 +1,7 @@
 #include <concurrency/include/lock.hpp>
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 Lock::Lock(Mutex& mutex) : m_mutex(mutex)
 {
     
@@ -19,3 +21,5 @@ void Lock::unlock()
 {
     m_mutex.unlock();
 }
+
+TE_END_TERMINUS_NAMESPACE

@@ -23,19 +23,19 @@ int Thread::run(std::function<void(void*)> func, void* args)
     m_run_function = func;
     m_args = args;
     
-    m_thread_handle = _beginthread( thread_proc, m_stack_size, static_cast<void*>(this));
+    m_thread_handle = _beginthread(thread_proc, m_stack_size, static_cast<void*>(this));
     
     if (m_thread_handle == -1)
         return -1;
     
-    m_thread_id = (HANDLE) m_thread_handle;
+    m_thread_id = (HANDLE)m_thread_handle;
 
     return 0;
 }
 
 bool Thread::join()
 {
-    unsigned long rc = (unsigned long) WaitForSingleObject(m_thread_id, INFINITE);
+    unsigned long rc = (unsigned long)WaitForSingleObject(m_thread_id, INFINITE);
     return (rc == 0);
 }
 

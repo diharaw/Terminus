@@ -4,7 +4,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-class ZipFile : public IFile
+class ZipFile : public File
 {
 public:
 	ZipFile(void* handle, size_t size);
@@ -18,9 +18,9 @@ public:
     void close() override;
 
 private:
-	size_t		m_start;
-	size_t		m_size;
-	void*		m_handle;
+	size_t m_start;
+	size_t m_size;
+	void*  m_handle;
 };
 
 TE_END_TERMINUS_NAMESPACE

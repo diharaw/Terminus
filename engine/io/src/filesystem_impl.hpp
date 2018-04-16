@@ -9,24 +9,26 @@ TE_BEGIN_TERMINUS_NAMESPACE
 
 class Package;
 
-class FileSystem : public IFileSystem
+class FileSystemImpl : public FileSystem
 {
 public:
-    FileSystem();
-    ~FileSystem();
+	FileSystemImpl();
+    ~FileSystemImpl();
 	virtual bool		 add_directory(const FSNameBuffer& path) override;
 	virtual bool		 add_package(const FSNameBuffer& file) override;
 	virtual bool		 remove_directory(const FSNameBuffer& path) override;
 	virtual bool		 remove_package(const FSNameBuffer& file) override;
-	virtual bool		 file_exists(const FSNameBuffer& file) override;
-	virtual bool		 directory_exists(const FSNameBuffer& file) override;
+	virtual bool		 file_exists(const FSNameBuffer& file, bool absolute = false) override;
+	virtual bool		 directory_exists(const FSNameBuffer& file, bool absolute = false) override;
 	virtual bool		 create_directory(const FSNameBuffer& file) override;
-	virtual IFile*       open_file(const FSNameBuffer& file, const uint32_t& mode, const bool& absolute = false) override;
-	virtual void		 close_file(IFile* file) override;
+	virtual File*        open_file(const FSNameBuffer& file, const uint32_t& mode) override;
+	virtual File*        open_file_ex(const FSNameBuffer& file, const uint32_t& mode) override;
+	virtual void		 close_file(File* file) override;
 	virtual FSNameBuffer file_extension(const FSNameBuffer& file) override;
 
 private:
-	IFile* open_file_internal(const FSNameBuffer& path, const uint32_t& mode);
+	bool file_exists_internal(const FSNameBuffer& path);
+	bool directory_exists_internal(const FSNameBuffer& path);
     
 private:
 	struct DirectoryEntry

@@ -10,7 +10,8 @@ public:
 	Package();
 	Package(const FSNameBuffer& name);
 	~Package();
-	IFile* open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator);
+	File* open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator);
+	bool file_exists(const FSNameBuffer& file);
 
 private:
 	void* m_zip;

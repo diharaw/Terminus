@@ -23,7 +23,7 @@ Package::~Package()
 	zip_close((zip_t*)m_zip);
 }
 
-IFile* Package::open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator)
+File* Package::open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator)
 {
 	if (allocator)
 	{
@@ -41,6 +41,11 @@ IFile* Package::open_file(const FSNameBuffer& file, const uint32_t& mode, IAlloc
 			return nullptr;
 	}
 	return nullptr;
+}
+
+bool Package::file_exists(const FSNameBuffer& file)
+{
+	return zip_name_locate((zip_t*)m_zip, file.c_str(), 0) != -1;
 }
 
 TE_END_TERMINUS_NAMESPACE

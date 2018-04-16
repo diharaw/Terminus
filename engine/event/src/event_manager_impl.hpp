@@ -10,7 +10,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class EventManagerImpl : public EventManager
 {
 public:
-    EventManagerImpl();
+	EventManagerImpl();
     ~EventManagerImpl();
     CallbackID register_callback(const uint16_t& type, EventCallback callback)		  override;
     void     unregister_callback(const uint16_t& type, const CallbackID& callback_id) override;

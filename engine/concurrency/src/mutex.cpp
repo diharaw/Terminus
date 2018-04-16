@@ -1,6 +1,8 @@
 #include <concurrency/include/mutex.hpp>
 #include <assert.h>
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 #if defined(WIN32)
 
 Mutex::Mutex()
@@ -49,4 +51,4 @@ void Mutex::unlock()
 
 #endif
 
-
+TE_END_TERMINUS_NAMESPACE

@@ -36,7 +36,7 @@ private:
     double m_mouse_last_pos_wheel;
     
 public:
-    InputManagerImpl();
+	InputManagerImpl();
     ~InputManagerImpl();
     void initialize();
     void process_gamepad_added(EventManager* event_manager, int32_t device_index);

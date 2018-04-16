@@ -13,10 +13,9 @@ using FSNameBuffer = StringBuffer<TE_MAX_FILENAME_SIZE>;
 
 enum FileMode
 {
-	TE_FS_READ = 1,
-	TE_FS_WRITE = 2,
-	TE_FS_TEXT = 4,
-	TE_FS_BINARY = 8
+	TE_FS_READ	 = 1,
+	TE_FS_WRITE  = 2,
+	TE_FS_BINARY = 4
 };
 
 enum FileType
@@ -25,13 +24,13 @@ enum FileType
 	TE_FILE_ZIP  = 1
 };
 
-class IFile
+class File
 {
 public:
 	const size_t END = ULLONG_MAX;
 
-	IFile() {}
-	virtual ~IFile() {}
+	File() {}
+	virtual ~File() {}
 	virtual size_t size() = 0;
 	virtual size_t read(void* buffer, const size_t& size, const size_t& count) = 0;
 	virtual size_t write(void* data, const size_t& size, const size_t& count) = 0;

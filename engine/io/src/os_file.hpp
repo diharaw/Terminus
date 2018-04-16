@@ -4,7 +4,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-class OsFile : public IFile
+class OsFile : public File
 {
 public:
 	OsFile(void* handle);

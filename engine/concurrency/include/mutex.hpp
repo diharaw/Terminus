@@ -4,6 +4,8 @@
 
 #include "thread_common.hpp"
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 class Mutex
 {
 public:
@@ -24,3 +26,5 @@ private:
 #endif
     
 };
+
+TE_END_TERMINUS_NAMESPACE

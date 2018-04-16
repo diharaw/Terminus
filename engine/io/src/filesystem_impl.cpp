@@ -17,14 +17,14 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-FileSystem::FileSystem()
+FileSystemImpl::FileSystemImpl()
 {
 	m_os_file_allocator.initialize(sizeof(OsFile), 8);
 	m_zip_file_allocator.initialize(sizeof(ZipFile), 8);
 	m_package_allocator.initialize(sizeof(Package), 8);
 }
 
-FileSystem::~FileSystem()
+FileSystemImpl::~FileSystemImpl()
 {
 	for (int i = 0; i < m_directories.size(); i++)
 		m_directories.remove(m_directories.array()[i].handle);
@@ -36,9 +36,9 @@ FileSystem::~FileSystem()
 	}
 }
 
-bool FileSystem::add_directory(const FSNameBuffer& path)
+bool FileSystemImpl::add_directory(const FSNameBuffer& path)
 {
-	if (directory_exists(path))
+	if (directory_exists(path, true))
 	{
 		DirectoryEntry entry;
 
@@ -52,9 +52,9 @@ bool FileSystem::add_directory(const FSNameBuffer& path)
 		return false;
 }
 
-bool FileSystem::add_package(const FSNameBuffer& file)
+bool FileSystemImpl::add_package(const FSNameBuffer& file)
 {
-	if (file_exists(file))
+	if (file_exists(file, true))
 	{
 		PackageEntry entry;
 
@@ -69,7 +69,7 @@ bool FileSystem::add_package(const FSNameBuffer& file)
 		return false;
 }
 
-bool FileSystem::remove_directory(const FSNameBuffer& file)
+bool FileSystemImpl::remove_directory(const FSNameBuffer& file)
 {
 	for (int i = 0; i < m_directories.size(); i++)
 	{
@@ -83,7 +83,7 @@ bool FileSystem::remove_directory(const FSNameBuffer& file)
 	return false;
 }
 
-bool FileSystem::remove_package(const FSNameBuffer& file)
+bool FileSystemImpl::remove_package(const FSNameBuffer& file)
 {
 	for (int i = 0; i < m_packages.size(); i++)
 	{
@@ -99,33 +99,52 @@ bool FileSystem::remove_package(const FSNameBuffer& file)
 	return false;
 }
 
-IFile* FileSystem::open_file(const FSNameBuffer& file, const uint32_t& mode, const bool& absolute)
+File* FileSystemImpl::open_file(const FSNameBuffer& file, const uint32_t& mode)
 {
-	if (absolute)
-		return open_file_internal(file, mode);
+	StringBuffer<4> fileMode = "";
+
+	if ((mode & TE_FS_READ) == TE_FS_READ)
+		fileMode += "r";
+
+	if ((mode & TE_FS_WRITE) == TE_FS_WRITE)
+		fileMode += "w";
+
+	if ((mode & TE_FS_BINARY) == TE_FS_BINARY)
+		fileMode += "b";
+
+	FILE* os_file = fopen(file.c_str(), fileMode.c_str());
+
+	if (os_file)
+		return TE_NEW(&m_os_file_allocator) OsFile((void*)os_file);
 	else
-	{
-		for (int i = 0; i < m_directories.size(); i++)
-		{
-			FSNameBuffer path = m_directories.array()[i].name + "/" + file;
-
-			if (file_exists(path))
-				return open_file_internal(path, mode);
-		}
-
-		for (int i = 0; i < m_packages.size(); i++)
-		{
-			IFile* zip_file = m_packages.array()[i].package->open_file(file, mode, &m_zip_file_allocator);
-			
-			if (zip_file)
-				return zip_file;
-		}
-
 		return nullptr;
-	}
 }
 
-void FileSystem::close_file(IFile* file)
+File* FileSystemImpl::open_file_ex(const FSNameBuffer& file, const uint32_t& mode)
+{
+	// File writing is not allowed in extended mode.
+	assert((mode & TE_FS_WRITE) != TE_FS_WRITE);
+
+	for (int i = 0; i < m_directories.size(); i++)
+	{
+		FSNameBuffer path = m_directories.array()[i].name + "/" + file;
+
+		if (file_exists(path, true))
+			return open_file(path, mode);
+	}
+
+	for (int i = 0; i < m_packages.size(); i++)
+	{
+		File* zip_file = m_packages.array()[i].package->open_file(file, mode, &m_zip_file_allocator);
+
+		if (zip_file)
+			return zip_file;
+	}
+
+	return nullptr;
+}
+
+void FileSystemImpl::close_file(File* file)
 {
 	file->close();
 
@@ -137,19 +156,53 @@ void FileSystem::close_file(IFile* file)
 
 #if defined(TERMINUS_PLATFORM_WIN32)
 
-bool FileSystem::file_exists(const FSNameBuffer& file)
+bool FileSystemImpl::file_exists(const FSNameBuffer& file, bool absolute)
 {
-	DWORD dwAttrib = GetFileAttributes(file.c_str());
-	return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	if (absolute)
+		return file_exists_internal(file);
+	else
+	{
+		for (int i = 0; i < m_directories.size(); i++)
+		{
+			FSNameBuffer path = m_directories.array()[i].name + "/" + file;
+			bool exists = file_exists_internal(path);
+
+			if (exists)
+				return exists;
+		}
+
+		for (int i = 0; i < m_packages.size(); i++)
+		{
+			bool exists = m_packages.array()[i].package->file_exists(file);
+
+			if (exists)
+				return exists;
+		}
+
+		return false;
+	}
 }
 
-bool FileSystem::directory_exists(const FSNameBuffer& file)
+bool FileSystemImpl::directory_exists(const FSNameBuffer& file, bool absolute)
 {
-	DWORD dwAttrib = GetFileAttributes(file.c_str());
-	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	if (absolute)
+		return directory_exists_internal(file);
+	else
+	{
+		for (int i = 0; i < m_directories.size(); i++)
+		{
+			FSNameBuffer path = m_directories.array()[i].name + "/" + file;
+			bool exists = directory_exists_internal(path);
+
+			if (exists)
+				return exists;
+		}
+
+		return false;
+	}
 }
 
-bool FileSystem::create_directory(const FSNameBuffer& path)
+bool FileSystemImpl::create_directory(const FSNameBuffer& path)
 {
 	FSNameBuffer str_path = path;;
 
@@ -183,7 +236,7 @@ bool FileSystem::create_directory(const FSNameBuffer& path)
 
 #else
 
-bool FileSystem::file_exists(const FSNameBuffer& file)
+bool FileSystemImpl::file_exists(const FSNameBuffer& file)
 {
 	if (access(path, F_OK) != -1)
 		return true;
@@ -191,7 +244,7 @@ bool FileSystem::file_exists(const FSNameBuffer& file)
 		return false;
 }
 
-bool FileSystem::directory_exists(const FSNameBuffer& file)
+bool FileSystemImpl::directory_exists(const FSNameBuffer& file)
 {
 	if (path == NULL)
 		return false;
@@ -210,7 +263,7 @@ bool FileSystem::directory_exists(const FSNameBuffer& file)
 	return exists;
 }
 
-bool FileSystem::create_directory(const FSNameBuffer& file)
+bool FileSystemImpl::create_directory(const FSNameBuffer& file)
 {
 	FSNameBuffer str_path = path;;
 
@@ -243,7 +296,7 @@ bool FileSystem::create_directory(const FSNameBuffer& file)
 
 #endif
 
-FSNameBuffer FileSystem::file_extension(const FSNameBuffer& file)
+FSNameBuffer FileSystemImpl::file_extension(const FSNameBuffer& file)
 {
     size_t pos = file.find_last('.');
     
@@ -253,25 +306,16 @@ FSNameBuffer FileSystem::file_extension(const FSNameBuffer& file)
         return file.substring(pos + 1, FSNameBuffer::END);
 }
 
-IFile* FileSystem::open_file_internal(const FSNameBuffer& path, const uint32_t& mode)
+bool FileSystemImpl::file_exists_internal(const FSNameBuffer& path)
 {
-	std::string fileMode = "";
+	DWORD dwAttrib = GetFileAttributes(path.c_str());
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
-	if ((mode & TE_FS_READ) == TE_FS_READ)
-		fileMode += "r";
-
-	if ((mode & TE_FS_WRITE) == TE_FS_WRITE)
-		fileMode += "w";
-
-	if ((mode & TE_FS_BINARY) == TE_FS_BINARY)
-		fileMode += "b";
-
-	FILE* file = fopen(path.c_str(), fileMode.c_str());
-
-	if (file)
-		return TE_NEW(&m_os_file_allocator) OsFile((void*)file);
-	else
-		return nullptr;
+bool FileSystemImpl::directory_exists_internal(const FSNameBuffer& path)
+{
+	DWORD dwAttrib = GetFileAttributes(path.c_str());
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 TE_END_TERMINUS_NAMESPACE
