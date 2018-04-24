@@ -4,12 +4,12 @@ TE_BEGIN_TERMINUS_NAMESPACE
 
 class IAllocator;
 
-class Package
+class Archive
 {
 public:
-	Package();
-	Package(const FSNameBuffer& name);
-	~Package();
+	Archive();
+	Archive(const FSNameBuffer& name);
+	~Archive();
 	File* open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator);
 	bool file_exists(const FSNameBuffer& file);
 

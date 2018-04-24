@@ -20,7 +20,6 @@ add_definitions(-DTE_PLATFORM_SDL2)
 
 # Public Headers
 set(TE_IO_PUBLIC_HEADERS "${PROJECT_SOURCE_DIR}/include/file.hpp"
-                         "${PROJECT_SOURCE_DIR}/include/directory.hpp"
                          "${PROJECT_SOURCE_DIR}/include/filesystem.hpp"
                          "${PROJECT_SOURCE_DIR}/include/input_device.hpp"
                          "${PROJECT_SOURCE_DIR}/include/input_manager.hpp"
@@ -28,21 +27,19 @@ set(TE_IO_PUBLIC_HEADERS "${PROJECT_SOURCE_DIR}/include/file.hpp"
                          "${PROJECT_SOURCE_DIR}/include/io_macros.hpp")
 
 # Private Headers
-set(TE_IO_PRIVATE_HEADERS "${PROJECT_SOURCE_DIR}/src/disk_directory.hpp"
-                          "${PROJECT_SOURCE_DIR}/src/filesystem_impl.hpp"
+set(TE_IO_PRIVATE_HEADERS "${PROJECT_SOURCE_DIR}/src/filesystem_impl.hpp"
                           "${PROJECT_SOURCE_DIR}/src/input_manager_impl.hpp"
                           "${PROJECT_SOURCE_DIR}/src/input_map_impl.hpp"
+                          "${PROJECT_SOURCE_DIR}/src/archive.hpp"
                           "${PROJECT_SOURCE_DIR}/src/os_file.hpp"
-                          "${PROJECT_SOURCE_DIR}/src/zip_directory.hpp"
                           "${PROJECT_SOURCE_DIR}/src/zip_file.hpp")
 
 # Sources
-set(TE_IO_SOURCES "disk_directory.cpp"
-                  "filesystem_impl.cpp"
+set(TE_IO_SOURCES "filesystem_impl.cpp"
                   "input_manager_impl.cpp"
                   "input_map_impl.cpp"
                   "os_file.cpp"
-                  "zip_directory.cpp"
+                  "archive.cpp"
                   "zip_file.cpp")
 
 # Source groups

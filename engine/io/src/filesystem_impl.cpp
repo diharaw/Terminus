@@ -1,7 +1,7 @@
 #include <io/src/filesystem_impl.hpp>
 #include <io/src/os_file.hpp>
 #include <io/src/zip_file.hpp>
-#include <io/src/package.hpp>
+#include <io/src/archive.hpp>
 #include <string>
 #include <zip.h>
 
@@ -21,7 +21,7 @@ FileSystemImpl::FileSystemImpl()
 {
 	m_os_file_allocator.initialize(sizeof(OsFile), 8);
 	m_zip_file_allocator.initialize(sizeof(ZipFile), 8);
-	m_package_allocator.initialize(sizeof(Package), 8);
+	m_archive_allocator.initialize(sizeof(Archive), 8);
 }
 
 FileSystemImpl::~FileSystemImpl()
@@ -29,14 +29,14 @@ FileSystemImpl::~FileSystemImpl()
 	for (int i = 0; i < m_directories.size(); i++)
 		m_directories.remove(m_directories.array()[i].handle);
 
-	for (int i = 0; i < m_packages.size(); i++)
+	for (int i = 0; i < m_archives.size(); i++)
 	{
-		TE_DELETE(m_packages.array()[i].package, &m_package_allocator);
-		m_packages.remove(m_packages.array()[i].handle);
+		TE_DELETE(m_archives.array()[i].archive, &m_archive_allocator);
+		m_archives.remove(m_archives.array()[i].handle);
 	}
 }
 
-bool FileSystemImpl::add_directory(const FSNameBuffer& path)
+bool FileSystemImpl::add_search_directory(const FSNameBuffer& path)
 {
 	if (directory_exists(path, true))
 	{
@@ -52,16 +52,16 @@ bool FileSystemImpl::add_directory(const FSNameBuffer& path)
 		return false;
 }
 
-bool FileSystemImpl::add_package(const FSNameBuffer& file)
+bool FileSystemImpl::add_search_archive(const FSNameBuffer& file)
 {
 	if (file_exists(file, true))
 	{
-		PackageEntry entry;
+		ArchiveEntry entry;
 
 		entry.name = file;
-		entry.handle = m_packages.add();
-		entry.package = TE_NEW(&m_package_allocator) Package(file);
-		m_packages.set(entry.handle, entry);
+		entry.handle = m_archives.add();
+		entry.archive = TE_NEW(&m_archive_allocator) Archive(file);
+		m_archives.set(entry.handle, entry);
 
 		return true;
 	}
@@ -69,7 +69,7 @@ bool FileSystemImpl::add_package(const FSNameBuffer& file)
 		return false;
 }
 
-bool FileSystemImpl::remove_directory(const FSNameBuffer& file)
+bool FileSystemImpl::remove_search_directory(const FSNameBuffer& file)
 {
 	for (int i = 0; i < m_directories.size(); i++)
 	{
@@ -83,14 +83,14 @@ bool FileSystemImpl::remove_directory(const FSNameBuffer& file)
 	return false;
 }
 
-bool FileSystemImpl::remove_package(const FSNameBuffer& file)
+bool FileSystemImpl::remove_search_archive(const FSNameBuffer& file)
 {
-	for (int i = 0; i < m_packages.size(); i++)
+	for (int i = 0; i < m_archives.size(); i++)
 	{
-		if (m_packages.array()[i].name == file)
+		if (m_archives.array()[i].name == file)
 		{
-			TE_DELETE(m_packages.array()[i].package, &m_package_allocator);
-			m_packages.remove(m_packages.array()[i].handle);
+			TE_DELETE(m_archives.array()[i].archive, &m_archive_allocator);
+			m_archives.remove(m_archives.array()[i].handle);
 
 			return true;
 		}
@@ -133,9 +133,9 @@ File* FileSystemImpl::open_file_ex(const FSNameBuffer& file, const uint32_t& mod
 			return open_file(path, mode);
 	}
 
-	for (int i = 0; i < m_packages.size(); i++)
+	for (int i = 0; i < m_archives.size(); i++)
 	{
-		File* zip_file = m_packages.array()[i].package->open_file(file, mode, &m_zip_file_allocator);
+		File* zip_file = m_archives.array()[i].archive->open_file(file, mode, &m_zip_file_allocator);
 
 		if (zip_file)
 			return zip_file;
@@ -171,9 +171,9 @@ bool FileSystemImpl::file_exists(const FSNameBuffer& file, bool absolute)
 				return exists;
 		}
 
-		for (int i = 0; i < m_packages.size(); i++)
+		for (int i = 0; i < m_archives.size(); i++)
 		{
-			bool exists = m_packages.array()[i].package->file_exists(file);
+			bool exists = m_archives.array()[i].archive->file_exists(file);
 
 			if (exists)
 				return exists;

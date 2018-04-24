@@ -11,10 +11,10 @@ class FileSystem
 public:
     FileSystem() {};
     virtual ~FileSystem() {};
-    virtual bool		 add_directory(const FSNameBuffer& path) = 0;
-	virtual bool		 add_package(const FSNameBuffer& file) = 0;
-	virtual bool		 remove_directory(const FSNameBuffer& path) = 0;
-	virtual bool		 remove_package(const FSNameBuffer& file) = 0;
+    virtual bool		 add_search_directory(const FSNameBuffer& path) = 0;
+	virtual bool		 add_search_archive(const FSNameBuffer& file) = 0;
+	virtual bool		 remove_search_directory(const FSNameBuffer& path) = 0;
+	virtual bool		 remove_search_archive(const FSNameBuffer& file) = 0;
 	virtual bool		 file_exists(const FSNameBuffer& file, bool absolute = true) = 0;
 	virtual bool		 directory_exists(const FSNameBuffer& file, bool absolute = true) = 0;
 	virtual bool		 create_directory(const FSNameBuffer& file) = 0;

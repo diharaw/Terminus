@@ -87,6 +87,7 @@ add_subdirectory("engine/concurrency")
 add_subdirectory("engine/platform")
 add_subdirectory("engine/event")
 add_subdirectory("engine/io")
+add_subdirectory("engine/resource")
 # add_subdirectory("engine/core")
 # add_subdirectory("engine/stl")
 

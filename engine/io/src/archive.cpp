@@ -1,4 +1,4 @@
-#include <io/src/package.hpp>
+#include <io/src/archive.hpp>
 #include <io/src/zip_file.hpp>
 #include <memory/include/allocator.hpp>
 
@@ -7,23 +7,23 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-Package::Package()
+Archive::Archive()
 {
 	m_zip = nullptr;
 }
 
-Package::Package(const FSNameBuffer& name)
+Archive::Archive(const FSNameBuffer& name)
 {
 	int err;
 	m_zip = zip_open(name.c_str(), 0, &err);
 }
 
-Package::~Package()
+Archive::~Archive()
 {
 	zip_close((zip_t*)m_zip);
 }
 
-File* Package::open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator)
+File* Archive::open_file(const FSNameBuffer& file, const uint32_t& mode, IAllocator* allocator)
 {
 	if (allocator)
 	{
@@ -43,7 +43,7 @@ File* Package::open_file(const FSNameBuffer& file, const uint32_t& mode, IAlloca
 	return nullptr;
 }
 
-bool Package::file_exists(const FSNameBuffer& file)
+bool Archive::file_exists(const FSNameBuffer& file)
 {
 	return zip_name_locate((zip_t*)m_zip, file.c_str(), 0) != -1;
 }

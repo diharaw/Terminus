@@ -7,17 +7,17 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-class Package;
+class Archive;
 
 class FileSystemImpl : public FileSystem
 {
 public:
 	FileSystemImpl();
     ~FileSystemImpl();
-	virtual bool		 add_directory(const FSNameBuffer& path) override;
-	virtual bool		 add_package(const FSNameBuffer& file) override;
-	virtual bool		 remove_directory(const FSNameBuffer& path) override;
-	virtual bool		 remove_package(const FSNameBuffer& file) override;
+	virtual bool		 add_search_directory(const FSNameBuffer& path) override;
+	virtual bool		 add_search_archive(const FSNameBuffer& file) override;
+	virtual bool		 remove_search_directory(const FSNameBuffer& path) override;
+	virtual bool		 remove_search_archive(const FSNameBuffer& file) override;
 	virtual bool		 file_exists(const FSNameBuffer& file, bool absolute = false) override;
 	virtual bool		 directory_exists(const FSNameBuffer& file, bool absolute = false) override;
 	virtual bool		 create_directory(const FSNameBuffer& file) override;
@@ -37,18 +37,18 @@ private:
 		uint32_t	 handle;
 	};
 
-	struct PackageEntry
+	struct ArchiveEntry
 	{
 		FSNameBuffer name;
 		uint32_t	 handle;
-		Package*	 package;
+		Archive*	 archive;
 	};
 
 	PackedArray<DirectoryEntry, 16>		m_directories;
-	PackedArray<PackageEntry, 16>		m_packages;
+	PackedArray<ArchiveEntry, 16>		m_archives;
     BufferPoolAllocator<TE_KILOBYTE(1)> m_zip_file_allocator;
 	BufferPoolAllocator<TE_KILOBYTE(1)> m_os_file_allocator;
-	BufferPoolAllocator<TE_KILOBYTE(1)> m_package_allocator;
+	BufferPoolAllocator<TE_KILOBYTE(1)> m_archive_allocator;
 };
 
 TE_END_TERMINUS_NAMESPACE
