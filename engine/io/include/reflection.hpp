@@ -69,18 +69,18 @@ Reflection.init(members, sizeof(members)/sizeof(TypeDescriptor_Struct::Member));
 
 #define REFLECT_MEMBER(MEMBER) { #MEMBER, offsetof(T, MEMBER), TypeResolver::get<StripPointer<decltype(MEMBER)>::Type>(), IsPointer<decltype(MEMBER)>::val },
 
-#define DECLARE_ENUM_TYPE_DESC(TYPE) struct TypeDescriptor_##TYPE : TypeDescriptor_Enum   \
+#define DECLARE_ENUM_TYPE_DESC(TYPE) struct TypeDescriptor_Enum_##TYPE : TypeDescriptor_Enum   \
 {                                                    \
-TypeDescriptor_##TYPE();                         \
+TypeDescriptor_Enum_##TYPE();                         \
 };                                                   \
 template <>                                          \
 TypeDescriptor* get_primitive_descriptor<TYPE>()     \
 {                                                    \
-static TypeDescriptor_##TYPE typeDesc;           \
+static TypeDescriptor_Enum_##TYPE typeDesc;           \
 return &typeDesc;                                \
 }
 
-#define BEGIN_ENUM_TYPE_DESC(TYPE) TypeDescriptor_##TYPE::TypeDescriptor_##TYPE() : TypeDescriptor_Enum(#TYPE, sizeof(TYPE)) { \
+#define BEGIN_ENUM_TYPE_DESC(TYPE) TypeDescriptor_Enum_##TYPE::TypeDescriptor_Enum_##TYPE() : TypeDescriptor_Enum(#TYPE, sizeof(TYPE)) { \
 static Constant constants[] = {                                                         \
 
 #define REFLECT_ENUM_CONST(VALUE, DISPLAY_NAME, DESC) { DISPLAY_NAME, DESC, VALUE },

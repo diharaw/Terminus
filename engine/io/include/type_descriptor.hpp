@@ -85,3 +85,10 @@ struct TypeDescriptor_Enum : public TypeDescriptor
     int       m_num_constants;
     Constant* m_constants;
 };
+
+struct TypeDescriptor_Container : public TypeDescriptor
+{
+    TypeDescriptor_Container(const char* name, size_t size) : TypeDescriptor(name, size) {}
+	virtual size_t size(void* obj) = 0;
+    virtual void* item(const size_t& idx) = 0;
+};
