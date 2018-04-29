@@ -310,6 +310,10 @@ int main(int argc, char *argv[])
 
 	serializer.save(foo);
 	serializer.print();
+	
+	Foo foo2;
+
+	serializer.load(foo2);
     
     while (running)
     {

@@ -39,12 +39,12 @@ void TypeDescriptor_Struct::deserialize(void* obj, const char* name, ISerializer
 	{
 		char* ptr = static_cast<char*>(obj);
 
-		serializer->begin_serialize_struct(name);
+		serializer->begin_deserialize_struct(name);
 
 		for (int i = 0; i < m_num_members; i++)
 			m_members[i].m_type->deserialize(ptr + m_members[i].m_offset, m_members[i].m_name, serializer);
 
-		serializer->end_serialize_struct(name);
+		serializer->end_deserialize_struct(name);
 	}
 }
 
