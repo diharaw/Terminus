@@ -1,7 +1,6 @@
 #pragma once
 
 #include <event/include/event_manager.hpp>
-#include <stl/include/hash_map.hpp>
 #include <stl/include/packed_array.hpp>
 #include <concurrency/include/mutex.hpp>
 

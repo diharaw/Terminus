@@ -1,5 +1,7 @@
-#include <json_serializer.hpp>
+#include <io/include/json_serializer.hpp>
 #include <iostream>
+
+TE_BEGIN_TERMINUS_NAMESPACE
 
 JsonSerializer::JsonSerializer()
 {
@@ -424,3 +426,5 @@ void JsonSerializer::raw_deserialize(void* data, const size_t& size)
 {
 
 }
+
+TE_END_TERMINUS_NAMESPACE

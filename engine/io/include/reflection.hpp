@@ -1,6 +1,6 @@
 #pragma once
 
-#include "type_descriptor.h"
+#include <io/include/type_descriptor.hpp>
 
 template <typename TYPE>
 const char* type_name()
@@ -63,22 +63,22 @@ void TYPE::init_reflection()                                                    
 using T = TYPE;                                                                   \
 static TypeDescriptor_Struct::Member members[] = {
 
-#define END_DECLARE_REFLECT()   };                                                                               \
-Reflection.init(members, sizeof(members)/sizeof(TypeDescriptor_Struct::Member)); \
-}
+#define END_DECLARE_REFLECT()		};																				 \
+									Reflection.init(members, sizeof(members)/sizeof(TypeDescriptor_Struct::Member)); \
+								}
 
-#define REFLECT_MEMBER(MEMBER) { #MEMBER, offsetof(T, MEMBER), TypeResolver::get<StripPointer<decltype(MEMBER)>::Type>(), IsPointer<decltype(MEMBER)>::val },
+#define REFLECT_MEMBER(MEMBER) { #MEMBER, offsetof(T, MEMBER), TypeResolver<StripPointer<decltype(MEMBER)>::Type>::get(), IsPointer<decltype(MEMBER)>::val },
 
 #define DECLARE_ENUM_TYPE_DESC(TYPE) struct TypeDescriptor_Enum_##TYPE : TypeDescriptor_Enum   \
-{                                                    \
-TypeDescriptor_Enum_##TYPE();                         \
-};                                                   \
-template <>                                          \
-TypeDescriptor* get_primitive_descriptor<TYPE>()     \
-{                                                    \
-static TypeDescriptor_Enum_##TYPE typeDesc;           \
-return &typeDesc;                                \
-}
+									 {														   \
+										TypeDescriptor_Enum_##TYPE();						   \
+									 };														   \
+									 template <>											   \
+									 TypeDescriptor* get_primitive_descriptor<TYPE>()		   \
+									 {														   \
+										static TypeDescriptor_Enum_##TYPE typeDesc;			   \
+										return &typeDesc;									   \
+									 }
 
 #define BEGIN_ENUM_TYPE_DESC(TYPE) TypeDescriptor_Enum_##TYPE::TypeDescriptor_Enum_##TYPE() : TypeDescriptor_Enum(#TYPE, sizeof(TYPE)) { \
 static Constant constants[] = {                                                         \

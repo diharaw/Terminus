@@ -10,7 +10,6 @@ class LinearAllocator : public IAllocator
 public:
 	LinearAllocator();
 	virtual ~LinearAllocator();
-	void initialize(IAllocator* backing, size_t max_size);
 	void initialize(void* memory, size_t max_size);
 	void* allocate(size_t size, size_t count, size_t align) override;
 	void free(void* ptr) override;

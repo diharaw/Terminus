@@ -25,7 +25,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class IAllocator
 {
 public:
-	IAllocator() : m_size(0), m_memory(nullptr), m_used_size(0), m_backing(nullptr), m_num_allocations(0) {}
+	IAllocator() : m_size(0), m_memory(nullptr), m_used_size(0), m_num_allocations(0) {}
 	virtual ~IAllocator() {}
 	virtual void* allocate(size_t size, size_t count, size_t align) = 0;
 	virtual void free(void* ptr) = 0;
@@ -35,7 +35,6 @@ protected:
 	size_t		 m_used_size;
 	size_t		 m_num_allocations;
 	void*		 m_memory;
-	IAllocator*  m_backing;
 };
 
 TE_END_TERMINUS_NAMESPACE

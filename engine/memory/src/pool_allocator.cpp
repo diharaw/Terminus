@@ -32,23 +32,6 @@ void PoolAllocator::initialize_internal()
     *p = nullptr;
 }
 
-void PoolAllocator::initialize(IAllocator* backing, size_t max_size, size_t object_size, uint8_t alignment)
-{
-	// Only init once.
-	assert(m_memory == nullptr);
-	assert(backing);
-	assert(max_size > 0);
-
-	m_size = max_size;
-	m_backing = backing;
-	m_memory = m_backing->allocate(m_size, 1, 8);
-    
-    m_object_size = object_size;
-    m_object_alignment = alignment;
-    
-    initialize_internal();
-}
-
 void PoolAllocator::initialize(void* memory, size_t max_size, size_t object_size, uint8_t alignment)
 {
 	// Only init once.

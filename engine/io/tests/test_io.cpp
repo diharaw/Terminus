@@ -8,6 +8,11 @@
 #include <event/src/event_manager_impl.hpp>
 #include <SDL.h>
 
+#include <stl/include/resizable_array.hpp>
+#include <stl/include/static_array.hpp>
+#include <io/include/reflection.hpp>
+#include <io/include/json_serializer.hpp>
+
 using namespace te;
 
 FileSystemImpl fs;
@@ -220,6 +225,33 @@ void on_axis_input(te::Event* e)
     }
 }
 
+struct Bar
+{
+	int a;
+	float b;
+
+	REFLECT()
+};
+
+struct Foo
+{
+	ResizableArray<Bar> test;
+	//StaticArray<int, 10> list;
+
+	REFLECT()
+};
+
+BEGIN_DECLARE_REFLECT(Bar)
+	REFLECT_MEMBER(a)
+	REFLECT_MEMBER(b)
+END_DECLARE_REFLECT()
+
+BEGIN_DECLARE_REFLECT(Foo)
+	REFLECT_MEMBER(test)
+//	REFLECT_MEMBER(list)
+END_DECLARE_REFLECT()
+
+
 extern "C" int main(int argc, char *argv[])
 {
 	test_filesystem();
@@ -256,6 +288,13 @@ extern "C" int main(int argc, char *argv[])
     
     event_manager.register_callback(TE_EVENT_AXIS_INPUT, on_axis_input);
     event_manager.register_callback(TE_EVENT_ACTION_INPUT, on_action_input);
+
+	JsonSerializer serializer;
+
+	Foo foo;
+
+	serializer.save(foo);
+	serializer.print();
     
     while (running)
     {

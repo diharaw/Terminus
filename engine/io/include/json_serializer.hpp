@@ -1,11 +1,13 @@
 #pragma once
 
-#include <serializer_macros.hpp>
-#include <serializer.hpp>
+#include <io/include/serializer_macros.hpp>
+#include <io/include/serializer.hpp>
 #include <stack>
 
 // Json Includes
 #include <json.hpp>
+
+TE_BEGIN_TERMINUS_NAMESPACE
 
 class JsonSerializer : public ISerializer
 {
@@ -67,3 +69,5 @@ public:
 private:
 	std::stack<nlohmann::json> m_object_stack;
 };
+
+TE_END_TERMINUS_NAMESPACE

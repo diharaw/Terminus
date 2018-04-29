@@ -70,12 +70,14 @@ set(TE_ENGINE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/engine")
 set(TE_SDL2_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/SDL/include")
 set(TE_LIBZIP_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/libzip")
 set(TE_ASSIMP_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/assimp/include")
+set(TE_JSON_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/json/single_include/nlohmann")
 
 # Set includes
 include_directories("${TE_ENGINE_INCLUDE_PATH}"
                     "${TE_SDL2_INCLUDE_PATH}"
                     "${TE_LIBZIP_INCLUDE_PATH}"
-                    "${TE_ASSIMP_INCLUDE_PATH}")
+                    "${TE_ASSIMP_INCLUDE_PATH}"
+                    "${TE_JSON_INCLUDE_PATH}")
 
 # -----------------------------------------------------------------------------------------------------------------------------
 # SUB-DIRECTORIES

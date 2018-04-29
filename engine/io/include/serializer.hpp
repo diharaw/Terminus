@@ -2,7 +2,9 @@
 
 #include <stdint.h>
 #include <string>
-#include <reflection.h>
+#include <io/include/reflection.hpp>
+
+TE_BEGIN_TERMINUS_NAMESPACE
 
 class ISerializer
 {
@@ -165,7 +167,7 @@ public:
 			char* ptr = static_cast<char*>(obj);
 
 			for (int i = 0; i < desc->m_num_members; i++)
-				desc->m_members[i].m_type->serialize(ptr + desc->m_members[i].m_offset, desc->m_members[i].m_name, desc->m_members[i].m_trivial, this);
+				desc->m_members[i].m_type->serialize(ptr + desc->m_members[i].m_offset, desc->m_members[i].m_name, this);
 		}
 	}
 
@@ -184,7 +186,7 @@ public:
 			char* ptr = static_cast<char*>(obj);
 
 			for (int i = 0; i < desc->m_num_members; i++)
-				desc->m_members[i].m_type->deserialize(ptr + desc->m_members[i].m_offset, desc->m_members[i].m_name, desc->m_members[i].m_trivial, this);
+				desc->m_members[i].m_type->deserialize(ptr + desc->m_members[i].m_offset, desc->m_members[i].m_name, this);
 		}
 	}
 
@@ -194,3 +196,5 @@ public:
 		deserialize(&obj, &T::Reflection, false);
 	}
 };
+
+TE_END_TERMINUS_NAMESPACE
