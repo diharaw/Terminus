@@ -236,7 +236,7 @@ struct Bar
 struct Foo
 {
 	ResizableArray<Bar> test;
-	//StaticArray<int, 10> list;
+	StaticArray<int, 10> list;
 
 	REFLECT()
 };
@@ -248,7 +248,7 @@ END_DECLARE_REFLECT()
 
 BEGIN_DECLARE_REFLECT(Foo)
 	REFLECT_MEMBER(test)
-	//REFLECT_MEMBER(list)
+	REFLECT_MEMBER(list)
 END_DECLARE_REFLECT()
 
 
@@ -297,8 +297,8 @@ int main(int argc, char *argv[])
 
 	Foo foo;
 
-	/*for (int i = 0; i < 10; i++)
-		foo.list[i] = rand();*/
+	for (int i = 0; i < 10; i++)
+		foo.list[i] = rand();
 
 	for (int i = 0; i < 10; i++)
 	{

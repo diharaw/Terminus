@@ -22,12 +22,12 @@ void TypeDescriptor_Struct::serialize(void* obj, const char* name, ISerializer* 
 	{
 		char* ptr = static_cast<char*>(obj);
 
-		serializer->begin_serialize_complex(name);
+		serializer->begin_serialize_struct(name);
 
 		for (int i = 0; i < m_num_members; i++)
 			m_members[i].m_type->serialize(ptr + m_members[i].m_offset, m_members[i].m_name, serializer);
 
-		serializer->end_serialize_complex(name);
+		serializer->end_serialize_struct(name);
 	}
 }
 
@@ -39,12 +39,12 @@ void TypeDescriptor_Struct::deserialize(void* obj, const char* name, ISerializer
 	{
 		char* ptr = static_cast<char*>(obj);
 
-		serializer->begin_deserialize_complex(name);
+		serializer->begin_serialize_struct(name);
 
 		for (int i = 0; i < m_num_members; i++)
 			m_members[i].m_type->deserialize(ptr + m_members[i].m_offset, m_members[i].m_name, serializer);
 
-		serializer->end_deserialize_complex(name);
+		serializer->end_serialize_struct(name);
 	}
 }
 
@@ -213,12 +213,12 @@ void TypeDescriptor_DynamicArray::serialize(void* obj, const char* name, ISerial
 	{
 		size_t n = get_size(obj);
 
-		serializer->begin_serialize_complex_array(name, get_size(obj));
+		serializer->begin_serialize_array(name, get_size(obj));
 
 		for (int i = 0; i < n; i++)
 			m_object_desc->serialize(get_item(obj, i), name, serializer);
 
-		serializer->end_serialize_complex_array(name);
+		serializer->end_serialize_array(name);
 	}
 }
 
@@ -228,12 +228,16 @@ void TypeDescriptor_DynamicArray::deserialize(void* obj, const char* name, ISeri
 		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
 	else
 	{
-		int n = serializer->begin_deserialize_complex_array(name);
+		int n = serializer->begin_deserialize_array(name);
 
 		for (int i = 0; i < n; i++)
+		{
+			serializer->push_array_index(i);
 			m_object_desc->deserialize(get_item(obj, i), name, serializer);
+			serializer->pop_array_index();
+		}
 
-		serializer->end_deserialize_complex_array(name);
+		serializer->end_deserialize_array(name);
 	}
 }
 
@@ -250,12 +254,12 @@ void TypeDescriptor_ResizableArray::serialize(void* obj, const char* name, ISeri
 	{
 		size_t n = get_size(obj);
 
-		serializer->begin_serialize_complex_array(name, n);
+		serializer->begin_serialize_array(name, n);
 
 		for (int i = 0; i < n; i++)
 			m_object_desc->serialize(get_item(obj, i), name, serializer);
 
-		serializer->end_serialize_complex_array(name);
+		serializer->end_serialize_array(name);
 	}
 }
 
@@ -265,12 +269,16 @@ void TypeDescriptor_ResizableArray::deserialize(void* obj, const char* name, ISe
 		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
 	else
 	{
-		int n = serializer->begin_deserialize_complex_array(name);
+		int n = serializer->begin_deserialize_array(name);
 
 		for (int i = 0; i < n; i++)
+		{
+			serializer->push_array_index(i);
 			m_object_desc->deserialize(get_item(obj, i), name, serializer);
+			serializer->pop_array_index();
+		}
 
-		serializer->end_deserialize_complex_array(name);
+		serializer->end_deserialize_array(name);
 	}
 }
 

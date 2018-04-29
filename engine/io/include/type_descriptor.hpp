@@ -201,12 +201,12 @@ struct TypeDescriptor_StaticArray : TypeDescriptor_Container
 		{
 			size_t n = get_size(obj);
 
-			serializer->begin_serialize_complex_array(name, n);
+			serializer->begin_serialize_array(name, n);
 
 			for (int i = 0; i < n; i++)
 				m_object_desc->serialize(get_item(obj, i), name, serializer);
 
-			serializer->end_serialize_complex_array(name);
+			serializer->end_serialize_array(name);
 		}
 	}
 
@@ -216,12 +216,16 @@ struct TypeDescriptor_StaticArray : TypeDescriptor_Container
 			serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
 		else
 		{
-			int n = serializer->begin_deserialize_complex_array(name);
+			int n = serializer->begin_deserialize_array(name);
 
 			for (int i = 0; i < n; i++)
+			{
+				serializer->push_array_index(i);
 				m_object_desc->deserialize(get_item(obj, i), name, serializer);
+				serializer->pop_array_index();
+			}
 
-			serializer->end_deserialize_complex_array(name);
+			serializer->end_deserialize_array(name);
 		}
 	}
 
