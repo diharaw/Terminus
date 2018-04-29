@@ -1,7 +1,5 @@
 #include <io/include/type_descriptor.hpp>
 #include <io/include/serializer.hpp>
-#include <stl/include/dynamic_array.hpp>
-#include <stl/include/static_array.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -207,74 +205,46 @@ TypeDescriptor* get_primitive_descriptor<float>()
     return &typeDesc;
 }
 
-struct TypeDescriptor_DynamicArray : TypeDescriptor_Container
+void TypeDescriptor_DynamicArray::serialize(void* obj, const char* name, ISerializer* serializer)
 {
-	template <typename T>
-	TypeDescriptor_DynamicArray(T*) : TypeDescriptor_Container{ "DynamicArray", sizeof(DynamicArray<T>) }
+	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
+		serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
+	else
 	{
-		m_object_desc = TypeResolver<StripPointer<T>::TYPE>::get();
-		m_pointer = IsPointer<T>::val;
+		size_t n = get_size(obj);
 
-		get_size = [](const void* obj) -> size_t {
-			return static_cast<DynamicArray<T>*>(obj)->m_num_elements;
-		};
-		get_item = [](const void* obj, size_t idx) -> const void* {
-			return &(*static_cast<DynamicArray<T>*>(obj)[idx]);
-		};
+		serializer->begin_serialize_complex_array(name, get_size(obj));
+
+		for (int i = 0; i < n; i++)
+			m_object_desc->serialize(get_item(obj, i), name, serializer);
+
+		serializer->end_serialize_complex_array(name);
 	}
+}
 
-	void serialize(void* obj, const char* name, ISerializer* serializer) override
-	{
-		if (m_object_desc->is_trivial() && !m_pointer)
-			serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
-		else
-		{
-			size_t n = get_size(obj);
-
-			serializer->begin_serialize_complex_array(name, get_size(obj));
-
-			for (int i = 0; i < n; i++)
-				m_object_desc->serialize(get_item(obj, i), name, serializer);
-
-			serializer->end_serialize_complex_array(name);
-		}
-	}
-
-	void deserialize(void* obj, const char* name, ISerializer* serializer) override
-	{
-		if (m_object_desc->is_trivial() && !m_pointer)
-			serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
-		else
-		{
-			int n = serializer->begin_deserialize_complex_array(name);
-
-			for (int i = 0; i < n; i++)
-				m_object_desc->deserialize(get_item(obj, i), name, serializer);
-
-			serializer->end_deserialize_complex_array(name);
-		}
-	}
-
-	bool is_trivial()
-	{
-		return false;
-	}
-};
-
-template <typename T>
-class TypeResolver<DynamicArray<T>>
+void TypeDescriptor_DynamicArray::deserialize(void* obj, const char* name, ISerializer* serializer)
 {
-public:
-	static TypeDescriptor* get()
+	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
+		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
+	else
 	{
-		static TypeDescriptor_DynamicArray typeDesc{ (T*)nullptr };
-		return &typeDesc;
+		int n = serializer->begin_deserialize_complex_array(name);
+
+		for (int i = 0; i < n; i++)
+			m_object_desc->deserialize(get_item(obj, i), name, serializer);
+
+		serializer->end_deserialize_complex_array(name);
 	}
-};
+}
+
+bool TypeDescriptor_DynamicArray::is_trivial()
+{
+	return false;
+}
 
 void TypeDescriptor_ResizableArray::serialize(void* obj, const char* name, ISerializer* serializer)
 {
-	if (m_object_desc->is_trivial() && !m_pointer)
+	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
 		serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
 	else
 	{
@@ -291,7 +261,7 @@ void TypeDescriptor_ResizableArray::serialize(void* obj, const char* name, ISeri
 
 void TypeDescriptor_ResizableArray::deserialize(void* obj, const char* name, ISerializer* serializer)
 {
-	if (m_object_desc->is_trivial() && !m_pointer)
+	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
 		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
 	else
 	{
@@ -308,69 +278,5 @@ bool TypeDescriptor_ResizableArray::is_trivial()
 {
 	return false;
 }
-
-//struct TypeDescriptor_StaticArray : TypeDescriptor_Container
-//{
-//	template <typename T, size_t N>
-//	TypeDescriptor_StaticArray(T*) : TypeDescriptor_Container{ "StaticArray", sizeof(StaticArray<T, N>) }
-//	{
-//		m_object_desc = TypeResolver<StripPointer<T>::TYPE>::get();
-//
-//		get_size = [](const void* obj) -> size_t {
-//			return N;
-//		};
-//		get_item = [](const void* obj, size_t idx) -> const void* {
-//			return &(*static_cast<StaticArray<T, N>*>(obj)[idx]);
-//		};
-//	}
-//
-//	void serialize(void* obj, const char* name, ISerializer* serializer) override
-//	{
-//		if (m_object_desc->is_trivial() && !m_pointer)
-//			serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
-//		else
-//		{
-//			size_t n = get_size(obj);
-//
-//			serializer->begin_serialize_complex_array(name, n);
-//
-//				for (int i = 0; i < n; i++)
-//					m_object_desc->serialize(get_item(obj, i), name, serializer);
-//
-//			serializer->end_serialize_complex_array(name);
-//		}
-//	}
-//
-//	void deserialize(void* obj, const char* name, ISerializer* serializer) override
-//	{
-//		if (is_trivial())
-//			serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
-//		else
-//		{
-//			int n = serializer->begin_deserialize_complex_array(name);
-//
-//				for (int i = 0; i < n; i++)
-//					m_object_desc->deserialize(get_item(obj, i), name, serializer);
-//
-//			serializer->end_deserialize_complex_array(name);
-//		}
-//	}
-//
-//	bool is_trivial()
-//	{
-//		return m_object_desc->is_trivial() && !m_pointer;
-//	}
-//};
-
-//template <typename T, size_t N>
-//class TypeResolver<StaticArray<T, N>>
-//{
-//public:
-//	static TypeDescriptor* get()
-//	{
-//		static TypeDescriptor_StaticArray<T, N> typeDesc{ (T*)nullptr };
-//		return &typeDesc;
-//	}
-//};
 
 TE_END_TERMINUS_NAMESPACE

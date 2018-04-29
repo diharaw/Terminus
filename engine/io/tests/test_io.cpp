@@ -248,13 +248,17 @@ END_DECLARE_REFLECT()
 
 BEGIN_DECLARE_REFLECT(Foo)
 	REFLECT_MEMBER(test)
-//	REFLECT_MEMBER(list)
+	//REFLECT_MEMBER(list)
 END_DECLARE_REFLECT()
 
 
-extern "C" int main(int argc, char *argv[])
+#ifdef main
+#undef main
+#endif
+
+int main(int argc, char *argv[])
 {
-	test_filesystem();
+	//test_filesystem();
 
     uint32_t flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
     
@@ -292,6 +296,17 @@ extern "C" int main(int argc, char *argv[])
 	JsonSerializer serializer;
 
 	Foo foo;
+
+	/*for (int i = 0; i < 10; i++)
+		foo.list[i] = rand();*/
+
+	for (int i = 0; i < 10; i++)
+	{
+		Bar obj;
+		obj.a = rand();
+		obj.b = rand();
+		foo.test.push_back(obj);
+	}
 
 	serializer.save(foo);
 	serializer.print();

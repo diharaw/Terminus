@@ -22,7 +22,7 @@ void* HeapAllocator::allocate(size_t size, size_t count, size_t align)
 
 void HeapAllocator::free(void* ptr)
 {
-    return free(ptr);
+    return ::free(ptr);
 }
 
 TE_END_TERMINUS_NAMESPACE
