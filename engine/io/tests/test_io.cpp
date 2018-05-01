@@ -12,6 +12,7 @@
 #include <stl/include/static_array.hpp>
 #include <io/include/reflection.hpp>
 #include <io/include/json_serializer.hpp>
+#include <io/include/file_stream.hpp>
 
 using namespace te;
 
@@ -251,6 +252,48 @@ BEGIN_DECLARE_REFLECT(Foo)
 	REFLECT_MEMBER(list)
 END_DECLARE_REFLECT()
 
+void test_serialize()
+{
+	File* f = fs.open_file("test.json", TE_FS_WRITE);
+
+	HeapAllocator alloc;
+	FileStream stream(f);
+	JsonSerializer serializer(stream, &alloc);
+
+	Foo foo;
+
+	for (int i = 0; i < 10; i++)
+		foo.list[i] = rand();
+
+	for (int i = 0; i < 10; i++)
+	{
+		Bar obj;
+		obj.a = rand();
+		obj.b = rand();
+		foo.test.push_back(obj);
+	}
+
+	serializer.save(foo);
+	serializer.flush_to_stream();
+
+	f->close();
+}
+
+void test_deserialize()
+{
+	File* f = fs.open_file("test.json", TE_FS_READ);
+
+	HeapAllocator alloc;
+	FileStream stream(f);
+	JsonSerializer serializer(stream, &alloc);
+
+	serializer.print();
+
+	Foo foo;
+	serializer.load(foo);
+
+	f->close();
+}
 
 #ifdef main
 #undef main
@@ -293,27 +336,15 @@ int main(int argc, char *argv[])
     event_manager.register_callback(TE_EVENT_AXIS_INPUT, on_axis_input);
     event_manager.register_callback(TE_EVENT_ACTION_INPUT, on_action_input);
 
-	JsonSerializer serializer;
+	//File* f = fs.open_file("test.json", TE_FS_READ);
 
-	Foo foo;
+	//char* json = (char*)malloc(f->size() + 1);
+	//f->read(json, f->size(), 1);
 
-	for (int i = 0; i < 10; i++)
-		foo.list[i] = rand();
+	//fs.close_file(f);
 
-	for (int i = 0; i < 10; i++)
-	{
-		Bar obj;
-		obj.a = rand();
-		obj.b = rand();
-		foo.test.push_back(obj);
-	}
-
-	serializer.save(foo);
-	serializer.print();
-	
-	Foo foo2;
-
-	serializer.load(foo2);
+	//test_serialize();
+	test_deserialize();
     
     while (running)
     {

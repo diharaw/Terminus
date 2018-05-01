@@ -1,23 +1,23 @@
 #pragma once
 
-#include "stream.hpp"
+#include <io/include/file.hpp>
+#include <io/include/stream.hpp>
 
-struct File
-{
-    
-};
+TE_BEGIN_TERMINUS_NAMESPACE
 
-class FileStream : public Stream
+class FileStream : public IStream
 {
 public:
-    FileStream(File& file);
+    FileStream(File* file);
     ~FileStream();
     void seek(const size_t& offset) override;
     void write(void* src, const size_t& size) override;
     void read(void* dst, const size_t& size) override;
-    void clear() override;
-    void reserve(size_t capacity) override;
-    
+    void reset() override;
+	size_t size() override;
+  
 private:
-    File& m_file;
+    File* m_file;
 };
+
+TE_END_TERMINUS_NAMESPACE

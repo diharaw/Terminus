@@ -3,9 +3,22 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-JsonSerializer::JsonSerializer()
+JsonSerializer::JsonSerializer(IStream& stream, IAllocator* allocator) : ISerializer(stream, allocator)
 {
-	m_object_stack.push(nlohmann::json());
+	if (stream.size() > 0)
+	{
+		char* buffer = (char*)malloc(stream.size() + 1);
+		stream.read(buffer, stream.size());
+
+		buffer[stream.size()] = '\0';
+
+		nlohmann::json root = nlohmann::json::parse(buffer);
+		m_object_stack.push(root);
+
+		free(buffer);
+	}
+	else
+		m_object_stack.push(nlohmann::json());
 }
 
 JsonSerializer::~JsonSerializer()
@@ -295,7 +308,15 @@ void JsonSerializer::end_deserialize_array(const char* name)
 
 void JsonSerializer::raw_deserialize(void* data, const size_t& size)
 {
+	// NOT ALLOWED.
+	assert(false);
+}
 
+void JsonSerializer::flush_to_stream()
+{
+	std::string str = m_object_stack.top().dump(4);
+	str += '\0';
+	m_stream.write((void*)str.c_str(), strlen(str.c_str()));
 }
 
 TE_END_TERMINUS_NAMESPACE

@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string>
 #include <io/include/reflection.hpp>
+#include <io/include/stream.hpp>
+#include <memory/include/allocator.hpp>
 
 #include <stack>
 
@@ -11,7 +13,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class ISerializer
 {
 public:
-	ISerializer() {}
+	ISerializer(IStream& stream, IAllocator* allocator) : m_stream(stream), m_allocator(allocator) {}
 	virtual ~ISerializer() {}
 	virtual void serialize(const char* name, bool& value)								  = 0;
 	virtual void serialize(const char* name, int8_t& value)								  = 0;
@@ -47,11 +49,12 @@ public:
 	virtual int  begin_deserialize_array(const char* name)								  = 0;
 	virtual void end_deserialize_array(const char* name)								  = 0;
 
-	virtual void print()																  = 0;
 	virtual bool is_raw_serializable()													  = 0;
 
 	virtual void raw_serialize(void* data, const size_t& size)							  = 0;
 	virtual void raw_deserialize(void* data, const size_t& size)						  = 0;
+
+	virtual void flush_to_stream()														  = 0;
 
 	inline void push_array_index(int idx) { m_index_stack.push(idx); }
 	inline void pop_array_index()		  { m_index_stack.pop();	 }
@@ -100,6 +103,8 @@ public:
 
 protected:
 	std::stack<int> m_index_stack;
+	IStream&		m_stream;
+	IAllocator*		m_allocator;
 };
 
 TE_END_TERMINUS_NAMESPACE

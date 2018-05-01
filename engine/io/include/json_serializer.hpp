@@ -11,7 +11,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class JsonSerializer : public ISerializer
 {
 public:
-	JsonSerializer();
+	JsonSerializer(IStream& stream, IAllocator* allocator);
 	~JsonSerializer();
 	void serialize(const char* name, bool& value) override;
 	void serialize(const char* name, int8_t& value) override;
@@ -51,7 +51,9 @@ public:
 	void raw_serialize(void* data, const size_t& size) override;
 	void raw_deserialize(void* data, const size_t& size) override;
 
-	void print() override;
+	void flush_to_stream() override;
+
+	void print();
 
 private:
 	std::stack<nlohmann::json> m_object_stack;
