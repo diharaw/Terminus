@@ -7,15 +7,13 @@ JsonSerializer::JsonSerializer(IStream& stream, IAllocator* allocator) : ISerial
 {
 	if (stream.size() > 0)
 	{
-		char* buffer = (char*)malloc(stream.size() + 1);
-		stream.read(buffer, stream.size());
-
-		buffer[stream.size()] = '\0';
-
-		nlohmann::json root = nlohmann::json::parse(buffer);
+		char* temp = (char*)malloc(stream.size() + 1);
+		stream.read(temp, stream.size());
+		temp[stream.size()] = '\0';
+		nlohmann::json root = nlohmann::json::parse(temp);
 		m_object_stack.push(root);
 
-		free(buffer);
+		free(temp);
 	}
 	else
 		m_object_stack.push(nlohmann::json());
@@ -315,8 +313,7 @@ void JsonSerializer::raw_deserialize(void* data, const size_t& size)
 void JsonSerializer::flush_to_stream()
 {
 	std::string str = m_object_stack.top().dump(4);
-	str += '\0';
-	m_stream.write((void*)str.c_str(), strlen(str.c_str()));
+	m_stream.write((void*)str.c_str(), str.length());
 }
 
 TE_END_TERMINUS_NAMESPACE

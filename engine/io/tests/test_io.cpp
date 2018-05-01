@@ -14,6 +14,8 @@
 #include <io/include/json_serializer.hpp>
 #include <io/include/file_stream.hpp>
 
+#include <fstream>
+
 using namespace te;
 
 FileSystemImpl fs;
@@ -254,7 +256,7 @@ END_DECLARE_REFLECT()
 
 void test_serialize()
 {
-	File* f = fs.open_file("test.json", TE_FS_WRITE);
+	File* f = fs.open_file("test.json", TE_FS_WRITE | TE_FS_BINARY);
 
 	HeapAllocator alloc;
 	FileStream stream(f);
@@ -281,7 +283,7 @@ void test_serialize()
 
 void test_deserialize()
 {
-	File* f = fs.open_file("test.json", TE_FS_READ);
+	File* f = fs.open_file("test.json", TE_FS_READ | TE_FS_BINARY);
 
 	HeapAllocator alloc;
 	FileStream stream(f);
@@ -343,7 +345,7 @@ int main(int argc, char *argv[])
 
 	//fs.close_file(f);
 
-	//test_serialize();
+	test_serialize();
 	test_deserialize();
     
     while (running)
