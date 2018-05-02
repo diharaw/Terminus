@@ -26,11 +26,11 @@ void LinearAllocator::initialize(void* memory, size_t max_size)
 	m_position = m_memory;
 }
 
-void* LinearAllocator::allocate(size_t size, size_t count, size_t align)
+void* LinearAllocator::allocate(size_t size, size_t align)
 {
 	assert(size != 0);
 
-	uint8_t adjustment = memory_common::align_backward_adjustment(m_position, align);
+	uint8_t adjustment = memory::align_backward_adjustment(m_position, align);
 
 	if (m_used_size + adjustment + size > m_size)
 		return nullptr;
@@ -43,7 +43,7 @@ void* LinearAllocator::allocate(size_t size, size_t count, size_t align)
 	return (void*)aligned_address;
 }
 
-void LinearAllocator::free(void* ptr)
+void LinearAllocator::deallocate(void* ptr)
 {
 	assert(false);
 }

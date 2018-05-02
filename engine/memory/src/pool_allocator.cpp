@@ -17,15 +17,15 @@ PoolAllocator::~PoolAllocator()
 void PoolAllocator::initialize_internal()
 {
     assert(m_object_size >= sizeof(void*));
-    uint8_t adjustment = memory_common::align_foward_adjustment(m_memory, m_object_alignment);
-    m_freelist = (void**)memory_common::add(m_memory, adjustment);
+    uint8_t adjustment = memory::align_foward_adjustment(m_memory, m_object_alignment);
+    m_freelist = (void**)memory::add(m_memory, adjustment);
     size_t num_objects = (m_size - adjustment) / m_object_size;
     
     void** p = m_freelist;
     
     for(int i = 0; i < num_objects - 1; i++)
     {
-        *p = memory_common::add(p, m_object_size);
+        *p = memory::add(p, m_object_size);
         p = (void**) *p;
     }
     
@@ -48,7 +48,7 @@ void PoolAllocator::initialize(void* memory, size_t max_size, size_t object_size
     initialize_internal();
 }
 
-void* PoolAllocator::allocate(size_t size, size_t count, size_t align)
+void* PoolAllocator::allocate(size_t size, size_t align)
 {
     assert(size == m_object_size && align == m_object_alignment);
     
@@ -64,7 +64,7 @@ void* PoolAllocator::allocate(size_t size, size_t count, size_t align)
     return p;
 }
 
-void PoolAllocator::free(void* ptr)
+void PoolAllocator::deallocate(void* ptr)
 {
     *((void**)ptr) = m_freelist;
     m_freelist = (void**)ptr;

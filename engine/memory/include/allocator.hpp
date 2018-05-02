@@ -5,30 +5,31 @@
 #include <stddef.h>
 #include <stdint.h>
 
+TE_BEGIN_TERMINUS_NAMESPACE
+
 // Overloaded operators.
 
-template <typename ALLOCATOR>
-void* operator new(size_t bytes, ALLOCATOR* allocator, int line, const char* file)
+template <typename ALLOCATOR_TYPE, typename OBJECT_TYPE, typename ...ARGS>
+OBJECT_TYPE* custom_new(ALLOCATOR_TYPE* allocator, ARGS&&... params, int line, const char* file)
 {
-	return allocator->allocate(bytes, 1, 8);
+	void* p = allocator->allocate(sizeof(OBJECT_TYPE), 8);
+	return new(p) (std::forward<Args>(params)...);
 }
 
-template <typename OBJECT, typename ALLOCATOR>
-void custom_delete(OBJECT* ptr, ALLOCATOR* allocator, int line, const char* file)
+template <typename ALLOCATOR_TYPE, typename OBJECT_TYPE>
+void custom_delete(ALLOCATOR_TYPE* allocator, OBJECT_TYPE* p, int line, const char* file)
 {
-	ptr->~OBJECT();
-	allocator->free(ptr);
+	p->~OBJECT();
+	allocator->free(p);
 }
-
-TE_BEGIN_TERMINUS_NAMESPACE
 
 class IAllocator
 {
 public:
 	IAllocator() : m_size(0), m_memory(nullptr), m_used_size(0), m_num_allocations(0) {}
 	virtual ~IAllocator() {}
-	virtual void* allocate(size_t size, size_t count, size_t align) = 0;
-	virtual void free(void* ptr) = 0;
+	virtual void* allocate(size_t size, size_t align) = 0;
+	virtual void deallocate(void* ptr) = 0;
 	
 protected:
 	size_t		 m_size;

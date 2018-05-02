@@ -5,14 +5,14 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-namespace memory_common
+namespace memory
 {
-	inline void* align_foward(void* address, uint8_t alignment)
+	inline void* align_forward(void* address, uint8_t alignment)
 	{
 		return (void*)((reinterpret_cast<uintptr_t>(address) + static_cast<uintptr_t>(alignment - 1)) & (static_cast<uintptr_t>(~(alignment - 1))));
 	}
 
-	inline const void* align_foward(const void* address, uint8_t alignment)
+	inline const void* align_forward(const void* address, uint8_t alignment)
 	{
 		return (void*)((reinterpret_cast<uintptr_t>(address) + static_cast<uintptr_t>(alignment - 1)) & (static_cast<uintptr_t>(~(alignment - 1))));
 	}
