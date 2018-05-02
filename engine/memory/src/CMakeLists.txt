@@ -26,19 +26,12 @@ set(TE_MEMORY_PRIVATE_HEADERS "${PROJECT_SOURCE_DIR}/src/buffer_linear_allocator
                               "${PROJECT_SOURCE_DIR}/src/buffer_stack_allocator.hpp"
                               "${PROJECT_SOURCE_DIR}/src/heap_allocator.hpp"
                               "${PROJECT_SOURCE_DIR}/src/linear_allocator.hpp"
-                              "${PROJECT_SOURCE_DIR}/src/memory_common.hpp"
-                              "${PROJECT_SOURCE_DIR}/src/os_allocator.hpp"
-                              "${PROJECT_SOURCE_DIR}/src/pool_allocator.hpp"
-                              "${PROJECT_SOURCE_DIR}/src/stack_allocator.hpp"
-                              "${PROJECT_SOURCE_DIR}/src/dlmalloc.h")
+                              "${PROJECT_SOURCE_DIR}/src/pool_allocator.hpp")
 
 # Sources
 set(TE_MEMORY_SOURCES "heap_allocator.cpp"
                       "linear_allocator.cpp"
-                      "os_allocator.cpp"
-                      "pool_allocator.cpp"
-                      "stack_allocator.cpp"
-                      "dlmalloc.c")
+                      "pool_allocator.cpp")
 
 # Source groups
 source_group("public" FILES ${TE_MEMORY_PUBLIC_HEADERS})
