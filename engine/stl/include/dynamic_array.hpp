@@ -2,7 +2,7 @@
 
 #include <core/include/terminus_macros.hpp>
 #include <io/include/io_macros.hpp>
-#include <memory/src/heap_allocator.hpp>
+#include <memory/include/allocator.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -12,16 +12,11 @@ class DynamicArray
 public:
     DynamicArray() : m_num_elements(0), m_elements(nullptr) 
 	{
-		m_allocator = &m_default_allocator;
+
 	}
 
-    DynamicArray(const size_t& size, IAllocator* allocator)
+    DynamicArray(const size_t& size)
     {
-		if (allocator)
-			m_allocator = allocator;
-		else
-			m_allocator = &m_default_allocator;
-
         resize(size);
     }
     ~DynamicArray()
@@ -32,19 +27,19 @@ public:
     void resize(const size_t& size)
     {
         if (m_elements)
-			m_allocator->free(m_elements);
+			heap_free(m_elements);
         
         m_num_elements = size;
-        m_elements = (T*)m_allocator->allocate(m_num_elements * sizeof(T), 1, 8);
+        m_elements = (T*)heap_alloc(m_num_elements * sizeof(T));
     }
     
     void clear()
     {
         if (m_elements)
-			m_allocator->free(m_elements);
+			heap_free(m_elements);
         
         m_num_elements = 0;
-        m_elements = (T*)m_allocator->allocate(m_num_elements * sizeof(T), 1, 8);
+        m_elements = (T*)heap_alloc(m_num_elements * sizeof(T));
     }
     
     T& operator [](uint32_t idx)
@@ -60,8 +55,6 @@ public:
 private:
     size_t		  m_num_elements;
     T*			  m_elements;
-	IAllocator*	  m_allocator;
-	HeapAllocator m_default_allocator;
 };
 
 TE_END_TERMINUS_NAMESPACE

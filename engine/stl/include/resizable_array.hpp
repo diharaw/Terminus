@@ -10,19 +10,14 @@ template<typename T>
 class ResizableArray
 {
 public:
-    ResizableArray(size_t capacity = 10, IAllocator* allocator = nullptr) : m_num_elements(0), m_capacity(0), m_data(nullptr)
+    ResizableArray(size_t capacity = 10) : m_num_elements(0), m_capacity(0), m_data(nullptr)
     {
-		if (allocator)
-			m_allocator = allocator;
-		else
-			m_allocator = &m_default_allocator;
-
         reserve(capacity);
     }
     
     ~ResizableArray()
     {
-		m_allocator->free(m_data);
+		heap_free(m_data);
     }
 
     void clear()
@@ -37,13 +32,13 @@ public:
         
         size_t old_capacity = m_capacity;
         m_capacity = size;
-        T* new_data = (T*)m_allocator->allocate(m_capacity * sizeof(T), 1, 8);
+		T* new_data = (T*)heap_alloc(m_capacity * sizeof(T));
         
         if (m_data)
         {
             T* old_data = m_data;
             memcpy(new_data, old_data, sizeof(T) * old_capacity);
-			m_allocator->free(old_data);
+			heap_free(old_data);
         }
     
         m_data = new_data;
@@ -88,8 +83,6 @@ private:
     size_t		  m_num_elements;
     size_t		  m_capacity;
     T*			  m_data;
-	IAllocator*	  m_allocator;
-	HeapAllocator m_default_allocator;
 };
 
 TE_END_TERMINUS_NAMESPACE

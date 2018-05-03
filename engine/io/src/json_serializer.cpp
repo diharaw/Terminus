@@ -1,9 +1,10 @@
 #include <io/include/json_serializer.hpp>
+#include <memory/include/allocator.hpp>
 #include <iostream>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-JsonSerializer::JsonSerializer(IStream& stream, IAllocator* allocator) : ISerializer(stream, allocator)
+JsonSerializer::JsonSerializer(IStream& stream) : ISerializer(stream)
 {
 	if (stream.size() > 0)
 	{
@@ -236,7 +237,7 @@ void JsonSerializer::deserialize(const char* name, double& value)
 		value = m_object_stack.top()[name];
 }
 
-void JsonSerializer::deserialize(const char* name, std::string& value, bool is_static)
+void JsonSerializer::deserialize(const char* name, std::string& value)
 {
 	if (m_object_stack.top().is_array() && m_index_stack.size() > 0)
 	{
@@ -250,7 +251,7 @@ void JsonSerializer::deserialize(const char* name, std::string& value, bool is_s
 	}
 }
 
-void JsonSerializer::deserialize(const char* name, char** value, bool is_static)
+void JsonSerializer::deserialize(const char* name, char** value)
 {
 	std::string str = "";
 
@@ -265,9 +266,7 @@ void JsonSerializer::deserialize(const char* name, char** value, bool is_static)
 		str = temp;
 	}
 
-	if (!is_static)
-		*value = new char[str.length()];
-
+	*value = (char*)heap_alloc(str.length());
 	strcpy(*value, str.c_str());
 }
 

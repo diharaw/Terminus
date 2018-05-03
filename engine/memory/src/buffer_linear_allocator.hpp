@@ -11,12 +11,7 @@ template<size_t SIZE>
 class BufferLinearAllocator : public LinearAllocator
 {
 public:
-	BufferLinearAllocator()
-	{
-		m_size = SIZE;
-		m_memory = &m_buffer[0];
-		m_position = m_memory;
-	}
+	BufferLinearAllocator() : LinearAllocator(&m_buffer[0], SIZE) {}
 
 private:
 	uint8_t m_buffer[SIZE];

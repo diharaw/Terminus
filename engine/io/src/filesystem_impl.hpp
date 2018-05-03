@@ -1,6 +1,9 @@
 #pragma once
 
 #include <io/include/filesystem.hpp>
+#include <io/src/os_file.hpp>
+#include <io/src/zip_file.hpp>
+#include <io/src/archive.hpp>
 #include <stl/include/murmur_hash.hpp>
 #include <stl/include/packed_array.hpp>
 #include <memory/src/buffer_pool_allocator.hpp>
@@ -46,9 +49,9 @@ private:
 
 	PackedArray<DirectoryEntry, 16>		m_directories;
 	PackedArray<ArchiveEntry, 16>		m_archives;
-    BufferPoolAllocator<TE_KILOBYTE(1)> m_zip_file_allocator;
-	BufferPoolAllocator<TE_KILOBYTE(1)> m_os_file_allocator;
-	BufferPoolAllocator<TE_KILOBYTE(1)> m_archive_allocator;
+    BufferPoolAllocator<TE_KILOBYTE(1), sizeof(ZipFile)> m_zip_file_allocator;
+	BufferPoolAllocator<TE_KILOBYTE(1), sizeof(OsFile)>  m_os_file_allocator;
+	BufferPoolAllocator<TE_KILOBYTE(1), sizeof(Archive)> m_archive_allocator;
 };
 
 TE_END_TERMINUS_NAMESPACE

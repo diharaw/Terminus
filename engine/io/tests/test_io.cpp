@@ -258,9 +258,8 @@ void test_serialize()
 {
 	File* f = fs.open_file("test.json", TE_FS_WRITE | TE_FS_BINARY);
 
-	HeapAllocator alloc;
 	FileStream stream(f);
-	JsonSerializer serializer(stream, &alloc);
+	JsonSerializer serializer(stream);
 
 	Foo foo;
 
@@ -285,9 +284,8 @@ void test_deserialize()
 {
 	File* f = fs.open_file("test.json", TE_FS_READ | TE_FS_BINARY);
 
-	HeapAllocator alloc;
 	FileStream stream(f);
-	JsonSerializer serializer(stream, &alloc);
+	JsonSerializer serializer(stream);
 
 	serializer.print();
 

@@ -2,7 +2,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-BinarySerializer::BinarySerializer(IStream& stream, IAllocator* allocator) : ISerializer(stream, allocator)
+BinarySerializer::BinarySerializer(IStream& stream) : ISerializer(stream)
 {
 
 }
@@ -132,12 +132,12 @@ void BinarySerializer::deserialize(const char* name, double& value)
 
 }
 
-void BinarySerializer::deserialize(const char* name, std::string& value, bool is_static)
+void BinarySerializer::deserialize(const char* name, std::string& value)
 {
 
 }
 
-void BinarySerializer::deserialize(const char* name, char** value, bool is_static)
+void BinarySerializer::deserialize(const char* name, char** value)
 {
 
 }

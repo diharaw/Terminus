@@ -7,17 +7,14 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-template<size_t SIZE>
+template<size_t MAX_SIZE, size_t OBJECT_SIZE, uint8_t ALIGNMENT = 8>
 class BufferPoolAllocator : public PoolAllocator
 {
 public:
-	void initialize(size_t object_size, uint8_t alignment)
-	{
-        PoolAllocator::initialize(&m_buffer[0], SIZE, object_size, alignment);
-	}
+	BufferPoolAllocator() : PoolAllocator(&m_buffer[0], MAX_SIZE, OBJECT_SIZE, ALIGNMENT) {}
 
 private:
-	uint8_t m_buffer[SIZE];
+	uint8_t m_buffer[MAX_SIZE];
 };
 
 TE_END_TERMINUS_NAMESPACE

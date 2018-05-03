@@ -4,10 +4,8 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-MemoryStream::MemoryStream(IAllocator* allocator, void* initial, const size_t& size) : m_allocator(allocator)
+MemoryStream::MemoryStream(void* initial, const size_t& size)
 {
-	assert(allocator != nullptr);
-
 	m_pointer = 0;
 
 	if (size > 0)
@@ -25,7 +23,7 @@ MemoryStream::MemoryStream(IAllocator* allocator, void* initial, const size_t& s
 
 MemoryStream::~MemoryStream()
 {
-	m_allocator->free(m_buffer);
+	heap_free(m_buffer);
 }
 
 void MemoryStream::seek(const size_t& offset)
@@ -60,9 +58,9 @@ void MemoryStream::reset()
 void MemoryStream::reserve(const size_t& capacity)
 {
     std::cout << "Reserving..." << std::endl;
-    void* new_data = m_allocator->allocate(capacity, 1, 8);
+    void* new_data = heap_alloc(capacity);
     memcpy(new_data, m_buffer, m_size);
-    free(m_buffer);
+    heap_free(m_buffer);
     m_buffer = new_data;
 	m_size = capacity;
 }

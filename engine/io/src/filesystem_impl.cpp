@@ -1,7 +1,4 @@
 #include <io/src/filesystem_impl.hpp>
-#include <io/src/os_file.hpp>
-#include <io/src/zip_file.hpp>
-#include <io/src/archive.hpp>
 #include <string>
 #include <zip.h>
 
@@ -17,12 +14,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-FileSystemImpl::FileSystemImpl()
-{
-	m_os_file_allocator.initialize(sizeof(OsFile), 8);
-	m_zip_file_allocator.initialize(sizeof(ZipFile), 8);
-	m_archive_allocator.initialize(sizeof(Archive), 8);
-}
+FileSystemImpl::FileSystemImpl() {}
 
 FileSystemImpl::~FileSystemImpl()
 {
@@ -31,7 +23,7 @@ FileSystemImpl::~FileSystemImpl()
 
 	for (int i = 0; i < m_archives.size(); i++)
 	{
-		TE_DELETE(m_archives.array()[i].archive, &m_archive_allocator);
+		custom_delete<Archive>(&m_archive_allocator, m_archives.array()[i].archive);
 		m_archives.remove(m_archives.array()[i].handle);
 	}
 }
@@ -60,7 +52,7 @@ bool FileSystemImpl::add_search_archive(const FSNameBuffer& file)
 
 		entry.name = file;
 		entry.handle = m_archives.add();
-		entry.archive = TE_NEW(&m_archive_allocator) Archive(file);
+		entry.archive = custom_new<Archive>(&m_archive_allocator, file);
 		m_archives.set(entry.handle, entry);
 
 		return true;
@@ -89,7 +81,7 @@ bool FileSystemImpl::remove_search_archive(const FSNameBuffer& file)
 	{
 		if (m_archives.array()[i].name == file)
 		{
-			TE_DELETE(m_archives.array()[i].archive, &m_archive_allocator);
+			custom_delete<Archive>(&m_archive_allocator, m_archives.array()[i].archive);
 			m_archives.remove(m_archives.array()[i].handle);
 
 			return true;
@@ -115,7 +107,7 @@ File* FileSystemImpl::open_file(const FSNameBuffer& file, const uint32_t& mode)
 	FILE* os_file = fopen(file.c_str(), fileMode.c_str());
 
 	if (os_file)
-		return TE_NEW(&m_os_file_allocator) OsFile((void*)os_file);
+		return custom_new<OsFile>(&m_os_file_allocator, (void*)os_file);
 	else
 		return nullptr;
 }
@@ -149,9 +141,9 @@ void FileSystemImpl::close_file(File* file)
 	file->close();
 
 	if (file->type() == TE_FILE_OS)
-		TE_DELETE(file, &m_os_file_allocator);
+		custom_delete(&m_os_file_allocator, file);
 	else
-		TE_DELETE(file, &m_zip_file_allocator);
+		custom_delete(&m_zip_file_allocator, file);
 }
 
 #if defined(TERMINUS_PLATFORM_WIN32)

@@ -4,26 +4,21 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-LinearAllocator::LinearAllocator()
-{
-
-}
-
-LinearAllocator::~LinearAllocator()
-{
-
-}
-
-void LinearAllocator::initialize(void* memory, size_t max_size)
+LinearAllocator::LinearAllocator(void* memory, size_t max_size) : IAllocator()
 {
 	// Only init once.
 	assert(m_memory == nullptr);
 	assert(memory);
 	assert(max_size > 0);
 
-	m_size	   = max_size;
-	m_memory   = memory;
+	m_size = max_size;
+	m_memory = memory;
 	m_position = m_memory;
+}
+
+LinearAllocator::~LinearAllocator()
+{
+
 }
 
 void* LinearAllocator::allocate(size_t size, size_t align)

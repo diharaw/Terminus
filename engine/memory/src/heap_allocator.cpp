@@ -1,5 +1,6 @@
 #include <memory/src/heap_allocator.hpp>
 #include <memory/src/memory_common.hpp>
+#include <concurrency/include/atomic.hpp>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -35,25 +36,40 @@ void initialize_header(AllocHeader* header, void* data, const size_t& size)
 		*p++ = HEADER_PAD_VALUE;
 }
 
-HeapAllocator::HeapAllocator() : m_num_alloc(0), m_alloc_size(0)
+HeapAllocator::HeapAllocator() : IAllocator()
 {
 
 }
 
 HeapAllocator::~HeapAllocator()
 {
-	m_num_alloc = 0;
-	m_alloc_size = 0;
+
 }
 
 void* HeapAllocator::allocate(size_t size, size_t align)
 {
-	return malloc(size);
+	size_t total_size = size_with_header(size, align);
+	AllocHeader* h = (AllocHeader*)malloc(total_size);
+	void* p = data_pointer(h, align);
+	initialize_header(h, p, total_size);
+
+	atomic::add64((int64_t*)&m_used_size, total_size);
+	atomic::increment64((int64_t*)&m_num_allocations);
+
+	return p;
 }
 
 void HeapAllocator::deallocate(void* ptr)
 {
-    return ::free(ptr);
+	if (!ptr)
+		return;
+
+	AllocHeader* h = header_pointer(ptr);
+
+	atomic::sub64((int64_t*)&m_used_size, h->size);
+	atomic::decrement64((int64_t*)&m_num_allocations);
+
+	free(h);
 }
 
 size_t HeapAllocator::size_with_header(size_t size, uint8_t alignment)

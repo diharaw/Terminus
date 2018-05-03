@@ -8,7 +8,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class MemoryStream : public IStream
 {
 public:
-    MemoryStream(IAllocator* allocator, void* initial = nullptr, const size_t& size = 0);
+    MemoryStream(void* initial = nullptr, const size_t& size = 0);
     ~MemoryStream();
     void seek(const size_t& offset) override;
     void write(void* src, const size_t& size) override;
@@ -20,7 +20,6 @@ private:
     void reserve(const size_t& capacity);
     
 private:
-	IAllocator* m_allocator;
     void*		m_buffer;
     size_t		m_size;
 };

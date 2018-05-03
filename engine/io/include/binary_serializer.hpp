@@ -8,7 +8,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class BinarySerializer : public ISerializer
 {
 public:
-	BinarySerializer(IStream& stream, IAllocator* allocator);
+	BinarySerializer(IStream& stream);
 	~BinarySerializer();
 
 	void serialize(const char* name, bool& value) override;
@@ -37,8 +37,8 @@ public:
 	void deserialize(const char* name, uint32_t& value) override;
 	void deserialize(const char* name, float& value) override;
 	void deserialize(const char* name, double& value) override;
-	void deserialize(const char* name, std::string& value, bool is_static = true) override;
-	void deserialize(const char* name, char** value, bool is_static = true) override;
+	void deserialize(const char* name, std::string& value) override;
+	void deserialize(const char* name, char** value) override;
 
 	void begin_deserialize_struct(const char* name) override;
 	void end_deserialize_struct(const char* name) override;
