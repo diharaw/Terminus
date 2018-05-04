@@ -1,4 +1,5 @@
 #include <io/src/filesystem_impl.hpp>
+#include <core/include/engine_core.hpp>
 #include <string>
 #include <zip.h>
 
@@ -23,7 +24,7 @@ FileSystemImpl::~FileSystemImpl()
 
 	for (int i = 0; i < m_archives.size(); i++)
 	{
-		custom_delete<Archive>(&m_archive_allocator, m_archives.array()[i].archive);
+		TE_DELETE(m_archives.array()[i].archive, &m_archive_allocator);
 		m_archives.remove(m_archives.array()[i].handle);
 	}
 }
@@ -52,7 +53,7 @@ bool FileSystemImpl::add_search_archive(const FSNameBuffer& file)
 
 		entry.name = file;
 		entry.handle = m_archives.add();
-		entry.archive = custom_new<Archive>(&m_archive_allocator, file);
+		entry.archive = TE_NEW(&m_archive_allocator) Archive(file);
 		m_archives.set(entry.handle, entry);
 
 		return true;
@@ -81,7 +82,7 @@ bool FileSystemImpl::remove_search_archive(const FSNameBuffer& file)
 	{
 		if (m_archives.array()[i].name == file)
 		{
-			custom_delete<Archive>(&m_archive_allocator, m_archives.array()[i].archive);
+			TE_DELETE(m_archives.array()[i].archive, &m_archive_allocator);
 			m_archives.remove(m_archives.array()[i].handle);
 
 			return true;
@@ -107,7 +108,7 @@ File* FileSystemImpl::open_file(const FSNameBuffer& file, const uint32_t& mode)
 	FILE* os_file = fopen(file.c_str(), fileMode.c_str());
 
 	if (os_file)
-		return custom_new<OsFile>(&m_os_file_allocator, (void*)os_file);
+		return TE_NEW(&m_os_file_allocator) OsFile((void*)os_file);
 	else
 		return nullptr;
 }
@@ -141,9 +142,9 @@ void FileSystemImpl::close_file(File* file)
 	file->close();
 
 	if (file->type() == TE_FILE_OS)
-		custom_delete(&m_os_file_allocator, file);
+		TE_DELETE(file, &m_os_file_allocator);
 	else
-		custom_delete(&m_zip_file_allocator, file);
+		TE_DELETE(file, &m_zip_file_allocator);
 }
 
 #if defined(TERMINUS_PLATFORM_WIN32)

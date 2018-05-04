@@ -33,7 +33,7 @@ File* Archive::open_file(const FSNameBuffer& file, const uint32_t& mode, IAlloca
 		{
 			zip_stat_t stats;
 			zip_stat((zip_t*)m_zip, file.c_str(), 0, &stats);
-			ZipFile* zip_file = custom_new<ZipFile>(allocator, zf, stats.size);
+			ZipFile* zip_file = TE_NEW(allocator) ZipFile(zf, stats.size);
 
 			return zip_file;
 		}

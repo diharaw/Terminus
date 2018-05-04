@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/include/terminus_macros.hpp>
+#include <core/include/engine_core.hpp>
 #include <io/include/io_macros.hpp>
 #include <memory/src/heap_allocator.hpp>
 
@@ -17,7 +18,7 @@ public:
     
     ~ResizableArray()
     {
-		heap_free(m_data);
+		TE_HEAP_DEALLOC(m_data);
     }
 
     void clear()
@@ -32,13 +33,13 @@ public:
         
         size_t old_capacity = m_capacity;
         m_capacity = size;
-		T* new_data = (T*)heap_alloc(m_capacity * sizeof(T));
+		T* new_data = (T*)TE_HEAP_ALLOC(m_capacity * sizeof(T));
         
         if (m_data)
         {
             T* old_data = m_data;
             memcpy(new_data, old_data, sizeof(T) * old_capacity);
-			heap_free(old_data);
+			TE_HEAP_DEALLOC(old_data);
         }
     
         m_data = new_data;

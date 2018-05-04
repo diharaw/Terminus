@@ -1,4 +1,5 @@
 #include <io/include/json_serializer.hpp>
+#include <core/include/engine_core.hpp>
 #include <memory/include/allocator.hpp>
 #include <iostream>
 
@@ -266,7 +267,7 @@ void JsonSerializer::deserialize(const char* name, char** value)
 		str = temp;
 	}
 
-	*value = (char*)heap_alloc(str.length());
+	*value = (char*)TE_HEAP_ALLOC(str.length());
 	strcpy(*value, str.c_str());
 }
 

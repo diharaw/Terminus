@@ -1,4 +1,5 @@
 #include <io/include/memory_stream.hpp>
+#include <core/include/engine_core.hpp>
 #include <iostream>
 #include <assert.h>
 
@@ -8,11 +9,12 @@ MemoryStream::MemoryStream(void* initial, const size_t& size)
 {
 	m_pointer = 0;
 
+	// If initial data available, heap-allocate enough memory and memcpy initial data into it.
 	if (size > 0)
 	{
-		m_buffer = initial;
+		m_buffer = TE_HEAP_ALLOC(size);
+		memcpy(m_buffer, initial, m_size);
 		m_size = size;
-		reserve(m_size);
 	}
 	else
 	{
@@ -23,7 +25,7 @@ MemoryStream::MemoryStream(void* initial, const size_t& size)
 
 MemoryStream::~MemoryStream()
 {
-	heap_free(m_buffer);
+	TE_HEAP_DEALLOC(m_buffer);
 }
 
 void MemoryStream::seek(const size_t& offset)
@@ -58,9 +60,9 @@ void MemoryStream::reset()
 void MemoryStream::reserve(const size_t& capacity)
 {
     std::cout << "Reserving..." << std::endl;
-    void* new_data = heap_alloc(capacity);
+    void* new_data = TE_HEAP_ALLOC(capacity);
     memcpy(new_data, m_buffer, m_size);
-    heap_free(m_buffer);
+	TE_HEAP_DEALLOC(m_buffer);
     m_buffer = new_data;
 	m_size = capacity;
 }

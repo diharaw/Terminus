@@ -14,6 +14,8 @@
 #include <io/include/json_serializer.hpp>
 #include <io/include/file_stream.hpp>
 
+#include <core/include/engine_core.hpp>
+
 #include <fstream>
 
 using namespace te;
@@ -301,6 +303,7 @@ void test_deserialize()
 
 int main(int argc, char *argv[])
 {
+	global::initialize_engine_core();
 	//test_filesystem();
 
     uint32_t flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
@@ -358,6 +361,7 @@ int main(int argc, char *argv[])
     
     SDL_Quit();
     
+	global::shutdown_engine_core();
 
 	return 0;
 }

@@ -5,6 +5,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
+// An abstract stream allowing bytes to be written or read from. Used for serialization.
 class IStream
 {
 public:

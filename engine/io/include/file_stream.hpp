@@ -5,6 +5,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
+// A Stream which writes and reads into a File object. Only guaranteed to work on OsFiles for now.
 class FileStream : public IStream
 {
 public:

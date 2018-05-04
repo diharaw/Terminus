@@ -6,47 +6,31 @@
 #include <stdint.h>
 #include <iostream>
 
-TE_BEGIN_TERMINUS_NAMESPACE
-
 // Overloaded operators.
 
-template <typename OBJECT_TYPE, typename ALLOCATOR_TYPE, typename ...ARGS>
-OBJECT_TYPE* custom_new(ALLOCATOR_TYPE* allocator, ARGS&&... params)
+template <typename ALLOCATOR>
+void* operator new(size_t size, ALLOCATOR* a, int line, const char* file)
 {
-	void* p = allocator->allocate(sizeof(OBJECT_TYPE), 8);
-	return new(p) OBJECT_TYPE(std::forward<ARGS>(params)...);
+	std::cout << "Performing allocation of size " << size << " at line " << line << " of " << file << std::endl;
+	return a->allocate(size, 8);
 }
 
-template <typename OBJECT_TYPE, typename ALLOCATOR_TYPE>
-void custom_delete(ALLOCATOR_TYPE* allocator, OBJECT_TYPE* p)
+template <typename ALLOCATOR, typename OBJECT>
+void custom_delete(OBJECT* p, ALLOCATOR* a, int line, const char* file)
 {
-	p->~OBJECT_TYPE();
-	allocator->deallocate(p);
+	std::cout << "Performing deallocation of size " << sizeof(OBJECT) << " at line " << line << " of " << file << std::endl;
+	p->~OBJECT();
+	a->deallocate(p);
 }
 
-template <typename OBJECT_TYPE, typename ...ARGS>
-OBJECT_TYPE* heap_new(ARGS&&... params)
-{
-	void* p = malloc(sizeof(OBJECT_TYPE));
-	return new (p) (std::forward<Args>(params)...);
-}
+#define TE_NEW(ALLOCATOR) new(ALLOCATOR, __LINE__, __FILE__)
+#define TE_DELETE(OBJECT, ALLOCATOR) custom_delete(OBJECT, ALLOCATOR, __LINE__, __FILE__)
+#define TE_HEAP_NEW new(te::global::default_allocator(), __LINE__, __FILE__)
+#define TE_HEAP_DELETE(OBJECT) custom_delete(OBJECT, te::global::default_allocator(), __LINE__, __FILE__)
+#define TE_HEAP_ALLOC(SIZE) te::global::default_allocator().allocate(SIZE, 8)
+#define TE_HEAP_DEALLOC(OBJECT) te::global::default_allocator().deallocate(OBJECT)
 
-template <typename OBJECT_TYPE>
-void heap_delete(OBJECT_TYPE* p)
-{
-	p->~OBJECT_TYPE();
-	free(p);
-}
-
-inline void* heap_alloc(const size_t& size)
-{
-	return malloc(size);
-}
-
-inline void heap_free(void* p)
-{
-	free(p);
-}
+TE_BEGIN_TERMINUS_NAMESPACE
 
 class IAllocator
 {
@@ -60,10 +44,10 @@ public:
 	inline size_t allocated_size() { return m_used_size; }
 	
 protected:
-	size_t		 m_size;
-	size_t		 m_used_size;
-	size_t		 m_num_allocations;
-	void*		 m_memory;
+	size_t m_size;
+	size_t m_used_size;
+	size_t m_num_allocations;
+	void*  m_memory;
 };
 
 TE_END_TERMINUS_NAMESPACE

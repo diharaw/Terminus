@@ -5,6 +5,7 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
+// A stream that writes into and reads from a heap-allocated buffer which will continue growing as needed by write operations.
 class MemoryStream : public IStream
 {
 public:
