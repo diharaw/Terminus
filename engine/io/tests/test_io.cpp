@@ -14,6 +14,7 @@
 #include <io/include/json_serializer.hpp>
 #include <io/include/file_stream.hpp>
 #include <io/include/memory_stream.hpp>
+#include <io/include/binary_serializer.hpp>
 #include <core/include/engine_core.hpp>
 
 #include <fstream>
@@ -256,6 +257,46 @@ BEGIN_DECLARE_REFLECT(Foo)
 	REFLECT_MEMBER(list)
 END_DECLARE_REFLECT()
 
+void test_bin_serialize_fs()
+{
+	File* f = fs.open_file("test_f.bin", TE_FS_WRITE | TE_FS_BINARY);
+
+	FileStream stream(f);
+	BinarySerializer serializer(stream);
+
+	Foo foo;
+	foo.list.resize(10);
+
+	for (int i = 0; i < 10; i++)
+		foo.list[i] = rand();
+
+	for (int i = 0; i < 10; i++)
+	{
+		Bar obj;
+		obj.a = rand();
+		obj.b = rand();
+		foo.test.push_back(obj);
+	}
+
+	serializer.save(foo);
+	serializer.flush_to_stream();
+
+	f->close();
+}
+
+void test_bin_deserialize_fs()
+{
+	File* f = fs.open_file("test_f.bin", TE_FS_READ | TE_FS_BINARY);
+
+	FileStream stream(f);
+	BinarySerializer serializer(stream);
+
+	Foo foo;
+	serializer.load(foo);
+
+	f->close();
+}
+
 void test_serialize_fs()
 {
 	File* f = fs.open_file("test_f.json", TE_FS_WRITE | TE_FS_BINARY);
@@ -264,6 +305,7 @@ void test_serialize_fs()
 	JsonSerializer serializer(stream);
 
 	Foo foo;
+	foo.list.resize(10);
 
 	for (int i = 0; i < 10; i++)
 		foo.list[i] = rand();
@@ -305,6 +347,7 @@ void test_serialize_ms()
 	JsonSerializer serializer(stream);
 
 	Foo foo;
+	foo.list.resize(10);
 
 	for (int i = 0; i < 10; i++)
 		foo.list[i] = rand();
@@ -398,8 +441,11 @@ int main(int argc, char *argv[])
 	test_serialize_fs();
 	test_deserialize_fs();
 
-	test_serialize_ms();
-	test_deserialize_ms();
+	//test_serialize_ms();
+	//test_deserialize_ms();
+
+	test_bin_serialize_fs();
+	test_bin_deserialize_fs();
     
     while (running)
     {

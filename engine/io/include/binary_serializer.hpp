@@ -50,10 +50,6 @@ public:
 	void raw_deserialize(void* data, const size_t& size) override;
 
 	void flush_to_stream() override;
-
-private:
-	char* m_buffer;
-	size_t m_buffer_size;
 };
 
 TE_END_TERMINUS_NAMESPACE

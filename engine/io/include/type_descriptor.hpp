@@ -117,6 +117,8 @@ struct TypeDescriptor_Container : public TypeDescriptor
 
 struct TypeDescriptor_Vector : public TypeDescriptor_Container
 {
+	void(*resize)(void*, size_t);
+
 	template <typename T>
 	TypeDescriptor_Vector(T*) : TypeDescriptor_Container{ "Vector", sizeof(Vector<T>) }
 	{
@@ -127,6 +129,10 @@ struct TypeDescriptor_Vector : public TypeDescriptor_Container
 		};
 		get_item = [](void* obj, size_t idx) -> void* {
 			return (void*)&(*((Vector<T>*)obj))[idx];
+		};
+
+		resize = [](void* obj, size_t size) -> void {
+			((Vector<T>*)obj)->resize(size);
 		};
 	}
 
@@ -149,7 +155,9 @@ public:
 template <typename T, size_t N>
 struct TypeDescriptor_Array : TypeDescriptor_Container
 {
-	TypeDescriptor_Array() : TypeDescriptor_Container{ "Array", sizeof(T) * N }
+	void(*resize)(void*, size_t);
+
+	TypeDescriptor_Array() : TypeDescriptor_Container{ "Array", sizeof(Array<T, N>) }
 	{
 		m_object_desc = TypeResolver<StripPointer<T>::Type>::get();
 
@@ -160,14 +168,17 @@ struct TypeDescriptor_Array : TypeDescriptor_Container
 		get_item = [](void* obj, size_t idx) -> void* {
 			return (void*)&(*((Array<T, N>*)obj))[idx];
 		};
+
+		resize = [](void* obj, size_t size) -> void {
+			((Array<T, N>*)obj)->resize(size);
+		};
 	}
 
 	void serialize(void* obj, const char* name, ISerializer* serializer)
 	{
 		if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
 		{
-			uint32_t size = m_size;
-			serializer->raw_serialize(&size, sizeof(uint32_t));
+			serializer->begin_serialize_array(nullptr, m_size);
 			serializer->raw_serialize(obj, m_size);
 		}
 		else
@@ -187,13 +198,13 @@ struct TypeDescriptor_Array : TypeDescriptor_Container
 	{
 		if (is_trivial() && serializer->is_raw_serializable())
 		{
-			uint32_t size = 0;
-			serializer->raw_deserialize(&size, sizeof(uint32_t));
+			uint32_t size = serializer->begin_deserialize_array(nullptr);
 			serializer->raw_deserialize(obj, size);
 		}
 		else
 		{
 			int n = serializer->begin_deserialize_array(name);
+			resize(obj, n);
 
 			for (int i = 0; i < n; i++)
 			{
@@ -267,8 +278,7 @@ struct TypeDescriptor_StaticHashMap: TypeDescriptor_Container
 	{
 		if (is_trivial() && serializer->is_raw_serializable())
 		{
-			uint32_t size = m_size;
-			serializer->raw_serialize(&size, sizeof(uint32_t));
+			serializer->begin_serialize_array(nullptr, m_size);
 			serializer->raw_serialize(obj, m_size);
 		}
 		else
@@ -293,8 +303,7 @@ struct TypeDescriptor_StaticHashMap: TypeDescriptor_Container
 	{
 		if (is_trivial() && serializer->is_raw_serializable())
 		{
-			uint32_t size = 0;
-			serializer->raw_deserialize(&size, sizeof(uint32_t));
+			uint32_t size = serializer->begin_deserialize_array(nullptr);
 			serializer->raw_deserialize(obj, size);
 		}
 		else

@@ -208,7 +208,10 @@ TypeDescriptor* get_primitive_descriptor<float>()
 void TypeDescriptor_Vector::serialize(void* obj, const char* name, ISerializer* serializer)
 {
 	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
+	{
+		serializer->begin_serialize_array(nullptr, get_size(obj));
 		serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
+	}
 	else
 	{
 		size_t n = get_size(obj);
@@ -225,12 +228,17 @@ void TypeDescriptor_Vector::serialize(void* obj, const char* name, ISerializer* 
 void TypeDescriptor_Vector::deserialize(void* obj, const char* name, ISerializer* serializer)
 {
 	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
-		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
+	{
+		uint32_t size = serializer->begin_deserialize_array(nullptr);
+		resize(obj, size);
+		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * size);
+	}
 	else
 	{
-		int n = serializer->begin_deserialize_array(name);
+		int size = serializer->begin_deserialize_array(name);
+		resize(obj, size);
 
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < size; i++)
 		{
 			serializer->push_array_index(i);
 			m_object_desc->deserialize(get_item(obj, i), name, serializer);
