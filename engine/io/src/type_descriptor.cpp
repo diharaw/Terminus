@@ -205,48 +205,7 @@ TypeDescriptor* get_primitive_descriptor<float>()
     return &typeDesc;
 }
 
-void TypeDescriptor_DynamicArray::serialize(void* obj, const char* name, ISerializer* serializer)
-{
-	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
-		serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
-	else
-	{
-		size_t n = get_size(obj);
-
-		serializer->begin_serialize_array(name, get_size(obj));
-
-		for (int i = 0; i < n; i++)
-			m_object_desc->serialize(get_item(obj, i), name, serializer);
-
-		serializer->end_serialize_array(name);
-	}
-}
-
-void TypeDescriptor_DynamicArray::deserialize(void* obj, const char* name, ISerializer* serializer)
-{
-	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
-		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
-	else
-	{
-		int n = serializer->begin_deserialize_array(name);
-
-		for (int i = 0; i < n; i++)
-		{
-			serializer->push_array_index(i);
-			m_object_desc->deserialize(get_item(obj, i), name, serializer);
-			serializer->pop_array_index();
-		}
-
-		serializer->end_deserialize_array(name);
-	}
-}
-
-bool TypeDescriptor_DynamicArray::is_trivial()
-{
-	return false;
-}
-
-void TypeDescriptor_ResizableArray::serialize(void* obj, const char* name, ISerializer* serializer)
+void TypeDescriptor_Vector::serialize(void* obj, const char* name, ISerializer* serializer)
 {
 	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
 		serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
@@ -263,7 +222,7 @@ void TypeDescriptor_ResizableArray::serialize(void* obj, const char* name, ISeri
 	}
 }
 
-void TypeDescriptor_ResizableArray::deserialize(void* obj, const char* name, ISerializer* serializer)
+void TypeDescriptor_Vector::deserialize(void* obj, const char* name, ISerializer* serializer)
 {
 	if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
 		serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
@@ -282,7 +241,7 @@ void TypeDescriptor_ResizableArray::deserialize(void* obj, const char* name, ISe
 	}
 }
 
-bool TypeDescriptor_ResizableArray::is_trivial()
+bool TypeDescriptor_Vector::is_trivial()
 {
 	return false;
 }

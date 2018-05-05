@@ -8,8 +8,8 @@
 #include <event/src/event_manager_impl.hpp>
 #include <SDL.h>
 
-#include <stl/include/resizable_array.hpp>
-#include <stl/include/static_array.hpp>
+#include <stl/include/vector.hpp>
+#include <stl/include/array.hpp>
 #include <io/include/reflection.hpp>
 #include <io/include/json_serializer.hpp>
 #include <io/include/file_stream.hpp>
@@ -240,8 +240,8 @@ struct Bar
 
 struct Foo
 {
-	ResizableArray<Bar> test;
-	StaticArray<int, 10> list;
+	Vector<Bar> test;
+	Array<int, 10> list;
 
 	REFLECT()
 };

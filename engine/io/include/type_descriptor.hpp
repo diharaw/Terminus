@@ -1,9 +1,8 @@
 #pragma once
 
 #include <core/include/terminus_macros.hpp>
-#include <stl/include/resizable_array.hpp>
-#include <stl/include/dynamic_array.hpp>
-#include <stl/include/static_array.hpp>
+#include <stl/include/vector.hpp>
+#include <stl/include/array.hpp>
 
 #include <stdio.h>
 #include <iostream>
@@ -115,18 +114,18 @@ struct TypeDescriptor_Container : public TypeDescriptor
 	void* (*get_item)(void*, size_t);
 };
 
-struct TypeDescriptor_ResizableArray : public TypeDescriptor_Container
+struct TypeDescriptor_Vector : public TypeDescriptor_Container
 {
 	template <typename T>
-	TypeDescriptor_ResizableArray(T*) : TypeDescriptor_Container{ "ResizableArray", sizeof(ResizableArray<T>) }
+	TypeDescriptor_Vector(T*) : TypeDescriptor_Container{ "Vector", sizeof(Vector<T>) }
 	{
 		m_object_desc = TypeResolver<StripPointer<T>::Type>::get();
 
 		get_size = [](void* obj) -> size_t {
-			return ((ResizableArray<T>*)obj)->num_elements();
+			return ((Vector<T>*)obj)->size();
 		};
 		get_item = [](void* obj, size_t idx) -> void* {
-			return (void*)&(*((ResizableArray<T>*)obj))[idx];
+			return (void*)&(*((Vector<T>*)obj))[idx];
 		};
 	}
 
@@ -136,52 +135,20 @@ struct TypeDescriptor_ResizableArray : public TypeDescriptor_Container
 };
 
 template <typename T>
-class TypeResolver<ResizableArray<T>>
+class TypeResolver<Vector<T>>
 {
 public:
 	static TypeDescriptor* get()
 	{
-		static TypeDescriptor_ResizableArray typeDesc{ (T*)nullptr };
-		return &typeDesc;
-	}
-};
-
-struct TypeDescriptor_DynamicArray : TypeDescriptor_Container
-{
-	template <typename T>
-	TypeDescriptor_DynamicArray(T*) : TypeDescriptor_Container{ "DynamicArray", sizeof(DynamicArray<T>) }
-	{
-		m_object_desc = TypeResolver<StripPointer<T>::Type>::get();
-		m_pointer = IsPointer<T>::val;
-
-		get_size = [](void* obj) -> size_t {
-			return ((DynamicArray<T>*)obj)->m_num_elements;
-		};
-		get_item = [](void* obj, size_t idx) -> void* {
-			return (void*)&(*((DynamicArray<T>*)obj))[idx];
-		};
-	}
-
-	void serialize(void* obj, const char* name, ISerializer* serializer) override;
-	void deserialize(void* obj, const char* name, ISerializer* serializer) override;
-	bool is_trivial();
-};
-
-template <typename T>
-class TypeResolver<DynamicArray<T>>
-{
-public:
-	static TypeDescriptor* get()
-	{
-		static TypeDescriptor_DynamicArray typeDesc{ (T*)nullptr };
+		static TypeDescriptor_Vector typeDesc{ (T*)nullptr };
 		return &typeDesc;
 	}
 };
 
 template <typename T, size_t N>
-struct TypeDescriptor_StaticArray : TypeDescriptor_Container
+struct TypeDescriptor_Array : TypeDescriptor_Container
 {
-	TypeDescriptor_StaticArray(T* obj) : TypeDescriptor_Container{ "StaticArray", sizeof(T) * N }
+	TypeDescriptor_Array(T* obj) : TypeDescriptor_Container{ "Array", sizeof(T) * N }
 	{
 		m_object_desc = TypeResolver<StripPointer<T>::Type>::get();
 
@@ -189,7 +156,7 @@ struct TypeDescriptor_StaticArray : TypeDescriptor_Container
 			return N;
 		};
 		get_item = [](void* obj, size_t idx) -> void* {
-			return (void*)&(*((StaticArray<T, N>*)obj))[idx];
+			return (void*)&(*((Array<T, N>*)obj))[idx];
 		};
 	}
 
@@ -233,16 +200,15 @@ struct TypeDescriptor_StaticArray : TypeDescriptor_Container
 	{
 		return m_object_desc->is_trivial() && !m_pointer;
 	}
-
 };
 
 template <typename T, size_t N>
-class TypeResolver<StaticArray<T, N>>
+class TypeResolver<Array<T, N>>
 {
 public:
 	static TypeDescriptor* get()
 	{
-		static TypeDescriptor_StaticArray<T, N> typeDesc{ (T*)nullptr };
+		static TypeDescriptor_Array<T, N> typeDesc{ (T*)nullptr };
 		return &typeDesc;
 	}
 };
