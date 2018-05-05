@@ -3,6 +3,7 @@
 #include <core/include/terminus_macros.hpp>
 #include <stl/include/vector.hpp>
 #include <stl/include/array.hpp>
+#include <stl/include/static_hash_map.hpp>
 
 #include <stdio.h>
 #include <iostream>
@@ -148,12 +149,13 @@ public:
 template <typename T, size_t N>
 struct TypeDescriptor_Array : TypeDescriptor_Container
 {
-	TypeDescriptor_Array(T* obj) : TypeDescriptor_Container{ "Array", sizeof(T) * N }
+	TypeDescriptor_Array() : TypeDescriptor_Container{ "Array", sizeof(T) * N }
 	{
 		m_object_desc = TypeResolver<StripPointer<T>::Type>::get();
 
 		get_size = [](void* obj) -> size_t {
-			return N;
+			Array<T, N>* array = (Array<T, N>*)obj;
+			return array->size();
 		};
 		get_item = [](void* obj, size_t idx) -> void* {
 			return (void*)&(*((Array<T, N>*)obj))[idx];
@@ -163,7 +165,11 @@ struct TypeDescriptor_Array : TypeDescriptor_Container
 	void serialize(void* obj, const char* name, ISerializer* serializer)
 	{
 		if (m_object_desc->is_trivial() && !m_pointer && serializer->is_raw_serializable())
-			serializer->raw_serialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
+		{
+			uint32_t size = m_size;
+			serializer->raw_serialize(&size, sizeof(uint32_t));
+			serializer->raw_serialize(obj, m_size);
+		}
 		else
 		{
 			size_t n = get_size(obj);
@@ -180,7 +186,11 @@ struct TypeDescriptor_Array : TypeDescriptor_Container
 	void deserialize(void* obj, const char* name, ISerializer* serializer)
 	{
 		if (is_trivial() && serializer->is_raw_serializable())
-			serializer->raw_deserialize(get_item(obj, 0), m_object_desc->m_size * get_size(obj));
+		{
+			uint32_t size = 0;
+			serializer->raw_deserialize(&size, sizeof(uint32_t));
+			serializer->raw_deserialize(obj, size);
+		}
 		else
 		{
 			int n = serializer->begin_deserialize_array(name);
@@ -208,7 +218,113 @@ class TypeResolver<Array<T, N>>
 public:
 	static TypeDescriptor* get()
 	{
-		static TypeDescriptor_Array<T, N> typeDesc{ (T*)nullptr };
+		static TypeDescriptor_Array<T, N> typeDesc;
+		return &typeDesc;
+	}
+};
+
+template <typename KEY_TYPE, typename VALUE_TYPE, size_t N>
+struct TypeDescriptor_StaticHashMap: TypeDescriptor_Container
+{
+	TypeDescriptor* m_key_desc;
+	void* (*get_key)(void*, size_t);
+	void (*deserialize_pair)(void*, TypeDescriptor*, TypeDescriptor*, ISerializer*);
+
+	TypeDescriptor_StaticHashMap() : TypeDescriptor_Container{ "StaticHashMap", sizeof(StaticHashMap<KEY_TYPE, VALUE_TYPE, N>) }
+	{
+		m_object_desc = TypeResolver<StripPointer<VALUE_TYPE>::Type>::get();
+		m_key_desc = TypeResolver<StripPointer<KEY_TYPE>::Type>::get();
+
+		get_size = [](void* obj) -> size_t {
+			StaticHashMap<KEY_TYPE, VALUE_TYPE, N>* hash_map = (StaticHashMap<KEY_TYPE, VALUE_TYPE, N>*)obj;
+			return hash_map->size();
+		};
+
+		get_item = [](void* obj, size_t idx) -> void* {
+			StaticHashMap<KEY_TYPE, VALUE_TYPE, N>* hash_map = (StaticHashMap<KEY_TYPE, VALUE_TYPE, N>*)obj;
+			return &hash_map->m_value[idx];
+		};
+
+		get_key = [](void* obj, size_t idx) -> void* {
+			StaticHashMap<KEY_TYPE, VALUE_TYPE, N>* hash_map = (StaticHashMap<KEY_TYPE, VALUE_TYPE, N>*)obj;
+			return &hash_map->m_key[idx];
+		};
+
+		deserialize_pair = [](void* obj, TypeDescriptor* key_desc, TypeDescriptor* value_desc, ISerializer* serializer) -> void {
+			StaticHashMap<KEY_TYPE, VALUE_TYPE, N>* hash_map = (StaticHashMap<KEY_TYPE, VALUE_TYPE, N>*)obj;
+			
+			KEY_TYPE key;
+			VALUE_TYPE val;
+
+			key_desc->deserialize(&key, "key", serializer);
+			value_desc->deserialize(&val, "value", serializer);
+
+			hash_map->set(key, val);
+		};
+	}
+
+	void serialize(void* obj, const char* name, ISerializer* serializer)
+	{
+		if (is_trivial() && serializer->is_raw_serializable())
+		{
+			uint32_t size = m_size;
+			serializer->raw_serialize(&size, sizeof(uint32_t));
+			serializer->raw_serialize(obj, m_size);
+		}
+		else
+		{
+			const size_t n = get_size(obj);
+
+			serializer->begin_serialize_array(name, n);
+
+			for (int i = 0; i < n; i++)
+			{
+				serializer->begin_serialize_struct(nullptr);
+				m_key_desc->serialize(get_key(obj, i), "key", serializer);
+				m_object_desc->serialize(get_item(obj, i), "value", serializer);
+				serializer->end_serialize_struct(nullptr);
+			}
+
+			serializer->end_serialize_array(name);
+		}
+	}
+
+	void deserialize(void* obj, const char* name, ISerializer* serializer)
+	{
+		if (is_trivial() && serializer->is_raw_serializable())
+		{
+			uint32_t size = 0;
+			serializer->raw_deserialize(&size, sizeof(uint32_t));
+			serializer->raw_deserialize(obj, size);
+		}
+		else
+		{
+			int n = serializer->begin_deserialize_array(name);
+
+			for (int i = 0; i < n; i++)
+			{
+				serializer->begin_deserialize_struct(nullptr);
+				deserialize_pair(obj, m_key_desc, m_object_desc, serializer);
+				serializer->end_deserialize_struct(nullptr)
+			}
+
+			serializer->end_deserialize_array(name);
+		}
+	}
+
+	bool is_trivial()
+	{
+		return m_object_desc->is_trivial() && m_key_desc->is_trivial() && !m_pointer;
+	}
+};
+
+template <typename KEY_TYPE, typename VALUE_TYPE, size_t N>
+class TypeResolver<StaticHashMap<KEY_TYPE, VALUE_TYPE, N>>
+{
+public:
+	static TypeDescriptor* get()
+	{
+		static TypeDescriptor_StaticHashMap<KEY_TYPE, VALUE_TYPE, N> typeDesc;
 		return &typeDesc;
 	}
 };

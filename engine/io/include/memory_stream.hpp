@@ -16,6 +16,7 @@ public:
     void read(void* dst, const size_t& size) override;
     void reset() override;
 	size_t size() override;
+	void* data();
 
 private:
     void reserve(const size_t& capacity);

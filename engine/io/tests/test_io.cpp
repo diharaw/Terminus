@@ -13,7 +13,7 @@
 #include <io/include/reflection.hpp>
 #include <io/include/json_serializer.hpp>
 #include <io/include/file_stream.hpp>
-
+#include <io/include/memory_stream.hpp>
 #include <core/include/engine_core.hpp>
 
 #include <fstream>
@@ -256,9 +256,9 @@ BEGIN_DECLARE_REFLECT(Foo)
 	REFLECT_MEMBER(list)
 END_DECLARE_REFLECT()
 
-void test_serialize()
+void test_serialize_fs()
 {
-	File* f = fs.open_file("test.json", TE_FS_WRITE | TE_FS_BINARY);
+	File* f = fs.open_file("test_f.json", TE_FS_WRITE | TE_FS_BINARY);
 
 	FileStream stream(f);
 	JsonSerializer serializer(stream);
@@ -282,9 +282,9 @@ void test_serialize()
 	f->close();
 }
 
-void test_deserialize()
+void test_deserialize_fs()
 {
-	File* f = fs.open_file("test.json", TE_FS_READ | TE_FS_BINARY);
+	File* f = fs.open_file("test_f.json", TE_FS_READ | TE_FS_BINARY);
 
 	FileStream stream(f);
 	JsonSerializer serializer(stream);
@@ -295,6 +295,55 @@ void test_deserialize()
 	serializer.load(foo);
 
 	f->close();
+}
+
+void test_serialize_ms()
+{
+	File* f = fs.open_file("test_m.json", TE_FS_WRITE | TE_FS_BINARY);
+
+	MemoryStream stream;
+	JsonSerializer serializer(stream);
+
+	Foo foo;
+
+	for (int i = 0; i < 10; i++)
+		foo.list[i] = rand();
+
+	for (int i = 0; i < 10; i++)
+	{
+		Bar obj;
+		obj.a = rand();
+		obj.b = rand();
+		foo.test.push_back(obj);
+	}
+
+	serializer.save(foo);
+	serializer.flush_to_stream();
+
+	f->write(stream.data(), stream.size(), 1);
+	f->close();
+}
+
+void test_deserialize_ms()
+{
+	File* f = fs.open_file("test_m.json", TE_FS_READ | TE_FS_BINARY);
+
+	size_t size = f->size();
+	char* buf = (char*)TE_HEAP_ALLOC(size + 1);
+	f->read(buf, size, 1);
+	buf[size] = '\0';
+
+	MemoryStream stream(buf, size);
+	JsonSerializer serializer(stream);
+
+	serializer.print();
+
+	Foo foo;
+	serializer.load(foo);
+
+	f->close();
+
+	TE_HEAP_DEALLOC(buf);
 }
 
 #ifdef main
@@ -346,8 +395,11 @@ int main(int argc, char *argv[])
 
 	//fs.close_file(f);
 
-	test_serialize();
-	test_deserialize();
+	test_serialize_fs();
+	test_deserialize_fs();
+
+	test_serialize_ms();
+	test_deserialize_ms();
     
     while (running)
     {

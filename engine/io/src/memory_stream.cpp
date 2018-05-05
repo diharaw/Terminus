@@ -13,8 +13,8 @@ MemoryStream::MemoryStream(void* initial, const size_t& size)
 	if (size > 0)
 	{
 		m_buffer = TE_HEAP_ALLOC(size);
-		memcpy(m_buffer, initial, m_size);
 		m_size = size;
+		memcpy(m_buffer, initial, m_size);
 	}
 	else
 	{
@@ -25,7 +25,8 @@ MemoryStream::MemoryStream(void* initial, const size_t& size)
 
 MemoryStream::~MemoryStream()
 {
-	TE_HEAP_DEALLOC(m_buffer);
+	if (m_buffer)
+		TE_HEAP_DEALLOC(m_buffer);
 }
 
 void MemoryStream::seek(const size_t& offset)
@@ -61,8 +62,13 @@ void MemoryStream::reserve(const size_t& capacity)
 {
     std::cout << "Reserving..." << std::endl;
     void* new_data = TE_HEAP_ALLOC(capacity);
-    memcpy(new_data, m_buffer, m_size);
-	TE_HEAP_DEALLOC(m_buffer);
+    
+	if (m_buffer)
+	{
+		memcpy(new_data, m_buffer, m_size);
+		TE_HEAP_DEALLOC(m_buffer);
+	}
+
     m_buffer = new_data;
 	m_size = capacity;
 }
@@ -70,6 +76,11 @@ void MemoryStream::reserve(const size_t& capacity)
 size_t MemoryStream::size()
 {
 	return m_size;
+}
+
+void* MemoryStream::data()
+{
+	return m_buffer;
 }
 
 TE_END_TERMINUS_NAMESPACE

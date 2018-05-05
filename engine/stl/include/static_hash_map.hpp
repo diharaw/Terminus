@@ -1,7 +1,7 @@
 #pragma once
 
-#include "deque.h"
-#include "murmur_hash.h"
+#include <stl/include/deque.hpp>
+#include <stl/include/murmur_hash.hpp>
 
 // @TODO:
 // 1. Turn HashEntry array into SOA. [DONE]
@@ -18,11 +18,11 @@ uint64_t create_hash(const T& key)
 	return murmur_hash_64(&key, sizeof(T), 0);
 }
 
-template <>
-uint64_t create_hash<uint64_t>(const uint64_t& key)
-{
-	return key;
-}
+//template <>
+//uint64_t create_hash<uint64_t>(const uint64_t& key)
+//{
+//	return key;
+//}
 
 template<typename KEY, typename VALUE, size_t SIZE>
 class StaticHashMap
@@ -89,6 +89,16 @@ public:
             return true;
         }
     }
+
+	VALUE* get_ptr(const KEY& key)
+	{
+		uint32_t data_index = find_or_fail(create_hash(key));
+
+		if (data_index == INVALID_INDEX)
+			return nullptr;
+		else
+			return &m_value[data_index];
+	}
 
     void remove(const KEY& key)
     {

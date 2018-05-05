@@ -22,6 +22,11 @@ public:
 		m_size = size;
 	}
 
+	size_t size()
+	{
+		return m_size;
+	}
+
 	void push_back(T obj)
 	{
 		m_elements[m_size++] = obj;
