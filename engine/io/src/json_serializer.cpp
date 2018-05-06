@@ -252,7 +252,7 @@ void JsonSerializer::deserialize(const char* name, std::string& value)
 	}
 }
 
-void JsonSerializer::deserialize(const char* name, char** value)
+void JsonSerializer::deserialize(const char* name, char** value, bool is_static)
 {
 	std::string str = "";
 
@@ -267,7 +267,9 @@ void JsonSerializer::deserialize(const char* name, char** value)
 		str = temp;
 	}
 
-	*value = (char*)TE_HEAP_ALLOC(str.length());
+	if (!is_static)
+		*value = (char*)TE_HEAP_ALLOC(str.length());
+
 	strcpy(*value, str.c_str());
 }
 

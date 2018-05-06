@@ -4,6 +4,7 @@
 #include <stl/include/vector.hpp>
 #include <stl/include/array.hpp>
 #include <stl/include/static_hash_map.hpp>
+#include <stl/include/string_buffer.hpp>
 
 #include <stdio.h>
 #include <iostream>
@@ -258,7 +259,7 @@ struct TypeDescriptor_StaticHashMap: TypeDescriptor_Container
 
 		get_key = [](void* obj, size_t idx) -> void* {
 			StaticHashMap<KEY_TYPE, VALUE_TYPE, N>* hash_map = (StaticHashMap<KEY_TYPE, VALUE_TYPE, N>*)obj;
-			return &hash_map->m_key[idx];
+			return &hash_map->m_key_original[idx];
 		};
 
 		deserialize_pair = [](void* obj, TypeDescriptor* key_desc, TypeDescriptor* value_desc, ISerializer* serializer) -> void {
@@ -312,9 +313,11 @@ struct TypeDescriptor_StaticHashMap: TypeDescriptor_Container
 
 			for (int i = 0; i < n; i++)
 			{
+				serializer->push_array_index(i);
 				serializer->begin_deserialize_struct(nullptr);
 				deserialize_pair(obj, m_key_desc, m_object_desc, serializer);
-				serializer->end_deserialize_struct(nullptr)
+				serializer->end_deserialize_struct(nullptr);
+				serializer->pop_array_index();
 			}
 
 			serializer->end_deserialize_array(name);
@@ -334,6 +337,50 @@ public:
 	static TypeDescriptor* get()
 	{
 		static TypeDescriptor_StaticHashMap<KEY_TYPE, VALUE_TYPE, N> typeDesc;
+		return &typeDesc;
+	}
+};
+
+template <size_t N>
+struct TypeDescriptor_StringBuffer : TypeDescriptor
+{
+	TypeDescriptor_StringBuffer() : TypeDescriptor{ "StringBuffer", sizeof(StringBuffer<N>) }
+	{
+
+	}
+
+	void serialize(void* obj, const char* name, ISerializer* serializer)
+	{
+		if (serializer->is_raw_serializable())
+			serializer->raw_serialize(obj, m_size);
+		else
+			serializer->serialize(name, (const char*)obj);
+	}
+
+	void deserialize(void* obj, const char* name, ISerializer* serializer)
+	{
+		if (serializer->is_raw_serializable())
+			serializer->raw_deserialize(obj, m_size);
+		else
+		{
+			std::string str = "";
+			serializer->deserialize(name, str);
+		}
+	}
+
+	bool is_trivial()
+	{
+		return true;
+	}
+};
+
+template <size_t N>
+class TypeResolver<StringBuffer<N>>
+{
+public:
+	static TypeDescriptor* get()
+	{
+		static TypeDescriptor_StringBuffer<N> typeDesc;
 		return &typeDesc;
 	}
 };

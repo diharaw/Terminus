@@ -111,7 +111,7 @@ public:
     
     uint32_t size()
     {
-        return _num_objects;
+        return m_num_objects;
     }
     
 private:

@@ -148,11 +148,13 @@ void BinarySerializer::deserialize(const char* name, std::string& value)
 	TE_HEAP_DEALLOC(str);
 }
 
-void BinarySerializer::deserialize(const char* name, char** value)
+void BinarySerializer::deserialize(const char* name, char** value, bool is_static)
 {
 	int32_t size = begin_deserialize_array(nullptr);
 
-	*value = (char*)TE_HEAP_ALLOC(size + 1);
+	if (!is_static)
+		*value = (char*)TE_HEAP_ALLOC(size + 1);
+
 	m_stream.read(*value, sizeof(double));
 }
 

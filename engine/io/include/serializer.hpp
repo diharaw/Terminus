@@ -41,7 +41,7 @@ public:
 	virtual void deserialize(const char* name, float& value)							  = 0;
 	virtual void deserialize(const char* name, double& value)							  = 0;
 	virtual void deserialize(const char* name, std::string& value)						  = 0;
-	virtual void deserialize(const char* name, char** value)							  = 0;
+	virtual void deserialize(const char* name, char** value, bool is_static = true)		  = 0;
 
 	virtual void begin_deserialize_struct(const char* name)								  = 0;
 	virtual void end_deserialize_struct(const char* name)								  = 0;
@@ -79,6 +79,12 @@ public:
 	void save(T& obj)
 	{
 		serialize(&obj, &T::Reflection, false);
+	}
+
+	template <typename T>
+	void save(const T& obj)
+	{
+		serialize((void*)&obj, &T::Reflection, false);
 	}
 
 	inline void deserialize(void* obj, TypeDescriptor_Struct* desc, bool trivial)

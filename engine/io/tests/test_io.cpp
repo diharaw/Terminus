@@ -243,6 +243,7 @@ struct Foo
 {
 	Vector<Bar> test;
 	Array<int, 10> list;
+	StaticHashMap<StringBuffer32, int, 32> map;
 
 	REFLECT()
 };
@@ -255,16 +256,11 @@ END_DECLARE_REFLECT()
 BEGIN_DECLARE_REFLECT(Foo)
 	REFLECT_MEMBER(test)
 	REFLECT_MEMBER(list)
+	REFLECT_MEMBER(map)
 END_DECLARE_REFLECT()
 
-void test_bin_serialize_fs()
+void create_foo(Foo& foo)
 {
-	File* f = fs.open_file("test_f.bin", TE_FS_WRITE | TE_FS_BINARY);
-
-	FileStream stream(f);
-	BinarySerializer serializer(stream);
-
-	Foo foo;
 	foo.list.resize(10);
 
 	for (int i = 0; i < 10; i++)
@@ -277,6 +273,17 @@ void test_bin_serialize_fs()
 		obj.b = rand();
 		foo.test.push_back(obj);
 	}
+
+	foo.map.set("Jesse", 434);
+	foo.map.set("Walter", 85);
+}
+
+void test_bin_serialize_fs(const Foo& foo)
+{
+	File* f = fs.open_file("test_f.bin", TE_FS_WRITE | TE_FS_BINARY);
+
+	FileStream stream(f);
+	BinarySerializer serializer(stream);
 
 	serializer.save(foo);
 	serializer.flush_to_stream();
@@ -297,26 +304,12 @@ void test_bin_deserialize_fs()
 	f->close();
 }
 
-void test_serialize_fs()
+void test_serialize_fs(const Foo& foo)
 {
 	File* f = fs.open_file("test_f.json", TE_FS_WRITE | TE_FS_BINARY);
 
 	FileStream stream(f);
 	JsonSerializer serializer(stream);
-
-	Foo foo;
-	foo.list.resize(10);
-
-	for (int i = 0; i < 10; i++)
-		foo.list[i] = rand();
-
-	for (int i = 0; i < 10; i++)
-	{
-		Bar obj;
-		obj.a = rand();
-		obj.b = rand();
-		foo.test.push_back(obj);
-	}
 
 	serializer.save(foo);
 	serializer.flush_to_stream();
@@ -339,26 +332,12 @@ void test_deserialize_fs()
 	f->close();
 }
 
-void test_serialize_ms()
+void test_serialize_ms(const Foo& foo)
 {
 	File* f = fs.open_file("test_m.json", TE_FS_WRITE | TE_FS_BINARY);
 
 	MemoryStream stream;
 	JsonSerializer serializer(stream);
-
-	Foo foo;
-	foo.list.resize(10);
-
-	for (int i = 0; i < 10; i++)
-		foo.list[i] = rand();
-
-	for (int i = 0; i < 10; i++)
-	{
-		Bar obj;
-		obj.a = rand();
-		obj.b = rand();
-		foo.test.push_back(obj);
-	}
 
 	serializer.save(foo);
 	serializer.flush_to_stream();
@@ -438,14 +417,19 @@ int main(int argc, char *argv[])
 
 	//fs.close_file(f);
 
-	test_serialize_fs();
-	test_deserialize_fs();
+	{
+		Foo foo;
+		create_foo(foo);
 
-	//test_serialize_ms();
-	//test_deserialize_ms();
+		test_serialize_fs(foo);
+		test_deserialize_fs();
 
-	test_bin_serialize_fs();
-	test_bin_deserialize_fs();
+		//test_serialize_ms();
+		//test_deserialize_ms();
+
+		test_bin_serialize_fs(foo);
+		test_bin_deserialize_fs();
+	}
     
     while (running)
     {
