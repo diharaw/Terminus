@@ -63,3 +63,10 @@
     #pragma warning Unknown dynamic link import/export semantics.
 #endif
 
+
+#define TE_DECLARE_APP_MAIN(CLASS)				\
+extern "C" int SDL_main(int argc, char *argv[]) \
+{												\
+	CLASS app;									\
+	return app.run(argc, argv);					\
+}

@@ -1,51 +1,100 @@
-#if defined(TE_PLATFORM_SDL2) || defined(TE_PLATFORM_EMSCRIPTEN)
-
 #include <core/application.hpp>
+#include <core/engine_core.hpp>
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <string.h>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-Window::Window()
+enum WindowFlags
+{
+	TE_WINDOW_FULLSCREEN = 0x00000001,
+	TE_WINDOW_OPENGL = 0x00000002,
+	TE_WINDOW_SHOWN = 0x00000004,
+	TE_WINDOW_HIDDEN = 0x00000008,
+	TE_WINDOW_BORDERLESS = 0x00000010,
+	TE_WINDOW_RESIZABLE = 0x00000020,
+	TE_WINDOW_MINIMIZED = 0x00000040,
+	TE_WINDOW_MAXIMIZED = 0x00000080,
+	TE_WINDOW_INPUT_GRABBED = 0x00000100,
+	TE_WINDOW_INPUT_FOCUS = 0x00000200,
+	TE_WINDOW_MOUSE_FOCUS = 0x00000400,
+	TE_WINDOW_FOREIGN = 0x00000800,
+	TE_WINDOW_ALLOW_HIGHDPI = 0x00002000,
+	TE_WINDOW_MOUSE_CAPTURE = 0x00004000,
+	TE_WINDOW_ALWAYS_ON_TOP = 0x00008000,
+	TE_WINDOW_SKIP_TASKBAR = 0x00010000,
+	TE_WINDOW_UTILITY = 0x00020000,
+	TE_WINDOW_TOOLTIP = 0x00040000,
+	TE_WINDOW_POPUP_MENU = 0x00080000,
+	TE_WINDOW_VULKAN = 0x00100000
+};
+
+Application::Application()
+{
+	m_width = 640;
+	m_height = 480;
+}
+
+Application::~Application()
 {
     
 }
 
-Window::~Window()
+int Application::run(int argc, char *argv[])
 {
-    
+	// Initialize engine
+	if (!initialize_engine())
+		return 1;
+
+	// Initialize game
+	if (!initialize())
+		return 1;
+
+	// Main loop
+	while (m_running)
+	{
+		// Pre-game simulation update
+		pre_update_engine();
+		// Game simulation
+		update();
+		// Post-game simulation update
+		post_update_engine();
+	}
+
+	// Shutdown game
+	shutdown();
+	// Shutdown engine
+	shutdown_engine();
+
+	return 0;
 }
 
-bool Window::initialize(const WindowCreateDesc& desc)
+bool Application::initialize_engine()
 {
-    m_width = desc.w;
-    m_height = desc.h;
-    
     uint32_t window_flags = 0;
+
+#if defined(TE_BACKEND_OPENGL)
+	window_flags |= SDL_WINDOW_OPENGL;
+#elif defined(TE_BACKEND_VULKAN)
+	window_flags |= SDL_WINDOW_VULKAN;
+#endif
+
+#if defined(TERMINUS_PLATFORM_MACOS)
+	window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
     
-    if (TE_HAS_BIT_FLAG(TE_WINDOW_RESIZABLE, desc.flags))
+    if (TE_HAS_BIT_FLAG(TE_WINDOW_RESIZABLE, m_window_flags))
         window_flags = SDL_WINDOW_RESIZABLE;
     
-    if (TE_HAS_BIT_FLAG(TE_WINDOW_FULLSCREEN, desc.flags))
+    if (TE_HAS_BIT_FLAG(TE_WINDOW_FULLSCREEN, m_window_flags))
         window_flags |= SDL_WINDOW_FULLSCREEN;
     
-    if (TE_HAS_BIT_FLAG(TE_WINDOW_BORDERLESS, desc.flags))
+    if (TE_HAS_BIT_FLAG(TE_WINDOW_BORDERLESS, m_window_flags))
         window_flags |= SDL_WINDOW_BORDERLESS;
     
-    if (TE_HAS_BIT_FLAG(TE_WINDOW_OPENGL, desc.flags))
-        window_flags |= SDL_WINDOW_OPENGL;
-    
-    if (TE_HAS_BIT_FLAG(TE_WINDOW_ALLOW_HIGHDPI, desc.flags))
-        window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
-    
-    if (desc.x == TE_WINDOW_POS_CENTERED)
-        m_x_pos = SDL_WINDOWPOS_CENTERED;
-    
-    if (desc.y == TE_WINDOW_POS_CENTERED)
-        m_y_pos = SDL_WINDOWPOS_CENTERED;
-    
-    set_title(desc.title);
+	m_x_pos = SDL_WINDOWPOS_CENTERED;
+	m_y_pos = SDL_WINDOWPOS_CENTERED;
     
     m_sdl_window = SDL_CreateWindow(m_title.c_str(),
                                     m_x_pos,
@@ -63,57 +112,223 @@ bool Window::initialize(const WindowCreateDesc& desc)
     
     m_drawable_width = dw;
     m_drawable_height = dh;
-    
     m_running = true;
-    m_keyboard_focus = true;
-    m_mouse_focus = true;
-    m_shown = true;
-    m_minimized = false;
-    m_window_id = SDL_GetWindowID(m_sdl_window);
+
+	// Initialize engine core
+	global::initialize_engine_core(this);
+	// Initialize input manager Joystick state
+	global::input_manager().initialize();
     
     return true;
 }
 
-void Window::shutdown()
+void Application::pre_update_engine()
+{
+	InputManager& input_manager = global::input_manager();
+
+	SDL_Event e;
+
+	while (SDL_PollEvent(&e))
+	{
+		switch (e.type)
+		{
+			// --------------------------------------------------------------------------------
+			// QUIT
+			// --------------------------------------------------------------------------------
+			case SDL_QUIT:
+			{
+				m_running = false;
+			}
+			// --------------------------------------------------------------------------------
+			// MOUSE
+			// --------------------------------------------------------------------------------
+			case SDL_MOUSEWHEEL:
+			{
+				input_manager.process_mouse_wheel(e.wheel.y);
+				break;
+			}
+			case SDL_MOUSEMOTION:
+			{
+				SDL_bool relative = SDL_GetRelativeMouseMode();
+				input_manager.process_mouse_motion(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel, relative);
+			}
+			case SDL_MOUSEBUTTONUP:
+			case SDL_MOUSEBUTTONDOWN:
+			{
+				if (e.type == SDL_MOUSEBUTTONDOWN)
+					input_manager.process_mouse_button(e.button.button, TE_BUTTON_STATE_PRESSED);
+				else
+					input_manager.process_mouse_button(e.button.button, TE_BUTTON_STATE_RELEASED);
+
+				break;
+			}
+			// --------------------------------------------------------------------------------
+			// KEYBOARD
+			// --------------------------------------------------------------------------------
+			case SDL_KEYUP:
+			case SDL_KEYDOWN:
+			{
+				if (e.key.repeat == 0)
+				{
+					if (e.type == SDL_KEYUP)
+						input_manager.process_keyboard_button(e.key.keysym.scancode, TE_BUTTON_STATE_RELEASED);
+					else
+						input_manager.process_keyboard_button(e.key.keysym.scancode, TE_BUTTON_STATE_PRESSED);
+				}
+			}
+			// --------------------------------------------------------------------------------
+			// CONTROLLER
+			// --------------------------------------------------------------------------------
+			case SDL_CONTROLLERAXISMOTION:
+			{
+
+			}
+			case SDL_CONTROLLERBUTTONUP:
+			case SDL_CONTROLLERBUTTONDOWN:
+			{
+
+			}
+			case SDL_CONTROLLERDEVICEADDED:
+			{
+
+			}
+			case SDL_CONTROLLERDEVICEREMOVED:
+			{
+
+			}
+			// --------------------------------------------------------------------------------
+			// JOYSTICK
+			// --------------------------------------------------------------------------------
+			case SDL_JOYAXISMOTION:
+			{
+
+			}
+			case SDL_JOYBALLMOTION:
+			{
+
+			}
+			case SDL_JOYHATMOTION:
+			{
+
+			}
+			case SDL_JOYBUTTONUP:
+			case SDL_JOYBUTTONDOWN:
+			{
+
+			}
+			case SDL_JOYDEVICEADDED:
+			{
+
+			}
+			case SDL_JOYDEVICEREMOVED:
+			{
+
+			}
+			// --------------------------------------------------------------------------------
+			// TOUCH
+			// --------------------------------------------------------------------------------
+			case SDL_FINGERMOTION:
+			{
+
+			}
+			case SDL_FINGERUP:
+			case SDL_FINGERDOWN:
+			{
+
+			}
+			case SDL_MULTIGESTURE:
+			{
+
+			}
+			// --------------------------------------------------------------------------------
+			// WINDOW
+			// --------------------------------------------------------------------------------
+			case SDL_WINDOWEVENT:
+			{
+				//                    event.window.type = e.window.event;
+				//                    event.window.id = e.window.windowID;
+
+			}
+			// --------------------------------------------------------------------------------
+			// TEXT
+			// --------------------------------------------------------------------------------
+			case SDL_TEXTEDITING:
+			{
+
+			}
+			case SDL_TEXTINPUT:
+			{
+
+			}
+			// --------------------------------------------------------------------------------
+			// DROP
+			// --------------------------------------------------------------------------------
+			case SDL_DROPFILE:
+			{
+
+			}
+			case SDL_DROPTEXT:
+			{
+
+			}
+			case SDL_DROPBEGIN:
+			{
+
+			}
+			case SDL_DROPCOMPLETE:
+			{
+
+			}
+		}
+	}
+
+	global::event_manager().process_events();
+}
+
+void Application::post_update_engine()
+{
+
+}
+
+void Application::shutdown_engine()
 {
     if(m_sdl_window)
     {
         SDL_DestroyWindow(m_sdl_window);
         m_sdl_window = nullptr;
     }
+
+	global::shutdown_engine_core();
+
+	SDL_Quit();
 }
 
-void Window::hide()
+void Application::hide()
 {
 	SDL_HideWindow(m_sdl_window);
 }
 
-void Window::show()
+void Application::show()
 {
 	SDL_ShowWindow(m_sdl_window);
 }
 
-uint32_t Window::id()
-{
-    return m_window_id;
-}
-
-void Window::hide_cursor()
+void Application::hide_cursor()
 {
     SDL_ShowCursor(SDL_FALSE);
 }
 
-void Window::show_cursor()
+void Application::show_cursor()
 {
     SDL_ShowCursor(SDL_TRUE);
 }
 
-void* Window::handle()
+void* Application::handle()
 {
     return (void*)m_sdl_window;
 }
 
-void* Window::native_handle()
+void* Application::native_handle()
 {
     SDL_SysWMinfo info;
     SDL_GetWindowWMInfo(m_sdl_window, &info);
@@ -129,50 +344,29 @@ void* Window::native_handle()
 #endif
 }
 
-void Window::resize(uint32_t w, uint32_t h)
-{
-    m_width = w;
-    m_height = h;
-    
-    SDL_SetWindowSize(m_sdl_window, m_width, m_height);
-}
-
-StringBuffer64 Window::title()
+StringBuffer64 Application::title()
 {
     return m_title;
 }
 
-void Window::set_title(const StringBuffer64& title)
+void Application::set_title(const StringBuffer64& title)
 {
 	m_title = title;
 }
 
-void Window::make_windowed()
-{
-    m_flags |= 0;
-}
-
-void Window::make_fullscreen()
-{
-    m_flags |= SDL_WINDOW_FULLSCREEN;
-	SDL_SetWindowFullscreen(m_sdl_window, m_flags);
-}
-
-void Window::remove_border()
-{
-	SDL_SetWindowBordered(m_sdl_window, SDL_FALSE);
-}
-
-void Window::add_border()
-{
-	SDL_SetWindowBordered(m_sdl_window, SDL_TRUE);
-}
-
-bool Window::shown()
+bool Application::shown()
 {
     return TE_HAS_BIT_FLAG(SDL_WINDOW_SHOWN, SDL_GetWindowFlags(m_sdl_window));
 }
 
-TE_END_TERMINUS_NAMESPACE
+void Application::exit()
+{
+	m_running = false;
+}
 
-#endif
+bool Application::is_running()
+{
+	return m_running;
+}
+
+TE_END_TERMINUS_NAMESPACE

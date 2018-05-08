@@ -83,8 +83,5 @@ include_directories("${TE_ENGINE_INCLUDE_PATH}"
 # SUB-DIRECTORIES
 # -----------------------------------------------------------------------------------------------------------------------------                    
 
-# Add engine projects
 add_subdirectory("engine/src")
-# add_subdirectory("engine/core")
-# add_subdirectory("engine/stl")
-
+add_subdirectory("runtime")

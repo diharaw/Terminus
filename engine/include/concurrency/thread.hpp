@@ -29,14 +29,14 @@ private:
     
 private:
 #if defined(_WIN32)
-    int      m_thread_handle;
-    DWORD    m_dw_thread_id;
-    unsigned m_stack_size;
-    HANDLE   m_thread_id;
+    int						   m_thread_handle;
+    DWORD					   m_dw_thread_id;
+    unsigned				   m_stack_size;
+    HANDLE					   m_thread_id;
 #else
-    pthread_t m_thread;
+    pthread_t				   m_thread;
 #endif
-    void*     m_args;
+    void*					   m_args;
     std::function<void(void*)> m_run_function;
 };
 

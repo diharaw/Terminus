@@ -6,9 +6,10 @@ namespace global
 {
 	EngineCore* g_engine_core;
 
-	void initialize_engine_core()
+	void initialize_engine_core(Application* app)
 	{
 		g_engine_core = new EngineCore();
+		g_engine_core->m_application = app;
 	}
 
 	EngineCore*	engine_core()
