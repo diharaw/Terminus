@@ -64,7 +64,7 @@ set(TE_ASSIMP_LIBS "${TE_LIB_PATH}/${TE_LIB_PREFFIX}assimp${TE_STATIC_LIB_SUFFIX
 # -----------------------------------------------------------------------------------------------------------------------------
 
 # Setup engine include paths
-set(TE_ENGINE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/engine")
+set(TE_ENGINE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/engine/include")
 
 # Setup external include paths
 set(TE_SDL2_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/external/SDL/include")
@@ -84,12 +84,7 @@ include_directories("${TE_ENGINE_INCLUDE_PATH}"
 # -----------------------------------------------------------------------------------------------------------------------------                    
 
 # Add engine projects
-add_subdirectory("engine/memory")
-add_subdirectory("engine/concurrency")
-add_subdirectory("engine/platform")
-add_subdirectory("engine/event")
-add_subdirectory("engine/io")
-add_subdirectory("engine/resource")
+add_subdirectory("engine/src")
 # add_subdirectory("engine/core")
 # add_subdirectory("engine/stl")
 
