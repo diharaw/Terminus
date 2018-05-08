@@ -153,13 +153,29 @@ set(TE_PLATFORM_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/platform/allocator.h
 # Sources
 set(TE_PLATFORM_SOURCES "${CMAKE_SOURCE_DIR}/engine/src/platform/window.cpp")
 
+# -----------------------------------------------------------------------------------------------------------------------------
+# FILES - STL
+# -----------------------------------------------------------------------------------------------------------------------------
+
+# Headers
+set(TE_STL_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/stl/array.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/deque.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/murmur_hash.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/packed_array.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/sparse_array.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/static_hash_map.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/string_buffer.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/string_hash.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/stl/vector.hpp")
+
 # Terminus Headers
 set(TE_HEADERS ${TE_CORE_HEADERS} 
                ${TE_CONCURRENCY_HEADERS}
                ${TE_EVENT_HEADERS} 
                ${TE_IO_HEADERS}
                ${TE_MATH_HEADERS}
-               ${TE_MEMORY_HEADERS})
+               ${TE_MEMORY_HEADERS}
+               ${TE_STL_HEADERS})
 
 # Terminus Source
 set(TE_SOURCES ${TE_CORE_SOURCES} 
