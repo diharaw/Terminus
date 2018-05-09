@@ -12,6 +12,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # DEPENDANCIES
 # -----------------------------------------------------------------------------------------------------------------------------
 
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
 # Setup platform specific library options
 if(WIN32)
     set(TE_LIB_PREFFIX "")
@@ -63,6 +65,9 @@ set(TE_ASSIMP_LIBS "${TE_LIB_PATH}/${TE_LIB_PREFFIX}assimp${TE_STATIC_LIB_SUFFIX
 # INCLUDES
 # -----------------------------------------------------------------------------------------------------------------------------
 
+find_package(Vulkan REQUIRED)
+find_package(OpenGL REQUIRED)
+
 # Setup engine include paths
 set(TE_ENGINE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/engine/include")
 
@@ -77,7 +82,8 @@ include_directories("${TE_ENGINE_INCLUDE_PATH}"
                     "${TE_SDL2_INCLUDE_PATH}"
                     "${TE_LIBZIP_INCLUDE_PATH}"
                     "${TE_ASSIMP_INCLUDE_PATH}"
-                    "${TE_JSON_INCLUDE_PATH}")
+                    "${TE_JSON_INCLUDE_PATH}"
+                    "${VULKAN_INCLUDE_DIR}")
 
 # -----------------------------------------------------------------------------------------------------------------------------
 # SUB-DIRECTORIES

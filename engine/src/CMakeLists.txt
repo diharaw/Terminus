@@ -168,6 +168,24 @@ set(TE_STL_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/stl/array.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/stl/string_hash.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/stl/vector.hpp")
 
+# -----------------------------------------------------------------------------------------------------------------------------
+# FILES - GFX
+# -----------------------------------------------------------------------------------------------------------------------------
+
+# Headers
+set(TE_GFX_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/gfx/gfx_descs.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/gfx_device.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/vulkan/gfx_device_vk.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/vulkan/gfx_types_vk.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/gfx_device_gl.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/gfx_types_gl.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/glad.h"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/khrplatform.h")
+
+# Sources
+set(TE_GFX_SOURCES "${CMAKE_SOURCE_DIR}/engine/src/gfx/vulkan/gfx_device_vk.cpp"
+                   "${CMAKE_SOURCE_DIR}/engine/src/gfx/opengl/glad.c")
+
 # Terminus Headers
 set(TE_HEADERS ${TE_CORE_HEADERS} 
                ${TE_CONCURRENCY_HEADERS}
@@ -175,14 +193,16 @@ set(TE_HEADERS ${TE_CORE_HEADERS}
                ${TE_IO_HEADERS}
                ${TE_MATH_HEADERS}
                ${TE_MEMORY_HEADERS}
-               ${TE_STL_HEADERS})
+               ${TE_STL_HEADERS}
+               ${TE_GFX_HEADERS})
 
 # Terminus Source
 set(TE_SOURCES ${TE_CORE_SOURCES} 
                ${TE_CONCURRENCY_SOURCES} 
                ${TE_EVENT_SOURCES} 
                ${TE_IO_SOURCES}
-               ${TE_MEMORY_SOURCES})
+               ${TE_MEMORY_SOURCES}
+               ${TE_GFX_SOURCES})
 
 # Source groups
 source_group("include" FILES ${TE_HEADERS})
@@ -199,6 +219,8 @@ set_target_properties(TerminusEngine PROPERTIES FOLDER "engine")
 target_link_libraries(TerminusEngine "${TE_LIBZIP_LIBS}")
 target_link_libraries(TerminusEngine "${TE_ZLIB_LIBS}")
 target_link_libraries(TerminusEngine "${TE_SDL2_LIBS}")
+target_link_libraries(TerminusEngine "${VULKAN_LIBRARY}")
+target_link_libraries(TerminusEngine "${OPENGL_LIBRARIES}")
 
 if(WIN32)
     target_link_libraries(TerminusEngine "user32.lib"

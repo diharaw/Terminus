@@ -6,6 +6,7 @@
 #include <io/filesystem.hpp>
 #include <io/input_manager.hpp>
 #include <event/event_manager.hpp>
+#include <gfx/gfx_device.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -15,6 +16,7 @@ struct EngineCore
 	FileSystem	  m_filesystem;
 	EventManager  m_event_manager;
 	InputManager  m_input_manager;
+	GfxDevice	  m_gfx_device;
 
 	// Application 
 	Application*  m_application;
@@ -31,6 +33,7 @@ namespace global
 	inline FileSystem&	  filesystem()		  { return engine_core()->m_filesystem; }
 	inline EventManager&  event_manager()	  { return engine_core()->m_event_manager; }
 	inline InputManager&  input_manager()	  { return engine_core()->m_input_manager; }
+	inline GfxDevice&	  gfx_device()		  { return engine_core()->m_gfx_device; }
 	inline Application*   application()		  { return engine_core()->m_application; }
 }
 
