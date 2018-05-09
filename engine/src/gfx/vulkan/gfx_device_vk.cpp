@@ -2,7 +2,7 @@
 #include <core/engine_core.hpp>
 #include <iostream>
 
-#define TE_VULKAN_VALIDATION_LAYERS
+#define TE_VULKAN_DEBUG
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -75,22 +75,26 @@ GfxDevice::~GfxDevice()
 
 bool GfxDevice::initialize()
 {
-	
+	// Create Vulkan instance
+	if (!create_instance())
+		return false;
 
-	
+	// Choose physical device
+	if (!choose_physical_device())
+		return false;
 
 	return true;
 }
 
 void GfxDevice::shutdown()
 {
-
+	vkDestroyInstance(m_instance, nullptr);
 }
 
 bool GfxDevice::create_instance()
 {
-#if defined(TE_VULKAN_VALIDATION_LAYERS)
-	if (check_validation_layer_support())
+#if defined(TE_VULKAN_DEBUG)
+	if (!check_validation_layer_support())
 		std::cout << "Validation layers requested, but not available!" << std::endl;
 #endif
 
@@ -113,13 +117,12 @@ bool GfxDevice::create_instance()
 	instance_info.enabledExtensionCount = extensions.size();
 	instance_info.ppEnabledExtensionNames = &extensions[0];
 
-#if defined(TE_VULKAN_VALIDATION_LAYERS)
+#if defined(TE_VULKAN_DEBUG)
 	instance_info.enabledLayerCount = static_cast<uint32_t>(sizeof(kValidationLayers)/sizeof(const char*));
 	instance_info.ppEnabledLayerNames = &kValidationLayers[0];
 #else
 	instance_info.enabledLayerCount = 0;
 #endif
-	instance_info.enabledLayerCount = 0;
 
 	if (vkCreateInstance(&instance_info, nullptr, &m_instance) != VK_SUCCESS)
 	{
@@ -130,7 +133,7 @@ bool GfxDevice::create_instance()
 	return true;
 }
 
-bool GfxDevice::create_device()
+bool GfxDevice::choose_physical_device()
 {
 	uint32_t device_count = 0;
 	vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
@@ -174,6 +177,16 @@ bool GfxDevice::create_device()
 		}
 	}
 
+	return false;
+}
+
+bool GfxDevice::create_surface()
+{
+	return false;
+}
+
+bool GfxDevice::create_logical_device()
+{
 	return false;
 }
 
@@ -224,6 +237,8 @@ bool GfxDevice::create_queues()
 		}
 		// TODO: AMD, Intel etc queue selection
 	}
+
+	return true;
 }
 
 bool GfxDevice::check_validation_layer_support()
@@ -263,11 +278,14 @@ void GfxDevice::required_extensions(Vector<const char*>& extensions)
 	SDL_Vulkan_GetInstanceExtensions((SDL_Window*)global::application()->handle(), &count, &extensions[0]);
 
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+
+	for (auto& ext : extensions)
+		std::cout << ext << std::endl;
 }
 
 VertexBuffer* GfxDevice::create(const VertexBufferDesc& desc)
 {
-
+	return nullptr;
 }
 
 void GfxDevice::destroy(VertexBuffer* buffer)

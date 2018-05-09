@@ -35,7 +35,9 @@ public:
 
 private:
 	bool create_instance();
-	bool create_device();
+	bool choose_physical_device();
+	bool create_surface();
+	bool create_logical_device();
 	bool create_queues();
 	bool check_validation_layer_support();
 	void required_extensions(Vector<const char*>& extensions);

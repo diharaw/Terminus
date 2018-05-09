@@ -116,6 +116,8 @@ bool Application::initialize_engine()
 
 	// Initialize engine core
 	global::initialize_engine_core(this);
+	// Initial graphics device
+	global::gfx_device().initialize();
 	// Initialize input manager Joystick state
 	global::input_manager().initialize();
     
@@ -297,6 +299,9 @@ void Application::shutdown_engine()
         SDL_DestroyWindow(m_sdl_window);
         m_sdl_window = nullptr;
     }
+
+	// Shutdown graphics device
+	global::gfx_device().shutdown();
 
 	global::shutdown_engine_core();
 

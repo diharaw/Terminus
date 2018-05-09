@@ -1,9 +1,8 @@
 #pragma once
 
 #include <core/terminus_macros.hpp>
-#include <core/engine_core.hpp>
 #include <io/io_macros.hpp>
-#include <memory/heap_allocator.hpp>
+#include <memory/allocator.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
