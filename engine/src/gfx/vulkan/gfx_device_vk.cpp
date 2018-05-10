@@ -76,24 +76,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 	return VK_FALSE;
 }
 
-VkResult create_debug_report_callback_ext(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback)
-{
-	auto func = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
-
-	if (func != nullptr)
-		return func(instance, pCreateInfo, pAllocator, pCallback);
-	else
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-}
-
-void destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator)
-{
-	auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
-
-	if (func != nullptr)
-		func(instance, callback, pAllocator);
-}
-
 GfxDevice::GfxDevice()
 {
 
@@ -124,11 +106,18 @@ bool GfxDevice::initialize()
 	if (!choose_physical_device())
 		return false;
 
+	// Create logical device
+	if (!create_logical_device())
+		return false;
+
 	return true;
 }
 
 void GfxDevice::shutdown()
 {
+	destroy_debug_report_callback_ext(m_instance, m_debug_callback, nullptr);
+
+	vkDestroyDevice(m_device, nullptr);
 	vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 	vkDestroyInstance(m_instance, nullptr);
 }
@@ -243,12 +232,7 @@ bool GfxDevice::create_surface()
 	return SDL_Vulkan_CreateSurface((SDL_Window*)global::application()->handle(), m_instance, &m_surface);
 }
 
-bool GfxDevice::create_logical_device()
-{
-	return false;
-}
-
-bool GfxDevice::create_queues()
+void GfxDevice::find_queues(QueueInfos& queue_infos)
 {
 	uint32_t family_count = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &family_count, nullptr);
@@ -258,11 +242,6 @@ bool GfxDevice::create_queues()
 
 	VkQueueFamilyProperties families[32];
 	vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &family_count, &families[0]);
-
-	int32_t graphics_queue_index = -1;
-	int32_t compute_queue_index = -1;
-	int32_t transfer_queue_index = -1;
-	int32_t presentation_queue_index = -1;
 
 	for (uint32_t i = 0; i < family_count; i++)
 	{
@@ -275,29 +254,146 @@ bool GfxDevice::create_queues()
 
 		if (m_device_properties.vendor_id == VK_VENDOR_NVIDIA)
 		{
-			// Look for All-Round Queue
-			if ((bits & VK_QUEUE_GRAPHICS_BIT) && (bits & VK_QUEUE_COMPUTE_BIT) && (bits & VK_QUEUE_TRANSFER_BIT))
+			VkBool32 present_support = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, i, m_surface, &present_support);
+
+			// Look for Presentation Queue
+			if (present_support && queue_infos.presentation_queue_index == -1)
 			{
-				graphics_queue_index = i;
+				queue_infos.presentation_queue_index = i;
+			}
+			// Look for All-Round Queue
+			if ((bits & VK_QUEUE_GRAPHICS_BIT) && (bits & VK_QUEUE_COMPUTE_BIT) && (bits & VK_QUEUE_TRANSFER_BIT) && queue_infos.graphics_queue_index == -1)
+			{
+				queue_infos.graphics_queue_index = i;
 				std::cout << "Found Graphics Queue Family" << std::endl;
 			}
 			// Look for Transfer Queue
-			if (!(bits & VK_QUEUE_GRAPHICS_BIT) && !(bits & VK_QUEUE_COMPUTE_BIT) && (bits & VK_QUEUE_TRANSFER_BIT))
+			if (!(bits & VK_QUEUE_GRAPHICS_BIT) && !(bits & VK_QUEUE_COMPUTE_BIT) && (bits & VK_QUEUE_TRANSFER_BIT) && queue_infos.transfer_queue_index == -1)
 			{
-				transfer_queue_index = i;
+				queue_infos.transfer_queue_index = i;
 				std::cout << "Found Transfer Queue Family" << std::endl;
 			}
 			// Look for Async Compute Queue
-			if (!(bits & VK_QUEUE_GRAPHICS_BIT) && (bits & VK_QUEUE_COMPUTE_BIT) && !(bits & VK_QUEUE_TRANSFER_BIT))
+			if (!(bits & VK_QUEUE_GRAPHICS_BIT) && (bits & VK_QUEUE_COMPUTE_BIT) && !(bits & VK_QUEUE_TRANSFER_BIT) && queue_infos.compute_queue_index == -1)
 			{
-				compute_queue_index = i;
+				queue_infos.compute_queue_index = i;
 				std::cout << "Found Async Compute Queue Family" << std::endl;
 			}
 		}
 		// TODO: AMD, Intel etc queue selection
 	}
 
-	return true;
+	// At least graphics and presentation queue must be supported
+	if (queue_infos.graphics_queue_index == -1)
+	{
+		std::cout << "No Graphics Queue Found" << std::endl;
+		return;
+	}
+
+	if (queue_infos.presentation_queue_index == -1)
+	{
+		std::cout << "No Presentation Queue Found" << std::endl;
+		return;
+	}
+
+	float priority = 1.0f;
+
+	VkDeviceQueueCreateInfo presentation_queue_info = {};
+	presentation_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	presentation_queue_info.queueFamilyIndex = queue_infos.presentation_queue_index;
+	presentation_queue_info.queueCount = 1;
+	presentation_queue_info.pQueuePriorities = &priority;
+
+	VkDeviceQueueCreateInfo graphics_queue_info = {};
+	graphics_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	graphics_queue_info.queueFamilyIndex = queue_infos.graphics_queue_index;
+	graphics_queue_info.queueCount = 1;
+	graphics_queue_info.pQueuePriorities = &priority;
+
+	VkDeviceQueueCreateInfo compute_queue_info = {};
+	compute_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	compute_queue_info.queueFamilyIndex = queue_infos.compute_queue_index;
+	compute_queue_info.queueCount = 1;
+	compute_queue_info.pQueuePriorities = &priority;
+
+	VkDeviceQueueCreateInfo transfer_queue_info = {};
+	transfer_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	transfer_queue_info.queueFamilyIndex = queue_infos.transfer_queue_index;
+	transfer_queue_info.queueCount = 1;
+	transfer_queue_info.pQueuePriorities = &priority;
+
+	queue_infos.infos[queue_infos.queue_count++] = presentation_queue_info;
+
+	if (queue_infos.graphics_queue_index != queue_infos.presentation_queue_index)
+		queue_infos.infos[queue_infos.queue_count++] = graphics_queue_info;
+
+	if (queue_infos.compute_queue_index != queue_infos.presentation_queue_index && queue_infos.compute_queue_index != queue_infos.graphics_queue_index)
+		queue_infos.infos[queue_infos.queue_count++] = compute_queue_info;
+
+	if (queue_infos.transfer_queue_index != queue_infos.presentation_queue_index && queue_infos.transfer_queue_index != queue_infos.graphics_queue_index && queue_infos.transfer_queue_index != queue_infos.compute_queue_index)
+		queue_infos.infos[queue_infos.queue_count++] = transfer_queue_info;
+}
+
+bool GfxDevice::create_logical_device()
+{
+	QueueInfos queue_infos;
+	find_queues(queue_infos);
+
+	if (queue_infos.queue_count == 0)
+		return false;
+
+	VkPhysicalDeviceFeatures features = {};
+
+	VkDeviceCreateInfo device_info = {};
+	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	device_info.pQueueCreateInfos = &queue_infos.infos[0];
+	device_info.queueCreateInfoCount = static_cast<uint32_t>(queue_infos.queue_count);
+	device_info.pEnabledFeatures = &features;
+	device_info.enabledExtensionCount = sizeof(kDeviceExtensions)/sizeof(const char*);
+	device_info.ppEnabledExtensionNames = &kDeviceExtensions[0];
+
+#if defined(TE_VULKAN_DEBUG)
+	device_info.enabledLayerCount = sizeof(kValidationLayers) / sizeof(const char*);
+	device_info.ppEnabledLayerNames = &kValidationLayers[0];
+#else
+	device_info.enabledLayerCount = 0;
+#endif
+
+	if (vkCreateDevice(m_physical_device, &device_info, nullptr, &m_device) != VK_SUCCESS)
+	{
+		std::cout << "Failed to create logical device!" << std::endl;
+		return true;
+	}
+
+	// Get presentation queue
+	vkGetDeviceQueue(m_device, queue_infos.presentation_queue_index, 0, &m_presentation_queue);
+
+	// Get graphics queue
+	if (queue_infos.graphics_queue_index == queue_infos.presentation_queue_index)
+		m_graphics_queue = m_presentation_queue;
+	else
+		vkGetDeviceQueue(m_device, queue_infos.graphics_queue_index, 0, &m_graphics_queue);
+
+	// Get compute queue
+	if (queue_infos.compute_queue_index == queue_infos.presentation_queue_index)
+		m_compute_queue = m_presentation_queue;
+	else if (queue_infos.compute_queue_index == queue_infos.graphics_queue_index)
+		m_compute_queue = m_graphics_queue;
+	else
+		vkGetDeviceQueue(m_device, queue_infos.compute_queue_index, 0, &m_compute_queue);
+
+	// Get transfer queue
+	if (queue_infos.transfer_queue_index == queue_infos.presentation_queue_index)
+		m_transfer_queue = m_presentation_queue;
+	else if (queue_infos.transfer_queue_index == queue_infos.graphics_queue_index)
+		m_transfer_queue = m_graphics_queue;
+	else if (queue_infos.transfer_queue_index == queue_infos.compute_queue_index)
+		m_transfer_queue = m_transfer_queue;
+	else
+		vkGetDeviceQueue(m_device, queue_infos.transfer_queue_index, 0, &m_transfer_queue);
+
+	return false;
 }
 
 bool GfxDevice::check_validation_layer_support()
@@ -402,6 +498,24 @@ bool GfxDevice::check_device_extension_support(VkPhysicalDevice device)
 	}
 
 	return unavailable_extensions == 0;
+}
+
+VkResult GfxDevice::create_debug_report_callback_ext(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback)
+{
+	auto func = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+
+	if (func != nullptr)
+		return func(instance, pCreateInfo, pAllocator, pCallback);
+	else
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+}
+
+void GfxDevice::destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator)
+{
+	auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+
+	if (func != nullptr)
+		func(instance, callback, pAllocator);
 }
 
 VertexBuffer* GfxDevice::create(const VertexBufferDesc& desc)
