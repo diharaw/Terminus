@@ -2,8 +2,6 @@
 #include <core/engine_core.hpp>
 #include <iostream>
 
-#define TE_VULKAN_DEBUG
-
 TE_BEGIN_TERMINUS_NAMESPACE
 
 const char* kDeviceTypes[] = {
@@ -29,20 +27,21 @@ const char* kValidationLayers[] =
 	"VK_LAYER_LUNARG_standard_validation"
 };
 
-namespace VkVendorID
-{
-	enum
-	{
-		AMD = 0x1002,
-		IMAGINATION = 0x1010,
-		NVIDIA = 0x10DE,
-		ARM = 0x13B5,
-		QUALCOMM = 0x5143,
-		INTEL = 0x8086,
-	};
-}
+const char* kDeviceExtensions[] = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
 
-const char* GetVendorName(uint32_t id)
+enum VkVendor
+{
+	VK_VENDOR_AMD = 0x1002,
+	VK_VENDOR_IMAGINATION = 0x1010,
+	VK_VENDOR_NVIDIA = 0x10DE,
+	VK_VENDOR_ARM = 0x13B5,
+	VK_VENDOR_QUALCOMM = 0x5143,
+	VK_VENDOR_INTEL = 0x8086,
+};
+
+const char* get_vendor_name(uint32_t id)
 {
 	switch (id)
 	{
@@ -63,6 +62,38 @@ const char* GetVendorName(uint32_t id)
 	}
 }
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags,
+	VkDebugReportObjectTypeEXT obj_type,
+	uint64_t obj,
+	size_t location,
+	int32_t code,
+	const char* layer_prefix,
+	const char* msg,
+	void* user_data)
+{
+	std::cerr << "Validation Layer : " << msg << std::endl;
+
+	return VK_FALSE;
+}
+
+VkResult create_debug_report_callback_ext(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback)
+{
+	auto func = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+
+	if (func != nullptr)
+		return func(instance, pCreateInfo, pAllocator, pCallback);
+	else
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+}
+
+void destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator)
+{
+	auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+
+	if (func != nullptr)
+		func(instance, callback, pAllocator);
+}
+
 GfxDevice::GfxDevice()
 {
 
@@ -79,6 +110,16 @@ bool GfxDevice::initialize()
 	if (!create_instance())
 		return false;
 
+#if defined(TE_VULKAN_DEBUG)
+	// Setup debug callback
+	if (!setup_debug_callback())
+		return false;
+#endif
+
+	// Create surface
+	if (!create_surface())
+		return false;
+
 	// Choose physical device
 	if (!choose_physical_device())
 		return false;
@@ -88,6 +129,7 @@ bool GfxDevice::initialize()
 
 void GfxDevice::shutdown()
 {
+	vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 	vkDestroyInstance(m_instance, nullptr);
 }
 
@@ -149,26 +191,42 @@ bool GfxDevice::choose_physical_device()
 
 	std::cout << "Number of Physical Devices found: " << device_count << std::endl;
 
-	uint32_t vendorId = 0;
-
 	for (uint32_t i = 0; i < device_count; i++)
 	{
 		VkPhysicalDevice& device = devices[i];
-		VkPhysicalDeviceProperties properties;
-		vkGetPhysicalDeviceProperties(device, &properties);
-
-		vendorId = properties.vendorID;
-
-		if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+		
+		if (is_device_suitable(device))
 		{
 			m_physical_device = device;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool GfxDevice::is_device_suitable(VkPhysicalDevice device)
+{
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties(device, &properties);
+
+	uint32_t vendorId = properties.vendorID;
+
+	if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+	{
+		bool extensions_supported = check_device_extension_support(device);
+		SwapChainSupportDetails details;
+		query_swap_chain_support(device, details);
+
+		if (details.format.size() > 0 && details.present_modes.size() > 0 && extensions_supported)
+		{
 			m_device_properties.vendor_id = properties.vendorID;
 			m_device_properties.name = properties.deviceName;
 			m_device_properties.type = kDeviceTypes[properties.deviceType];
 			m_device_properties.driver = properties.driverVersion;
 
 			std::cout << std::endl;
-			std::cout << "Vendor: " << GetVendorName(properties.vendorID) << std::endl;
+			std::cout << "Vendor: " << get_vendor_name(properties.vendorID) << std::endl;
 			std::cout << "Name: " << properties.deviceName << std::endl;
 			std::cout << "Type: " << kDeviceTypes[properties.deviceType] << std::endl;
 			std::cout << "Driver: " << properties.driverVersion << std::endl;
@@ -182,7 +240,7 @@ bool GfxDevice::choose_physical_device()
 
 bool GfxDevice::create_surface()
 {
-	return false;
+	return SDL_Vulkan_CreateSurface((SDL_Window*)global::application()->handle(), m_instance, &m_surface);
 }
 
 bool GfxDevice::create_logical_device()
@@ -201,9 +259,10 @@ bool GfxDevice::create_queues()
 	VkQueueFamilyProperties families[32];
 	vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &family_count, &families[0]);
 
-	uint32_t graphics_queue_index = 0;
-	uint32_t compute_queue_index = 0;
-	uint32_t transfer_queue_index = 0;
+	int32_t graphics_queue_index = -1;
+	int32_t compute_queue_index = -1;
+	int32_t transfer_queue_index = -1;
+	int32_t presentation_queue_index = -1;
 
 	for (uint32_t i = 0; i < family_count; i++)
 	{
@@ -214,9 +273,9 @@ bool GfxDevice::create_queues()
 		std::cout << "Supported Bits: " << "VK_QUEUE_GRAPHICS_BIT: " << ((families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) ? "1" : "0") << ", " << "VK_QUEUE_COMPUTE_BIT: " << ((families[i].queueFlags & VK_QUEUE_COMPUTE_BIT) ? "1" : "0") << ", " << "VK_QUEUE_TRANSFER_BIT: " << ((families[i].queueFlags & VK_QUEUE_TRANSFER_BIT) ? "1" : "0") << std::endl;
 		std::cout << "Number of Queues: " << families[i].queueCount << std::endl;
 
-		if (m_device_properties.vendor_id == VkVendorID::NVIDIA)
+		if (m_device_properties.vendor_id == VK_VENDOR_NVIDIA)
 		{
-			// Look for Transfer Queue
+			// Look for All-Round Queue
 			if ((bits & VK_QUEUE_GRAPHICS_BIT) && (bits & VK_QUEUE_COMPUTE_BIT) && (bits & VK_QUEUE_TRANSFER_BIT))
 			{
 				graphics_queue_index = i;
@@ -281,6 +340,68 @@ void GfxDevice::required_extensions(Vector<const char*>& extensions)
 
 	for (auto& ext : extensions)
 		std::cout << ext << std::endl;
+}
+
+bool GfxDevice::setup_debug_callback()
+{
+	VkDebugReportCallbackCreateInfoEXT create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+	create_info.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+	create_info.pfnCallback = debug_callback;
+
+	if (create_debug_report_callback_ext(m_instance, &create_info, nullptr, &m_debug_callback) != VK_SUCCESS)
+	{
+		std::cout << "Failed to set up debug callback!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+void GfxDevice::query_swap_chain_support(VkPhysicalDevice device, SwapChainSupportDetails& details)
+{
+	// Get surface capabilities
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
+
+	uint32_t present_mode_count;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &present_mode_count, nullptr);
+
+	if (present_mode_count != 0)
+	{
+		details.present_modes.resize(present_mode_count);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &present_mode_count, &details.present_modes[0]);
+	}
+
+	uint32_t format_count;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &format_count, nullptr);
+
+	if (format_count != 0)
+	{
+		details.format.resize(format_count);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &format_count, &details.format[0]);
+	}
+}
+
+bool GfxDevice::check_device_extension_support(VkPhysicalDevice device)
+{
+	uint32_t extension_count;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
+
+	Vector<VkExtensionProperties> available_extensions(extension_count);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, &available_extensions[0]);
+
+	int unavailable_extensions = 0;
+
+	for (auto& str : kDeviceExtensions)
+	{
+		for (const auto& extension : available_extensions)
+		{
+			if (strcmp(str, extension.extensionName) != 0)
+				unavailable_extensions++;
+		}
+	}
+
+	return unavailable_extensions == 0;
 }
 
 VertexBuffer* GfxDevice::create(const VertexBufferDesc& desc)
