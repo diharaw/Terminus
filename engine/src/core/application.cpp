@@ -302,9 +302,9 @@ void Application::shutdown_engine()
 
 	// Shutdown graphics device
 	global::gfx_device().shutdown();
-
+	// Shutdown engine core
 	global::shutdown_engine_core();
-
+	// Shutdown SDL
 	SDL_Quit();
 }
 

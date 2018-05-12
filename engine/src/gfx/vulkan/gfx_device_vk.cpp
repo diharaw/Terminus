@@ -4,7 +4,8 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-const char* kDeviceTypes[] = {
+const char* kDeviceTypes[] = 
+{
 	"VK_PHYSICAL_DEVICE_TYPE_OTHER",
 	"VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU",
 	"VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU",
@@ -12,7 +13,8 @@ const char* kDeviceTypes[] = {
 	"VK_PHYSICAL_DEVICE_TYPE_CPU"
 };
 
-const char* kVendorNames[] = {
+const char* kVendorNames[] = 
+{
 	"Unknown",
 	"AMD",
 	"IMAGINATION",
@@ -27,7 +29,8 @@ const char* kValidationLayers[] =
 	"VK_LAYER_LUNARG_standard_validation"
 };
 
-const char* kDeviceExtensions[] = {
+const char* kDeviceExtensions[] = 
+{
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 

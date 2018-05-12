@@ -53,19 +53,19 @@ public:
 	void destroy(VertexBuffer* buffer);
 
 private:
-	bool create_instance();
-	bool setup_debug_callback();
-	bool choose_physical_device();
-	bool check_device_extension_support(VkPhysicalDevice device);
-	bool is_device_suitable(VkPhysicalDevice device);
-	void find_queues(QueueInfos& queue_infos);
-	bool create_surface();
-	void query_swap_chain_support(VkPhysicalDevice device, SwapChainSupportDetails& details);
-	bool create_logical_device();
-	bool check_validation_layer_support();
-	void required_extensions(Vector<const char*>& extensions);
+	bool	 create_instance();
+	bool	 setup_debug_callback();
+	bool	 choose_physical_device();
+	bool	 check_device_extension_support(VkPhysicalDevice device);
+	bool	 is_device_suitable(VkPhysicalDevice device);
+	void	 find_queues(QueueInfos& queue_infos);
+	bool	 create_surface();
+	void	 query_swap_chain_support(VkPhysicalDevice device, SwapChainSupportDetails& details);
+	bool	 create_logical_device();
+	bool	 check_validation_layer_support();
+	void	 required_extensions(Vector<const char*>& extensions);
 	VkResult create_debug_report_callback_ext(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback);
-	void destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator);
+	void	 destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator);
 
 private:
 	DeviceProperties m_device_properties;
