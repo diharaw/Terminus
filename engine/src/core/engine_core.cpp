@@ -5,10 +5,16 @@ TE_BEGIN_TERMINUS_NAMESPACE
 namespace global
 {
 	EngineCore* g_engine_core;
+	HeapAllocator g_heap_allocator;
+
+	HeapAllocator& default_allocator()
+	{
+		return g_heap_allocator;
+	}
 
 	void initialize_engine_core(Application* app)
 	{
-		g_engine_core = new EngineCore();
+		g_engine_core = TE_HEAP_NEW EngineCore();
 		g_engine_core->m_application = app;
 	}
 
@@ -25,7 +31,7 @@ namespace global
 
 	void shutdown_engine_core()
 	{
-		delete g_engine_core;
+		TE_HEAP_DELETE(g_engine_core);
 	}
 }
 

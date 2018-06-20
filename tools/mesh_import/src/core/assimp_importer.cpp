@@ -10,7 +10,8 @@
 
 namespace assimp_importer
 {
-	static const aiTextureType kTextureTypes[] = {
+	static const aiTextureType kTextureTypes[] = 
+    {
 		aiTextureType_DIFFUSE,
 		aiTextureType_SPECULAR,
 		aiTextureType_AMBIENT,
@@ -24,7 +25,8 @@ namespace assimp_importer
 		aiTextureType_REFLECTION
 	};
 
-	static const char* kTextureTypeStrings[] = {
+	static const char* kTextureTypeStrings[] = 
+    {
 		"aiTextureType_DIFFUSE",
 		"aiTextureType_SPECULAR",
 		"aiTextureType_AMBIENT",
@@ -38,18 +40,16 @@ namespace assimp_importer
 		"aiTextureType_REFLECTION"
 	};
 
-    std::string get_texture_path(aiMaterial* a_Material, aiTextureType a_TextureType)
+    std::string get_texture_path(aiMaterial* material, aiTextureType texture_type)
     {
         aiString path;
-        aiReturn result = a_Material->GetTexture(a_TextureType, 0, &path);
+        aiReturn result = material->GetTexture(texture_type, 0, &path);
         
         if (result == aiReturn_FAILURE)
-        {
             return "";
-        }
         else
         {
-            String cppStr = std::string(path.C_Str());
+            std::string cppStr = std::string(path.C_Str());
             
             if (cppStr == "")
                 return "";
@@ -58,24 +58,24 @@ namespace assimp_importer
         }
     }
 
-	void DumpTextures(aiMaterial* mat)
+	void dump_textures(aiMaterial* material)
 	{
 		std::string texture = "";
 
 		for (uint32_t i = 0; i < 11; i++)
 		{
-			texture = get_texture_path(mat, kTextureTypes[i]);
+			texture = get_texture_path(material, kTextureTypes[i]);
 
 			if (texture != "")
 				std::cout << kTextureTypeStrings[i] << " : " << texture << std::endl;
 		}
 	}
     
-    bool does_material_exist(std::vector<unsigned int> &_Materials, unsigned int &_CurrentMaterial)
+    bool does_material_exist(std::vector<unsigned int> &materials, unsigned int &current_material)
     {
-        for (auto it : _Materials)
+        for (auto it : materials)
         {
-            if (it == _CurrentMaterial)
+            if (it == current_material)
                 return true;
         }
         
@@ -85,9 +85,9 @@ namespace assimp_importer
     AssimpImportData* import_mesh(const char* file)
     {
         {
-            String filename = String(file);
-            String meshPath = filesystem::get_file_path(filename);
-            
+            std::string filename = std::string(file);
+            std::string meshPath = filesystem::get_file_path(filename);
+
             AssimpImportData* load_data = new AssimpImportData();
             
             load_data->mesh_path = meshPath;
@@ -106,7 +106,7 @@ namespace assimp_importer
             // Temp
             load_data->skeletal = false;
             
-            aiMaterial* TempMaterial;
+            aiMaterial* temp_material;
             uint8 materialIndex = 0;
             
             std::vector<Assimp_Material> temp_materials;
@@ -129,14 +129,14 @@ namespace assimp_importer
                 {
 					Assimp_Material temp;
 
-                    TempMaterial = Scene->mMaterials[Scene->mMeshes[i]->mMaterialIndex];
+                    temp_material = Scene->mMaterials[Scene->mMeshes[i]->mMaterialIndex];
                     temp.mesh_name = std::string(Scene->mMeshes[i]->mName.C_Str());
 
 					std::cout << "**** Dumping Textures for Material: " << temp.mesh_name << "\n" << std::endl;
-					DumpTextures(TempMaterial);
+					dump_textures(temp_material);
 					std::cout << "\n************************************" << std::endl;
 
-                    std::string albedo = get_texture_path(TempMaterial, aiTextureType_DIFFUSE);
+                    std::string albedo = get_texture_path(temp_material, aiTextureType_DIFFUSE);
                     
 					temp.albedo[0] = '\0';
 					if (albedo != "")
@@ -150,7 +150,7 @@ namespace assimp_importer
 						}
 					}
 
-					std::string normal = get_texture_path(TempMaterial, aiTextureType_HEIGHT);
+					std::string normal = get_texture_path(temp_material, aiTextureType_HEIGHT);
 
 					temp.normal[0] = '\0';
 					if (normal != "")
@@ -164,7 +164,7 @@ namespace assimp_importer
 						}
 					}
 	
-					std::string metalness = get_texture_path(TempMaterial, aiTextureType_AMBIENT);
+					std::string metalness = get_texture_path(temp_material, aiTextureType_AMBIENT);
                     std::string mtl_str = std::string(metalness);
                     
 					temp.metalness[0] = '\0';
@@ -182,7 +182,7 @@ namespace assimp_importer
 						}
                     }
 
-					std::string roughness = get_texture_path(TempMaterial, aiTextureType_SHININESS);
+					std::string roughness = get_texture_path(temp_material, aiTextureType_SHININESS);
                     std::string rgh_str = std::string(roughness);
                     
 					temp.roughness[0] = '\0';
@@ -214,14 +214,10 @@ namespace assimp_importer
 						materialIndex++;
 					}
 					else
-					{
 						load_data->meshes[i].material_index = 0;
-					}
                 }
                 else // if already exists, find the internal ID it maps to.
-                {
                     load_data->meshes[i].material_index = MatIDMapping[Scene->mMeshes[i]->mMaterialIndex];
-                }
             }
 
             load_data->header.material_count = processedMatId.size();

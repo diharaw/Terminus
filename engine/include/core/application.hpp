@@ -50,6 +50,10 @@ public:
     bool           shown();
 	void		   exit();
 	bool		   is_running();
+	uint32_t	   width();
+	uint32_t	   height();
+	uint32_t	   drawable_width();
+	uint32_t	   drawable_height();
 };
 
 TE_END_TERMINUS_NAMESPACE

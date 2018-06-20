@@ -25,8 +25,8 @@ void custom_delete(OBJECT* p, ALLOCATOR* a, int line, const char* file)
 
 #define TE_NEW(ALLOCATOR) new(ALLOCATOR, __LINE__, __FILE__)
 #define TE_DELETE(OBJECT, ALLOCATOR) custom_delete(OBJECT, ALLOCATOR, __LINE__, __FILE__)
-#define TE_HEAP_NEW new(te::global::default_allocator(), __LINE__, __FILE__)
-#define TE_HEAP_DELETE(OBJECT) custom_delete(OBJECT, te::global::default_allocator(), __LINE__, __FILE__)
+#define TE_HEAP_NEW new(&te::global::default_allocator(), __LINE__, __FILE__)
+#define TE_HEAP_DELETE(OBJECT) custom_delete(OBJECT, &te::global::default_allocator(), __LINE__, __FILE__)
 #define TE_HEAP_ALLOC(SIZE) te::global::default_allocator().allocate(SIZE, 8)
 #define TE_HEAP_DEALLOC(OBJECT) te::global::default_allocator().deallocate(OBJECT)
 

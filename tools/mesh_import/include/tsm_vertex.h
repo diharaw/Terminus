@@ -4,18 +4,18 @@
 
 struct TSM_Vertex
 {
-	Vector3 position;
-	Vector2 tex_coord;
-	Vector3 normal;
-	Vector3 tangent;
+	glm::vec3 position;
+	glm::vec2 tex_coord;
+	glm::vec3 normal;
+	glm::vec3 tangent;
 };
 
 struct TSM_SkeletalVertex
 {
-	Vector3  position;
-	Vector2  tex_coord;
-	Vector3  normal;
-	Vector3  tangent;
-	iVector4 bone_indices;
-	Vector4  bone_weights;
+	glm::vec3  position;
+	glm::vec2  tex_coord;
+	glm::vec3  normal;
+	glm::vec3  tangent;
+	glm::ivec4 bone_indices;
+	glm::vec4  bone_weights;
 };

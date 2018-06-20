@@ -10,6 +10,7 @@ class Array
 {
 public:
     Array() : m_size(0) {}
+	Array(size_t size) : m_size(size) {}
     ~Array() {}
 
 	void clear()
@@ -22,9 +23,19 @@ public:
 		m_size = size;
 	}
 
-	size_t size()
+	size_t capacity() const
+	{
+		return N;
+	}
+
+	size_t size() const
 	{
 		return m_size;
+	}
+
+	T* data() const
+	{
+		return &m_elements[0];
 	}
 
 	void push_back(T obj)
@@ -45,7 +56,7 @@ public:
 	class Iterator
 	{
 		T*	   data;
-		size_t	   position;
+		size_t position;
 		size_t num_elements;
 	public:
 		Iterator(T* _data, size_t _position, size_t _num_elements) : data(_data), position(_position), num_elements(_num_elements)

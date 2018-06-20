@@ -28,8 +28,6 @@ public:
     // Reserves space for 'size' number of elements.
     void reserve(const size_t& size)
     {
-        std::cout << "Reserving..." << std::endl;
-        
         size_t old_capacity = m_capacity;
         m_capacity = size;
 		T* new_data = (T*)TE_HEAP_ALLOC(m_capacity * sizeof(T));
@@ -62,15 +60,20 @@ public:
 		m_elements[m_size++] = obj;
     }
     
-    size_t capacity()
+    size_t capacity() const
     {
         return m_capacity;
     }
     
-    size_t size()
+    size_t size() const 
     {
         return m_size;
     }
+
+	T* data() const
+	{
+		return &m_elements[0];
+	}
     
     T& operator [](const uint32_t& idx)
     {
@@ -149,7 +152,7 @@ public:
 
 	ConstIterator begin() const
 	{
-		{ m_elements, 0, m_size };
+		return { m_elements, 0, m_size };
 	}
 
 	ConstIterator end() const

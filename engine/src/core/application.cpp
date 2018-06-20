@@ -374,4 +374,24 @@ bool Application::is_running()
 	return m_running;
 }
 
+uint32_t Application::width()
+{
+	return m_width;
+}
+
+uint32_t Application::height()
+{
+	return m_height;
+}
+
+uint32_t Application::drawable_width()
+{
+	return m_drawable_width;
+}
+
+uint32_t Application::drawable_height()
+{
+	return m_drawable_height;
+}
+
 TE_END_TERMINUS_NAMESPACE

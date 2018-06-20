@@ -19,7 +19,17 @@ struct DeviceLimits
 
 };
 
-struct VertexBufferDesc
+struct TextureDesc
+{
+
+};
+
+struct BufferDesc
+{
+
+};
+
+struct FramebufferDesc
 {
 
 };
