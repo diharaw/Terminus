@@ -1,5 +1,8 @@
+#define VMA_IMPLEMENTATION
+#include <gfx/vulkan/vk_mem_alloc.h>
 #include <gfx/vulkan/gfx_device_vk.hpp>
 #include <gfx/vulkan/gfx_types_vk.hpp>
+#include <gfx/vulkan/gfx_initializers_vk.hpp>
 #include <core/engine_core.hpp>
 #include <iostream>
 
@@ -66,6 +69,100 @@ const char* get_vendor_name(uint32_t id)
 	}
 }
 
+//GFX_TEXTURE_1D = 0,
+//GFX_TEXTURE_2D = 1,
+//GFX_TEXTURE_3D = 2,
+//GFX_TEXTURE_CUBE = 3,
+//GFX_TEXTURE_CUBE_POSITIVE_X = GFX_TEXTURE_CUBE + 1,
+//GFX_TEXTURE_CUBE_NEGATIVE_X = GFX_TEXTURE_CUBE + 2,
+//GFX_TEXTURE_CUBE_POSITIVE_Y = GFX_TEXTURE_CUBE + 3,
+//GFX_TEXTURE_CUBE_NEGATIVE_Y = GFX_TEXTURE_CUBE + 4,
+//GFX_TEXTURE_CUBE_POSITIVE_Z = GFX_TEXTURE_CUBE + 5,
+//GFX_TEXTURE_CUBE_NEGATIVE_Z = GFX_TEXTURE_CUBE + 6
+
+const VkImageType kImageTypeTable[] =
+{
+	VK_IMAGE_TYPE_1D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_3D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_2D,
+	VK_IMAGE_TYPE_2D,
+};
+
+const VkFormat kFormatTable[] = 
+{
+	VK_FORMAT_R32G32B32_SFLOAT,
+	VK_FORMAT_R32G32B32A32_SFLOAT,
+	VK_FORMAT_R32G32B32_UINT,
+	VK_FORMAT_R32G32B32A32_UINT,
+	VK_FORMAT_R32G32B32_SINT,
+	VK_FORMAT_R32G32B32A32_SINT,
+	VK_FORMAT_R16G16_SFLOAT,
+	VK_FORMAT_R16G16B16_SFLOAT,
+	VK_FORMAT_R16G16B16A16_SFLOAT,
+	VK_FORMAT_R16G16B16_UINT,
+	VK_FORMAT_R16G16B16A16_UINT,
+	VK_FORMAT_R16G16B16_SINT,
+	VK_FORMAT_R16G16B16A16_SINT,
+	VK_FORMAT_R8G8B8_UNORM,
+	VK_FORMAT_R8G8B8A8_UNORM,
+	VK_FORMAT_R8G8B8_SRGB,
+	VK_FORMAT_R8G8B8A8_SRGB,
+	VK_FORMAT_R8G8B8_SNORM,
+	VK_FORMAT_R8G8B8A8_SNORM,
+	VK_FORMAT_R8G8B8_SINT,
+	VK_FORMAT_R8G8B8A8_SINT,
+	VK_FORMAT_R8G8B8_UINT,
+	VK_FORMAT_R8G8B8A8_UINT,
+	VK_FORMAT_R8_UNORM,
+	VK_FORMAT_R8_SNORM,
+	VK_FORMAT_D32_SFLOAT_S8_UINT,
+	VK_FORMAT_D24_UNORM_S8_UINT,
+	VK_FORMAT_D16_UNORM,
+	VK_FORMAT_R32G32_SFLOAT,
+	VK_FORMAT_R16_SFLOAT
+};
+
+const size_t kPixelSizes[] =
+{
+	// @TODO: Add compressed formats
+	sizeof(float) * 3,
+	sizeof(float) * 4,
+	sizeof(uint32_t) * 3,
+	sizeof(uint32_t) * 4,
+	sizeof(int32_t) * 3,
+	sizeof(int32_t) * 4,
+	sizeof(uint16_t) * 2,
+	sizeof(uint16_t) * 3,
+	sizeof(uint16_t) * 4,
+	sizeof(uint16_t) * 3,
+	sizeof(uint16_t) * 4,
+	sizeof(uint16_t) * 3,
+	sizeof(uint16_t) * 4,
+	sizeof(uint8_t) * 3,
+	sizeof(uint8_t) * 4,
+	sizeof(uint8_t) * 3,
+	sizeof(uint8_t) * 4,
+	sizeof(uint8_t) * 3,
+	sizeof(uint8_t) * 4,
+	sizeof(uint8_t) * 3,
+	sizeof(uint8_t) * 4,
+	sizeof(uint8_t) * 3,
+	sizeof(uint8_t) * 4,
+	sizeof(uint8_t),
+	sizeof(uint8_t),
+	sizeof(float),
+	sizeof(float),
+	sizeof(uint16_t),
+	sizeof(float) * 2,
+	sizeof(uint16_t)
+};
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags,
 	VkDebugReportObjectTypeEXT obj_type,
 	uint64_t obj,
@@ -118,11 +215,21 @@ bool GfxDevice::initialize()
 	if (!create_swap_chain())
 		return false;
 
+	VmaAllocatorCreateInfo allocator_info = {};
+	allocator_info.physicalDevice = m_physical_device;
+	allocator_info.device = m_device;
+
+	vmaCreateAllocator(&allocator_info, &m_allocator);
+
 	return true;
 }
 
 void GfxDevice::shutdown()
 {
+	vkDeviceWaitIdle(m_device);
+
+	vmaDestroyAllocator(m_allocator);
+
 	destroy_debug_report_callback_ext(m_instance, m_debug_callback, nullptr);
 
 	shutdown_swap_chain();
@@ -585,37 +692,29 @@ bool GfxDevice::create_swap_chain()
 
 	VkImage images[32];
 
-	vkGetSwapchainImagesKHR(m_device, m_swap_chain, &swap_image_count, &images[32]);
+	if (vkGetSwapchainImagesKHR(m_device, m_swap_chain, &swap_image_count, &images[0]) != VK_SUCCESS)
+	{
+		std::cout << "Failed to retrieve Swap Chain images!" << std::endl;
+		return false;
+	}
 
 	for (int i = 0; i < swap_image_count; i++)
 	{
+		m_swap_chain_textures[i] = create_swap_chain_texture(m_swap_chain_extent.width, m_swap_chain_extent.height, images[i], m_swap_chain_image_format, VK_SAMPLE_COUNT_1_BIT);
+
 		TextureVK* texture = static_cast<TextureVK*>(m_swap_chain_textures[i]);
-		texture->image = images[i];
 
-		// Create image view.
-		VkImageViewCreateInfo create_info = {};
-		create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		create_info.image = texture->image;
-		create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		create_info.format = m_swap_chain_image_format;
-		create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		FramebufferDesc desc;
 
-		create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		create_info.subresourceRange.baseMipLevel = 0;
-		create_info.subresourceRange.levelCount = 1;
-		create_info.subresourceRange.baseArrayLayer = 0;
-		create_info.subresourceRange.layerCount = 1;
-
-		if (vkCreateImageView(m_device, &create_info, nullptr, &texture->image_view) != VK_SUCCESS)
+		AttachmentDesc color_attachments[] = 
 		{
-			std::cout << "Failed to create image view!" << std::endl;
-			return false;
-		}
+			{ 0, 1, 0, 1, m_swap_chain_textures[i] }
+		};
 
+		desc.num_color_attachments = 1;
+		desc.color_attachments = color_attachments;
 
+		m_swap_chain_framebuffers[i] = create_framebuffer(desc);
 	}
 
 	return true;
@@ -623,6 +722,12 @@ bool GfxDevice::create_swap_chain()
 
 void GfxDevice::shutdown_swap_chain()
 {
+	for (uint32_t i = 0; i < m_swap_chain_textures.size(); i++)
+		TE_HEAP_DEALLOC(m_swap_chain_textures[i]);
+
+	for (uint32_t i = 0; i < m_swap_chain_framebuffers.size(); i++)
+		destroy_framebuffer(m_swap_chain_framebuffers[i]);
+
 	vkDestroySwapchainKHR(m_device, m_swap_chain, nullptr);
 }
 
@@ -802,19 +907,257 @@ void GfxDevice::destroy_debug_report_callback_ext(VkInstance instance, VkDebugRe
 		func(instance, callback, pAllocator);
 }
 
+VkRenderPass GfxDevice::create_render_pass(const FramebufferDesc& desc)
+{
+	VkRenderPass render_pass;
+
+	VkAttachmentDescription attachments[10] = {};
+	VkAttachmentReference color_references[10] = {};
+	VkAttachmentReference depth_reference = {};
+
+	uint32_t attachment_count = desc.num_color_attachments;
+
+	for (uint32_t i = 0; i < desc.num_color_attachments; i++)
+	{
+		TextureVK* texture = static_cast<TextureVK*>(desc.color_attachments[i].texture);
+
+		attachments[i].format = texture->vk_format;
+		attachments[i].samples = texture->sample_count;
+		attachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[i].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		attachments[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		color_references[i].attachment = i;
+		color_references[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	}
+
+	if (desc.depth_attachment.texture)
+	{
+		attachment_count++;
+
+		TextureVK* texture = static_cast<TextureVK*>(desc.depth_attachment.texture);
+		uint32_t depth_idx = desc.num_color_attachments;
+
+		attachments[depth_idx].format = texture->vk_format;
+		attachments[depth_idx].samples = texture->sample_count;
+		attachments[depth_idx].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[depth_idx].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[depth_idx].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		attachments[depth_idx].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		depth_reference.attachment = depth_idx;
+		depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	}
+
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = desc.num_color_attachments;
+	subpass.pColorAttachments = color_references;
+
+	if (desc.depth_attachment.texture)
+		subpass.pDepthStencilAttachment = &depth_reference;
+	subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
+
+	VkRenderPassCreateInfo render_pass_info = {};
+	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	render_pass_info.attachmentCount = attachment_count;
+	render_pass_info.pAttachments = attachments;
+	render_pass_info.subpassCount = 1;
+	render_pass_info.pSubpasses = &subpass;
+
+	if (vkCreateRenderPass(m_device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
+	{
+		std::cout << "Failed to create image view!" << std::endl;
+		return nullptr;
+	}
+
+	return render_pass;
+}
+
+bool GfxDevice::allocate_buffer(VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info)
+{
+	VmaAllocationCreateInfo alloc_create_info = {};
+	alloc_create_info.usage = vma_usage;
+	alloc_create_info.flags = vma_flags;
+
+	if (vmaCreateBuffer(m_allocator, &info, &alloc_create_info, &buffer, &vma_allocation, &alloc_info) != VK_SUCCESS)
+	{
+		buffer = VK_NULL_HANDLE;
+		vma_allocation = VK_NULL_HANDLE;
+		return false;
+	}
+
+	return true;
+}
+
+bool GfxDevice::allocate_image(VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info)
+{
+	VmaAllocationCreateInfo alloc_create_info = {};
+	alloc_create_info.usage = vma_usage;
+	alloc_create_info.flags = vma_flags;
+
+	if (vmaCreateImage(m_allocator, &info, &alloc_create_info, &image, &vma_allocation, &alloc_info) != VK_SUCCESS)
+	{
+		image = VK_NULL_HANDLE;
+		vma_allocation = VK_NULL_HANDLE;
+		return false;
+	}
+
+	return true;
+}
+
+Texture* GfxDevice::create_swap_chain_texture(uint32_t w, uint32_t h, VkImage image, VkFormat format, VkSampleCountFlagBits sample_count)
+{
+	TextureVK* texture = TE_HEAP_NEW TextureVK();
+
+	texture->width = w;
+	texture->height = h;
+	texture->depth = 1;
+	texture->image = image;
+	texture->sample_count = sample_count;
+	texture->vk_format = format;
+	texture->vk_type = VK_IMAGE_TYPE_2D;
+	texture->type = GFX_TEXTURE_2D;
+
+	return texture;
+}
+
+void GfxDevice::calc_image_size_and_extents(Texture* texture, uint32_t mip_level, uint32_t& w, uint32_t& h, uint32_t& d, size_t& size)
+{
+	int width = texture->width;
+	int height = texture->height;
+	int depth = texture->depth;
+
+	for (int i = 0; i < mip_level; i++)
+	{
+		width = std::max(1, width / 2);
+		height = std::max(1, height / 2);
+		depth = std::max(1, depth / 2);
+	}
+
+	w = width;
+	h = height;
+	d = depth;
+
+	size_t pixel_size = kPixelSizes[texture->format];
+	size - w * h * d * pixel_size;
+}
+
 Texture* GfxDevice::create_texture(const TextureDesc& desc)
 {
+	TextureVK* texture = TE_HEAP_NEW TextureVK();
 
+	VkImageCreateInfo image_info = {};
+	image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	image_info.imageType = kImageTypeTable[desc.type];
+	image_info.extent.width = desc.width;
+	image_info.extent.height = desc.height;
+	image_info.extent.depth = desc.depth;
+	image_info.mipLevels = desc.mip_levels;
+	image_info.arrayLayers = desc.array_layers;
+	image_info.format = kFormatTable[desc.format];
+	image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_READABLE, desc.usage))
+		image_info.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+
+	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_WRITABLE, desc.usage))
+		image_info.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+
+	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_DRAWABLE, desc.usage))
+	{
+		if (desc.format == 25 || desc.format == 26 || desc.format == 27)
+		{
+			image_info.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			texture->aspect_flags = VK_IMAGE_ASPECT_DEPTH_BIT;
+		}
+		else
+		{
+			image_info.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			texture->aspect_flags = VK_IMAGE_ASPECT_COLOR_BIT;
+		}
+	}
+
+	image_info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	image_info.samples = (VkSampleCountFlagBits)desc.samples;
+	image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	texture->width = desc.width;
+	texture->height = desc.height;
+	texture->depth = desc.depth;
+	texture->type = desc.type;
+	texture->format = desc.format;
+	texture->sample_count = (VkSampleCountFlagBits)desc.samples;
+
+	if (!allocate_image(image_info, VMA_MEMORY_USAGE_GPU_ONLY, 0, texture->image, texture->allocation, texture->alloc_info))
+	{
+		TE_HEAP_DELETE(texture);
+		return nullptr;
+	}
+
+	return texture;
 }
 
 void GfxDevice::destroy_texture(Texture* texture)
 {
+	if (texture)
+	{
+		TextureVK* texture_vk = static_cast<TextureVK*>(texture);
 
+		if (texture_vk->image != VK_NULL_HANDLE && texture_vk->allocation != VK_NULL_HANDLE)
+			vmaDestroyImage(m_allocator, texture_vk->image, texture_vk->allocation);
+
+		TE_HEAP_DELETE(texture_vk);
+	}
+}
+
+void GfxDevice::upload_texture_data(Texture* texture, uint32_t mip_level, uint32_t array_layer, void* data)
+{
+	uint32_t w, h, d;
+	size_t size;
+
+	calc_image_size_and_extents(texture, mip_level, w, d, h, size);
+
+	VkBuffer staging_buffer = VK_NULL_HANDLE;
+	VmaAllocation staging_buffer_alloc = VK_NULL_HANDLE;
+	VmaAllocationInfo staging_buffer_alloc_info;
+
+	VkBufferCreateInfo buffer_info = {};
+	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_info.size = 0;
+	buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	// Create CPU Staging buffer
+	allocate_buffer(buffer_info, VMA_MEMORY_USAGE_CPU_ONLY, 0, staging_buffer, staging_buffer_alloc, staging_buffer_alloc_info);
+
+	void* ptr = nullptr;
+	vkMapMemory(m_device, staging_buffer_alloc_info.deviceMemory, 0, size, 0, &ptr);
+	memcpy(ptr, data, size);
+	vkUnmapMemory(m_device, staging_buffer_alloc_info.deviceMemory);
+
+	TextureVK* texture_vk = static_cast<TextureVK*>(texture);
+
+	VkBufferImageCopy buffer_copy_region = {};
+	buffer_copy_region.imageSubresource.aspectMask = texture_vk->aspect_flags;
+	buffer_copy_region.imageSubresource.mipLevel = mip_level;
+	buffer_copy_region.imageSubresource.baseArrayLayer = array_layer;
+	buffer_copy_region.imageSubresource.layerCount = 1;
+	buffer_copy_region.imageExtent.width = w;
+	buffer_copy_region.imageExtent.height = h;
+	buffer_copy_region.imageExtent.depth = d;
+	buffer_copy_region.bufferOffset = 0;
 }
 
 Buffer* GfxDevice::create_buffer(const BufferDesc& desc)
 {
-
+	return nullptr;
 }
 
 void GfxDevice::destroy_buffer(Buffer* buffer)
@@ -822,14 +1165,158 @@ void GfxDevice::destroy_buffer(Buffer* buffer)
 
 }
 
+// @TODO: Handle stencil targets
 Framebuffer* GfxDevice::create_framebuffer(const FramebufferDesc& desc)
 {
+	FramebufferVK* framebuffer = TE_HEAP_NEW FramebufferVK();
 
+	// Temporary image view array for Framebuffer creation
+	VkImageView image_views[10];
+	uint32_t attachment_count = desc.num_color_attachments;
+
+	for (uint32_t i = 0; i < desc.num_color_attachments; i++)
+	{
+		VkImageViewCreateInfo info = vk::image_view_create_info();
+
+		TextureVK* texture = static_cast<TextureVK*>(desc.color_attachments[i].texture);
+		info.image = texture->image;
+		info.format = texture->vk_format;
+		
+		// Subresource info
+		info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		info.subresourceRange.baseMipLevel = desc.color_attachments[i].base_mip_level;
+		info.subresourceRange.levelCount = desc.color_attachments[i].layer_count;
+		info.subresourceRange.baseArrayLayer = desc.color_attachments[i].base_layer;
+		info.subresourceRange.layerCount = desc.color_attachments[i].layer_count;
+
+		// Find image view type
+		if (texture->type == GFX_TEXTURE_1D && desc.color_attachments[i].layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_1D;
+		else if (texture->type == GFX_TEXTURE_1D && desc.color_attachments[i].layer_count > 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+		else if (texture->type == GFX_TEXTURE_2D && desc.color_attachments[i].layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		else if (texture->type == GFX_TEXTURE_2D && desc.color_attachments[i].layer_count > 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+		else if (texture->type == GFX_TEXTURE_3D && desc.color_attachments[i].layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_3D;
+		else if (texture->type == GFX_TEXTURE_CUBE && desc.color_attachments[i].layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
+		else if (texture->type == GFX_TEXTURE_CUBE && desc.color_attachments[i].layer_count > 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+
+		// Add flags
+		if (texture->type == GFX_TEXTURE_CUBE)
+			info.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+		else if (texture->type == GFX_TEXTURE_2D && desc.color_attachments[i].layer_count > 1)
+			info.flags = VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
+
+		if (vkCreateImageView(m_device, &info, nullptr, &framebuffer->color_image_views[i]) != VK_SUCCESS)
+		{
+			std::cout << "Failed to create image view!" << std::endl;
+			TE_HEAP_DELETE(framebuffer);
+			return nullptr;
+		}
+
+		image_views[i] = framebuffer->color_image_views[i];
+	}
+
+	if (desc.depth_attachment.texture)
+	{
+		attachment_count++;
+
+		VkImageViewCreateInfo info = vk::image_view_create_info();
+
+		TextureVK* texture = static_cast<TextureVK*>(desc.depth_attachment.texture);
+		info.image = texture->image;
+		info.format = texture->vk_format;
+
+		// Subresource info
+		info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		info.subresourceRange.baseMipLevel = desc.depth_attachment.base_mip_level;
+		info.subresourceRange.levelCount = desc.depth_attachment.layer_count;
+		info.subresourceRange.baseArrayLayer = desc.depth_attachment.base_layer;
+		info.subresourceRange.layerCount = desc.depth_attachment.layer_count;
+
+		// Find image view type
+		if (texture->type == GFX_TEXTURE_1D && desc.depth_attachment.layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_1D;
+		else if (texture->type == GFX_TEXTURE_1D && desc.depth_attachment.layer_count > 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+		else if (texture->type == GFX_TEXTURE_2D && desc.depth_attachment.layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		else if (texture->type == GFX_TEXTURE_2D && desc.depth_attachment.layer_count > 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+		else if (texture->type == GFX_TEXTURE_3D && desc.depth_attachment.layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_3D;
+		else if (texture->type == GFX_TEXTURE_CUBE && desc.depth_attachment.layer_count == 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
+		else if (texture->type == GFX_TEXTURE_CUBE && desc.depth_attachment.layer_count > 1)
+			info.viewType = VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+
+		// Add flags
+		if (texture->type == GFX_TEXTURE_CUBE)
+			info.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+		else if (texture->type == VK_IMAGE_VIEW_TYPE_2D_ARRAY)
+			info.flags = VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
+
+		if (vkCreateImageView(m_device, &info, nullptr, &framebuffer->depth_image_view) != VK_SUCCESS)
+		{
+			std::cout << "Failed to create image view!" << std::endl;
+			TE_HEAP_DELETE(framebuffer);
+			return nullptr;
+		}
+
+		image_views[attachment_count - 1] = framebuffer->depth_image_view;
+	}
+
+	VkFramebufferCreateInfo framebuffer_info = {};
+
+	TextureVK* texture = static_cast<TextureVK*>(desc.color_attachments[0].texture);
+
+	framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+	VkRenderPass render_pass = create_render_pass(desc);
+
+	framebuffer_info.renderPass = render_pass;
+	framebuffer_info.attachmentCount = attachment_count;
+	framebuffer_info.pAttachments = image_views;
+	framebuffer_info.width = texture->width;
+	framebuffer_info.height = texture->height;
+	framebuffer_info.layers = desc.color_attachments[0].layer_count; // @TODO: Check what this actually is.
+
+	if (vkCreateFramebuffer(m_device, &framebuffer_info, nullptr, &framebuffer->framebuffer) != VK_SUCCESS)
+	{
+		std::cout << "Failed to create framebuffer!" << std::endl;
+		TE_HEAP_DELETE(framebuffer);
+		return nullptr;
+	}
+
+	framebuffer->color_attachment_count = desc.num_color_attachments;
+	framebuffer->render_pass = render_pass;
+
+	return framebuffer;
 }
 
 void GfxDevice::destroy_framebuffer(Framebuffer* framebuffer)
 {
+	if (framebuffer)
+	{
+		FramebufferVK* framebuffer_vk = static_cast<FramebufferVK*>(framebuffer);
 
+		for (int i = 0; i < framebuffer_vk->color_attachment_count; i++)
+			vkDestroyImageView(m_device, framebuffer_vk->color_image_views[i], nullptr);
+		
+		if (framebuffer_vk->depth_image_view != VK_NULL_HANDLE)
+			vkDestroyImageView(m_device, framebuffer_vk->depth_image_view, nullptr);
+
+		vkDestroyFramebuffer(m_device, framebuffer_vk->framebuffer, nullptr);
+
+		if (framebuffer_vk->render_pass != VK_NULL_HANDLE)
+			vkDestroyRenderPass(m_device, framebuffer_vk->render_pass, nullptr);
+
+		TE_HEAP_DELETE(framebuffer_vk);
+	}
 }
 
 TE_END_TERMINUS_NAMESPACE

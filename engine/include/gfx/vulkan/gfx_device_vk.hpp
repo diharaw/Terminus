@@ -5,6 +5,7 @@
 #include <gfx/gfx_types.hpp>
 #include <stl/vector.hpp>
 #include <vulkan/vulkan.h>
+#include <gfx/vulkan/vk_mem_alloc.h>
 #include <SDL_vulkan.h>
 
 #define TE_VULKAN_DEBUG
@@ -47,6 +48,7 @@ public:
 
 	Texture* create_texture(const TextureDesc& desc);
 	void destroy_texture(Texture* texture);
+	void upload_texture_data(Texture* texture, uint32_t mip_level, uint32_t array_layer, void* data);
 	Buffer* create_buffer(const BufferDesc& desc);
 	void destroy_buffer(Buffer* buffer);
 	Framebuffer* create_framebuffer(const FramebufferDesc& desc);
@@ -87,6 +89,13 @@ private:
 	VkResult create_debug_report_callback_ext(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback);
 	void	 destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator);
 
+	// Helpers
+	VkRenderPass create_render_pass(const FramebufferDesc& desc);
+	bool allocate_buffer(VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
+	bool allocate_image(VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
+	Texture*	 create_swap_chain_texture(uint32_t w, uint32_t h, VkImage image, VkFormat format, VkSampleCountFlagBits sample_count);
+	void calc_image_size_and_extents(Texture* texture, uint32_t mip_level, uint32_t& w, uint32_t& h, uint32_t& d, size_t& size);
+
 private:
 	DeviceProperties m_device_properties;
 	DeviceLimits	 m_device_limits;
@@ -104,6 +113,7 @@ private:
 	VkExtent2D		 m_swap_chain_extent;
 	Vector<Texture*> m_swap_chain_textures;
 	Vector<Framebuffer*> m_swap_chain_framebuffers;
+	VmaAllocator		 m_allocator;
 
 #if defined(TE_VULKAN_DEBUG)
 	VkDebugReportCallbackEXT m_debug_callback;
