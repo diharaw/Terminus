@@ -2,99 +2,152 @@
 
 #include <core/terminus_macros.hpp>
 #include <core/terminus_types.hpp>
-#include <stl/string_buffer.hpp>
 #include <gfx/gfx_enums.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
+struct Shader;
+struct InputElement;
+struct InputLayout;
+struct VertexBuffer;
+struct IndexBuffer;
 struct Texture;
 
-struct DeviceProperties
+struct RenderDeviceInitData
 {
-	uint32_t	   vendor_id;
-	uint32_t	   driver;
-	StringBuffer32 name;
-	StringBuffer32 type;
+    void*  memory;
+    size_t size;
 };
 
-struct DeviceLimits
+struct TextureCreateDesc
 {
-
-};
-
-struct TextureDesc
-{
-	TextureType   type;
 	TextureFormat format;
 	TextureUsage  usage;
-	uint32_t	  width;
-	uint32_t	  height;
-	uint32_t	  depth;
-	uint32_t	  mip_levels;
-	uint32_t	  array_layers;
-	uint32_t	  samples;
-
-	TextureDesc()
-	{
-		type = GFX_TEXTURE_2D;
-		format = GFX_FORMAT_R8G8B8A8_UNORM;
-		usage = GFX_TEXTURE_USAGE_NONE;
-		width = 0;
-		height = 0;
-		depth = 0;
-		mip_levels = 1;
-		array_layers = 1;
-		samples = 1;
-	}
+	TextureType	  type;
+    uint16_t width;
+    uint16_t height;
+    uint16_t depth;
+	uint16_t samples;
+    void*    data;
+	uint16_t array_slices;
+    uint16_t mipmap_levels;
+    uint32_t flags;
 };
 
-struct BufferDesc
+struct BufferCreateDesc
 {
-
+    void*	 data;
+    uint32_t size;
+    uint32_t usage_type;
+    uint32_t data_type;
 };
 
-struct AttachmentDesc
+struct InputLayoutCreateDesc
 {
-	uint32_t base_mip_level;
-	uint32_t mip_level_count;
-	uint32_t base_layer;
-	uint32_t layer_count;
-	Texture* texture;
-
-	AttachmentDesc()
-	{
-		base_mip_level = 0;
-		mip_level_count = 0;
-		base_layer = 0;
-		layer_count = 0;
-		texture = nullptr;
-	}
-
-	AttachmentDesc(uint32_t base_mip_level, 
-				  uint32_t mip_level_count,
-				  uint32_t base_layer,
-			      uint32_t layer_count,
-				  Texture* texture)
-	{
-		this->base_mip_level = base_mip_level;
-		this->mip_level_count = mip_level_count;
-		this->base_layer = base_layer;
-		this->layer_count = layer_count;
-		this->texture = texture;
-	}
+    InputElement* elements;
+    uint32_t	  vertex_size;
+    uint32_t	  num_elements;
 };
 
-struct FramebufferDesc
+struct VertexArrayCreateDesc
 {
-	uint32_t		num_color_attachments;
-	AttachmentDesc* color_attachments;
-	AttachmentDesc  depth_attachment;
+    VertexBuffer* vertex_buffer;
+    IndexBuffer*  index_buffer;
+    InputLayout*  layout;
+};
 
-	FramebufferDesc()
-	{
-		num_color_attachments = 0;
-		color_attachments = nullptr;
-	}
+struct RenderTargetDesc
+{
+	Texture* texture = nullptr;
+	uint32_t array_slice = 0;
+	uint32_t mip_slice = 0;
+};
+
+struct DepthStencilTargetDesc
+{
+	Texture* texture = nullptr;
+	uint32_t array_slice = 0;
+	uint32_t mip_slice = 0;
+};
+
+struct FramebufferCreateDesc
+{
+	uint32_t			   render_target_count;
+	RenderTargetDesc*      render_targets;
+	DepthStencilTargetDesc depth_stencil_target;
+};
+
+struct DepthStencilStateCreateDesc
+{
+    bool     enable_depth_test;
+    bool     enable_stencil_test;
+    bool     depth_mask;
+	CompFunc depth_cmp_func;
+	StencilOp front_stencil_fail;
+	StencilOp front_stencil_pass_depth_fail;
+	StencilOp front_stencil_pass_depth_pass;
+	CompFunc front_stencil_cmp_func;
+	StencilOp back_stencil_fail;
+	StencilOp back_stencil_pass_depth_fail;
+	StencilOp back_stencil_pass_depth_pass;
+	CompFunc back_stencil_cmp_func;
+    uint32_t stencil_mask;
+};
+
+struct RasterizerStateCreateDesc
+{
+    uint32_t cull_mode = GFX_CULL_MODE_BACK;
+    uint32_t fill_mode = GFX_FILL_MODE_SOLID;
+    bool     front_winding_ccw = true;
+    bool     multisample = false;
+    bool     scissor = false;
+};
+
+struct SamplerStateCreateDesc
+{
+    TextureFilter min_filter = GFX_FILTER_LINEAR_ALL;
+	TextureFilter mag_filter = GFX_FILTER_LINEAR;
+    TextureAddressMode wrap_mode_u = GFX_ADDRESS_REPEAT;
+	TextureAddressMode wrap_mode_v = GFX_ADDRESS_REPEAT;
+    TextureAddressMode wrap_mode_w = GFX_ADDRESS_REPEAT;
+	uint32_t comparison_mode;
+	CompFunc comparison_func = GFX_COMP_FUNC_LESS;
+    float    max_anisotropy = 0;
+    float    border_color[4];
+};
+
+struct ShaderCreateDesc
+{
+    ShaderStage type;
+    const char* shader_source;
+};
+
+struct ShaderProgramCreateDesc
+{
+    Shader* vertex;
+    Shader* pixel;
+    Shader* geometry;
+    Shader* tessellation_control;
+    Shader* tessellation_evaluation;
+};
+
+struct BlendStateCreateDesc
+{
+	bool enable = false;
+	BlendFunc src_func;
+	BlendFunc dst_func;
+	BlendOp blend_op;
+	BlendFunc src_func_alpha;
+	BlendFunc dst_func_alpha;
+	BlendOp blend_op_alpha;
+};
+
+struct PipelineStateCreateDesc
+{
+    DepthStencilStateCreateDesc depth_stencil_state;
+    RasterizerStateCreateDesc   rasterizer_state;
+    BlendStateCreateDesc        blend_state;
+    uint32_t                    primitive;
 };
 
 TE_END_TERMINUS_NAMESPACE

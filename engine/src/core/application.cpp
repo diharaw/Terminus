@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <string.h>
+#include <io/logger.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -72,11 +73,16 @@ int Application::run(int argc, char *argv[])
 
 bool Application::initialize_engine()
 {
+	logger::initialize();
+
+	logger::open_console_stream();
+	logger::open_file_stream();
+
     uint32_t window_flags = 0;
 
-#if defined(TE_BACKEND_OPENGL)
+#if defined(TE_GFX_BACKEND_GL)
 	window_flags |= SDL_WINDOW_OPENGL;
-#elif defined(TE_BACKEND_VULKAN)
+#elif defined(TE_GFX_BACKEND_VK)
 	window_flags |= SDL_WINDOW_VULKAN;
 #endif
 
@@ -305,7 +311,10 @@ void Application::shutdown_engine()
 	// Shutdown engine core
 	global::shutdown_engine_core();
 	// Shutdown SDL
-	SDL_Quit();
+	SDL_Quit();	
+	// Close logger streams
+	logger::close_file_stream();
+	logger::close_console_stream();
 }
 
 void Application::hide()

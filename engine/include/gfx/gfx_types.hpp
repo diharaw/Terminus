@@ -1,29 +1,9 @@
 #pragma once
 
-#include <core/terminus_macros.hpp>
-#include <core/terminus_types.hpp>
-#include <gfx/gfx_enums.hpp>
-
-TE_BEGIN_TERMINUS_NAMESPACE
-
-struct Buffer {};
-struct VertexArray {};
-struct GraphicsPipeline {};
-struct ComputePipeline {};
-struct CommandBuffer {};
-
-struct Framebuffer 
-{
-	uint32_t color_attachment_count;
-};
-
-struct Texture 
-{
-	TextureType type;
-	TextureFormat format;
-	uint32_t	width;
-	uint32_t	height;
-	uint32_t	depth;
-};
-
-TE_END_TERMINUS_NAMESPACE
+#if defined(TE_GFX_BACKEND_GL) || defined(TE_GFX_BACKEND_GLES)
+#include <gfx/opengl/gfx_types_gl.hpp>
+#elif defined(TE_GFX_BACKEND_D3D11)
+#include <gfx/direct3d11/gfx_types_d3d11.hpp>
+#elif defined(TE_GFX_BACKEND_VK)
+#include <gfx/vulkan/gfx_types_vk.hpp>
+#endif

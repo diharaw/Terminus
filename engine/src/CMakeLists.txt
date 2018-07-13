@@ -175,16 +175,24 @@ set(TE_STL_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/stl/array.hpp"
 # Headers
 set(TE_GFX_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/gfx/gfx_descs.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/gfx/gfx_device.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/gfx_enums.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/gfx_types.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/gfx/vulkan/gfx_device_vk.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/gfx/vulkan/gfx_types_vk.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/vulkan/gfx_initializers_vk.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/vulkan/vk_mem_alloc.h"
                    "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/gfx_device_gl.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/gfx_types_gl.hpp"
                    "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/glad.h"
-                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/khrplatform.h")
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/opengl/khrplatform.h"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/direct3d11/gfx_device_d3d11.hpp"
+                   "${CMAKE_SOURCE_DIR}/engine/include/gfx/direct3d11/gfx_types_d3d11.hpp")
 
 # Sources
 set(TE_GFX_SOURCES "${CMAKE_SOURCE_DIR}/engine/src/gfx/vulkan/gfx_device_vk.cpp"
-                   "${CMAKE_SOURCE_DIR}/engine/src/gfx/opengl/glad.c")
+                   "${CMAKE_SOURCE_DIR}/engine/src/gfx/opengl/gfx_device_gl.cpp"
+                   "${CMAKE_SOURCE_DIR}/engine/src/gfx/opengl/glad.c"
+                   "${CMAKE_SOURCE_DIR}/engine/src/gfx/direct3d11/gfx_device_d3d11.cpp")
 
 # Terminus Headers
 set(TE_HEADERS ${TE_CORE_HEADERS} 

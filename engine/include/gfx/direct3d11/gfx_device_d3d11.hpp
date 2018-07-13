@@ -1,21 +1,23 @@
 #pragma once
 
-#if defined(TE_GFX_BACKEND_GL) || defined(TE_GFX_BACKEND_GLES)
+#if defined(TE_GFX_BACKEND_D3D11)
 
 #include <stdint.h>
 #include <iostream>
 #include <unordered_map>
 #include <string>
-#include <gfx/gfx_types.h>
+#include <gfx_types.h>
 
-typedef void* (* ExtensionLoaderFunc)(const char *name);
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 
 class GfxDevice
 {
 public:
 	GfxDevice();
     ~GfxDevice();
-	bool init(ExtensionLoaderFunc func = nullptr);
+	bool init();
 	Shader* create_shader(const char* source, uint32_t type);
 	ShaderProgram* create_shader_program(Shader** shaders, uint32_t count);
 	Framebuffer*	 create_framebuffer(const FramebufferCreateDesc& desc);
