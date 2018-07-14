@@ -13,16 +13,16 @@ TE_BEGIN_TERMINUS_NAMESPACE
 
 struct Buffer
 {
-	struct VmaAllocation_T* allocation;
-	VkDeviceMemory device_memory;
-	VkBuffer buffer;
+	struct VmaAllocation_T* vma_allocation;
+	VkDeviceMemory vk_device_memory;
+	VkBuffer vk_buffer;
 	DataType index_type;
 
 	Buffer()
 	{
-		allocation = VK_NULL_HANDLE;
-		device_memory = VK_NULL_HANDLE;
-		buffer = VK_NULL_HANDLE;
+		vma_allocation = VK_NULL_HANDLE;
+		vk_device_memory = VK_NULL_HANDLE;
+		vk_buffer = VK_NULL_HANDLE;
 	}
 };
 
@@ -77,6 +77,12 @@ struct CommandBuffer
 	VkCommandBuffer vk_cmd_buf;
 };
 
+struct Shader
+{
+	ShaderStage	   stage;
+	VkShaderModule vk_shader_module;
+};
+
 struct PipelineState
 {
 	PipelineType type;
@@ -88,10 +94,10 @@ struct Fence
 	VkFence vk_fence;
 };
 
-struct VertexArray
+// TODO: Namespace the GFX stuff!!!
+struct SemaphoreGPU
 {
-	Buffer* vertex_buffer;
-	Buffer* index_buffer;
+	VkSemaphore vk_semaphore;
 };
 
 struct InputLayout
@@ -99,6 +105,13 @@ struct InputLayout
 	VkVertexInputBindingDescription		 input_binding_desc;
 	VkVertexInputAttributeDescription	 input_attrib_descs[MAX_VERTEX_ATTRIBUTES];
 	VkPipelineVertexInputStateCreateInfo input_state_nfo;
+};
+
+struct VertexArray
+{
+	Buffer*		 vertex_buffer;
+	Buffer*		 index_buffer;
+	InputLayout* layout;
 };
 
 TE_END_TERMINUS_NAMESPACE

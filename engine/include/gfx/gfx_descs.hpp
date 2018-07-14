@@ -9,8 +9,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 struct Shader;
 struct InputElement;
 struct InputLayout;
-struct VertexBuffer;
-struct IndexBuffer;
+struct Buffer;
 struct Texture;
 
 struct RenderDeviceInitData
@@ -51,9 +50,9 @@ struct InputLayoutCreateDesc
 
 struct VertexArrayCreateDesc
 {
-    VertexBuffer* vertex_buffer;
-    IndexBuffer*  index_buffer;
-    InputLayout*  layout;
+    Buffer*		 vertex_buffer;
+    Buffer*		 index_buffer;
+    InputLayout* layout;
 };
 
 struct RenderTargetDesc
@@ -80,24 +79,25 @@ struct FramebufferCreateDesc
 struct DepthStencilStateCreateDesc
 {
     bool     enable_depth_test;
+	bool     enable_depth_write;
     bool     enable_stencil_test;
-    bool     depth_mask;
 	CompFunc depth_cmp_func;
 	StencilOp front_stencil_fail;
 	StencilOp front_stencil_pass_depth_fail;
 	StencilOp front_stencil_pass_depth_pass;
 	CompFunc front_stencil_cmp_func;
+	uint32_t front_stencil_mask;
 	StencilOp back_stencil_fail;
 	StencilOp back_stencil_pass_depth_fail;
 	StencilOp back_stencil_pass_depth_pass;
 	CompFunc back_stencil_cmp_func;
-    uint32_t stencil_mask;
+	uint32_t back_stencil_mask;
 };
 
 struct RasterizerStateCreateDesc
 {
-    uint32_t cull_mode = GFX_CULL_MODE_BACK;
-    uint32_t fill_mode = GFX_FILL_MODE_SOLID;
+    CullMode cull_mode = GFX_CULL_MODE_BACK;
+    FillMode fill_mode = GFX_FILL_MODE_SOLID;
     bool     front_winding_ccw = true;
     bool     multisample = false;
     bool     scissor = false;
@@ -116,10 +116,19 @@ struct SamplerStateCreateDesc
     float    border_color[4];
 };
 
-struct ShaderCreateDesc
+struct SourceShaderCreateDesc
 {
     ShaderStage type;
     const char* shader_source;
+	const char*	entry_point;
+};
+
+struct BinaryShaderCreateDesc
+{
+	ShaderStage type;
+	size_t		size;
+	void*		data;
+	const char*	entry_point;
 };
 
 struct ShaderProgramCreateDesc

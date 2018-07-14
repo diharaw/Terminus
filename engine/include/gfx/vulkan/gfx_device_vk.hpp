@@ -37,10 +37,6 @@ struct QueueInfos
 	VkDeviceQueueCreateInfo infos[32];
 };
 
-struct Texture;
-struct Framebuffer;
-struct Buffer;
-
 class GfxDevice
 {
 public:
@@ -50,7 +46,7 @@ public:
 	bool initialize();
 	void shutdown();
 
-	Framebuffer* accquire_next_framebuffer();
+	Framebuffer* accquire_next_framebuffer(SemaphoreGPU* signal_semaphore);
 
 	// Resource creation
 	Texture*	   create_texture(const TextureCreateDesc& desc);
@@ -58,8 +54,11 @@ public:
 	VertexArray*   create_vertex_array(const VertexArrayCreateDesc& desc);
 	InputLayout*   create_input_layout(const InputLayoutCreateDesc& desc);
 	Framebuffer*   create_framebuffer(const FramebufferCreateDesc& desc);
+	Shader*		   create_shader_from_binary(const BinaryShaderCreateDesc& desc);
+	Shader*		   create_shader_from_source(const SourceShaderCreateDesc& desc);
 	PipelineState* create_pipeline_state(const PipelineStateCreateDesc& desc);
 	Fence*		   create_fence();
+	SemaphoreGPU*  create_semaphore();
 
 	// Resource destruction
 	void destroy_texture(Texture* texture);
@@ -67,8 +66,10 @@ public:
 	void destroy_vertex_array(VertexArray* vertex_array);
 	void destroy_input_layout(InputLayout* input_layout);
 	void destroy_framebuffer(Framebuffer* framebuffer);
+	void destroy_shader(Shader* shader);
 	void destory_pipeline_state(PipelineState* pipeline_state);
 	void destroy_fence(Fence* fence);
+	void destroy_semaphore(SemaphoreGPU* semaphore);
 
 	// Resource updates
 	void  update_texture(Texture* texture, uint32_t mip_slice , uint32_t array_slice, void* data);
@@ -78,6 +79,7 @@ public:
 
 	// Synchronization
 	void wait_for_fences(uint32_t count, Fence** fences, uint64_t timeout);
+	void check_fences(uint32_t count, Fence** fences, bool* status);
 	void wait_for_idle();
 
 	// Command encoding
@@ -92,12 +94,27 @@ public:
 	void cmd_draw_indexed_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset, uint32_t draw_count, uint32_t stride);
 	void cmd_dispatch(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t z);
 	void cmd_dispatch_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset);
-	void cmd_present();
-
-	// Command submission
-	void submit_graphics(uint32_t cmd_buf_count, CommandBuffer** command_buffers, Fence* fence);
-	void submit_compute(uint32_t cmd_buf_count, CommandBuffer** command_buffers, Fence* fence);
 	
+	// Command submission
+	void submit_graphics(uint32_t cmd_buf_count, 
+						 CommandBuffer** command_buffers, 
+						 uint32_t wait_sema_count, 
+						 SemaphoreGPU** wait_semaphores, 
+						 uint32_t signal_sema_count, 
+						 SemaphoreGPU** signal_semaphores,  
+						 Fence* fence);
+
+	void submit_compute(uint32_t cmd_buf_count,
+						CommandBuffer** command_buffers,
+						uint32_t wait_sema_count,
+						SemaphoreGPU** wait_semaphores,
+						uint32_t signal_sema_count,
+						SemaphoreGPU** signal_semaphores,
+						Fence* fence);
+	
+	// Presentation
+	void present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores);
+
 private:
 	// Instance
 	bool create_instance();

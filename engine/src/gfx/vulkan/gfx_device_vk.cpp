@@ -148,10 +148,56 @@ const VkIndexType kIndexTypeTable[] =
 	VK_INDEX_TYPE_MAX_ENUM
 };
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 const VkPipelineBindPoint kPipelineBindPointTable[] =
 {
 	VK_PIPELINE_BIND_POINT_GRAPHICS,
 	VK_PIPELINE_BIND_POINT_COMPUTE
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkCullModeFlags kCullModeTable[] =
+{
+	VK_CULL_MODE_FRONT_BIT,
+	VK_CULL_MODE_BACK_BIT,
+	VK_CULL_MODE_FRONT_AND_BACK,
+	VK_CULL_MODE_NONE
+};
+
+const VkPolygonMode kFillModeTable[] =
+{
+	VK_POLYGON_MODE_FILL,
+	VK_POLYGON_MODE_LINE
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkCompareOp kCompareOpTable[] =
+{
+	VK_COMPARE_OP_NEVER,
+	VK_COMPARE_OP_LESS,
+	VK_COMPARE_OP_EQUAL,
+	VK_COMPARE_OP_LESS_OR_EQUAL,
+	VK_COMPARE_OP_GREATER,
+	VK_COMPARE_OP_NOT_EQUAL,
+	VK_COMPARE_OP_GREATER_OR_EQUAL,
+	VK_COMPARE_OP_ALWAYS
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkStencilOp kStencilOpTable[] =
+{
+	VK_STENCIL_OP_KEEP,
+	VK_STENCIL_OP_ZERO,
+	VK_STENCIL_OP_REPLACE,
+	VK_STENCIL_OP_INCREMENT_AND_CLAMP,
+	VK_STENCIL_OP_DECREMENT_AND_CLAMP,
+	VK_STENCIL_OP_INVERT,
+	VK_STENCIL_OP_INCREMENT_AND_WRAP,
+	VK_STENCIL_OP_DECREMENT_AND_WRAP,
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -503,7 +549,7 @@ bool GfxDevice::find_queues()
 			}
 			else if (is_queue_compatible(bits, 0, 1, 1))
 			{
-				// Else, a queue that supports compute and transfer only (might allow a asynchronous compute. Have to check).
+				// Else, a queue that supports compute and transfer only (might allow asynchronous compute. Have to check).
 				m_queue_infos.compute_queue_index = i;
 				m_queue_infos.compute_queue_quality = 2;
 			}
@@ -1033,10 +1079,10 @@ void GfxDevice::calc_image_size_and_extents(Texture* texture, uint32_t mip_level
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-Framebuffer* GfxDevice::accquire_next_framebuffer()
+Framebuffer* GfxDevice::accquire_next_framebuffer(SemaphoreGPU* signal_semaphore)
 {
-	uint32_t idx = m_framebuffer_index % m_swap_chain_framebuffers.size();
-	m_framebuffer_index++;
+	// TODO: Implement THIS!
+	uint32_t idx = 0;
 	return m_swap_chain_framebuffers[idx];
 }
 
@@ -1121,12 +1167,32 @@ Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 
 VertexArray* GfxDevice::create_vertex_array(const VertexArrayCreateDesc& desc)
 {
+	VertexArray* vertex_array = TE_HEAP_NEW VertexArray();
 
+	vertex_array->index_buffer = desc.index_buffer;
+	vertex_array->vertex_buffer = desc.vertex_buffer;
+	vertex_array->layout = desc.layout;
+
+	return vertex_array;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 InputLayout* GfxDevice::create_input_layout(const InputLayoutCreateDesc& desc)
+{
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+Shader* GfxDevice::create_shader_from_binary(const BinaryShaderCreateDesc& desc)
+{
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+Shader* GfxDevice::create_shader_from_source(const SourceShaderCreateDesc& desc)
 {
 
 }
@@ -1210,14 +1276,89 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 
 PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& desc)
 {
+	VkPipelineRasterizationStateCreateInfo rasterizer_state = {};
 
+	rasterizer_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer_state.cullMode = kCullModeTable[desc.rasterizer_state.cull_mode];
+	rasterizer_state.polygonMode = kFillModeTable[desc.rasterizer_state.fill_mode];
+	rasterizer_state.frontFace = desc.rasterizer_state.front_winding_ccw ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
+	rasterizer_state.lineWidth = 1.0f;
+	rasterizer_state.rasterizerDiscardEnable = VK_FALSE;
+
+	rasterizer_state.depthBiasClamp = VK_FALSE;
+	rasterizer_state.depthBiasEnable = VK_FALSE;
+	rasterizer_state.depthBiasConstantFactor = 0.0f;
+	rasterizer_state.depthBiasClamp = 0.0f;
+	rasterizer_state.depthBiasSlopeFactor = 0.0f;
+
+	VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
+
+	depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depth_stencil_state.flags = 0;
+	depth_stencil_state.depthTestEnable = desc.depth_stencil_state.enable_depth_test;
+	depth_stencil_state.depthWriteEnable = desc.depth_stencil_state.enable_depth_write;
+	depth_stencil_state.depthCompareOp = kCompareOpTable[desc.depth_stencil_state.depth_cmp_func];
+	depth_stencil_state.stencilTestEnable = desc.depth_stencil_state.enable_stencil_test;
+
+	depth_stencil_state.front.failOp = kStencilOpTable[desc.depth_stencil_state.front_stencil_fail];
+	depth_stencil_state.front.passOp = kStencilOpTable[desc.depth_stencil_state.front_stencil_pass_depth_pass];
+	depth_stencil_state.front.depthFailOp = kStencilOpTable[desc.depth_stencil_state.front_stencil_pass_depth_fail];
+	depth_stencil_state.front.compareOp = kCompareOpTable[desc.depth_stencil_state.front_stencil_cmp_func];
+	depth_stencil_state.front.writeMask = kCompareOpTable[desc.depth_stencil_state.front_stencil_mask];
+	depth_stencil_state.front.compareMask = 0; // TODO
+	depth_stencil_state.front.reference = 0; // TODO
+
+	depth_stencil_state.back.failOp = kStencilOpTable[desc.depth_stencil_state.back_stencil_fail];
+	depth_stencil_state.back.passOp = kStencilOpTable[desc.depth_stencil_state.back_stencil_pass_depth_pass];
+	depth_stencil_state.back.depthFailOp = kStencilOpTable[desc.depth_stencil_state.back_stencil_pass_depth_fail];
+	depth_stencil_state.back.compareOp = kCompareOpTable[desc.depth_stencil_state.back_stencil_cmp_func];
+	depth_stencil_state.back.writeMask = kCompareOpTable[desc.depth_stencil_state.back_stencil_mask];
+	depth_stencil_state.back.compareMask = 0; // TODO
+	depth_stencil_state.back.reference = 0; // TODO
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 Fence* GfxDevice::create_fence()
 {
+	Fence* fence = TE_HEAP_NEW Fence();
 
+	VkFenceCreateInfo info = {};
+
+	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	info.pNext = nullptr;
+	info.flags = 0;
+
+	if (vkCreateFence(m_device, &info, nullptr, &fence->vk_fence) != VK_SUCCESS)
+	{
+		TE_LOG_ERROR("Failed to create Fence!");
+		TE_HEAP_DELETE(fence);
+		return nullptr;
+	}
+
+	return fence;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+SemaphoreGPU* GfxDevice::create_semaphore()
+{
+	SemaphoreGPU* semaphore = TE_HEAP_NEW SemaphoreGPU();
+
+	VkSemaphoreCreateInfo info = {};
+
+	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	info.pNext = nullptr;
+	info.flags = 0;
+
+	if (vkCreateSemaphore(m_device, &info, nullptr, &semaphore->vk_semaphore) != VK_SUCCESS)
+	{
+		TE_LOG_ERROR("Failed to create Semaphore!");
+		TE_HEAP_DELETE(semaphore);
+		return nullptr;
+	}
+
+	return semaphore;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1240,21 +1381,33 @@ void GfxDevice::destroy_texture(Texture* texture)
 
 void GfxDevice::destroy_buffer(Buffer* buffer)
 {
+	if (buffer)
+	{
+		if (buffer->vk_buffer != VK_NULL_HANDLE && buffer->vma_allocation != VK_NULL_HANDLE)
+			vmaDestroyBuffer(m_allocator, buffer->vk_buffer, buffer->vma_allocation);
 
+		TE_HEAP_DELETE(buffer);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 void GfxDevice::destroy_vertex_array(VertexArray* vertex_array)
 {
-
+	if (vertex_array)
+	{
+		TE_HEAP_DELETE(vertex_array);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 void GfxDevice::destroy_input_layout(InputLayout* input_layout)
 {
-
+	if (input_layout)
+	{
+		TE_HEAP_DELETE(input_layout);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1280,16 +1433,46 @@ void GfxDevice::destroy_framebuffer(Framebuffer* framebuffer)
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::destroy_shader(Shader* shader)
+{
+	if (shader)
+	{
+		vkDestroyShaderModule(m_device, shader->vk_shader_module, nullptr);
+		TE_HEAP_DELETE(shader);
+	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::destory_pipeline_state(PipelineState* pipeline_state)
 {
-
+	if (pipeline_state)
+	{
+		vkDestroyPipeline(m_device, pipeline_state->vk_pipeline, nullptr);
+		TE_HEAP_DELETE(pipeline_state);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 void GfxDevice::destroy_fence(Fence* fence)
 {
+	if (fence)
+	{
+		vkDestroyFence(m_device, fence->vk_fence, nullptr);
+		TE_HEAP_DELETE(fence);
+	}
+}
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::destroy_semaphore(SemaphoreGPU* semaphore)
+{
+	if (semaphore)
+	{
+		vkDestroySemaphore(m_device, semaphore->vk_semaphore, nullptr);
+		TE_HEAP_DELETE(semaphore);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1343,7 +1526,7 @@ void* GfxDevice::map_buffer(Buffer* buffer, size_t offset, size_t size)
 {
 	void* ptr = nullptr;
 
-	if (vkMapMemory(m_device, buffer->device_memory, offset, size, 0, &ptr) != VK_SUCCESS)
+	if (vkMapMemory(m_device, buffer->vk_device_memory, offset, size, 0, &ptr) != VK_SUCCESS)
 	{
 		TE_LOG_ERROR("Buffer mapping failed!");
 		return nullptr;
@@ -1356,7 +1539,7 @@ void* GfxDevice::map_buffer(Buffer* buffer, size_t offset, size_t size)
 
 void GfxDevice::unmap_buffer(Buffer* buffer)
 {
-	vkUnmapMemory(m_device, buffer->device_memory);
+	vkUnmapMemory(m_device, buffer->vk_device_memory);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1364,6 +1547,13 @@ void GfxDevice::unmap_buffer(Buffer* buffer)
 void GfxDevice::wait_for_fences(uint32_t count, Fence** fences, uint64_t timeout)
 {
 	vkWaitForFences(m_device, count, (VkFence*)fences, VK_TRUE, timeout);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::check_fences(uint32_t count, Fence** fences, bool* status)
+{
+
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1385,9 +1575,9 @@ CommandBuffer* GfxDevice::accquire_command_buffer()
 void GfxDevice::cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_array)
 {
 	size_t offset = 0;
-	vkCmdBindVertexBuffers(cmd->vk_cmd_buf, 0, 1, &vertex_array->vertex_buffer->buffer, &offset);
+	vkCmdBindVertexBuffers(cmd->vk_cmd_buf, 0, 1, &vertex_array->vertex_buffer->vk_buffer, &offset);
 
-	vkCmdBindIndexBuffer(cmd->vk_cmd_buf, vertex_array->index_buffer->buffer, offset, kIndexTypeTable[vertex_array->index_buffer->index_type]);
+	vkCmdBindIndexBuffer(cmd->vk_cmd_buf, vertex_array->index_buffer->vk_buffer, offset, kIndexTypeTable[vertex_array->index_buffer->index_type]);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1429,14 +1619,14 @@ void GfxDevice::cmd_draw_indexed(CommandBuffer* cmd, uint32_t index_count, uint3
 
 void GfxDevice::cmd_draw_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset, uint32_t draw_count, uint32_t stride)
 {
-	vkCmdDrawIndirect(cmd->vk_cmd_buf, buffer->buffer, offset, draw_count, stride);
+	vkCmdDrawIndirect(cmd->vk_cmd_buf, buffer->vk_buffer, offset, draw_count, stride);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 void GfxDevice::cmd_draw_indexed_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset, uint32_t draw_count, uint32_t stride)
 {
-	vkCmdDrawIndexedIndirect(cmd->vk_cmd_buf, buffer->buffer, offset, draw_count, stride);
+	vkCmdDrawIndexedIndirect(cmd->vk_cmd_buf, buffer->vk_buffer, offset, draw_count, stride);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1450,26 +1640,38 @@ void GfxDevice::cmd_dispatch(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_
 
 void GfxDevice::cmd_dispatch_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset)
 {
-	vkCmdDispatchIndirect(cmd->vk_cmd_buf, buffer->buffer, offset);
+	vkCmdDispatchIndirect(cmd->vk_cmd_buf, buffer->vk_buffer, offset);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::cmd_present()
+void GfxDevice::submit_graphics(uint32_t cmd_buf_count,
+								CommandBuffer** command_buffers,
+								uint32_t wait_sema_count,
+								SemaphoreGPU** wait_semaphores,
+								uint32_t signal_sema_count,
+								SemaphoreGPU** signal_semaphores,
+								Fence* fence)
 {
 	
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::submit_graphics(uint32_t cmd_buf_count, CommandBuffer** command_buffers, Fence* fence)
+void GfxDevice::submit_compute(uint32_t cmd_buf_count,
+							   CommandBuffer** command_buffers,
+							   uint32_t wait_sema_count,
+							   SemaphoreGPU** wait_semaphores,
+							   uint32_t signal_sema_count,
+							   SemaphoreGPU** signal_semaphores,
+							   Fence* fence)
 {
-	
+
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::submit_compute(uint32_t cmd_buf_count, CommandBuffer** command_buffers, Fence* fence)
+void GfxDevice::present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores)
 {
 
 }
@@ -1514,7 +1716,7 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const F
 		attachments[depth_idx].samples = texture->sample_count;
 		attachments[depth_idx].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		attachments[depth_idx].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // @TODO: Set stencil related flags
 		attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[depth_idx].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		attachments[depth_idx].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -1530,7 +1732,8 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const F
 
 	if (desc.depth_stencil_target.texture)
 		subpass.pDepthStencilAttachment = &depth_reference;
-	subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
+	else
+		subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
 
 	VkRenderPassCreateInfo render_pass_info = {};
 	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
