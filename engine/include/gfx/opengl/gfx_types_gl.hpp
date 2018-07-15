@@ -28,15 +28,6 @@ struct Shader;
 using ShaderMap = std::unordered_map<uint32_t, Shader*>;
 using BindingMap = std::unordered_map<uint32_t, uint32_t>;
 
-struct InputElement
-{
-    uint32_t	num_sub_elements;
-    uint32_t    type;
-    bool		normalized;
-    uint32_t	offset;
-    const char* semantic_name;
-};
-
 struct InputLayout
 {
     InputElement elements[10];

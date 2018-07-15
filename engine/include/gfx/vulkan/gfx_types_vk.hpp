@@ -81,6 +81,7 @@ struct Shader
 {
 	ShaderStage	   stage;
 	VkShaderModule vk_shader_module;
+	StringBuffer32 entry_point;
 };
 
 struct PipelineState

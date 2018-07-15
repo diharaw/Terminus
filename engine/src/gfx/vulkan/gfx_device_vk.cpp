@@ -6,6 +6,7 @@
 #include <gfx/vulkan/gfx_types_vk.hpp>
 #include <gfx/vulkan/gfx_initializers_vk.hpp>
 #include <core/engine_core.hpp>
+#include <stl/string_buffer.hpp>
 #include <io/logger.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
@@ -202,6 +203,42 @@ const VkStencilOp kStencilOpTable[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+const VkShaderStageFlagBits kShaderStageTable[] =
+{
+	VK_SHADER_STAGE_VERTEX_BIT,
+	VK_SHADER_STAGE_FRAGMENT_BIT,
+	VK_SHADER_STAGE_GEOMETRY_BIT,
+	VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+	VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+	VK_SHADER_STAGE_COMPUTE_BIT
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkFormat kInputAttribFormatTable[][4] =
+{
+	{ VK_FORMAT_R8_SINT, VK_FORMAT_R8G8_SINT, VK_FORMAT_R8G8B8_SINT, VK_FORMAT_R8G8B8A8_SINT },
+	{ VK_FORMAT_R8_UINT, VK_FORMAT_R8G8_UINT, VK_FORMAT_R8G8B8_UINT, VK_FORMAT_R8G8B8A8_UINT },
+	{ VK_FORMAT_R16_SINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16A16_SINT },
+	{ VK_FORMAT_R32_SINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32A32_SINT },
+	{ VK_FORMAT_R16_UINT, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16A16_UINT },
+	{ VK_FORMAT_R32_UINT, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32A32_UINT },
+	{ VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT },
+};
+
+const VkSampleCountFlagBits kSampleCountTable[] =
+{
+	VK_SAMPLE_COUNT_1_BIT,
+	VK_SAMPLE_COUNT_2_BIT,
+	VK_SAMPLE_COUNT_4_BIT,
+	VK_SAMPLE_COUNT_8_BIT,
+	VK_SAMPLE_COUNT_16_BIT,
+	VK_SAMPLE_COUNT_32_BIT,
+	VK_SAMPLE_COUNT_64_BIT
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 const size_t kPixelSizes[] =
 {
 	// @TODO: Add compressed formats
@@ -257,6 +294,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 
 // Helpers Declaration
 VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const FramebufferCreateDesc& desc);
+VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_t render_target_count, TextureFormat* color_attachment_formats, uint32_t sample_count, TextureFormat depth_stencil_format);
 bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
@@ -1180,7 +1218,32 @@ VertexArray* GfxDevice::create_vertex_array(const VertexArrayCreateDesc& desc)
 
 InputLayout* GfxDevice::create_input_layout(const InputLayoutCreateDesc& desc)
 {
+	InputLayout* il = TE_HEAP_NEW InputLayout();
 
+	il->input_binding_desc.binding = 0;
+	il->input_binding_desc.stride = desc.vertex_size;
+	il->input_binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+	for (uint32_t i = 0; i < desc.num_elements; i++)
+	{
+		il->input_attrib_descs[i].binding = 0;
+		il->input_attrib_descs[i].location = i;
+
+		assert(desc.elements[i].num_sub_elements > 0);
+		assert(desc.elements[i].type >= 0);
+		assert(desc.elements[i].type < 7);
+
+		il->input_attrib_descs[i].format = kInputAttribFormatTable[desc.elements[i].type][desc.elements[i].num_sub_elements - 1];
+		il->input_attrib_descs[i].offset = desc.elements[i].offset;
+	}
+
+	il->input_state_nfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	il->input_state_nfo.vertexBindingDescriptionCount = 1;
+	il->input_state_nfo.pVertexBindingDescriptions = &il->input_binding_desc;
+	il->input_state_nfo.vertexAttributeDescriptionCount = desc.num_elements;
+	il->input_state_nfo.pVertexAttributeDescriptions = &il->input_attrib_descs[0];
+
+	return il;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1276,6 +1339,9 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 
 PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& desc)
 {
+	// -------------------------------------------------------------------------------------
+	// Rasterizer State
+	// -------------------------------------------------------------------------------------
 	VkPipelineRasterizationStateCreateInfo rasterizer_state = {};
 
 	rasterizer_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -1291,6 +1357,9 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 	rasterizer_state.depthBiasClamp = 0.0f;
 	rasterizer_state.depthBiasSlopeFactor = 0.0f;
 
+	// -------------------------------------------------------------------------------------
+	// Depth Stencil State
+	// -------------------------------------------------------------------------------------
 	VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
 
 	depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -1315,6 +1384,29 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 	depth_stencil_state.back.writeMask = kCompareOpTable[desc.depth_stencil_state.back_stencil_mask];
 	depth_stencil_state.back.compareMask = 0; // TODO
 	depth_stencil_state.back.reference = 0; // TODO
+
+	// -------------------------------------------------------------------------------------
+	// Shader Modules
+	// -------------------------------------------------------------------------------------
+	Vector<VkPipelineShaderStageCreateInfo> shader_stages(desc.shader_count);
+
+	for (uint32_t i = 0; i < desc.shader_count; i++)
+	{
+		VkPipelineShaderStageCreateInfo shader_stage_info = {};
+		shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shader_stage_info.stage = kShaderStageTable[desc.shaders[i]->stage];
+		shader_stage_info.module = desc.shaders[i]->vk_shader_module;
+		shader_stage_info.pName = desc.shaders[i]->entry_point.c_str();
+
+		shader_stages.push_back(shader_stage_info);
+	}
+
+	// -------------------------------------------------------------------------------------
+	// Render Pass
+	// -------------------------------------------------------------------------------------
+	VkRenderPass temp_render_pass = create_render_pass(m_device, m_allocator, desc.render_target_count, desc.color_attachment_formats, desc.sample_count, desc.depth_stencil_format);
+
+
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1731,6 +1823,76 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const F
 	subpass.pColorAttachments = color_references;
 
 	if (desc.depth_stencil_target.texture)
+		subpass.pDepthStencilAttachment = &depth_reference;
+	else
+		subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
+
+	VkRenderPassCreateInfo render_pass_info = {};
+	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	render_pass_info.attachmentCount = attachment_count;
+	render_pass_info.pAttachments = attachments;
+	render_pass_info.subpassCount = 1;
+	render_pass_info.pSubpasses = &subpass;
+
+	if (vkCreateRenderPass(device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
+	{
+		TE_LOG_ERROR("Failed to create render pass!");
+		return nullptr;
+	}
+
+	return render_pass;
+}
+
+VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_t render_target_count, TextureFormat* color_attachment_formats, uint32_t sample_count, TextureFormat depth_stencil_format)
+{
+	VkRenderPass render_pass;
+
+	VkAttachmentDescription attachments[10] = {};
+	VkAttachmentReference color_references[10] = {};
+	VkAttachmentReference depth_reference = {};
+
+	uint32_t attachment_count = render_target_count;
+
+	for (uint32_t i = 0; i < render_target_count; i++)
+	{
+		attachments[i].format = kFormatTable[color_attachment_formats[i]];
+		attachments[i].samples = kSampleCountTable[sample_count];
+		attachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[i].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		attachments[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		color_references[i].attachment = i;
+		color_references[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	}
+
+	if (depth_stencil_format != GFX_FORMAT_UNKNOWN)
+	{
+		attachment_count++;
+
+		uint32_t depth_idx = render_target_count;
+
+		attachments[depth_idx].format = kFormatTable[depth_stencil_format];
+		attachments[depth_idx].samples = kSampleCountTable[sample_count];
+		attachments[depth_idx].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[depth_idx].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // @TODO: Set stencil related flags
+		attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[depth_idx].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		attachments[depth_idx].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		depth_reference.attachment = depth_idx;
+		depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	}
+
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = render_target_count;
+	subpass.pColorAttachments = color_references;
+
+	if (depth_stencil_format != GFX_FORMAT_UNKNOWN)
 		subpass.pDepthStencilAttachment = &depth_reference;
 	else
 		subpass.pDepthStencilAttachment = VK_NULL_HANDLE;

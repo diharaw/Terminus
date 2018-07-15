@@ -7,7 +7,6 @@
 TE_BEGIN_TERMINUS_NAMESPACE
 
 struct Shader;
-struct InputElement;
 struct InputLayout;
 struct Buffer;
 struct Texture;
@@ -39,6 +38,15 @@ struct BufferCreateDesc
     uint32_t size;
     uint32_t usage_type;
     uint32_t data_type;
+};
+
+struct InputElement
+{
+	uint32_t	num_sub_elements;
+	uint32_t    type;
+	bool		normalized;
+	uint32_t	offset;
+	const char* semantic_name;
 };
 
 struct InputLayoutCreateDesc
@@ -156,7 +164,14 @@ struct PipelineStateCreateDesc
     DepthStencilStateCreateDesc depth_stencil_state;
     RasterizerStateCreateDesc   rasterizer_state;
     BlendStateCreateDesc        blend_state;
-    uint32_t                    primitive;
+    PrimitiveTopology			primitive;
+	uint32_t					shader_count;
+	Shader**					shaders;
+	InputLayout*				input_layout;
+	uint32_t					render_target_count;
+	TextureFormat*				color_attachment_formats;
+	uint32_t					sample_count;
+	TextureFormat				depth_stencil_format;
 };
 
 TE_END_TERMINUS_NAMESPACE
