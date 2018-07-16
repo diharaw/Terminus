@@ -226,6 +226,8 @@ const VkFormat kInputAttribFormatTable[][4] =
 	{ VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT },
 };
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 const VkSampleCountFlagBits kSampleCountTable[] =
 {
 	VK_SAMPLE_COUNT_1_BIT,
@@ -235,6 +237,66 @@ const VkSampleCountFlagBits kSampleCountTable[] =
 	VK_SAMPLE_COUNT_16_BIT,
 	VK_SAMPLE_COUNT_32_BIT,
 	VK_SAMPLE_COUNT_64_BIT
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkPrimitiveTopology kPrimitiveTopologyTable[] =
+{
+	VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+	VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+	VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
+	VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+	VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
+	VK_PRIMITIVE_TOPOLOGY_PATCH_LIST
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkBlendFactor kBlendFactorTable[] = 
+{
+	VK_BLEND_FACTOR_ZERO,
+	VK_BLEND_FACTOR_ONE,
+	VK_BLEND_FACTOR_SRC_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+	VK_BLEND_FACTOR_DST_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+	VK_BLEND_FACTOR_SRC_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+	VK_BLEND_FACTOR_DST_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+	VK_BLEND_FACTOR_CONSTANT_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR,
+	VK_BLEND_FACTOR_CONSTANT_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA,
+	VK_BLEND_FACTOR_SRC_ALPHA_SATURATE,
+	VK_BLEND_FACTOR_SRC1_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+	VK_BLEND_FACTOR_SRC1_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkBlendOp kBlendOpTable[] =
+{
+	VK_BLEND_OP_ADD,
+	VK_BLEND_OP_SUBTRACT,
+	VK_BLEND_OP_REVERSE_SUBTRACT,
+	VK_BLEND_OP_MIN,
+	VK_BLEND_OP_MAX
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkDescriptorType kDescriptorTypeTable[] =
+{
+	VK_DESCRIPTOR_TYPE_SAMPLER,
+	VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+	VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+	VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -298,6 +360,7 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_
 bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
+VkShaderStageFlags find_stage_flags(ShaderStageBit bits);
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -1337,76 +1400,295 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& desc)
+PipelineLayout* GfxDevice::create_pipeline_layout(const PipelineLayoutCreateDesc& desc)
 {
-	// -------------------------------------------------------------------------------------
-	// Rasterizer State
-	// -------------------------------------------------------------------------------------
-	VkPipelineRasterizationStateCreateInfo rasterizer_state = {};
+	PipelineLayout* pipeline_layout = TE_HEAP_NEW PipelineLayout();
 
-	rasterizer_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer_state.cullMode = kCullModeTable[desc.rasterizer_state.cull_mode];
-	rasterizer_state.polygonMode = kFillModeTable[desc.rasterizer_state.fill_mode];
-	rasterizer_state.frontFace = desc.rasterizer_state.front_winding_ccw ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
-	rasterizer_state.lineWidth = 1.0f;
-	rasterizer_state.rasterizerDiscardEnable = VK_FALSE;
+	pipeline_layout->ds_layouts.reserve(desc.descriptor_set_count);
 
-	rasterizer_state.depthBiasClamp = VK_FALSE;
-	rasterizer_state.depthBiasEnable = VK_FALSE;
-	rasterizer_state.depthBiasConstantFactor = 0.0f;
-	rasterizer_state.depthBiasClamp = 0.0f;
-	rasterizer_state.depthBiasSlopeFactor = 0.0f;
-
-	// -------------------------------------------------------------------------------------
-	// Depth Stencil State
-	// -------------------------------------------------------------------------------------
-	VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
-
-	depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	depth_stencil_state.flags = 0;
-	depth_stencil_state.depthTestEnable = desc.depth_stencil_state.enable_depth_test;
-	depth_stencil_state.depthWriteEnable = desc.depth_stencil_state.enable_depth_write;
-	depth_stencil_state.depthCompareOp = kCompareOpTable[desc.depth_stencil_state.depth_cmp_func];
-	depth_stencil_state.stencilTestEnable = desc.depth_stencil_state.enable_stencil_test;
-
-	depth_stencil_state.front.failOp = kStencilOpTable[desc.depth_stencil_state.front_stencil_fail];
-	depth_stencil_state.front.passOp = kStencilOpTable[desc.depth_stencil_state.front_stencil_pass_depth_pass];
-	depth_stencil_state.front.depthFailOp = kStencilOpTable[desc.depth_stencil_state.front_stencil_pass_depth_fail];
-	depth_stencil_state.front.compareOp = kCompareOpTable[desc.depth_stencil_state.front_stencil_cmp_func];
-	depth_stencil_state.front.writeMask = kCompareOpTable[desc.depth_stencil_state.front_stencil_mask];
-	depth_stencil_state.front.compareMask = 0; // TODO
-	depth_stencil_state.front.reference = 0; // TODO
-
-	depth_stencil_state.back.failOp = kStencilOpTable[desc.depth_stencil_state.back_stencil_fail];
-	depth_stencil_state.back.passOp = kStencilOpTable[desc.depth_stencil_state.back_stencil_pass_depth_pass];
-	depth_stencil_state.back.depthFailOp = kStencilOpTable[desc.depth_stencil_state.back_stencil_pass_depth_fail];
-	depth_stencil_state.back.compareOp = kCompareOpTable[desc.depth_stencil_state.back_stencil_cmp_func];
-	depth_stencil_state.back.writeMask = kCompareOpTable[desc.depth_stencil_state.back_stencil_mask];
-	depth_stencil_state.back.compareMask = 0; // TODO
-	depth_stencil_state.back.reference = 0; // TODO
-
-	// -------------------------------------------------------------------------------------
-	// Shader Modules
-	// -------------------------------------------------------------------------------------
-	Vector<VkPipelineShaderStageCreateInfo> shader_stages(desc.shader_count);
-
-	for (uint32_t i = 0; i < desc.shader_count; i++)
+	for (uint32_t i = 0; i < desc.descriptor_set_count; i++)
 	{
-		VkPipelineShaderStageCreateInfo shader_stage_info = {};
-		shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shader_stage_info.stage = kShaderStageTable[desc.shaders[i]->stage];
-		shader_stage_info.module = desc.shaders[i]->vk_shader_module;
-		shader_stage_info.pName = desc.shaders[i]->entry_point.c_str();
+		Vector<VkDescriptorSetLayoutBinding> bindings(desc.descriptor_sets[i].descriptor_count);
 
-		shader_stages.push_back(shader_stage_info);
+		for (uint32_t j = 0; j < desc.descriptor_sets[i].descriptor_count; j++)
+		{
+			VkDescriptorSetLayoutBinding binding_info = {};
+
+			binding_info.descriptorCount = 1;
+			binding_info.stageFlags = find_stage_flags(desc.descriptor_sets[i].descriptors[j].stages);
+			binding_info.binding = desc.descriptor_sets[i].descriptors[j].binding;
+			binding_info.descriptorType = kDescriptorTypeTable[desc.descriptor_sets[i].descriptors[j].type];
+			binding_info.pImmutableSamplers = nullptr;
+
+			bindings.push_back(binding_info);
+		}
+
+		VkDescriptorSetLayoutCreateInfo ds_layout_info = {};
+
+		ds_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		ds_layout_info.pNext = nullptr;
+		ds_layout_info.flags = 0;
+		ds_layout_info.bindingCount = bindings.size();
+		ds_layout_info.pBindings = bindings.data();
+
+		VkDescriptorSetLayout layout;
+		
+		if (vkCreateDescriptorSetLayout(m_device, &ds_layout_info, nullptr, &layout) != VK_SUCCESS)
+		{
+			TE_LOG_ERROR("Failed to create descriptor set layout!");
+			return nullptr;
+		}
+
+		pipeline_layout->ds_layouts.push_back(layout);
 	}
 
-	// -------------------------------------------------------------------------------------
-	// Render Pass
-	// -------------------------------------------------------------------------------------
-	VkRenderPass temp_render_pass = create_render_pass(m_device, m_allocator, desc.render_target_count, desc.color_attachment_formats, desc.sample_count, desc.depth_stencil_format);
+	Vector<VkPushConstantRange> pc_ranges(desc.push_constant_range_count);
 
+	for (uint32_t i = 0; i < desc.push_constant_range_count; i++)
+	{
+		VkPushConstantRange range = {};
 
+		range.stageFlags = find_stage_flags(desc.push_constant_ranges[i].stages);
+		range.offset = desc.push_constant_ranges[i].offset;
+		range.size = desc.push_constant_ranges[i].size;
+
+		pc_ranges.push_back(range);
+	}
+
+	VkPipelineLayoutCreateInfo info = {};
+
+	info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	info.pNext = nullptr;
+	info.setLayoutCount = pipeline_layout->ds_layouts.size();
+	info.pSetLayouts = pipeline_layout->ds_layouts.data();
+	info.pushConstantRangeCount = pc_ranges.size();
+	info.pPushConstantRanges = pc_ranges.data();
+
+	if (vkCreatePipelineLayout(m_device, &info, nullptr, &pipeline_layout->vk_pipeline_layout) != VK_SUCCESS)
+	{
+		TE_LOG_ERROR("Failed to create Pipeline Layout!");
+
+		for (auto ds_layout : pipeline_layout->ds_layouts)
+			vkDestroyDescriptorSetLayout(m_device, ds_layout, nullptr);
+
+		TE_HEAP_DELETE(pipeline_layout);
+		return nullptr;
+	}
+
+	return pipeline_layout;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& desc)
+{
+	if (desc.type == GFX_PIPELINE_GRAPHICS)
+	{
+		// -------------------------------------------------------------------------------------
+		// Rasterizer State
+		// -------------------------------------------------------------------------------------
+		VkPipelineRasterizationStateCreateInfo rasterizer_state = {};
+
+		rasterizer_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+		rasterizer_state.pNext = nullptr;
+		rasterizer_state.cullMode = kCullModeTable[desc.graphics.rasterizer_state.cull_mode];
+		rasterizer_state.polygonMode = kFillModeTable[desc.graphics.rasterizer_state.fill_mode];
+		rasterizer_state.frontFace = desc.graphics.rasterizer_state.front_winding_ccw ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
+		rasterizer_state.lineWidth = 1.0f;
+		rasterizer_state.rasterizerDiscardEnable = VK_FALSE;
+
+		rasterizer_state.depthBiasClamp = VK_FALSE;
+		rasterizer_state.depthBiasEnable = VK_FALSE;
+		rasterizer_state.depthBiasConstantFactor = 0.0f;
+		rasterizer_state.depthBiasClamp = 0.0f;
+		rasterizer_state.depthBiasSlopeFactor = 0.0f;
+
+		// -------------------------------------------------------------------------------------
+		// Depth Stencil State
+		// -------------------------------------------------------------------------------------
+		VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
+
+		depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depth_stencil_state.pNext = nullptr;
+		depth_stencil_state.flags = 0;
+		depth_stencil_state.depthTestEnable = desc.graphics.depth_stencil_state.enable_depth_test;
+		depth_stencil_state.depthWriteEnable = desc.graphics.depth_stencil_state.enable_depth_write;
+		depth_stencil_state.depthCompareOp = kCompareOpTable[desc.graphics.depth_stencil_state.depth_cmp_func];
+		depth_stencil_state.stencilTestEnable = desc.graphics.depth_stencil_state.enable_stencil_test;
+
+		depth_stencil_state.front.failOp = kStencilOpTable[desc.graphics.depth_stencil_state.front_stencil_fail];
+		depth_stencil_state.front.passOp = kStencilOpTable[desc.graphics.depth_stencil_state.front_stencil_pass_depth_pass];
+		depth_stencil_state.front.depthFailOp = kStencilOpTable[desc.graphics.depth_stencil_state.front_stencil_pass_depth_fail];
+		depth_stencil_state.front.compareOp = kCompareOpTable[desc.graphics.depth_stencil_state.front_stencil_cmp_func];
+		depth_stencil_state.front.writeMask = kCompareOpTable[desc.graphics.depth_stencil_state.front_stencil_mask];
+		depth_stencil_state.front.compareMask = 0; // TODO
+		depth_stencil_state.front.reference = 0; // TODO
+
+		depth_stencil_state.back.failOp = kStencilOpTable[desc.graphics.depth_stencil_state.back_stencil_fail];
+		depth_stencil_state.back.passOp = kStencilOpTable[desc.graphics.depth_stencil_state.back_stencil_pass_depth_pass];
+		depth_stencil_state.back.depthFailOp = kStencilOpTable[desc.graphics.depth_stencil_state.back_stencil_pass_depth_fail];
+		depth_stencil_state.back.compareOp = kCompareOpTable[desc.graphics.depth_stencil_state.back_stencil_cmp_func];
+		depth_stencil_state.back.writeMask = kCompareOpTable[desc.graphics.depth_stencil_state.back_stencil_mask];
+		depth_stencil_state.back.compareMask = 0; // TODO
+		depth_stencil_state.back.reference = 0; // TODO
+
+		// -------------------------------------------------------------------------------------
+		// Shader Modules
+		// -------------------------------------------------------------------------------------
+		Vector<VkPipelineShaderStageCreateInfo> shader_stages(desc.graphics.shader_count);
+
+		for (uint32_t i = 0; i < desc.graphics.shader_count; i++)
+		{
+			VkPipelineShaderStageCreateInfo shader_stage_info = {};
+			shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shader_stage_info.pNext = nullptr;
+			shader_stage_info.stage = kShaderStageTable[desc.graphics.shaders[i]->stage];
+			shader_stage_info.module = desc.graphics.shaders[i]->vk_shader_module;
+			shader_stage_info.pName = desc.graphics.shaders[i]->entry_point.c_str();
+
+			shader_stages.push_back(shader_stage_info);
+		}
+
+		// -------------------------------------------------------------------------------------
+		// Render Pass
+		// -------------------------------------------------------------------------------------
+		VkRenderPass temp_render_pass = create_render_pass(m_device, m_allocator, desc.graphics.render_target_count, desc.graphics.color_attachment_formats, desc.graphics.sample_count, desc.graphics.depth_stencil_format);
+
+		// -------------------------------------------------------------------------------------
+		// Input Assembly State
+		// -------------------------------------------------------------------------------------
+		VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
+		input_assembly_state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+		input_assembly_state.pNext = nullptr;
+		input_assembly_state.topology = kPrimitiveTopologyTable[desc.graphics.primitive];
+
+		// -------------------------------------------------------------------------------------
+		// Blend State
+		// -------------------------------------------------------------------------------------
+		Vector<VkPipelineColorBlendAttachmentState> blend_attachment_states(desc.graphics.render_target_count);
+
+		for (uint32_t i = 0; i < desc.graphics.render_target_count; i++)
+		{
+			VkPipelineColorBlendAttachmentState state = {};
+
+			state.blendEnable = desc.graphics.blend_states[i].enable;
+			state.srcColorBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].src_func];
+			state.dstColorBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].dst_func];
+			state.colorBlendOp = kBlendOpTable[desc.graphics.blend_states[i].blend_op];
+			state.srcAlphaBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].src_func_alpha];
+			state.dstAlphaBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].dst_func_alpha];
+			state.alphaBlendOp = kBlendOpTable[desc.graphics.blend_states[i].blend_op_alpha];
+			// TODO: Check if other API's support this.
+			state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT; 
+
+			blend_attachment_states.push_back(state);
+		}
+		
+		VkPipelineColorBlendStateCreateInfo color_blend_state = {};
+		color_blend_state.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+		color_blend_state.pNext = nullptr;
+		color_blend_state.attachmentCount = blend_attachment_states.size();
+		color_blend_state.pAttachments = blend_attachment_states.data();
+
+		// -------------------------------------------------------------------------------------
+		// Viewport State
+		// -------------------------------------------------------------------------------------
+		VkPipelineViewportStateCreateInfo viewport_state = {};
+		viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		viewport_state.pNext = nullptr;
+		viewport_state.viewportCount = 1;
+		viewport_state.scissorCount = 1;
+
+		// -------------------------------------------------------------------------------------
+		// Multisample State
+		// -------------------------------------------------------------------------------------
+		VkPipelineMultisampleStateCreateInfo multisample_state = {};
+		multisample_state.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+		multisample_state.pNext = nullptr;
+		multisample_state.rasterizationSamples = kSampleCountTable[desc.graphics.sample_count];
+		multisample_state.pSampleMask = nullptr;
+
+		// -------------------------------------------------------------------------------------
+		// Dynamic State
+		// -------------------------------------------------------------------------------------
+		VkDynamicState dynamic_states[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+
+		VkPipelineDynamicStateCreateInfo dynamic_state = {};
+		dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamic_state.pNext = nullptr;
+		dynamic_state.pDynamicStates = dynamic_states;
+		dynamic_state.dynamicStateCount = 2;
+
+		// -------------------------------------------------------------------------------------
+		// Pipeline Creation
+		// -------------------------------------------------------------------------------------
+		VkGraphicsPipelineCreateInfo info = {};
+
+		info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		info.basePipelineHandle = VK_NULL_HANDLE;
+		info.pNext = nullptr;
+		info.flags = 0;
+		info.layout = desc.pipeline_layout->vk_pipeline_layout;
+		info.renderPass = temp_render_pass;
+		info.stageCount = desc.graphics.shader_count;
+		info.pStages = shader_stages.data();
+		info.pInputAssemblyState = &input_assembly_state;
+		info.pDepthStencilState = &depth_stencil_state;
+		info.pRasterizationState = &rasterizer_state;
+		info.pColorBlendState = &color_blend_state;
+		info.pMultisampleState = &multisample_state;
+		info.pDynamicState = &dynamic_state;
+		info.pViewportState - &viewport_state;
+		info.pVertexInputState = &desc.graphics.input_layout->input_state_nfo;
+
+		PipelineState* pipeline = TE_HEAP_NEW PipelineState();
+
+		pipeline->type = desc.type;
+
+		if (vkCreateGraphicsPipelines(m_device, nullptr, 1, &info, nullptr, &pipeline->vk_pipeline) != VK_SUCCESS)
+		{
+			TE_LOG_ERROR("Failed to create graphics pipeline!");
+			TE_HEAP_DELETE(pipeline);
+
+			vkDestroyRenderPass(m_device, temp_render_pass, nullptr);
+
+			return nullptr;
+		}
+
+		vkDestroyRenderPass(m_device, temp_render_pass, nullptr);
+
+		return pipeline;
+	}
+	else if (desc.type == GFX_PIPELINE_COMPUTE)
+	{
+		VkComputePipelineCreateInfo info = {};
+
+		info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+		info.layout = desc.pipeline_layout->vk_pipeline_layout;
+		info.flags = 0;
+		info.pNext = nullptr;
+		info.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		info.stage.stage = kShaderStageTable[desc.compute.shader->stage];
+		info.stage.module = desc.compute.shader->vk_shader_module;
+		info.stage.pName = desc.compute.shader->entry_point.c_str();
+		info.basePipelineHandle = VK_NULL_HANDLE;
+
+		PipelineState* pipeline = TE_HEAP_NEW PipelineState();
+
+		pipeline->type = desc.type;
+
+		if (vkCreateComputePipelines(m_device, nullptr, 1, &info, nullptr, &pipeline->vk_pipeline) != VK_SUCCESS)
+		{
+			TE_LOG_ERROR("Failed to create compute pipeline!");
+			TE_HEAP_DELETE(pipeline);
+
+			return nullptr;
+		}
+
+		return pipeline;
+	}
+	else
+		return nullptr;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1531,6 +1813,20 @@ void GfxDevice::destroy_shader(Shader* shader)
 	{
 		vkDestroyShaderModule(m_device, shader->vk_shader_module, nullptr);
 		TE_HEAP_DELETE(shader);
+	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::destroy_pipeline_layout(PipelineLayout* pipeline_layout)
+{
+	if (pipeline_layout)
+	{
+		for (auto ds_layout : pipeline_layout->ds_layouts)
+			vkDestroyDescriptorSetLayout(m_device, ds_layout, nullptr);
+
+		vkDestroyPipelineLayout(m_device, pipeline_layout->vk_pipeline_layout, nullptr);
+		TE_HEAP_DELETE(pipeline_layout);
 	}
 }
 
@@ -1920,6 +2216,7 @@ bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo
 	VmaAllocationCreateInfo alloc_create_info = {};
 	alloc_create_info.usage = vma_usage;
 	alloc_create_info.flags = vma_flags;
+	// TODO: add HOST_COHERENT etc options
 
 	if (vmaCreateBuffer(allocator, &info, &alloc_create_info, &buffer, &vma_allocation, &alloc_info) != VK_SUCCESS)
 	{
@@ -1991,6 +2288,33 @@ bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture
 		return false;
 
 	return true;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+VkShaderStageFlags find_stage_flags(ShaderStageBit bits)
+{
+	VkShaderStageFlags flags = 0;
+
+	if (bits & GFX_SHADER_STAGE_VERTEX_BIT)
+		flags |= VK_SHADER_STAGE_VERTEX_BIT;
+
+	if (bits & GFX_SHADER_STAGE_FRAGMENT_BIT)
+		flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	if (bits & GFX_SHADER_STAGE_GEOMETRY_BIT)
+		flags |= VK_SHADER_STAGE_GEOMETRY_BIT;
+
+	if (bits & GFX_SHADER_STAGE_TESS_CONTROL_BIT)
+		flags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+
+	if (bits & GFX_SHADER_STAGE_TESS_EVAL_BIT)
+		flags |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+
+	if (bits & GFX_SHADER_STAGE_COMPUTE_BIT)
+		flags |= VK_SHADER_STAGE_COMPUTE_BIT;
+
+	return flags;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 #include <core/terminus_macros.hpp>
 #include <vulkan/vulkan.h>
 #include <gfx/gfx_enums.hpp>
+#include <stl/vector.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -113,6 +114,12 @@ struct VertexArray
 	Buffer*		 vertex_buffer;
 	Buffer*		 index_buffer;
 	InputLayout* layout;
+};
+
+struct PipelineLayout
+{
+	VkPipelineLayout			  vk_pipeline_layout;
+	Vector<VkDescriptorSetLayout> ds_layouts;
 };
 
 TE_END_TERMINUS_NAMESPACE

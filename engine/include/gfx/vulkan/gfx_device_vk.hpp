@@ -49,16 +49,17 @@ public:
 	Framebuffer* accquire_next_framebuffer(SemaphoreGPU* signal_semaphore);
 
 	// Resource creation
-	Texture*	   create_texture(const TextureCreateDesc& desc);
-	Buffer*		   create_buffer(const BufferCreateDesc& desc);
-	VertexArray*   create_vertex_array(const VertexArrayCreateDesc& desc);
-	InputLayout*   create_input_layout(const InputLayoutCreateDesc& desc);
-	Framebuffer*   create_framebuffer(const FramebufferCreateDesc& desc);
-	Shader*		   create_shader_from_binary(const BinaryShaderCreateDesc& desc);
-	Shader*		   create_shader_from_source(const SourceShaderCreateDesc& desc);
-	PipelineState* create_pipeline_state(const PipelineStateCreateDesc& desc);
-	Fence*		   create_fence();
-	SemaphoreGPU*  create_semaphore();
+	Texture*	    create_texture(const TextureCreateDesc& desc);
+	Buffer*		    create_buffer(const BufferCreateDesc& desc);
+	VertexArray*    create_vertex_array(const VertexArrayCreateDesc& desc);
+	InputLayout*    create_input_layout(const InputLayoutCreateDesc& desc);
+	Framebuffer*    create_framebuffer(const FramebufferCreateDesc& desc);
+	Shader*		    create_shader_from_binary(const BinaryShaderCreateDesc& desc);
+	Shader*		    create_shader_from_source(const SourceShaderCreateDesc& desc);
+	PipelineLayout* create_pipeline_layout(const PipelineLayoutCreateDesc& desc);
+	PipelineState*  create_pipeline_state(const PipelineStateCreateDesc& desc);
+	Fence*		    create_fence();
+	SemaphoreGPU*   create_semaphore();
 
 	// Resource destruction
 	void destroy_texture(Texture* texture);
@@ -67,6 +68,7 @@ public:
 	void destroy_input_layout(InputLayout* input_layout);
 	void destroy_framebuffer(Framebuffer* framebuffer);
 	void destroy_shader(Shader* shader);
+	void destroy_pipeline_layout(PipelineLayout* pipeline_layout);
 	void destory_pipeline_state(PipelineState* pipeline_state);
 	void destroy_fence(Fence* fence);
 	void destroy_semaphore(SemaphoreGPU* semaphore);

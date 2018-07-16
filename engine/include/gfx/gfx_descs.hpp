@@ -8,6 +8,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 
 struct Shader;
 struct InputLayout;
+struct PipelineLayout;
 struct Buffer;
 struct Texture;
 
@@ -159,12 +160,40 @@ struct BlendStateCreateDesc
 	BlendOp blend_op_alpha;
 };
 
-struct PipelineStateCreateDesc
+struct DescriptorDesc
 {
-    DepthStencilStateCreateDesc depth_stencil_state;
-    RasterizerStateCreateDesc   rasterizer_state;
-    BlendStateCreateDesc        blend_state;
-    PrimitiveTopology			primitive;
+	uint32_t	   binding;
+	DescriptorType type;
+	ShaderStageBit stages;
+};
+
+struct DescriptorSetDesc
+{
+	uint32_t		descriptor_count;
+	DescriptorDesc*	descriptors;
+};
+
+struct PushConstantRange
+{
+	size_t		   offset;
+	size_t		   size;
+	ShaderStageBit stages;
+};
+
+struct PipelineLayoutCreateDesc
+{
+	uint32_t		   descriptor_set_count;
+	DescriptorSetDesc* descriptor_sets;
+	uint32_t		   push_constant_range_count;
+	PushConstantRange* push_constant_ranges;
+};
+
+struct GraphicsPipelineStateCreateDesc
+{
+	DepthStencilStateCreateDesc depth_stencil_state;
+	RasterizerStateCreateDesc   rasterizer_state;
+	BlendStateCreateDesc*       blend_states;
+	PrimitiveTopology			primitive;
 	uint32_t					shader_count;
 	Shader**					shaders;
 	InputLayout*				input_layout;
@@ -172,6 +201,19 @@ struct PipelineStateCreateDesc
 	TextureFormat*				color_attachment_formats;
 	uint32_t					sample_count;
 	TextureFormat				depth_stencil_format;
+};
+
+struct ComputePipelineStateCreateDesc
+{
+	Shader* shader;
+};
+
+struct PipelineStateCreateDesc
+{
+	PipelineType					type;
+	PipelineLayout*					pipeline_layout;
+	GraphicsPipelineStateCreateDesc graphics;
+	ComputePipelineStateCreateDesc	compute;
 };
 
 TE_END_TERMINUS_NAMESPACE
