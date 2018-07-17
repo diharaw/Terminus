@@ -4,6 +4,12 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
+enum CommandPoolType
+{
+	GFX_CMD_POOL_GRAPHICS = 0,
+	GFX_CMD_POOL_COMPUTE = 1
+};
+
 enum PipelineType
 {
 	GFX_PIPELINE_GRAPHICS = 0,

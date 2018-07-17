@@ -8,6 +8,7 @@
 #include <core/engine_core.hpp>
 #include <stl/string_buffer.hpp>
 #include <io/logger.hpp>
+#include <concurrency/atomic.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -360,6 +361,7 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_
 bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
+bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool* pool);
 VkShaderStageFlags find_stage_flags(ShaderStageBit bits);
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1313,14 +1315,30 @@ InputLayout* GfxDevice::create_input_layout(const InputLayoutCreateDesc& desc)
 
 Shader* GfxDevice::create_shader_from_binary(const BinaryShaderCreateDesc& desc)
 {
+	Shader* shader = TE_HEAP_NEW Shader();
 
+	VkShaderModuleCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	create_info.codeSize = desc.size;
+	create_info.pCode = reinterpret_cast<const uint32_t*>(desc.data);
+
+	if (vkCreateShaderModule(m_device, &create_info, nullptr, &shader->vk_shader_module) != VK_SUCCESS)
+	{
+		TE_LOG_ERROR("Failed to create shader module!");
+		TE_HEAP_DELETE(shader);
+		return nullptr;
+	}
+
+	return shader;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 Shader* GfxDevice::create_shader_from_source(const SourceShaderCreateDesc& desc)
 {
+	Shader* shader = TE_HEAP_NEW Shader();
 
+	return shader;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1693,6 +1711,42 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+CommandPool* GfxDevice::create_command_pool(CommandPoolType type)
+{
+	CommandPool* cmd_pool = TE_HEAP_NEW CommandPool();
+
+	if (vk_create_command_pool(m_device, type == GFX_CMD_POOL_GRAPHICS ? m_queue_infos.graphics_queue_index : m_queue_infos.compute_queue_index, &cmd_pool->vk_cmd_pool))
+	{
+		TE_HEAP_DELETE(cmd_pool);
+		return nullptr;
+	}
+
+	return cmd_pool;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+CommandBuffer* GfxDevice::create_command_buffer(CommandPool* cmd_pool)
+{
+	CommandBuffer* cmd_buf = TE_HEAP_NEW CommandBuffer();
+
+	VkCommandBufferAllocateInfo alloc_info = {};
+	alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	alloc_info.commandPool = cmd_pool->vk_cmd_pool;
+	alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	alloc_info.commandBufferCount = 1;
+
+	if (vkAllocateCommandBuffers(m_device, &alloc_info, &cmd_buf->vk_cmd_buf))
+	{
+		TE_HEAP_DELETE(cmd_buf);
+		return nullptr;
+	}
+
+	return cmd_buf;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 Fence* GfxDevice::create_fence()
 {
 	Fence* fence = TE_HEAP_NEW Fence();
@@ -1843,6 +1897,17 @@ void GfxDevice::destory_pipeline_state(PipelineState* pipeline_state)
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::destroy_command_pool(CommandPool* cmd_pool)
+{
+	if (cmd_pool)
+	{
+		vkDestroyCommandPool(m_device, cmd_pool->vk_cmd_pool, nullptr);
+		TE_HEAP_DELETE(cmd_pool);
+	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::destroy_fence(Fence* fence)
 {
 	if (fence)
@@ -1861,6 +1926,13 @@ void GfxDevice::destroy_semaphore(SemaphoreGPU* semaphore)
 		vkDestroySemaphore(m_device, semaphore->vk_semaphore, nullptr);
 		TE_HEAP_DELETE(semaphore);
 	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::reset_command_pool(CommandPool* cmd_pool)
+{
+	vkResetCommandPool(m_device, cmd_pool->vk_cmd_pool, 0);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1949,13 +2021,6 @@ void GfxDevice::check_fences(uint32_t count, Fence** fences, bool* status)
 void GfxDevice::wait_for_idle()
 {
 	vkDeviceWaitIdle(m_device);
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-CommandBuffer* GfxDevice::accquire_command_buffer()
-{
-
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2286,6 +2351,24 @@ bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture
 
 	if (vkCreateImageView(device, &info, nullptr, &image_view) != VK_SUCCESS)
 		return false;
+
+	return true;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool* pool)
+{
+	VkCommandPoolCreateInfo pool_info = {};
+	pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	pool_info.queueFamilyIndex = queue_index;
+	pool_info.flags = 0;
+
+	if (vkCreateCommandPool(device, &pool_info, nullptr, pool) != VK_SUCCESS)
+	{
+		TE_LOG_ERROR("Failed to create command pool");
+		return false;
+	}
 
 	return true;
 }

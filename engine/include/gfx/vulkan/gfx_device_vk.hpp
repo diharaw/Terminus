@@ -58,6 +58,8 @@ public:
 	Shader*		    create_shader_from_source(const SourceShaderCreateDesc& desc);
 	PipelineLayout* create_pipeline_layout(const PipelineLayoutCreateDesc& desc);
 	PipelineState*  create_pipeline_state(const PipelineStateCreateDesc& desc);
+	CommandPool*	create_command_pool(CommandPoolType type);
+	CommandBuffer*  create_command_buffer(CommandPool* cmd_pool);
 	Fence*		    create_fence();
 	SemaphoreGPU*   create_semaphore();
 
@@ -70,8 +72,10 @@ public:
 	void destroy_shader(Shader* shader);
 	void destroy_pipeline_layout(PipelineLayout* pipeline_layout);
 	void destory_pipeline_state(PipelineState* pipeline_state);
+	void destroy_command_pool(CommandPool* cmd_pool);
 	void destroy_fence(Fence* fence);
 	void destroy_semaphore(SemaphoreGPU* semaphore);
+	void reset_command_pool(CommandPool* cmd_pool);
 
 	// Resource updates
 	void  update_texture(Texture* texture, uint32_t mip_slice , uint32_t array_slice, void* data);
@@ -85,7 +89,6 @@ public:
 	void wait_for_idle();
 
 	// Command encoding
-	CommandBuffer* accquire_command_buffer();
 	void cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_array);
 	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
@@ -151,6 +154,8 @@ private:
 	bool	 check_validation_layer_support();
 	VkResult create_debug_report_callback_ext(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback);
 	void	 destroy_debug_report_callback_ext(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator);
+
+	void initialize_command_data();
 
 	// Helpers
 	Texture* create_swap_chain_texture(uint32_t w, uint32_t h, VkImage image, VkFormat format, VkSampleCountFlagBits sample_count);

@@ -5,6 +5,7 @@
 #include <core/terminus_macros.hpp>
 #include <vulkan/vulkan.h>
 #include <gfx/gfx_enums.hpp>
+#include <stl/string_buffer.hpp>
 #include <stl/vector.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
@@ -71,6 +72,11 @@ struct Framebuffer
 
 		depth_image_view = VK_NULL_HANDLE;
 	}
+};
+
+struct CommandPool
+{
+	VkCommandPool vk_cmd_pool;
 };
 
 struct CommandBuffer
