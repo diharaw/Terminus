@@ -1,13 +1,13 @@
-# Terminus-Engine
-![TerminusLogo](docs/logo.png)
-## What is it?
+[![License: MIT](https://img.shields.io/packagist/l/doctrine/orm.svg)](https://opensource.org/licenses/MIT)
 
-An Open Source, Cross Platform Game Engine with Rendering backends for OpenGL and Direct3D.
+# Terminus-Engine
+Open Source, Cross Platform Game Engine with Rendering backends for OpenGL and Direct3D (Vulkan, Direct3D 12 and Metal in the near future).
+![TerminusLogo](docs/logo.png)
 
 ## License
 
 ```
-Copyright (c) 2016 Dihara Wijetunga
+Copyright (c) 2018 Dihara Wijetunga
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
 associated documentation files (the "Software"), to deal in the Software without restriction, 
