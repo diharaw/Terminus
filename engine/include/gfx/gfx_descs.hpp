@@ -26,7 +26,7 @@ struct TextureCreateDesc
     uint16_t width;
     uint16_t height;
     uint16_t depth;
-	uint16_t samples;
+	SampleCount samples;
     void*    data;
 	uint16_t array_slices;
     uint16_t mipmap_levels;

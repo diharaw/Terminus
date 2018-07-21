@@ -1228,7 +1228,7 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 	}
 
 	image_info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	image_info.samples = (VkSampleCountFlagBits)desc.samples;
+	image_info.samples = kSampleCountTable[desc.samples];
 	image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 	texture->width = desc.width;
@@ -1236,7 +1236,7 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 	texture->depth = desc.depth;
 	texture->type = desc.type;
 	texture->format = desc.format;
-	texture->sample_count = (VkSampleCountFlagBits)desc.samples;
+	texture->sample_count = kSampleCountTable[desc.samples];
 
 	VmaAllocationInfo info;
 
