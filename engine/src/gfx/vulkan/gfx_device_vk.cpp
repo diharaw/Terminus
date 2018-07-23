@@ -339,6 +339,14 @@ const size_t kPixelSizes[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+// Submission State
+thread_local static VkPipelineStageFlags m_submit_pipeline_stage_flags[32];
+thread_local static VkCommandBuffer		 m_submit_cmd_buf[32];
+thread_local static VkSemaphore			 m_submit_wait_semaphores[32];
+thread_local static VkSemaphore			 m_submit_signal_semaphores[32];
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags,
 	VkDebugReportObjectTypeEXT obj_type,
 	uint64_t obj,
@@ -363,6 +371,7 @@ bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo i
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
 bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool* pool);
 VkShaderStageFlags find_stage_flags(ShaderStageBit bits);
+void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence);
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -2106,7 +2115,7 @@ void GfxDevice::submit_graphics(uint32_t cmd_buf_count,
 								SemaphoreGPU** signal_semaphores,
 								Fence* fence)
 {
-	
+	vk_queue_submit(m_graphics_queue, cmd_buf_count, command_buffers, wait_sema_count, wait_semaphores, signal_sema_count, signal_semaphores, fence);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2119,7 +2128,7 @@ void GfxDevice::submit_compute(uint32_t cmd_buf_count,
 							   SemaphoreGPU** signal_semaphores,
 							   Fence* fence)
 {
-
+	vk_queue_submit(m_compute_queue, cmd_buf_count, command_buffers, wait_sema_count, wait_semaphores, signal_sema_count, signal_semaphores, fence);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2398,6 +2407,42 @@ VkShaderStageFlags find_stage_flags(ShaderStageBit bits)
 		flags |= VK_SHADER_STAGE_COMPUTE_BIT;
 
 	return flags;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence)
+{
+	for (uint32_t i = 0; i < cmd_buf_count; i++)
+		m_submit_cmd_buf[i] = command_buffers[i]->vk_cmd_buf;
+
+	for (uint32_t i = 0; i < wait_sema_count; i++)
+	{
+		m_submit_wait_semaphores[i] = wait_semaphores[i]->vk_semaphore;
+		m_submit_pipeline_stage_flags[i] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+	}
+
+	for (uint32_t i = 0; i < signal_sema_count; i++)
+		m_submit_signal_semaphores[i] = signal_semaphores[i]->vk_semaphore;
+
+	VkSubmitInfo submit_info;
+
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = NULL;
+	submit_info.waitSemaphoreCount = wait_sema_count;
+	submit_info.pWaitSemaphores = &m_submit_wait_semaphores[0];
+	submit_info.pWaitDstStageMask = &m_submit_pipeline_stage_flags[0];
+	submit_info.commandBufferCount = cmd_buf_count;
+	submit_info.pCommandBuffers = &m_submit_cmd_buf[0];
+	submit_info.signalSemaphoreCount = signal_sema_count;
+	submit_info.pSignalSemaphores = &m_submit_signal_semaphores[0];
+
+	VkFence vk_fence = VK_NULL_HANDLE;
+
+	if (fence)
+		vk_fence = fence->vk_fence;
+
+	vkQueueSubmit(queue, 1, &submit_info, vk_fence);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
