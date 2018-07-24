@@ -86,10 +86,22 @@ struct PipelineLayout
 
 struct DescriptorSet
 {
-	// Indicates whether this Descriptor Table only contains CBV's, 
-	// in which case it can be bound as a root constant buffer view.
-	bool                          only_cbv;
-	CD3DX12_GPU_DESCRIPTOR_HANDLE d3d12_gpu_address;
+    // Indicates whether this Descriptor Table only contains CBV's, 
+    // in which case it can be bound as a root constant buffer view.
+    bool                          only_cbv; 
+
+    // If the Descriptor Set contains at least one dynamically offset constant buffer.
+    uint32_t                      dynamic_cbv_count;
+    DynamicCBV*                   dynamic_cbvs;
+    // The static portion of the descriptor set will be created in the CPU-side heap
+    // and will be copied over into the shader-visible heap after the dynamic descriptors
+    // are created and copied. 
+    CD3DX12_CPU_DESCRIPTOR_HANDLE d3d12_cpu_address;
+
+    // If the Descriptor Set does NOT contain dynamically offset constant buffers,
+    // the entire descriptor table will be created in the shader-visible heap.
+    CD3DX12_GPU_DESCRIPTOR_HANDLE d3d12_gpu_address;
+    D3D12_DESCRIPTOR_HEAP_TYPE    d3d12_heap_type;
 };
 
 TE_END_TERMINUS_NAMESPACE
