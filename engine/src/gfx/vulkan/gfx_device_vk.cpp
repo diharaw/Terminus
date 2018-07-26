@@ -344,6 +344,7 @@ thread_local static VkPipelineStageFlags m_submit_pipeline_stage_flags[32];
 thread_local static VkCommandBuffer		 m_submit_cmd_buf[32];
 thread_local static VkSemaphore			 m_submit_wait_semaphores[32];
 thread_local static VkSemaphore			 m_submit_signal_semaphores[32];
+thread_local static VkSemaphore			 m_present_semaphores[32];
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -418,6 +419,16 @@ bool GfxDevice::initialize()
 	vmaCreateAllocator(&allocator_info, &m_allocator);
 
 	return true;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::recreate_swap_chain()
+{
+	shutdown_swap_chain();
+
+	if (create_swap_chain())
+		TE_LOG_ERROR("Failed to create swap chain");
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1193,9 +1204,9 @@ void GfxDevice::calc_image_size_and_extents(Texture* texture, uint32_t mip_level
 
 Framebuffer* GfxDevice::accquire_next_framebuffer(SemaphoreGPU* signal_semaphore)
 {
-	// TODO: Implement THIS!
-	uint32_t idx = 0;
-	return m_swap_chain_framebuffers[idx];
+	VkResult res = vkAcquireNextImageKHR(m_device, m_swap_chain, UINT64_MAX, signal_semaphore->vk_semaphore, VK_NULL_HANDLE, &m_framebuffer_index);
+	assert(res == VK_SUCCESS);
+	return m_swap_chain_framebuffers[m_framebuffer_index];
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2135,7 +2146,22 @@ void GfxDevice::submit_compute(uint32_t cmd_buf_count,
 
 void GfxDevice::present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores)
 {
+	for (uint32_t i = 0; i < wait_sema_count; i++)
+		m_present_semaphores[i] = wait_semaphores[i]->vk_semaphore;
 
+	VkPresentInfoKHR present_info = {};
+
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.pNext = NULL;
+	present_info.waitSemaphoreCount = wait_sema_count;
+	present_info.pWaitSemaphores = &m_present_semaphores[0];
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = &(m_swap_chain);
+	present_info.pImageIndices = &(m_framebuffer_index);
+	present_info.pResults = NULL;
+
+	if (vkQueuePresentKHR(m_presentation_queue, &present_info) != VK_SUCCESS)
+		TE_LOG_ERROR("Failed to present");
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

@@ -44,6 +44,7 @@ public:
 	~GfxDevice();
 
 	bool initialize();
+	void recreate_swap_chain();
 	void shutdown();
 
 	Framebuffer* accquire_next_framebuffer(SemaphoreGPU* signal_semaphore);

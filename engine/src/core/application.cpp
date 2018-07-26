@@ -253,9 +253,10 @@ void Application::pre_update_engine()
 			// --------------------------------------------------------------------------------
 			case SDL_WINDOWEVENT:
 			{
-				//                    event.window.type = e.window.event;
-				//                    event.window.id = e.window.windowID;
-
+				if (e.window.type == SDL_WINDOWEVENT_RESIZED)
+				{
+					global::gfx_device().recreate_swap_chain();
+				}
 			}
 			// --------------------------------------------------------------------------------
 			// TEXT
