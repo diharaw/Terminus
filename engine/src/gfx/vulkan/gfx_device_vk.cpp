@@ -388,29 +388,47 @@ bool GfxDevice::initialize()
 {
 	// Create Vulkan instance
 	if (!create_instance())
+	{
+		TE_LOG_ERROR("Faild to create Vulkan Instance!");
 		return false;
+	}
 
 #if defined(TE_VULKAN_DEBUG)
 	// Setup debug callback
 	if (!setup_debug_callback())
+	{
+		TE_LOG_ERROR("Faild to create Vulkan debug callback!");
 		return false;
+	}
 #endif
 
 	// Create surface
 	if (!create_surface())
+	{
+		TE_LOG_ERROR("Faild to create Vulkan surface!");
 		return false;
+	}
 
 	// Choose physical device
 	if (!choose_physical_device())
+	{
+		TE_LOG_ERROR("Faild to choose Vulkan device!");
 		return false;
+	}
 
 	// Create logical device
 	if (!create_logical_device())
+	{
+		TE_LOG_ERROR("Faild to create Vulkan queues!");
 		return false;
+	}
 
 	// Create swap chain
 	if (!create_swap_chain())
+	{
+		TE_LOG_ERROR("Faild to create Vulkan swap chain!");
 		return false;
+	}
 
 	VmaAllocatorCreateInfo allocator_info = {};
 	allocator_info.physicalDevice = m_physical_device;
@@ -427,7 +445,7 @@ void GfxDevice::recreate_swap_chain()
 {
 	shutdown_swap_chain();
 
-	if (create_swap_chain())
+	if (!create_swap_chain())
 		TE_LOG_ERROR("Failed to create swap chain");
 }
 
@@ -950,7 +968,7 @@ bool GfxDevice::create_swap_chain()
 void GfxDevice::shutdown_swap_chain()
 {
 	for (uint32_t i = 0; i < m_swap_chain_textures.size(); i++)
-		TE_HEAP_DEALLOC(m_swap_chain_textures[i]);
+		TE_HEAP_DELETE(m_swap_chain_textures[i]);
 
 	for (uint32_t i = 0; i < m_swap_chain_framebuffers.size(); i++)
 		destroy_framebuffer(m_swap_chain_framebuffers[i]);

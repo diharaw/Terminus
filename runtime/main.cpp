@@ -182,6 +182,7 @@ public:
 		m_title = "Terminus Runtime";
 		m_width = 1280;
 		m_height = 720;
+		m_window_flags |= TE_WINDOW_RESIZABLE;
 	}
 
 	~Runtime()

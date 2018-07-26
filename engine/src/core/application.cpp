@@ -7,30 +7,6 @@
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
-enum WindowFlags
-{
-	TE_WINDOW_FULLSCREEN = 0x00000001,
-	TE_WINDOW_OPENGL = 0x00000002,
-	TE_WINDOW_SHOWN = 0x00000004,
-	TE_WINDOW_HIDDEN = 0x00000008,
-	TE_WINDOW_BORDERLESS = 0x00000010,
-	TE_WINDOW_RESIZABLE = 0x00000020,
-	TE_WINDOW_MINIMIZED = 0x00000040,
-	TE_WINDOW_MAXIMIZED = 0x00000080,
-	TE_WINDOW_INPUT_GRABBED = 0x00000100,
-	TE_WINDOW_INPUT_FOCUS = 0x00000200,
-	TE_WINDOW_MOUSE_FOCUS = 0x00000400,
-	TE_WINDOW_FOREIGN = 0x00000800,
-	TE_WINDOW_ALLOW_HIGHDPI = 0x00002000,
-	TE_WINDOW_MOUSE_CAPTURE = 0x00004000,
-	TE_WINDOW_ALWAYS_ON_TOP = 0x00008000,
-	TE_WINDOW_SKIP_TASKBAR = 0x00010000,
-	TE_WINDOW_UTILITY = 0x00020000,
-	TE_WINDOW_TOOLTIP = 0x00040000,
-	TE_WINDOW_POPUP_MENU = 0x00080000,
-	TE_WINDOW_VULKAN = 0x00100000
-};
-
 Application::Application()
 {
 	m_width = 640;
@@ -91,7 +67,7 @@ bool Application::initialize_engine()
 #endif
     
     if (TE_HAS_BIT_FLAG(TE_WINDOW_RESIZABLE, m_window_flags))
-        window_flags = SDL_WINDOW_RESIZABLE;
+        window_flags |= SDL_WINDOW_RESIZABLE;
     
     if (TE_HAS_BIT_FLAG(TE_WINDOW_FULLSCREEN, m_window_flags))
         window_flags |= SDL_WINDOW_FULLSCREEN;
@@ -253,7 +229,7 @@ void Application::pre_update_engine()
 			// --------------------------------------------------------------------------------
 			case SDL_WINDOWEVENT:
 			{
-				if (e.window.type == SDL_WINDOWEVENT_RESIZED)
+				if (e.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
 					global::gfx_device().recreate_swap_chain();
 				}
@@ -301,14 +277,15 @@ void Application::post_update_engine()
 
 void Application::shutdown_engine()
 {
-    if(m_sdl_window)
-    {
-        SDL_DestroyWindow(m_sdl_window);
-        m_sdl_window = nullptr;
-    }
-
 	// Shutdown graphics device
 	global::gfx_device().shutdown();
+
+	if (m_sdl_window)
+	{
+		SDL_DestroyWindow(m_sdl_window);
+		m_sdl_window = nullptr;
+	}
+
 	// Shutdown engine core
 	global::shutdown_engine_core();
 	// Shutdown SDL
