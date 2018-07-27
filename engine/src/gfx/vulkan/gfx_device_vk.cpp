@@ -2063,8 +2063,74 @@ void GfxDevice::wait_for_idle()
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::cmd_begin_recording(CommandBuffer* cmd)
+{
+	assert(cmd != nullptr);
+	VkCommandBufferBeginInfo begin_info = {};
+	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+	begin_info.pInheritanceInfo = nullptr;
+
+	vkBeginCommandBuffer(cmd->vk_cmd_buf, &begin_info);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_end_recording(CommandBuffer* cmd)
+{
+	assert(cmd != nullptr);
+
+	// If a framebuffer is already bound, it means there is already an active Render Pass. Finish it first before starting a new one.
+	if (cmd->current_framebuffer)
+	{
+		vkCmdEndRenderPass(cmd->vk_cmd_buf);
+		cmd->current_framebuffer = nullptr;
+	}
+
+	vkEndCommandBuffer(cmd->vk_cmd_buf);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_set_viewport(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+	assert(cmd != nullptr);
+	cmd->vk_viewport.x = x;
+	cmd->vk_viewport.y = y;
+	cmd->vk_viewport.minDepth = 0.0f;
+	cmd->vk_viewport.maxDepth = 1.0f;
+	cmd->vk_viewport.width = w;
+	cmd->vk_viewport.height = h;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_set_clear_values(CommandBuffer* cmd, float* color, float depth, float stencil)
+{
+	assert(cmd != nullptr);
+	cmd->vk_clear_value.color = { color[0], color[1], color[2], color[3] };
+	cmd->vk_clear_value.depthStencil = { depth, stencil };
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_clear_framebuffer(CommandBuffer* cmd, ClearTarget clear_flags)
+{
+	assert(cmd != nullptr);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_clear_framebuffer(CommandBuffer* cmd, uint32_t render_target_index, ClearTarget clear_flags)
+{
+	assert(cmd != nullptr);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_array)
 {
+	assert(cmd != nullptr);
 	size_t offset = 0;
 	vkCmdBindVertexBuffers(cmd->vk_cmd_buf, 0, 1, &vertex_array->vertex_buffer->vk_buffer, &offset);
 
@@ -2075,13 +2141,35 @@ void GfxDevice::cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_ar
 
 void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer)
 {
+	assert(cmd != nullptr);
 
+	// If a framebuffer is already bound, it means there is already an active Render Pass. Finish it first before starting a new one.
+	if (cmd->current_framebuffer && cmd->current_framebuffer != framebuffer)
+	{
+		vkCmdEndRenderPass(cmd->vk_cmd_buf);
+		cmd->current_framebuffer = nullptr;
+	}
+
+	VkRenderPassBeginInfo render_pass_info = {};
+	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	render_pass_info.renderPass = framebuffer->render_pass;
+	render_pass_info.framebuffer = framebuffer->framebuffer;
+	render_pass_info.renderArea.offset = { cmd->vk_viewport.x, cmd->vk_viewport.y };	
+	render_pass_info.renderArea.extent = { cmd->vk_viewport.width, cmd->vk_viewport.height };
+	// Clearing is done manually
+	render_pass_info.clearValueCount = 0;
+	render_pass_info.pClearValues = nullptr;
+
+	cmd->current_framebuffer = framebuffer;
+
+	vkCmdBeginRenderPass(cmd->vk_cmd_buf, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 void GfxDevice::cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state)
 {
+	assert(cmd != nullptr);
 	vkCmdBindPipeline(cmd->vk_cmd_buf, kPipelineBindPointTable[pipeline_state->type], pipeline_state->vk_pipeline);
 }
 

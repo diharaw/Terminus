@@ -82,6 +82,14 @@ struct CommandPool
 struct CommandBuffer
 {
 	VkCommandBuffer vk_cmd_buf;
+	VkViewport		vk_viewport;
+	VkClearValue	vk_clear_value;
+	Framebuffer*	current_framebuffer;
+
+	CommandBuffer()
+	{
+		current_framebuffer = nullptr;
+	}
 };
 
 struct Shader
