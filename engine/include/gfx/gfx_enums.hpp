@@ -16,6 +16,13 @@ enum PipelineType
 	GFX_PIPELINE_COMPUTE  = 1
 };
 
+enum LoadOp
+{
+	GFX_LOAD_OP_DONT_CARE = 0,
+	GFX_LOAD_OP_LOAD = 1,
+	GFX_LOAD_OP_CLEAR = 2
+};
+
 enum BufferType
 {
 	GFX_BUFFER_VERTEX = 0,

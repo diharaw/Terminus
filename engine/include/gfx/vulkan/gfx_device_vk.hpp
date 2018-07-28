@@ -93,11 +93,8 @@ public:
 	void cmd_begin_recording(CommandBuffer* cmd);
 	void cmd_end_recording(CommandBuffer* cmd);
 	void cmd_set_viewport(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-	void cmd_set_clear_values(CommandBuffer* cmd, float* color, float depth, float stencil);
-	void cmd_clear_framebuffer(CommandBuffer* cmd, ClearTarget clear_flags);
-	void cmd_clear_framebuffer(CommandBuffer* cmd, uint32_t render_target_index, ClearTarget clear_flags);
 	void cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_array);
-	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer);
+	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer, ClearValue* color_clear_values, ClearValue ds_clear_value);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
 	void cmd_resource_barrier(CommandBuffer* cmd);
 	void cmd_draw(CommandBuffer* cmd, uint32_t  vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance);

@@ -69,6 +69,7 @@ struct RenderTargetDesc
 	Texture* texture = nullptr;
 	uint32_t array_slice = 0;
 	uint32_t mip_slice = 0;
+	LoadOp   load_op = GFX_LOAD_OP_CLEAR;
 };
 
 struct DepthStencilTargetDesc
@@ -76,6 +77,14 @@ struct DepthStencilTargetDesc
 	Texture* texture = nullptr;
 	uint32_t array_slice = 0;
 	uint32_t mip_slice = 0;
+	LoadOp   load_op = GFX_LOAD_OP_CLEAR;
+};
+
+struct ClearValue
+{
+	float color[4];
+	float depth;
+	uint32_t stencil;
 };
 
 struct FramebufferCreateDesc

@@ -57,10 +57,12 @@ struct Texture
 
 struct Framebuffer
 {
-	uint32_t color_attachment_count;
+	uint32_t	  color_attachment_count;
 	VkFramebuffer framebuffer;
 	VkImageView   color_image_views[MAX_COLOR_ATTACHMENTS];
+	LoadOp		  color_load_ops[MAX_COLOR_ATTACHMENTS];
 	VkImageView   depth_image_view;
+	LoadOp		  depth_stencil_load_op;
 	VkRenderPass  render_pass;
 
 	Framebuffer()

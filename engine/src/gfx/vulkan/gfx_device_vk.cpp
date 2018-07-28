@@ -302,6 +302,15 @@ const VkDescriptorType kDescriptorTypeTable[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+const VkAttachmentLoadOp kLoadOpTable[] =
+{
+	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+	VK_ATTACHMENT_LOAD_OP_LOAD,
+	VK_ATTACHMENT_LOAD_OP_CLEAR
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 const size_t kPixelSizes[] =
 {
 	// @TODO: Add compressed formats
@@ -345,6 +354,7 @@ thread_local static VkCommandBuffer		 m_submit_cmd_buf[32];
 thread_local static VkSemaphore			 m_submit_wait_semaphores[32];
 thread_local static VkSemaphore			 m_submit_signal_semaphores[32];
 thread_local static VkSemaphore			 m_present_semaphores[32];
+thread_local static VkClearValue		 m_clear_values[MAX_COLOR_ATTACHMENTS + 1];
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -357,7 +367,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 	const char* msg,
 	void* user_data)
 {
-	TE_LOG_ERROR("Validation Layer : " + std::string(msg));
+	TE_LOG_ERROR("Vulkan Validation Layer : " + std::string(msg));
 
 	return VK_FALSE;
 }
@@ -373,6 +383,7 @@ bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture
 bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool* pool);
 VkShaderStageFlags find_stage_flags(ShaderStageBit bits);
 void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence);
+bool is_stencil(TextureFormat format);
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -1404,6 +1415,7 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 			return nullptr;
 		}
 
+		framebuffer->color_load_ops[i] = desc.render_targets[i].load_op;
 		image_views[i] = framebuffer->color_image_views[i];
 	}
 
@@ -1423,6 +1435,7 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 			return nullptr;
 		}
 
+		framebuffer->depth_stencil_load_op = desc.depth_stencil_target.load_op;
 		image_views[attachment_count - 1] = framebuffer->depth_image_view;
 	}
 
@@ -2101,29 +2114,8 @@ void GfxDevice::cmd_set_viewport(CommandBuffer* cmd, uint32_t x, uint32_t y, uin
 	cmd->vk_viewport.maxDepth = 1.0f;
 	cmd->vk_viewport.width = w;
 	cmd->vk_viewport.height = h;
-}
 
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-void GfxDevice::cmd_set_clear_values(CommandBuffer* cmd, float* color, float depth, float stencil)
-{
-	assert(cmd != nullptr);
-	cmd->vk_clear_value.color = { color[0], color[1], color[2], color[3] };
-	cmd->vk_clear_value.depthStencil = { depth, stencil };
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-void GfxDevice::cmd_clear_framebuffer(CommandBuffer* cmd, ClearTarget clear_flags)
-{
-	assert(cmd != nullptr);
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-void GfxDevice::cmd_clear_framebuffer(CommandBuffer* cmd, uint32_t render_target_index, ClearTarget clear_flags)
-{
-	assert(cmd != nullptr);
+	vkCmdSetViewport(cmd->vk_cmd_buf, 0, 1, &cmd->vk_viewport);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2139,7 +2131,7 @@ void GfxDevice::cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_ar
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer)
+void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer, ClearValue* color_clear_values, ClearValue ds_clear_value)
 {
 	assert(cmd != nullptr);
 
@@ -2156,9 +2148,27 @@ void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffe
 	render_pass_info.framebuffer = framebuffer->framebuffer;
 	render_pass_info.renderArea.offset = { cmd->vk_viewport.x, cmd->vk_viewport.y };	
 	render_pass_info.renderArea.extent = { cmd->vk_viewport.width, cmd->vk_viewport.height };
-	// Clearing is done manually
-	render_pass_info.clearValueCount = 0;
-	render_pass_info.pClearValues = nullptr;
+	
+	uint32_t clear_color_count = 0;
+
+	for (uint32_t i = 0; i < clear_color_count; i++)
+	{
+		if (framebuffer->color_load_ops[i] == GFX_LOAD_OP_CLEAR)
+		{
+			m_clear_values[i].color = { color_clear_values[i].color[0], color_clear_values[i].color[1], color_clear_values[i].color[2], color_clear_values[i].color[3] };
+			m_clear_values[i].depthStencil = { color_clear_values[i].depth, color_clear_values[i].stencil };
+			clear_color_count++;
+		}
+	}
+
+	if (framebuffer->depth_image_view != VK_NULL_HANDLE && framebuffer->depth_stencil_load_op == GFX_LOAD_OP_CLEAR)
+	{
+		m_clear_values[clear_color_count].depthStencil = { ds_clear_value.depth, ds_clear_value.stencil };
+		clear_color_count++;
+	}
+
+	render_pass_info.clearValueCount = clear_color_count;
+	render_pass_info.pClearValues = &m_clear_values[0];
 
 	cmd->current_framebuffer = framebuffer;
 
@@ -2288,7 +2298,7 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const F
 
 		attachments[i].format = texture->vk_format;
 		attachments[i].samples = texture->sample_count;
-		attachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[i].loadOp = kLoadOpTable[desc.render_targets[i].load_op];
 		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachments[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -2308,10 +2318,20 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const F
 
 		attachments[depth_idx].format = texture->vk_format;
 		attachments[depth_idx].samples = texture->sample_count;
-		attachments[depth_idx].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[depth_idx].loadOp = kLoadOpTable[desc.depth_stencil_target.load_op];
 		attachments[depth_idx].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // @TODO: Set stencil related flags
-		attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+		if (is_stencil(texture->format))
+		{
+			attachments[depth_idx].stencilLoadOp = kLoadOpTable[desc.depth_stencil_target.load_op];
+			attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		}
+		else
+		{
+			attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		}
+
 		attachments[depth_idx].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		attachments[depth_idx].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -2575,6 +2595,16 @@ void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** comm
 		vk_fence = fence->vk_fence;
 
 	vkQueueSubmit(queue, 1, &submit_info, vk_fence);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+bool is_stencil(TextureFormat format)
+{
+	if (format == GFX_FORMAT_D32_FLOAT_S8_UINT || format == GFX_FORMAT_D24_FLOAT_S8_UINT)
+		return true;
+	else
+		return false;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
