@@ -225,4 +225,16 @@ struct PipelineStateCreateDesc
 	ComputePipelineStateCreateDesc	compute;
 };
 
+struct BufferResourceBarrier
+{
+	Buffer*		  buffer;
+	ResourceState target_state;
+};
+
+struct TextureResourceBarrier
+{
+	Texture*	  texture;
+	ResourceState target_state;
+};
+
 TE_END_TERMINUS_NAMESPACE

@@ -86,13 +86,14 @@ public:
 
 	// Synchronization
 	void wait_for_fences(uint32_t count, Fence** fences, uint64_t timeout);
-	void check_fences(uint32_t count, Fence** fences, bool* status);
+	bool check_fence(Fence* fence);
 	void wait_for_idle();
 
 	// Command encoding
 	void cmd_begin_recording(CommandBuffer* cmd);
 	void cmd_end_recording(CommandBuffer* cmd);
 	void cmd_set_viewport(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+	void cmd_set_scissor(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 	void cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_array);
 	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer, ClearValue* color_clear_values, ClearValue ds_clear_value);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);

@@ -5,6 +5,8 @@ TE_BEGIN_TERMINUS_NAMESPACE
 
 #define TE_EVENT_MASK (TE_MAX_EVENTS - 1u)
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 EventManager::EventManager()
 {
     m_num_events = 0;
@@ -12,10 +14,14 @@ EventManager::EventManager()
     m_back = 0;
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 EventManager::~EventManager()
 {
     
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 CallbackID EventManager::register_callback(const uint16_t& type, EventCallback callback)
 {
@@ -29,6 +35,8 @@ CallbackID EventManager::register_callback(const uint16_t& type, EventCallback c
         return 0;
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void EventManager::unregister_callback(const uint16_t& type, const CallbackID& callback_id)
 {
     if(type < 16)
@@ -40,6 +48,8 @@ void EventManager::unregister_callback(const uint16_t& type, const CallbackID& c
     }    
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 Event* EventManager::allocate_event(const uint16_t& type)
 {
     uint32_t event_index = m_num_events++;
@@ -48,6 +58,8 @@ Event* EventManager::allocate_event(const uint16_t& type)
     return e;
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void EventManager::queue_event(Event* event)
 {
     ScopedLock lock(m_mutex);
@@ -55,6 +67,8 @@ void EventManager::queue_event(Event* event)
     m_event_queue[m_back & TE_EVENT_MASK] = event;
     ++m_back;
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 Event* EventManager::pop_event()
 {
@@ -67,6 +81,8 @@ Event* EventManager::pop_event()
     --m_back;
     return m_event_queue[m_back & TE_EVENT_MASK];
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 void EventManager::process_events()
 {
@@ -82,5 +98,7 @@ void EventManager::process_events()
         e = pop_event();
     }
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 TE_END_TERMINUS_NAMESPACE

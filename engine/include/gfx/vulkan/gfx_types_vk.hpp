@@ -110,12 +110,24 @@ struct PipelineState
 struct Fence
 {
 	VkFence vk_fence;
+	bool	submitted;
+
+	Fence()
+	{
+		submitted = false;
+	}
 };
 
 // TODO: Namespace the GFX stuff!!!
 struct SemaphoreGPU
 {
 	VkSemaphore vk_semaphore;
+	bool		signaled;
+
+	SemaphoreGPU()
+	{
+		signaled = false;
+	}
 };
 
 struct InputLayout

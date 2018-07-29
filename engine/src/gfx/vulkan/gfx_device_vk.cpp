@@ -355,6 +355,7 @@ thread_local static VkSemaphore			 m_submit_wait_semaphores[32];
 thread_local static VkSemaphore			 m_submit_signal_semaphores[32];
 thread_local static VkSemaphore			 m_present_semaphores[32];
 thread_local static VkClearValue		 m_clear_values[MAX_COLOR_ATTACHMENTS + 1];
+thread_local static VkFence				 m_wait_fences[32];
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -384,6 +385,8 @@ bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool
 VkShaderStageFlags find_stage_flags(ShaderStageBit bits);
 void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence);
 bool is_stencil(TextureFormat format);
+VkAccessFlags vk_access_flags(ResourceState state);
+VkImageLayout vk_image_layout(ResourceState usage);
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -1233,8 +1236,12 @@ void GfxDevice::calc_image_size_and_extents(Texture* texture, uint32_t mip_level
 
 Framebuffer* GfxDevice::accquire_next_framebuffer(SemaphoreGPU* signal_semaphore)
 {
+	if (!signal_semaphore->signaled)
+		signal_semaphore->signaled = true;
+
 	VkResult res = vkAcquireNextImageKHR(m_device, m_swap_chain, UINT64_MAX, signal_semaphore->vk_semaphore, VK_NULL_HANDLE, &m_framebuffer_index);
 	assert(res == VK_SUCCESS);
+
 	return m_swap_chain_framebuffers[m_framebuffer_index];
 }
 
@@ -1837,6 +1844,8 @@ SemaphoreGPU* GfxDevice::create_semaphore()
 		return nullptr;
 	}
 
+	semaphore->signaled = false;
+
 	return semaphore;
 }
 
@@ -2057,14 +2066,39 @@ void GfxDevice::unmap_buffer(Buffer* buffer)
 
 void GfxDevice::wait_for_fences(uint32_t count, Fence** fences, uint64_t timeout)
 {
-	vkWaitForFences(m_device, count, (VkFence*)fences, VK_TRUE, timeout);
+	uint32_t unsubmitted_count = 0;
+
+	for (uint32_t i = 0; i < count; i++)
+	{
+		if (fences[i]->submitted)
+		{
+			m_wait_fences[unsubmitted_count] = fences[i]->vk_fence;
+			unsubmitted_count++;
+		}
+	}
+
+	vkWaitForFences(m_device, unsubmitted_count, &m_wait_fences[0], VK_TRUE, timeout);
+	vkResetFences(m_device, unsubmitted_count, &m_wait_fences[0]);
+
+	for (uint32_t i = 0; i < count; i++)
+		fences[i]->submitted = false;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::check_fences(uint32_t count, Fence** fences, bool* status)
+bool GfxDevice::check_fence(Fence* fence)
 {
+	bool status = false;
+	VkResult vkRes = vkGetFenceStatus(m_device, fence->vk_fence);
 
+	if (vkRes == VK_SUCCESS)
+	{
+		vkResetFences(m_device, 1, &fence->vk_fence);
+		fence->submitted = false;
+		status = true;
+	}
+
+	return status;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2116,6 +2150,21 @@ void GfxDevice::cmd_set_viewport(CommandBuffer* cmd, uint32_t x, uint32_t y, uin
 	cmd->vk_viewport.height = h;
 
 	vkCmdSetViewport(cmd->vk_cmd_buf, 0, 1, &cmd->vk_viewport);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_set_scissor(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+	assert(cmd != nullptr);
+
+	VkRect2D rect = {};
+	rect.offset.x = x;
+	rect.offset.y = y;
+	rect.extent.width = w;
+	rect.extent.height = h;
+
+	vkCmdSetScissor(cmd->vk_cmd_buf, 0, 1, &rect);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2262,18 +2311,28 @@ void GfxDevice::submit_compute(uint32_t cmd_buf_count,
 
 void GfxDevice::present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores)
 {
+	uint32_t wait_count = 0;
+
 	for (uint32_t i = 0; i < wait_sema_count; i++)
-		m_present_semaphores[i] = wait_semaphores[i]->vk_semaphore;
+	{
+		if (wait_semaphores[i]->signaled)
+		{
+			m_present_semaphores[wait_count] = wait_semaphores[i]->vk_semaphore;
+			wait_semaphores[i]->signaled = false;
+
+			wait_count++;
+		}
+	}
 
 	VkPresentInfoKHR present_info = {};
 
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.pNext = NULL;
-	present_info.waitSemaphoreCount = wait_sema_count;
+	present_info.waitSemaphoreCount = wait_count;
 	present_info.pWaitSemaphores = &m_present_semaphores[0];
 	present_info.swapchainCount = 1;
 	present_info.pSwapchains = &(m_swap_chain);
-	present_info.pImageIndices = &(m_framebuffer_index);
+	present_info.pImageIndices = &m_framebuffer_index;
 	present_info.pResults = NULL;
 
 	if (vkQueuePresentKHR(m_presentation_queue, &present_info) != VK_SUCCESS)
@@ -2364,6 +2423,8 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const F
 
 	return render_pass;
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_t render_target_count, TextureFormat* color_attachment_formats, uint32_t sample_count, TextureFormat depth_stencil_format)
 {
@@ -2568,31 +2629,52 @@ void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** comm
 	for (uint32_t i = 0; i < cmd_buf_count; i++)
 		m_submit_cmd_buf[i] = command_buffers[i]->vk_cmd_buf;
 
+	uint32_t wait_count = 0;
+
 	for (uint32_t i = 0; i < wait_sema_count; i++)
 	{
-		m_submit_wait_semaphores[i] = wait_semaphores[i]->vk_semaphore;
-		m_submit_pipeline_stage_flags[i] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		if (wait_semaphores[i]->signaled)
+		{
+			m_submit_wait_semaphores[wait_count] = wait_semaphores[i]->vk_semaphore;
+			m_submit_pipeline_stage_flags[wait_count] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+			wait_count++;
+
+			wait_semaphores[i]->signaled = false;
+		}
 	}
 
+	uint32_t signal_count = 0;
+
 	for (uint32_t i = 0; i < signal_sema_count; i++)
-		m_submit_signal_semaphores[i] = signal_semaphores[i]->vk_semaphore;
+	{
+		if (!signal_semaphores[i]->signaled)
+		{
+			m_submit_signal_semaphores[signal_count] = signal_semaphores[i]->vk_semaphore;
+			signal_count++;
+
+			signal_semaphores[i]->signaled = true;
+		}
+	}
 
 	VkSubmitInfo submit_info;
 
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.pNext = NULL;
-	submit_info.waitSemaphoreCount = wait_sema_count;
+	submit_info.waitSemaphoreCount = wait_count;
 	submit_info.pWaitSemaphores = &m_submit_wait_semaphores[0];
 	submit_info.pWaitDstStageMask = &m_submit_pipeline_stage_flags[0];
 	submit_info.commandBufferCount = cmd_buf_count;
 	submit_info.pCommandBuffers = &m_submit_cmd_buf[0];
-	submit_info.signalSemaphoreCount = signal_sema_count;
+	submit_info.signalSemaphoreCount = signal_count;
 	submit_info.pSignalSemaphores = &m_submit_signal_semaphores[0];
 
 	VkFence vk_fence = VK_NULL_HANDLE;
 
 	if (fence)
+	{
 		vk_fence = fence->vk_fence;
+		fence->submitted = true;
+	}
 
 	vkQueueSubmit(queue, 1, &submit_info, vk_fence);
 }
@@ -2605,6 +2687,76 @@ bool is_stencil(TextureFormat format)
 		return true;
 	else
 		return false;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+VkAccessFlags vk_access_flags(ResourceState state)
+{
+	VkAccessFlags ret = 0;
+
+	if (state & GFX_RESOURCE_STATE_COPY_SOURCE)
+		ret |= VK_ACCESS_TRANSFER_READ_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_COPY_DEST)
+		ret |= VK_ACCESS_TRANSFER_WRITE_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)
+		ret |= VK_ACCESS_UNIFORM_READ_BIT | VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_INDEX_BUFFER)
+		ret |= VK_ACCESS_INDEX_READ_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_UNORDERED_ACCESS)
+		ret |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_INDIRECT_ARGUMENT)
+		ret |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_RENDER_TARGET)
+		ret |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	
+	if (state & GFX_RESOURCE_STATE_DEPTH_WRITE)
+		ret |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+	if ((state & GFX_RESOURCE_STATE_SHADER_RESOURCE) || (state & GFX_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE))
+		ret |= VK_ACCESS_SHADER_READ_BIT;
+
+	if (state & GFX_RESOURCE_STATE_PRESENT)
+		ret |= VK_ACCESS_MEMORY_READ_BIT;
+
+	return ret;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+VkImageLayout vk_image_layout(ResourceState usage)
+{
+	if (usage & GFX_RESOURCE_STATE_COPY_SOURCE)
+		return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+	if (usage & GFX_RESOURCE_STATE_COPY_DEST)
+		return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+	if (usage & GFX_RESOURCE_STATE_RENDER_TARGET)
+		return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	if (usage & GFX_RESOURCE_STATE_DEPTH_WRITE)
+		return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	if (usage & GFX_RESOURCE_STATE_UNORDERED_ACCESS)
+		return VK_IMAGE_LAYOUT_GENERAL;
+
+	if ((usage & GFX_RESOURCE_STATE_SHADER_RESOURCE) || (usage & GFX_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE))
+		return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	if (usage & GFX_RESOURCE_STATE_PRESENT)
+		return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	if (usage == GFX_RESOURCE_STATE_COMMON)
+		return VK_IMAGE_LAYOUT_GENERAL;
+
+	return VK_IMAGE_LAYOUT_UNDEFINED;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
