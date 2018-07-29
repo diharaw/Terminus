@@ -348,14 +348,16 @@ const size_t kPixelSizes[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-// Submission State
-thread_local static VkPipelineStageFlags m_submit_pipeline_stage_flags[32];
-thread_local static VkCommandBuffer		 m_submit_cmd_buf[32];
-thread_local static VkSemaphore			 m_submit_wait_semaphores[32];
-thread_local static VkSemaphore			 m_submit_signal_semaphores[32];
-thread_local static VkSemaphore			 m_present_semaphores[32];
-thread_local static VkClearValue		 m_clear_values[MAX_COLOR_ATTACHMENTS + 1];
-thread_local static VkFence				 m_wait_fences[32];
+// Thread-local Submission State
+thread_local static VkPipelineStageFlags  m_submit_pipeline_stage_flags[32];
+thread_local static VkCommandBuffer		  m_submit_cmd_buf[32];
+thread_local static VkSemaphore			  m_submit_wait_semaphores[32];
+thread_local static VkSemaphore			  m_submit_signal_semaphores[32];
+thread_local static VkSemaphore			  m_present_semaphores[32];
+thread_local static VkClearValue		  m_clear_values[MAX_COLOR_ATTACHMENTS + 1];
+thread_local static VkFence				  m_wait_fences[32];
+thread_local static VkImageMemoryBarrier  m_image_memory_barriers[32];
+thread_local static VkBufferMemoryBarrier m_buffer_memory_barriers[32];
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -2234,9 +2236,73 @@ void GfxDevice::cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipel
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::cmd_resource_barrier(CommandBuffer* cmd)
+void GfxDevice::cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrier_count, TextureResourceBarrier* texture_barriers, uint32_t buffer_barrier_count, BufferResourceBarrier* buffer_barriers)
 {
-	
+	assert(cmd != nullptr);
+
+	uint32_t actual_texture_barrier_count = 0;
+
+	for (uint32_t i = 0; i < texture_barrier_count; i++)
+	{
+		TextureResourceBarrier& barrier = texture_barriers[i];
+
+		if (!(barrier.target_state & barrier.texture->current_state))
+		{
+			VkImageMemoryBarrier* img_barrier = &m_image_memory_barriers[actual_texture_barrier_count];
+
+			img_barrier->sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			img_barrier->pNext = NULL;
+			img_barrier->image = barrier.texture->image;
+			img_barrier->subresourceRange.aspectMask = barrier.texture->aspect_flags;
+			img_barrier->subresourceRange.baseMipLevel = 0;
+			img_barrier->subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+			img_barrier->subresourceRange.baseArrayLayer = 0;
+			img_barrier->subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+			img_barrier->srcAccessMask = vk_access_flags(barrier.texture->current_state);
+			img_barrier->dstAccessMask = vk_access_flags(barrier.target_state);
+			img_barrier->oldLayout = vk_image_layout(barrier.texture->current_state);
+			img_barrier->newLayout = vk_image_layout(barrier.target_state);
+			img_barrier->srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			img_barrier->dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+			barrier.texture->current_state = barrier.target_state;
+
+			actual_texture_barrier_count++;
+		}
+	}
+
+	uint32_t actual_buffer_barrier_count = 0;
+
+	for (uint32_t i = 0; i < buffer_barrier_count; i++)
+	{
+		BufferResourceBarrier& barrier = buffer_barriers[i];
+
+		if (!(barrier.target_state & barrier.buffer->current_state))
+		{
+			VkBufferMemoryBarrier* buf_barrier = &m_buffer_memory_barriers[actual_buffer_barrier_count];
+
+			buf_barrier->sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			buf_barrier->pNext = NULL;
+			buf_barrier->buffer = barrier.buffer->vk_buffer;
+			buf_barrier->size = VK_WHOLE_SIZE;
+			buf_barrier->offset = 0;
+			buf_barrier->srcAccessMask = vk_access_flags(barrier.buffer->current_state);
+			buf_barrier->dstAccessMask = vk_access_flags(barrier.target_state);
+			buf_barrier->srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			buf_barrier->dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+			barrier.buffer->current_state = barrier.target_state;
+
+			actual_buffer_barrier_count++;
+		}
+	}
+
+	if (actual_texture_barrier_count || actual_buffer_barrier_count)
+	{
+		VkPipelineStageFlags src_pipeline_flags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		VkPipelineStageFlags dst_pipeline_flags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		vkCmdPipelineBarrier(cmd->vk_cmd_buf, src_pipeline_flags, dst_pipeline_flags, 0, 0, NULL, actual_buffer_barrier_count, &m_buffer_memory_barriers[0], actual_texture_barrier_count, &m_image_memory_barriers[0]);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

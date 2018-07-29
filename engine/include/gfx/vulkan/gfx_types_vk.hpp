@@ -19,12 +19,14 @@ struct Buffer
 	VkDeviceMemory vk_device_memory;
 	VkBuffer vk_buffer;
 	DataType index_type;
+	ResourceState  current_state;
 
 	Buffer()
 	{
 		vma_allocation = VK_NULL_HANDLE;
 		vk_device_memory = VK_NULL_HANDLE;
 		vk_buffer = VK_NULL_HANDLE;
+		current_state = GFX_RESOURCE_STATE_UNDEFINED;
 	}
 };
 
@@ -44,6 +46,7 @@ struct Texture
 	VkSampleCountFlagBits sample_count;
 	struct VmaAllocation_T* allocation;
 	VkDeviceMemory device_memory;
+	ResourceState  current_state;
 
 	Texture()
 	{
@@ -52,6 +55,7 @@ struct Texture
 		allocation = VK_NULL_HANDLE;
 		device_memory = VK_NULL_HANDLE;
 		vk_format = VK_FORMAT_UNDEFINED;
+		current_state = GFX_RESOURCE_STATE_UNDEFINED;
 	}
 };
 
