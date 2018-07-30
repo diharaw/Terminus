@@ -378,8 +378,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 // Helpers Declaration
-VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const FramebufferCreateDesc& desc);
-VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_t render_target_count, TextureFormat* color_attachment_formats, uint32_t sample_count, TextureFormat depth_stencil_format);
+VkRenderPass create_render_pass(VkDevice device, uint32_t render_target_count, TextureFormat* color_attachment_formats, LoadOp* color_load_ops, VkSampleCountFlagBits sample_count, TextureFormat depth_stencil_format, LoadOp depth_stencil_load_op);
 bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
@@ -1454,7 +1453,36 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 
 	framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 
-	VkRenderPass render_pass = create_render_pass(m_device, m_allocator, desc);
+	TextureFormat color_formats[32];
+	LoadOp color_load_ops[32];
+	VkSampleCountFlagBits sample_count;
+
+	for (uint32_t i = 0; i < desc.render_target_count; i++)
+	{
+		color_formats[i] = desc.render_targets[i].texture->format;
+		color_load_ops[i] = desc.render_targets[i].load_op;
+
+		if (i == 0)
+			sample_count = desc.render_targets[i].texture->sample_count;
+	}
+
+	TextureFormat depth_stencil_format = GFX_FORMAT_UNKNOWN;
+	LoadOp depth_stencil_load_op;
+
+	if (desc.depth_stencil_target.texture)
+	{
+		depth_stencil_format = desc.depth_stencil_target.texture->format;
+		depth_stencil_load_op = desc.depth_stencil_target.load_op;
+		sample_count = desc.depth_stencil_target.texture->sample_count;
+	}
+
+	VkRenderPass render_pass = create_render_pass(m_device, 
+		desc.render_target_count, 
+		&color_formats[0], 
+		&color_load_ops[0], 
+		sample_count,
+		depth_stencil_format, 
+		depth_stencil_load_op);
 
 	framebuffer_info.renderPass = render_pass;
 	framebuffer_info.attachmentCount = attachment_count;
@@ -1630,7 +1658,13 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 		// -------------------------------------------------------------------------------------
 		// Render Pass
 		// -------------------------------------------------------------------------------------
-		VkRenderPass temp_render_pass = create_render_pass(m_device, m_allocator, desc.graphics.render_target_count, desc.graphics.color_attachment_formats, desc.graphics.sample_count, desc.graphics.depth_stencil_format);
+		VkRenderPass temp_render_pass = create_render_pass(m_device, 
+														   desc.graphics.render_target_count, 
+														   desc.graphics.color_attachment_formats, 
+														   desc.graphics.color_load_ops, 
+														   kSampleCountTable[desc.graphics.sample_count],
+														   desc.graphics.depth_stencil_format, 
+														   desc.graphics.depth_stencil_load_op);
 
 		// -------------------------------------------------------------------------------------
 		// Input Assembly State
@@ -2407,92 +2441,7 @@ void GfxDevice::present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, const FramebufferCreateDesc& desc)
-{
-	VkRenderPass render_pass;
-
-	VkAttachmentDescription attachments[10] = {};
-	VkAttachmentReference color_references[10] = {};
-	VkAttachmentReference depth_reference = {};
-
-	uint32_t attachment_count = desc.render_target_count;
-
-	for (uint32_t i = 0; i < desc.render_target_count; i++)
-	{
-		Texture* texture = desc.render_targets[i].texture;
-
-		attachments[i].format = texture->vk_format;
-		attachments[i].samples = texture->sample_count;
-		attachments[i].loadOp = kLoadOpTable[desc.render_targets[i].load_op];
-		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachments[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[i].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		attachments[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		color_references[i].attachment = i;
-		color_references[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	}
-
-	if (desc.depth_stencil_target.texture)
-	{
-		attachment_count++;
-
-		Texture* texture = desc.depth_stencil_target.texture;
-		uint32_t depth_idx = desc.render_target_count;
-
-		attachments[depth_idx].format = texture->vk_format;
-		attachments[depth_idx].samples = texture->sample_count;
-		attachments[depth_idx].loadOp = kLoadOpTable[desc.depth_stencil_target.load_op];
-		attachments[depth_idx].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-		if (is_stencil(texture->format))
-		{
-			attachments[depth_idx].stencilLoadOp = kLoadOpTable[desc.depth_stencil_target.load_op];
-			attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		}
-		else
-		{
-			attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		}
-
-		attachments[depth_idx].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		attachments[depth_idx].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		depth_reference.attachment = depth_idx;
-		depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	}
-
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = desc.render_target_count;
-	subpass.pColorAttachments = color_references;
-
-	if (desc.depth_stencil_target.texture)
-		subpass.pDepthStencilAttachment = &depth_reference;
-	else
-		subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
-
-	VkRenderPassCreateInfo render_pass_info = {};
-	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	render_pass_info.attachmentCount = attachment_count;
-	render_pass_info.pAttachments = attachments;
-	render_pass_info.subpassCount = 1;
-	render_pass_info.pSubpasses = &subpass;
-
-	if (vkCreateRenderPass(device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
-	{
-		TE_LOG_ERROR("Failed to create render pass!");
-		return nullptr;
-	}
-
-	return render_pass;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_t render_target_count, TextureFormat* color_attachment_formats, uint32_t sample_count, TextureFormat depth_stencil_format)
+VkRenderPass create_render_pass(VkDevice device, uint32_t render_target_count, TextureFormat* color_attachment_formats, LoadOp* color_load_ops, VkSampleCountFlagBits sample_count, TextureFormat depth_stencil_format, LoadOp depth_stencil_load_op)
 {
 	VkRenderPass render_pass;
 
@@ -2505,8 +2454,8 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_
 	for (uint32_t i = 0; i < render_target_count; i++)
 	{
 		attachments[i].format = kFormatTable[color_attachment_formats[i]];
-		attachments[i].samples = kSampleCountTable[sample_count];
-		attachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[i].samples = sample_count;
+		attachments[i].loadOp = kLoadOpTable[color_load_ops[i]];
 		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachments[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -2524,11 +2473,21 @@ VkRenderPass create_render_pass(VkDevice device, VmaAllocator allocator, uint32_
 		uint32_t depth_idx = render_target_count;
 
 		attachments[depth_idx].format = kFormatTable[depth_stencil_format];
-		attachments[depth_idx].samples = kSampleCountTable[sample_count];
-		attachments[depth_idx].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[depth_idx].samples = sample_count;
+		attachments[depth_idx].loadOp = kLoadOpTable[depth_stencil_load_op];
 		attachments[depth_idx].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // @TODO: Set stencil related flags
-		attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+		if (is_stencil(depth_stencil_format))
+		{
+			attachments[depth_idx].stencilLoadOp = kLoadOpTable[depth_stencil_load_op];
+			attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+		}
+		else
+		{
+			attachments[depth_idx].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			attachments[depth_idx].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		}
+
 		attachments[depth_idx].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		attachments[depth_idx].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 

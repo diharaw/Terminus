@@ -208,8 +208,10 @@ struct GraphicsPipelineStateCreateDesc
 	InputLayout*				input_layout;
 	uint32_t					render_target_count;
 	TextureFormat*				color_attachment_formats;
+	LoadOp*						color_load_ops;
 	uint32_t					sample_count;
 	TextureFormat				depth_stencil_format;
+	LoadOp						depth_stencil_load_op;
 };
 
 struct ComputePipelineStateCreateDesc
