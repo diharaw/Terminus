@@ -1,3 +1,10 @@
+#if defined(TE_GFX_BACKEND_D3D12)
+
+#include <gfx/direct3d12/descriptor_heap_manager.hpp>
+
+TE_BEGIN_TERMINUS_NAMESPACE
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 bool DescriptorHeapManager::initialize(ID3D12Device* device, UINT descriptor_count, D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAG flags)
 {
@@ -14,6 +21,9 @@ bool DescriptorHeapManager::initialize(ID3D12Device* device, UINT descriptor_cou
     m_total = descriptor_count;
     m_allocated = 0;
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 DescriptorHeapAlloc DescriptorHeapManager::allocate_dynamic(uint32_t count)
 {
     m_allocated += count;
@@ -33,3 +43,9 @@ DescriptorHeapAlloc DescriptorHeapManager::allocate_dynamic(uint32_t count)
     m_allocated += count;
     return alloc;
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+TE_END_TERMINUS_NAMESPACE
+
+#endif

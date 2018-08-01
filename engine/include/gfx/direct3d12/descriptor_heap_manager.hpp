@@ -1,3 +1,10 @@
+#pragma once
+
+#if defined(TE_GFX_BACKEND_D3D12)
+
+#include <gfx/gfx_types.hpp>
+
+TE_BEGIN_TERMINUS_NAMESPACE
 
 struct DescriptorHeapAlloc
 {
@@ -22,3 +29,7 @@ private:
     CD3DX12_GPU_DESCRIPTOR_HANDLE m_gpu_current_handle;
     ComPtr<ID3D12DescriptorHeap>  m_heap;
 };
+
+TE_END_TERMINUS_NAMESPACE
+
+#endif
