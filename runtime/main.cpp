@@ -175,10 +175,14 @@ void test_deserialize_ms()
 class Runtime : public Application
 {
 public:
+	const uint32_t  m_frame_count = 3;
 	InputMap		input_map;
 	PipelineState*  m_pso;
 	PipelineLayout* m_pipeline_layout;
 	VertexArray*    m_vao;
+	CommandBuffer*	m_command_buffers[3];
+	CommandPool*	m_command_pools[3];
+	Fence*			m_fence[3];
 
 	Runtime()
 	{
@@ -241,7 +245,12 @@ private:
 	{
 		PipelineStateCreateDesc pso_desc;
 
-
+		for (int i = 0; i < 3; i++)
+		{
+			m_command_pools[i] = global::gfx_device().create_command_pool(GFX_CMD_POOL_GRAPHICS);
+			m_command_buffers[i] = global::gfx_device().create_command_buffer(m_command_pools[i]);
+			m_fence[i] = global::gfx_device().create_fence();
+		}
 	}
 };
 
