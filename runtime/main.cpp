@@ -175,7 +175,10 @@ void test_deserialize_ms()
 class Runtime : public Application
 {
 public:
-	InputMap input_map;
+	InputMap		input_map;
+	PipelineState*  m_pso;
+	PipelineLayout* m_pipeline_layout;
+	VertexArray*    m_vao;
 
 	Runtime()
 	{
@@ -230,6 +233,14 @@ public:
 
 	void shutdown() override
 	{
+
+	}
+
+private:
+	bool intialize_graphics()
+	{
+		PipelineStateCreateDesc pso_desc;
+
 
 	}
 };
