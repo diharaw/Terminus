@@ -252,6 +252,16 @@ private:
 			m_fence[i] = global::gfx_device().create_fence();
 		}
 	}
+
+	void shutdown_graphics()
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			global::gfx_device().destroy_fence(m_fence[i]);
+			delete m_command_buffers[i];
+			global::gfx_device().destroy_command_pool(m_command_pools[i]);
+		}
+	}
 };
 
 TE_END_TERMINUS_NAMESPACE
