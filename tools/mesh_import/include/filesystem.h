@@ -90,6 +90,9 @@ namespace filesystem
 	extern void copy_file(std::string input, std::string output);
     
     extern void destroy_handle(FileHandle& handle);
+    
+    extern bool directory_exists_internal(const std::string& path);
+    extern bool create_directory(const std::string& path);
 }
 
 #endif

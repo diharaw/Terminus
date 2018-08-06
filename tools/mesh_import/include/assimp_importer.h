@@ -3,6 +3,7 @@
 #include "tsm_headers.h"
 #include "tsm_material.h"
 #include "tsm_vertex.h"
+#include "options.h"
 
 struct AssimpImportData
 {
@@ -11,7 +12,7 @@ struct AssimpImportData
 	Assimp_Material*    materials;
 	TSM_Vertex*			vertices;
 	TSM_SkeletalVertex* skeletal_vertices;
-	uint*			    indices;
+	uint32_t*			indices;
 	bool			    skeletal;
     std::string         mesh_path;
     std::string         filename;
@@ -19,5 +20,5 @@ struct AssimpImportData
 
 namespace assimp_importer
 {
-	extern AssimpImportData* import_mesh(const char* file);
+    extern AssimpImportData* import_mesh(std::string file, Options options);
 }

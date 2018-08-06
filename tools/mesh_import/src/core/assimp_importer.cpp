@@ -82,16 +82,15 @@ namespace assimp_importer
         return false;
     }
 
-    AssimpImportData* import_mesh(const char* file)
+    AssimpImportData* import_mesh(std::string file, Options options)
     {
         {
-            std::string filename = std::string(file);
-            std::string meshPath = filesystem::get_file_path(filename);
+            std::string meshPath = filesystem::get_file_path(file);
 
             AssimpImportData* load_data = new AssimpImportData();
             
             load_data->mesh_path = meshPath;
-            load_data->filename = filename;
+            load_data->filename = file;
             
             const aiScene* Scene;
             Assimp::Importer Importer;
@@ -100,19 +99,21 @@ namespace assimp_importer
             load_data->header.mesh_count = Scene->mNumMeshes;
             load_data->header.vertex_count = 0;
             load_data->header.index_count = 0;
-			load_data->header.material_count - 0;
+			load_data->header.material_count = 0;
             load_data->meshes = new TSM_MeshHeader[Scene->mNumMeshes];
             
             // Temp
             load_data->skeletal = false;
             
             aiMaterial* temp_material;
-            uint8 materialIndex = 0;
+            uint8_t materialIndex = 0;
             
             std::vector<Assimp_Material> temp_materials;
             std::vector<unsigned int> processedMatId;
             std::unordered_map<unsigned int, uint8_t> MatIDMapping;
 			uint32_t unamedMats = 1;
+            
+            std::cout << Scene->mNumMaterials << std::endl;
             
             for (int i = 0; i < load_data->header.mesh_count; i++)
             {
@@ -132,9 +133,12 @@ namespace assimp_importer
                     temp_material = Scene->mMaterials[Scene->mMeshes[i]->mMaterialIndex];
                     temp.mesh_name = std::string(Scene->mMeshes[i]->mName.C_Str());
 
-					std::cout << "**** Dumping Textures for Material: " << temp.mesh_name << "\n" << std::endl;
-					dump_textures(temp_material);
-					std::cout << "\n************************************" << std::endl;
+                    if (options.verbose)
+                    {
+                        std::cout << "**** Dumping Textures for Material: " << temp.mesh_name << "\n" << std::endl;
+                        dump_textures(temp_material);
+                        std::cout << "\n************************************" << std::endl;
+                    }
 
                     std::string albedo = get_texture_path(temp_material, aiTextureType_DIFFUSE);
                     
@@ -146,7 +150,7 @@ namespace assimp_importer
 						if (albedo.length() > 4 && albedo[0] != ' ')
 						{
 							hasLeastOneTexture = true;
-							strncpy(temp.albedo, albedo.c_str(), 50);
+							strncpy(temp.albedo, albedo.c_str(), 150);
 						}
 					}
 
@@ -160,7 +164,7 @@ namespace assimp_importer
 						if (normal.length() > 4 && normal[0] != ' ' && normal != "")
 						{
 							hasLeastOneTexture = true;
-							strncpy(temp.normal, normal.c_str(), 50);
+							strncpy(temp.normal, normal.c_str(), 150);
 						}
 					}
 	
@@ -178,7 +182,7 @@ namespace assimp_importer
 						if (metalness.length() > 4 && metalness[0] != ' ' && metalness != "")
 						{
 							hasLeastOneTexture = true;
-							strncpy(temp.metalness, metalness.c_str(), 50);
+							strncpy(temp.metalness, metalness.c_str(), 150);
 						}
                     }
 
@@ -196,8 +200,23 @@ namespace assimp_importer
 						if (roughness.length() > 4 && roughness[0] != ' ' && roughness != "")
 						{
 							hasLeastOneTexture = true;
-							strncpy(temp.roughness, roughness.c_str(), 50);
+							strncpy(temp.roughness, roughness.c_str(), 150);
 						}
+                    }
+                    
+                    std::string displacement = get_texture_path(temp_material, aiTextureType_DISPLACEMENT);
+                    std::string disp_str = std::string(displacement);
+                    
+                    temp.displacement[0] = '\0';
+                    if (displacement != "" || disp_str != "")
+                    {
+                        std::replace(displacement.begin(), displacement.end(), '\\', '/');
+                        
+                        if (displacement.length() > 4 && displacement[0] != ' ' && displacement != "")
+                        {
+                            hasLeastOneTexture = true;
+                            strncpy(temp.displacement, displacement.c_str(), 150);
+                        }
                     }
 
 					if (hasLeastOneTexture)
@@ -233,7 +252,7 @@ namespace assimp_importer
             }
             
             load_data->vertices = new TSM_Vertex[load_data->header.vertex_count];
-            load_data->indices = new uint[load_data->header.index_count];
+            load_data->indices = new uint32_t[load_data->header.index_count];
             
             aiMesh* TempMesh;
             int idx = 0;
@@ -242,23 +261,33 @@ namespace assimp_importer
             for (int i = 0; i < load_data->header.mesh_count; i++)
             {
                 TempMesh = Scene->mMeshes[i];
-                load_data->meshes[i].max_extents = Vector3(TempMesh->mVertices[0].x, TempMesh->mVertices[0].y, TempMesh->mVertices[0].z);
-                load_data->meshes[i].min_extents = Vector3(TempMesh->mVertices[0].x, TempMesh->mVertices[0].y, TempMesh->mVertices[0].z);
+                load_data->meshes[i].max_extents = glm::vec3(TempMesh->mVertices[0].x, TempMesh->mVertices[0].y, TempMesh->mVertices[0].z);
+                load_data->meshes[i].min_extents = glm::vec3(TempMesh->mVertices[0].x, TempMesh->mVertices[0].y, TempMesh->mVertices[0].z);
                 
                 for (int k = 0; k < Scene->mMeshes[i]->mNumVertices; k++)
                 {
                     load_data->vertices[vertexIndex].position = glm::vec3(TempMesh->mVertices[k].x, TempMesh->mVertices[k].y, TempMesh->mVertices[k].z);
-                    Vector3 n = glm::vec3(TempMesh->mNormals[k].x, TempMesh->mNormals[k].y, TempMesh->mNormals[k].z);
-					Vector3 t = glm::vec3(TempMesh->mTangents[k].x, TempMesh->mTangents[k].y, TempMesh->mTangents[k].z);
-					Vector3 b = glm::vec3(TempMesh->mBitangents[k].x, TempMesh->mBitangents[k].y, TempMesh->mBitangents[k].z);
-
-					// @NOTE: Assuming right handed coordinate space
-					if (glm::dot(glm::cross(n, t), b) < 0.0f)
-						t *= -1.0f; // Flip tangent
-
+                    glm::vec3 n = glm::vec3(TempMesh->mNormals[k].x, TempMesh->mNormals[k].y, TempMesh->mNormals[k].z);
 					load_data->vertices[vertexIndex].normal = n;
-					load_data->vertices[vertexIndex].tangent = t;
-                    
+
+					if (TempMesh->mTangents)
+					{
+						glm::vec3 t = glm::vec3(TempMesh->mTangents[k].x, TempMesh->mTangents[k].y, TempMesh->mTangents[k].z);
+						glm::vec3 b = glm::vec3(TempMesh->mBitangents[k].x, TempMesh->mBitangents[k].y, TempMesh->mBitangents[k].z);
+
+						// @NOTE: Assuming right handed coordinate space
+						if (glm::dot(glm::cross(n, t), b) < 0.0f)
+							t *= -1.0f; // Flip tangent
+
+						load_data->vertices[vertexIndex].tangent = t;
+						load_data->vertices[vertexIndex].bitangent = b;
+					}
+
+					if (TempMesh->HasTextureCoords(0))
+					{
+						load_data->vertices[vertexIndex].tex_coord = glm::vec2(TempMesh->mTextureCoords[0][k].x, TempMesh->mTextureCoords[0][k].y);
+					}
+
                     if (load_data->vertices[vertexIndex].position.x > load_data->meshes[i].max_extents.x)
                         load_data->meshes[i].max_extents.x = load_data->vertices[vertexIndex].position.x;
                     if (load_data->vertices[vertexIndex].position.y > load_data->meshes[i].max_extents.y)
@@ -272,11 +301,6 @@ namespace assimp_importer
                         load_data->meshes[i].min_extents.y = load_data->vertices[vertexIndex].position.y;
                     if (load_data->vertices[vertexIndex].position.z < load_data->meshes[i].min_extents.z)
                         load_data->meshes[i].min_extents.z = load_data->vertices[vertexIndex].position.z;
-                    
-                    if (TempMesh->HasTextureCoords(0))
-                    {
-                        load_data->vertices[vertexIndex].tex_coord = glm::vec2(TempMesh->mTextureCoords[0][k].x, TempMesh->mTextureCoords[0][k].y);
-                    }
                     
                     vertexIndex++;
                 }
@@ -311,6 +335,13 @@ namespace assimp_importer
                 if (load_data->meshes[i].min_extents.z < load_data->header.min_extents.z)
                     load_data->header.min_extents.z = load_data->meshes[i].min_extents.z;
             }
+            
+            std::cout << std::endl;
+            std::cout << "Vertex count: " << load_data->header.vertex_count << std::endl;
+            std::cout << "Index count: " << load_data->header.index_count << std::endl;
+            std::cout << "Mesh count: " << load_data->header.mesh_count << std::endl;
+            std::cout << "Material count: " << load_data->header.material_count << std::endl;
+            std::cout << std::endl;
             
             return load_data;
         }

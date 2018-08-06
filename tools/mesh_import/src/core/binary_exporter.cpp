@@ -1,19 +1,14 @@
-#include <tsm_exporter.h>
+#include <binary_exporter.h>
 #include <assimp_importer.h>
 #include <filesystem.h>
-
+#include <timer.h>
 #include <iostream>
 
-namespace tsm_exporter
+namespace binary_exporter
 {
-    void export_mesh(AssimpImportData* data, const char* output)
+    void export_mesh(AssimpImportData* data, std::string output, Options options)
     {
         std::string meshOutputName = filesystem::get_filename(data->filename);
-        
-        std::string outputPath = "";
-        
-        if(output != nullptr)
-            outputPath = output;
         
         auto mats = new TSM_Material_Json[data->header.material_count];
         
@@ -27,29 +22,20 @@ namespace tsm_exporter
             if (map != "")
             {
                 String name = filesystem::get_file_name_and_extention(map);
-                String ext = filesystem::get_file_extention(map);
-                std::string texPath = outputPath;
-				texPath += "/texture/";
-                texPath += name;
                 
-                String texturePath = "texture/";
-                texturePath += name;
+                String path_in_mat = "texture/";
+                path_in_mat += name;
                 
-                doc["diffuse_map"] = texturePath;
+                doc["diffuse_map"] = path_in_mat;
                 
-                String sourcePath = "";
+                String sourcePath = data->mesh_path;
+                sourcePath += map;
 
-				if (map[0] == '.' && data->mesh_path == "")
-				{
-					sourcePath = map;
-				}
-				else
-				{
-					sourcePath = data->mesh_path;
-					sourcePath += map;
-				}
+                std::string dest_path = output;
+                dest_path += "/";
+                dest_path += path_in_mat;
                 
-                filesystem::copy_file(sourcePath, texPath);
+                filesystem::copy_file(sourcePath, dest_path);
             }
             else
             {
@@ -69,20 +55,20 @@ namespace tsm_exporter
             if (map != "")
             {
                 String name = filesystem::get_file_name_and_extention(map);
-                String ext = filesystem::get_file_extention(map);
-                std::string texPath = outputPath;
-				texPath += "/texture";
-                texPath += name;
                 
-                String texturePath = "texture/";
-                texturePath += map;
+                String path_in_mat = "texture/";
+                path_in_mat += name;
                 
-                doc["normal_map"] = texturePath;
+                doc["normal_map"] = path_in_mat;
                 
                 String sourcePath = data->mesh_path;
                 sourcePath += map;
                 
-                filesystem::copy_file(sourcePath, texPath);
+                std::string dest_path = output;
+                dest_path += "/";
+                dest_path += path_in_mat;
+                
+                filesystem::copy_file(sourcePath, dest_path);
             }
             
             // Metalness
@@ -91,20 +77,20 @@ namespace tsm_exporter
             if (data->materials[i].has_metalness)
             {
                 String name = filesystem::get_file_name_and_extention(map);
-                String ext = filesystem::get_file_extention(map);
-                std::string texPath = outputPath;
-				texPath += "/texture";
-                texPath += name;
                 
-                String texturePath = "texture/";
-                texturePath += map;
+                String path_in_mat = "texture/";
+                path_in_mat += name;
                 
-                doc["metalness_map"] = texturePath;
+                doc["metalness_map"] = path_in_mat;
                 
                 String sourcePath = data->mesh_path;
                 sourcePath += map;
                 
-                filesystem::copy_file(sourcePath, texPath);
+                std::string dest_path = output;
+                dest_path += "/";
+                dest_path += path_in_mat;
+                
+                filesystem::copy_file(sourcePath, dest_path);
             }
             else
             {
@@ -118,20 +104,20 @@ namespace tsm_exporter
             if (data->materials[i].has_roughness)
             {
                 String name = filesystem::get_file_name_and_extention(map);
-                String ext = filesystem::get_file_extention(map);
-                std::string texPath = outputPath;
-				texPath += "/texture";
-                texPath += name;
+              
+                String path_in_mat = "texture/";
+                path_in_mat += name;
                 
-                String texturePath = "texture/";
-                texturePath += map;
-                
-                doc["roughness_map"] = texturePath;
+                doc["roughness_map"] = path_in_mat;
                 
                 String sourcePath = data->mesh_path;
                 sourcePath += map;
                 
-                filesystem::copy_file(sourcePath, texPath);
+                std::string dest_path = output;
+                dest_path += "/";
+                dest_path += path_in_mat;
+                
+                filesystem::copy_file(sourcePath, dest_path);
             }
             else
             {
@@ -142,7 +128,7 @@ namespace tsm_exporter
             // Backface Cull
             doc["backface_cull"] = true;
             
-            std::string matPath =  outputPath;
+            std::string matPath =  output;
             matPath += "/material/mat_";
             
             matPath += data->materials[i].mesh_name;
@@ -165,15 +151,18 @@ namespace tsm_exporter
         for (int i = 0; i < data->header.mesh_count; i++)
         {
 			uint32_t idx = data->meshes[i].material_index;
-            std::cout << "Mat Idx : " << std::to_string(idx) << std::endl;
+            
+            if (options.verbose)
+                std::cout << "Mat Idx : " << std::to_string(idx) << std::endl;
         }
         
-        std::string meshPath = outputPath;
-        outputPath += "/mesh/";
-        outputPath += meshOutputName;
-        outputPath += ".tsm";
+        std::string meshPath = output;
+        meshPath += "/mesh/";
+        meshPath += meshOutputName;
+        meshPath += ".";
+        meshPath += ASSET_EXTENSION;
         
-        if (filesystem::write_begin(outputPath))
+        if (filesystem::write_begin(meshPath))
         {
             long Offset = 0;
             // Write Header
@@ -183,8 +172,8 @@ namespace tsm_exporter
             filesystem::write(data->vertices, sizeof(TSM_Vertex), data->header.vertex_count, Offset);
             Offset += sizeof(TSM_Vertex) * data->header.vertex_count;
             // Write Indices
-            filesystem::write(data->indices, sizeof(uint), data->header.index_count, Offset);
-            Offset += sizeof(uint) * data->header.index_count;
+            filesystem::write(data->indices, sizeof(uint32_t), data->header.index_count, Offset);
+            Offset += sizeof(uint32_t) * data->header.index_count;
             // Write Mesh Headers
             filesystem::write(data->meshes, sizeof(TSM_MeshHeader), data->header.mesh_count, Offset);
             Offset += sizeof(TSM_MeshHeader) * data->header.mesh_count;
@@ -202,9 +191,21 @@ namespace tsm_exporter
         T_SAFE_DELETE(data);
     }
     
-    void export_mesh(const char* file, const char* output)
+    void export_mesh(std::string file, std::string output, Options options)
     {
-        AssimpImportData* data = assimp_importer::import_mesh(file);
-        export_mesh(data, output);
+        Timer timer;
+        timer.start();
+        
+        filesystem::create_directory(output);
+        filesystem::create_directory(output + "/mesh");
+        filesystem::create_directory(output + "/material");
+        filesystem::create_directory(output + "/texture");
+        
+        AssimpImportData* data = assimp_importer::import_mesh(file, options);
+        export_mesh(data, output, options);
+        
+        timer.stop();
+        
+        std::cout << "Finished exporting mesh in " << timer.elapsed_time_sec() << " second(s)." << std::endl;
     }
 }

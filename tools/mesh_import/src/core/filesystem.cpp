@@ -8,6 +8,8 @@
 
 #ifdef _WIN32
 #include <direct.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #define getcwd _getcwd
 #else
 #include <unistd.h>
@@ -15,6 +17,9 @@
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <errno.h>
 #endif
 
 namespace filesystem
@@ -273,4 +278,90 @@ namespace filesystem
             free(handle.buffer);
         }
     }
+
+#ifdef WIN32
+    bool directory_exists_internal(const std::string& path)
+    {
+        DWORD dwAttrib = GetFileAttributes(path.c_str());
+        return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+    }
+
+    bool create_directory(const std::string& path)
+    {
+        std::string str_path = path;;
+        
+        int ret = _mkdir(path.c_str());
+        
+        if (ret == 0)
+            return true;
+        
+        switch (errno)
+        {
+            case ENOENT:
+            {
+                int pos = static_cast<int>(str_path.find_last_of('/'));
+                if (pos == std::string::npos)
+                    pos = str_path.find_last_of('\\');
+                if (pos == std::string::npos)
+                    return false;
+                if (!create_directory(str_path.substr(0, pos).c_str()))
+                    return false;
+            }
+                
+                return 0 == _mkdir(path.c_str());
+                
+            case EEXIST:
+                return directory_exists_internal(path);
+                
+            default:
+                return false;
+        }
+    }
+#else
+    bool directory_exists_internal(const std::string& path)
+    {
+        DIR *dir;
+        bool exists = false;
+        
+        dir = opendir(path.c_str());
+        
+        if (dir != NULL)
+        {
+            exists = true;
+            closedir(dir);
+        }
+        
+        return exists;
+    }
+    
+    bool create_directory(const std::string& path)
+    {
+        std::string str_path = path;;
+        
+        mode_t mode = 0755;
+        int ret = mkdir(str_path.c_str(), mode);
+        
+        if (ret == 0)
+            return true;
+        
+        switch (errno)
+        {
+            case ENOENT:
+            {
+                int pos = static_cast<int>(str_path.find_last_of('/'));
+                if (pos == std::string::npos)
+                    return false;
+                if (!create_directory(str_path.substr(0, pos).c_str()))
+                    return false;
+                
+                return 0 == mkdir(path.c_str(), mode);
+            }
+            case EEXIST:
+                return directory_exists_internal(path);
+                
+            default:
+                return false;
+        }
+    }
+#endif
 }

@@ -8,6 +8,7 @@ struct TSM_Vertex
 	glm::vec2 tex_coord;
 	glm::vec3 normal;
 	glm::vec3 tangent;
+    glm::vec3 bitangent;
 };
 
 struct TSM_SkeletalVertex
