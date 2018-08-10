@@ -183,6 +183,9 @@ public:
 	CommandBuffer*	m_command_buffers[3];
 	CommandPool*	m_command_pools[3];
 	Fence*			m_fence[3];
+	PipelineLayout* m_pipeline_layout;
+	Shader*			m_vs;
+	Shader*			m_fs;
 
 	Runtime()
 	{
@@ -241,9 +244,42 @@ public:
 	}
 
 private:
-	bool intialize_graphics()
+	void create_pipeline_state()
 	{
 		PipelineStateCreateDesc pso_desc;
+
+		pso_desc.type = GFX_PIPELINE_GRAPHICS;
+		pso_desc.graphics.shader_count = 2;
+
+		Shader* shaders[] = { m_vs, m_fs };
+		pso_desc.graphics.shaders = shaders;
+
+		BlendStateCreateDesc blend_state;
+		blend_state.enable = false;
+		blend_state.blend_op = GFX_BLEND_OP_ADD;
+		blend_state.blend_op_alpha = GFX_BLEND_OP_ADD;
+		blend_state.src_func = GFX_BLEND_FUNC_ONE;
+		blend_state.dst_func = GFX_BLEND_FUNC_ONE_MINUS_DST_COLOR;
+		blend_state.src_func_alpha = GFX_BLEND_FUNC_ONE;
+		blend_state.dst_func_alpha = GFX_BLEND_FUNC_ONE_MINUS_DST_COLOR;
+
+		pso_desc.graphics.blend_states = &blend_state;
+
+		TextureFormat color_fmt = GFX_FORMAT_R8G8B8A8_UNORM;
+		LoadOp color_op = GFX_LOAD_OP_CLEAR;
+		pso_desc.graphics.render_target_count = 1;
+		pso_desc.graphics.color_attachment_formats = &color_fmt;
+		pso_desc.graphics.color_load_ops = &color_op;
+
+		pso_desc.graphics.depth_stencil_format = GFX_FORMAT_UNKNOWN;
+		pso_desc.graphics.depth_stencil_load_op = GFX_LOAD_OP_CLEAR;
+
+		pso_desc.graphics.depth_stencil_state.
+	}
+
+	bool intialize_graphics()
+	{
+		create_pipeline_state();
 
 		for (int i = 0; i < 3; i++)
 		{
