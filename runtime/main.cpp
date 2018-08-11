@@ -189,6 +189,8 @@ public:
 	Shader*			m_fs;
 	SemaphoreGPU*   m_image_available_sema;
 	SemaphoreGPU*	m_render_finished_sema;
+	Framebuffer*	m_fbo;
+	uint32_t		m_frame_index;
 
 	Runtime()
 	{
@@ -196,6 +198,8 @@ public:
 		m_width = 1280;
 		m_height = 720;
 		m_window_flags |= TE_WINDOW_RESIZABLE;
+
+		m_frame_index = 0;
 	}
 
 	~Runtime()
@@ -398,6 +402,38 @@ private:
 
 		m_image_available_sema = global::gfx_device().create_semaphore();
 		m_render_finished_sema = global::gfx_device().create_semaphore();
+	}
+
+	void render()
+	{
+		ClearValue color_clear =
+		{
+			{ 1.0f, 0.0f, 0.0f, 1.0f },
+			0.0f,
+			0.0f
+		};
+
+		GfxDevice& device = global::gfx_device();
+
+		m_fbo = device.accquire_next_framebuffer(m_image_available_sema);
+		Fence* fence = m_fence[m_frame_index];
+		CommandPool* cmd_pool = m_command_pools[m_frame_index];
+		CommandBuffer* cmd_buffer = m_command_buffers[m_frame_index];
+		
+		device.wait_for_fences(1, &fence, INFINITY);
+		device.reset_command_pool(cmd_pool);
+
+		device.cmd_begin_recording(cmd_buffer);
+
+		device.cmd_bind_framebuffer(cmd_buffer, m_fbo, &color_clear, color_clear);
+		device.cmd_set_viewport(cmd_buffer, 0, 0, m_width, m_height);
+		device.cmd_bind_pipeline_state(cmd_buffer, m_pso);
+		device.cmd_draw(cmd_buffer, 3, 1, 0, 0);
+
+		device.cmd_end_recording(cmd_buffer);
+
+		device.submit_graphics(1, &cmd_buffer, 1, &m_image_available_sema, 1, &m_render_finished_sema, fence);
+		device.present(1, &m_render_finished_sema);
 	}
 
 	void shutdown_graphics()

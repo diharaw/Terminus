@@ -2114,11 +2114,14 @@ void GfxDevice::wait_for_fences(uint32_t count, Fence** fences, uint64_t timeout
 		}
 	}
 
-	vkWaitForFences(m_device, unsubmitted_count, &m_wait_fences[0], VK_TRUE, timeout);
-	vkResetFences(m_device, unsubmitted_count, &m_wait_fences[0]);
+	if (unsubmitted_count > 0)
+	{
+		vkWaitForFences(m_device, unsubmitted_count, &m_wait_fences[0], VK_TRUE, timeout);
+		vkResetFences(m_device, unsubmitted_count, &m_wait_fences[0]);
 
-	for (uint32_t i = 0; i < count; i++)
-		fences[i]->submitted = false;
+		for (uint32_t i = 0; i < count; i++)
+			fences[i]->submitted = false;
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
