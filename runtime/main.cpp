@@ -7,6 +7,7 @@
 #include <io/binary_serializer.hpp>
 #include <io/memory_stream.hpp>
 #include <io/file_stream.hpp>
+#include <io/logger.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -186,6 +187,8 @@ public:
 	PipelineLayout* m_pipeline_layout;
 	Shader*			m_vs;
 	Shader*			m_fs;
+	SemaphoreGPU*   m_image_available_sema;
+	SemaphoreGPU*	m_render_finished_sema;
 
 	Runtime()
 	{
@@ -244,7 +247,74 @@ public:
 	}
 
 private:
-	void create_pipeline_state()
+	bool load_shaders()
+	{
+		{
+			File* vs = global::filesystem().open_file("vs.bin", TE_FS_READ | TE_FS_BINARY);
+
+			if (!vs)
+			{
+				TE_LOG_ERROR("Failed to load Vertex Shader!");
+				return false;
+			}
+
+			size_t size = vs->size();
+			void* vs_src = TE_HEAP_ALLOC(size);
+			vs->read(vs_src, size, 1);
+
+			global::filesystem().close_file(vs);
+
+			BinaryShaderCreateDesc desc;
+
+			desc.type = GFX_SHADER_STAGE_VERTEX;
+			desc.size = size;
+			desc.data = vs_src;
+			desc.entry_point = "main";
+			
+			m_vs = global::gfx_device().create_shader_from_binary(desc);
+
+			if (!m_vs)
+			{
+				TE_LOG_ERROR("Failed to load Vertex Shader!");
+				return false;
+			}
+		}
+
+		{
+			File* fs = global::filesystem().open_file("fs.bin", TE_FS_READ | TE_FS_BINARY);
+
+			if (!fs)
+			{
+				TE_LOG_ERROR("Failed to load Fragment Shader!");
+				return false;
+			}
+
+			size_t size = fs->size();
+			void* fs_src = TE_HEAP_ALLOC(size);
+			fs->read(fs_src, size, 1);
+
+			global::filesystem().close_file(fs);
+
+			BinaryShaderCreateDesc desc;
+
+			desc.type = GFX_SHADER_STAGE_FRAGMENT;
+			desc.size = size;
+			desc.data = fs_src;
+			desc.entry_point = "main";
+
+			m_fs = global::gfx_device().create_shader_from_binary(desc);
+
+			if (!m_fs)
+			{
+				TE_LOG_ERROR("Failed to load Fragment Shader!");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool create_pipeline_state()
 	{
 		PipelineStateCreateDesc pso_desc;
 
@@ -265,21 +335,59 @@ private:
 
 		pso_desc.graphics.blend_states = &blend_state;
 
+		pso_desc.graphics.primitive = GFX_PRIMITIVE_TOPOLOGY_TRIANGLES;
+
 		TextureFormat color_fmt = GFX_FORMAT_R8G8B8A8_UNORM;
 		LoadOp color_op = GFX_LOAD_OP_CLEAR;
 		pso_desc.graphics.render_target_count = 1;
 		pso_desc.graphics.color_attachment_formats = &color_fmt;
 		pso_desc.graphics.color_load_ops = &color_op;
+		pso_desc.graphics.sample_count = GFX_SAMPLE_COUNT_1;
 
 		pso_desc.graphics.depth_stencil_format = GFX_FORMAT_UNKNOWN;
 		pso_desc.graphics.depth_stencil_load_op = GFX_LOAD_OP_CLEAR;
 
-		pso_desc.graphics.depth_stencil_state.
+		pso_desc.graphics.depth_stencil_state.enable_stencil_test = false;
+		pso_desc.graphics.depth_stencil_state.enable_depth_write = false;
+		pso_desc.graphics.depth_stencil_state.enable_depth_test = false;
+		pso_desc.graphics.depth_stencil_state.depth_cmp_func = GFX_COMP_FUNC_LESS;
+
+		pso_desc.graphics.depth_stencil_state.back_stencil_cmp_func = GFX_COMP_FUNC_LESS;
+		pso_desc.graphics.depth_stencil_state.back_stencil_fail = GFX_STENCIL_OP_INCR;
+		pso_desc.graphics.depth_stencil_state.back_stencil_mask = 0;
+		pso_desc.graphics.depth_stencil_state.back_stencil_pass_depth_fail = GFX_STENCIL_OP_INCR;
+		pso_desc.graphics.depth_stencil_state.back_stencil_pass_depth_pass = GFX_STENCIL_OP_INCR;
+
+		pso_desc.graphics.depth_stencil_state.front_stencil_cmp_func = GFX_COMP_FUNC_LESS;
+		pso_desc.graphics.depth_stencil_state.front_stencil_fail = GFX_STENCIL_OP_INCR;
+		pso_desc.graphics.depth_stencil_state.front_stencil_mask = 0;
+		pso_desc.graphics.depth_stencil_state.front_stencil_pass_depth_fail = GFX_STENCIL_OP_INCR;
+		pso_desc.graphics.depth_stencil_state.front_stencil_pass_depth_pass = GFX_STENCIL_OP_INCR;
+
+		pso_desc.graphics.rasterizer_state.cull_mode = GFX_CULL_MODE_NONE;
+		pso_desc.graphics.rasterizer_state.fill_mode = GFX_FILL_MODE_SOLID;
+		pso_desc.graphics.rasterizer_state.front_winding_ccw = true;
+		pso_desc.graphics.rasterizer_state.multisample = false;
+		pso_desc.graphics.rasterizer_state.scissor = false;
+
+		m_pso = global::gfx_device().create_pipeline_state(pso_desc);
+		
+		if (!m_pso)
+		{
+			TE_LOG_ERROR("Failed to create Pipeline State!");
+			return false;
+		}
+	
+		return true;
 	}
 
 	bool intialize_graphics()
 	{
-		create_pipeline_state();
+		if (!load_shaders())
+			return false;
+
+		if (!create_pipeline_state())
+			return false;
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -287,16 +395,26 @@ private:
 			m_command_buffers[i] = global::gfx_device().create_command_buffer(m_command_pools[i]);
 			m_fence[i] = global::gfx_device().create_fence();
 		}
+
+		m_image_available_sema = global::gfx_device().create_semaphore();
+		m_render_finished_sema = global::gfx_device().create_semaphore();
 	}
 
 	void shutdown_graphics()
 	{
+		global::gfx_device().wait_for_idle();
+
+		global::gfx_device().destroy_semaphore(m_render_finished_sema);
+		global::gfx_device().destroy_semaphore(m_image_available_sema);
+
 		for (int i = 0; i < 3; i++)
 		{
 			global::gfx_device().destroy_fence(m_fence[i]);
-			delete m_command_buffers[i];
+			TE_HEAP_DELETE(m_command_buffers[i]);
 			global::gfx_device().destroy_command_pool(m_command_pools[i]);
 		}
+
+		global::gfx_device().destory_pipeline_state(m_pso);
 	}
 };
 

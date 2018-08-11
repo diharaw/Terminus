@@ -204,7 +204,7 @@ const VkStencilOp kStencilOpTable[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-const VkShaderStageFlagBits kShaderStageTable[] =
+const VkShaderStageFlagBits kShaderStageBitTable[] =
 {
 	VK_SHADER_STAGE_VERTEX_BIT,
 	VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -1373,6 +1373,7 @@ InputLayout* GfxDevice::create_input_layout(const InputLayoutCreateDesc& desc)
 Shader* GfxDevice::create_shader_from_binary(const BinaryShaderCreateDesc& desc)
 {
 	Shader* shader = TE_HEAP_NEW Shader();
+	shader->stage = desc.type;
 
 	VkShaderModuleCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1648,7 +1649,7 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 			VkPipelineShaderStageCreateInfo shader_stage_info = {};
 			shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			shader_stage_info.pNext = nullptr;
-			shader_stage_info.stage = kShaderStageTable[desc.graphics.shaders[i]->stage];
+			shader_stage_info.stage = kShaderStageBitTable[desc.graphics.shaders[i]->stage];
 			shader_stage_info.module = desc.graphics.shaders[i]->vk_shader_module;
 			shader_stage_info.pName = desc.graphics.shaders[i]->entry_point.c_str();
 
@@ -1780,7 +1781,7 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 		info.flags = 0;
 		info.pNext = nullptr;
 		info.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		info.stage.stage = kShaderStageTable[desc.compute.shader->stage];
+		info.stage.stage = kShaderStageBitTable[desc.compute.shader->stage];
 		info.stage.module = desc.compute.shader->vk_shader_module;
 		info.stage.pName = desc.compute.shader->entry_point.c_str();
 		info.basePipelineHandle = VK_NULL_HANDLE;
