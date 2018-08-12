@@ -158,6 +158,13 @@ struct ShaderProgramCreateDesc
     Shader* tessellation_evaluation;
 };
 
+struct PipelineBlendStateCreateDesc
+{
+	BlendStateCreateDesc* blend_states;
+	bool				  enable_logic_op;
+	LogicOp				  logic_op;
+};
+
 struct BlendStateCreateDesc
 {
 	bool enable = false;
@@ -199,19 +206,19 @@ struct PipelineLayoutCreateDesc
 
 struct GraphicsPipelineStateCreateDesc
 {
-	DepthStencilStateCreateDesc depth_stencil_state;
-	RasterizerStateCreateDesc   rasterizer_state;
-	BlendStateCreateDesc*       blend_states;
-	PrimitiveTopology			primitive;
-	uint32_t					shader_count;
-	Shader**					shaders;
-	InputLayout*				input_layout;
-	uint32_t					render_target_count;
-	TextureFormat*				color_attachment_formats;
-	LoadOp*						color_load_ops;
-	uint32_t					sample_count;
-	TextureFormat				depth_stencil_format;
-	LoadOp						depth_stencil_load_op;
+	DepthStencilStateCreateDesc  depth_stencil_state;
+	RasterizerStateCreateDesc    rasterizer_state;
+	PipelineBlendStateCreateDesc blend_state;
+	PrimitiveTopology			 primitive;
+	uint32_t					 shader_count;
+	Shader**					 shaders;
+	InputLayout*				 input_layout;
+	uint32_t					 render_target_count;
+	TextureFormat*				 color_attachment_formats;
+	LoadOp*						 color_load_ops;
+	uint32_t					 sample_count;
+	TextureFormat				 depth_stencil_format;
+	LoadOp						 depth_stencil_load_op;
 };
 
 struct ComputePipelineStateCreateDesc

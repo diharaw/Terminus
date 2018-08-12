@@ -103,6 +103,28 @@ const VkImageType kImageTypeTable[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+const VkLogicOp kLogicOp[] =
+{
+	VK_LOGIC_OP_CLEAR,
+	VK_LOGIC_OP_AND,
+	VK_LOGIC_OP_AND_REVERSE,
+	VK_LOGIC_OP_COPY,
+	VK_LOGIC_OP_AND_INVERTED,
+	VK_LOGIC_OP_NO_OP,
+	VK_LOGIC_OP_XOR,
+	VK_LOGIC_OP_OR,
+	VK_LOGIC_OP_NOR,
+	VK_LOGIC_OP_EQUIVALENT,
+	VK_LOGIC_OP_INVERT,
+	VK_LOGIC_OP_OR_REVERSE,
+	VK_LOGIC_OP_COPY_INVERTED,
+	VK_LOGIC_OP_OR_INVERTED,
+	VK_LOGIC_OP_NAND,
+	VK_LOGIC_OP_SET
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 const VkFormat kFormatTable[] = 
 {
 	VK_FORMAT_R32G32B32_SFLOAT,
@@ -1684,13 +1706,13 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 		{
 			VkPipelineColorBlendAttachmentState state = {};
 
-			state.blendEnable = desc.graphics.blend_states[i].enable;
-			state.srcColorBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].src_func];
-			state.dstColorBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].dst_func];
-			state.colorBlendOp = kBlendOpTable[desc.graphics.blend_states[i].blend_op];
-			state.srcAlphaBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].src_func_alpha];
-			state.dstAlphaBlendFactor = kBlendFactorTable[desc.graphics.blend_states[i].dst_func_alpha];
-			state.alphaBlendOp = kBlendOpTable[desc.graphics.blend_states[i].blend_op_alpha];
+			state.blendEnable = desc.graphics.blend_state.blend_states[i].enable;
+			state.srcColorBlendFactor = kBlendFactorTable[desc.graphics.blend_state.blend_states[i].src_func];
+			state.dstColorBlendFactor = kBlendFactorTable[desc.graphics.blend_state.blend_states[i].dst_func];
+			state.colorBlendOp = kBlendOpTable[desc.graphics.blend_state.blend_states[i].blend_op];
+			state.srcAlphaBlendFactor = kBlendFactorTable[desc.graphics.blend_state.blend_states[i].src_func_alpha];
+			state.dstAlphaBlendFactor = kBlendFactorTable[desc.graphics.blend_state.blend_states[i].dst_func_alpha];
+			state.alphaBlendOp = kBlendOpTable[desc.graphics.blend_state.blend_states[i].blend_op_alpha];
 			// TODO: Check if other API's support this.
 			state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT; 
 
@@ -1702,6 +1724,12 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 		color_blend_state.pNext = nullptr;
 		color_blend_state.attachmentCount = blend_attachment_states.size();
 		color_blend_state.pAttachments = blend_attachment_states.data();
+		color_blend_state.logicOpEnable = desc.graphics.blend_state.enable_logic_op;
+		color_blend_state.logicOp = kLogicOp[desc.graphics.blend_state.logic_op];
+		color_blend_state.blendConstants[0] = 0.0f;
+		color_blend_state.blendConstants[1] = 0.0f;
+		color_blend_state.blendConstants[2] = 0.0f;
+		color_blend_state.blendConstants[3] = 0.0f;
 
 		// -------------------------------------------------------------------------------------
 		// Viewport State

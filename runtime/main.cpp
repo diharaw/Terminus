@@ -337,7 +337,9 @@ private:
 		blend_state.src_func_alpha = GFX_BLEND_FUNC_ONE;
 		blend_state.dst_func_alpha = GFX_BLEND_FUNC_ONE_MINUS_DST_COLOR;
 
-		pso_desc.graphics.blend_states = &blend_state;
+		pso_desc.graphics.blend_state.blend_states = &blend_state;
+		pso_desc.graphics.blend_state.enable_logic_op = false;
+		pso_desc.graphics.blend_state.logic_op = GFX_LOGIC_OP_COPY;
 
 		pso_desc.graphics.primitive = GFX_PRIMITIVE_TOPOLOGY_TRIANGLES;
 
@@ -408,8 +410,8 @@ private:
 	{
 		ClearValue color_clear =
 		{
-			{ 1.0f, 0.0f, 0.0f, 1.0f },
-			0.0f,
+			{ 0.0f, 0.0f, 0.0f, 1.0f },
+			1.0f,
 			0.0f
 		};
 
@@ -434,6 +436,11 @@ private:
 
 		device.submit_graphics(1, &cmd_buffer, 1, &m_image_available_sema, 1, &m_render_finished_sema, fence);
 		device.present(1, &m_render_finished_sema);
+
+		m_frame_index++;
+
+		if (m_frame_index == 3)
+			m_frame_index = 0;
 	}
 
 	void shutdown_graphics()
