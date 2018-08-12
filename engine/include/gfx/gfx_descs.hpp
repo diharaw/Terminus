@@ -96,20 +96,20 @@ struct FramebufferCreateDesc
 
 struct DepthStencilStateCreateDesc
 {
-    bool     enable_depth_test;
-	bool     enable_depth_write;
-    bool     enable_stencil_test;
-	CompFunc depth_cmp_func;
+    bool      enable_depth_test;
+	bool      enable_depth_write;
+    bool      enable_stencil_test;
+	CompFunc  depth_cmp_func;
 	StencilOp front_stencil_fail;
 	StencilOp front_stencil_pass_depth_fail;
 	StencilOp front_stencil_pass_depth_pass;
-	CompFunc front_stencil_cmp_func;
-	uint32_t front_stencil_mask;
+	CompFunc  front_stencil_cmp_func;
+	uint32_t  front_stencil_mask;
 	StencilOp back_stencil_fail;
 	StencilOp back_stencil_pass_depth_fail;
 	StencilOp back_stencil_pass_depth_pass;
-	CompFunc back_stencil_cmp_func;
-	uint32_t back_stencil_mask;
+	CompFunc  back_stencil_cmp_func;
+	uint32_t  back_stencil_mask;
 };
 
 struct RasterizerStateCreateDesc
@@ -123,15 +123,15 @@ struct RasterizerStateCreateDesc
 
 struct SamplerStateCreateDesc
 {
-    TextureFilter min_filter = GFX_FILTER_LINEAR_ALL;
-	TextureFilter mag_filter = GFX_FILTER_LINEAR;
+    TextureFilter	   min_filter = GFX_FILTER_LINEAR_ALL;
+	TextureFilter	   mag_filter = GFX_FILTER_LINEAR;
     TextureAddressMode wrap_mode_u = GFX_ADDRESS_REPEAT;
 	TextureAddressMode wrap_mode_v = GFX_ADDRESS_REPEAT;
     TextureAddressMode wrap_mode_w = GFX_ADDRESS_REPEAT;
-	uint32_t comparison_mode;
-	CompFunc comparison_func = GFX_COMP_FUNC_LESS;
-    float    max_anisotropy = 0;
-    float    border_color[4];
+	uint32_t		   comparison_mode;
+	CompFunc		   comparison_func = GFX_COMP_FUNC_LESS;
+    float			   max_anisotropy = 0;
+    float			   border_color[4];
 };
 
 struct SourceShaderCreateDesc
@@ -158,13 +158,6 @@ struct ShaderProgramCreateDesc
     Shader* tessellation_evaluation;
 };
 
-struct PipelineBlendStateCreateDesc
-{
-	BlendStateCreateDesc* blend_states;
-	bool				  enable_logic_op;
-	LogicOp				  logic_op;
-};
-
 struct BlendStateCreateDesc
 {
 	bool enable = false;
@@ -174,6 +167,13 @@ struct BlendStateCreateDesc
 	BlendFunc src_func_alpha;
 	BlendFunc dst_func_alpha;
 	BlendOp blend_op_alpha;
+};
+
+struct PipelineBlendStateCreateDesc
+{
+	BlendStateCreateDesc* blend_states;
+	bool				  enable_logic_op;
+	LogicOp				  logic_op;
 };
 
 struct DescriptorDesc

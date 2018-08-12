@@ -2263,8 +2263,8 @@ void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffe
 	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	render_pass_info.renderPass = framebuffer->render_pass;
 	render_pass_info.framebuffer = framebuffer->framebuffer;
-	render_pass_info.renderArea.offset = { cmd->vk_viewport.x, cmd->vk_viewport.y };	
-	render_pass_info.renderArea.extent = { cmd->vk_viewport.width, cmd->vk_viewport.height };
+	render_pass_info.renderArea.offset = { (int32_t)cmd->vk_viewport.x, (int32_t)cmd->vk_viewport.y };
+	render_pass_info.renderArea.extent = { (uint32_t)cmd->vk_viewport.width, (uint32_t)cmd->vk_viewport.height };
 	
 	uint32_t clear_color_count = 0;
 

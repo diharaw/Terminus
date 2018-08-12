@@ -184,7 +184,6 @@ public:
 	CommandBuffer*	m_command_buffers[3];
 	CommandPool*	m_command_pools[3];
 	Fence*			m_fence[3];
-	PipelineLayout* m_pipeline_layout;
 	Shader*			m_vs;
 	Shader*			m_fs;
 	SemaphoreGPU*   m_image_available_sema;
@@ -318,9 +317,31 @@ private:
 		return true;
 	}
 
+	bool create_pipeline_layout()
+	{
+		PipelineLayoutCreateDesc desc;
+
+		desc.descriptor_set_count = 1;
+		desc.descriptor_sets = nullptr;
+		desc.push_constant_range_count = 1;
+		desc.push_constant_ranges = nullptr;
+
+		m_pipeline_layout = global::gfx_device().create_pipeline_layout(desc);
+
+		if (!m_pipeline_layout)
+		{
+			TE_LOG_ERROR("Failed to create Pipeline Layout!");
+			return false;
+		}
+
+		return true;
+	}
+
 	bool create_pipeline_state()
 	{
 		PipelineStateCreateDesc pso_desc;
+
+		pso_desc.pipeline_layout = m_pipeline_layout;
 
 		pso_desc.type = GFX_PIPELINE_GRAPHICS;
 		pso_desc.graphics.shader_count = 2;
@@ -392,6 +413,9 @@ private:
 		if (!load_shaders())
 			return false;
 
+		if (!create_pipeline_layout())
+			return false;
+
 		if (!create_pipeline_state())
 			return false;
 
@@ -458,6 +482,9 @@ private:
 		}
 
 		global::gfx_device().destory_pipeline_state(m_pso);
+		global::gfx_device().destroy_pipeline_layout(m_pipeline_layout);
+		global::gfx_device().destroy_shader(m_vs);
+		global::gfx_device().destroy_shader(m_fs);
 	}
 };
 
