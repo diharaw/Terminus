@@ -156,7 +156,9 @@ const VkFormat kFormatTable[] =
 	VK_FORMAT_D24_UNORM_S8_UINT,
 	VK_FORMAT_D16_UNORM,
 	VK_FORMAT_R32G32_SFLOAT,
-	VK_FORMAT_R16_SFLOAT
+	VK_FORMAT_R16_SFLOAT,
+	VK_FORMAT_B8G8R8A8_UNORM,
+	VK_FORMAT_B8G8R8A8_SNORM
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -410,6 +412,7 @@ void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** comm
 bool is_stencil(TextureFormat format);
 VkAccessFlags vk_access_flags(ResourceState state);
 VkImageLayout vk_image_layout(ResourceState usage);
+TextureFormat texture_format_from_vk(VkFormat fmt);
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -982,7 +985,7 @@ bool GfxDevice::create_swap_chain()
 	{
 		m_swap_chain_textures[i] = create_swap_chain_texture(m_swap_chain_extent.width, m_swap_chain_extent.height, images[i], m_swap_chain_image_format, VK_SAMPLE_COUNT_1_BIT);
 
-		Texture* texture =m_swap_chain_textures[i];
+		Texture* texture = m_swap_chain_textures[i];
 
 		FramebufferCreateDesc desc;
 
@@ -1005,7 +1008,7 @@ bool GfxDevice::create_swap_chain()
 void GfxDevice::shutdown_swap_chain()
 {
 	for (uint32_t i = 0; i < m_swap_chain_textures.size(); i++)
-		TE_HEAP_DELETE(m_swap_chain_textures[i]);
+		create_destroy_swap_chain_texture(m_swap_chain_textures[i]);
 
 	for (uint32_t i = 0; i < m_swap_chain_framebuffers.size(); i++)
 		destroy_framebuffer(m_swap_chain_framebuffers[i]);
@@ -1223,6 +1226,7 @@ Texture* GfxDevice::create_swap_chain_texture(uint32_t w, uint32_t h, VkImage im
 	texture->vk_format = format;
 	texture->vk_type = VK_IMAGE_TYPE_2D;
 	texture->type = GFX_TEXTURE_2D;
+	texture->format = texture_format_from_vk(format);
 
 	if (format == 25 || format == 26 || format == 27)
 		texture->aspect_flags = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -1230,6 +1234,16 @@ Texture* GfxDevice::create_swap_chain_texture(uint32_t w, uint32_t h, VkImage im
 		texture->aspect_flags = VK_IMAGE_ASPECT_COLOR_BIT;
 
 	return texture;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::create_destroy_swap_chain_texture(Texture* texture)
+{
+	if (texture)
+	{
+		TE_HEAP_DELETE(texture);
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1396,6 +1410,7 @@ Shader* GfxDevice::create_shader_from_binary(const BinaryShaderCreateDesc& desc)
 {
 	Shader* shader = TE_HEAP_NEW Shader();
 	shader->stage = desc.type;
+	shader->entry_point = desc.entry_point;
 
 	VkShaderModuleCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1738,7 +1753,9 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 		viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		viewport_state.pNext = nullptr;
 		viewport_state.viewportCount = 1;
+		viewport_state.pViewports = nullptr;
 		viewport_state.scissorCount = 1;
+		viewport_state.pScissors = nullptr;
 
 		// -------------------------------------------------------------------------------------
 		// Multisample State
@@ -1779,8 +1796,21 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 		info.pColorBlendState = &color_blend_state;
 		info.pMultisampleState = &multisample_state;
 		info.pDynamicState = &dynamic_state;
-		info.pViewportState - &viewport_state;
-		info.pVertexInputState = &desc.graphics.input_layout->input_state_nfo;
+		info.pViewportState = &viewport_state;
+
+		if (desc.graphics.input_layout)
+			info.pVertexInputState = &desc.graphics.input_layout->input_state_nfo;
+		else
+		{
+			VkPipelineVertexInputStateCreateInfo vertex_input_info = {};
+			vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+			vertex_input_info.vertexBindingDescriptionCount = 0;
+			vertex_input_info.pVertexBindingDescriptions = nullptr;
+			vertex_input_info.vertexAttributeDescriptionCount = 0;
+			vertex_input_info.pVertexAttributeDescriptions = nullptr;
+
+			info.pVertexInputState = &vertex_input_info;
+		}
 
 		PipelineState* pipeline = TE_HEAP_NEW PipelineState();
 
@@ -1838,7 +1868,7 @@ CommandPool* GfxDevice::create_command_pool(CommandPoolType type)
 {
 	CommandPool* cmd_pool = TE_HEAP_NEW CommandPool();
 
-	if (vk_create_command_pool(m_device, type == GFX_CMD_POOL_GRAPHICS ? m_queue_infos.graphics_queue_index : m_queue_infos.compute_queue_index, &cmd_pool->vk_cmd_pool))
+	if (!vk_create_command_pool(m_device, type == GFX_CMD_POOL_GRAPHICS ? m_queue_infos.graphics_queue_index : m_queue_infos.compute_queue_index, &cmd_pool->vk_cmd_pool))
 	{
 		TE_HEAP_DELETE(cmd_pool);
 		return nullptr;
@@ -2814,6 +2844,18 @@ VkImageLayout vk_image_layout(ResourceState usage)
 		return VK_IMAGE_LAYOUT_GENERAL;
 
 	return VK_IMAGE_LAYOUT_UNDEFINED;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+TextureFormat texture_format_from_vk(VkFormat fmt)
+{
+	if (fmt == VK_FORMAT_B8G8R8A8_UNORM)
+		return GFX_FORMAT_B8G8R8A8_UNORM;
+	else if (fmt == VK_FORMAT_B8G8R8A8_SNORM)
+		return GFX_FORMAT_B8G8R8A8_SNORM;
+	else
+		return GFX_FORMAT_UNKNOWN;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

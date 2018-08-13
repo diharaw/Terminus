@@ -236,24 +236,27 @@ public:
 		test_bin_serialize_fs(foo);
 		test_bin_deserialize_fs();
 
+		if (!intialize_graphics())
+			return false;
+
 		return true;
 	}
 
 	void update() override
 	{
-
+		render();
 	}
 
 	void shutdown() override
 	{
-
+		shutdown_graphics();
 	}
 
 private:
 	bool load_shaders()
 	{
 		{
-			File* vs = global::filesystem().open_file("vs.bin", TE_FS_READ | TE_FS_BINARY);
+			File* vs = global::filesystem().open_file("vert.spv", TE_FS_READ | TE_FS_BINARY);
 
 			if (!vs)
 			{
@@ -284,7 +287,7 @@ private:
 		}
 
 		{
-			File* fs = global::filesystem().open_file("fs.bin", TE_FS_READ | TE_FS_BINARY);
+			File* fs = global::filesystem().open_file("frag.spv", TE_FS_READ | TE_FS_BINARY);
 
 			if (!fs)
 			{
@@ -321,9 +324,9 @@ private:
 	{
 		PipelineLayoutCreateDesc desc;
 
-		desc.descriptor_set_count = 1;
+		desc.descriptor_set_count = 0;
 		desc.descriptor_sets = nullptr;
-		desc.push_constant_range_count = 1;
+		desc.push_constant_range_count = 0;
 		desc.push_constant_ranges = nullptr;
 
 		m_pipeline_layout = global::gfx_device().create_pipeline_layout(desc);
@@ -345,6 +348,7 @@ private:
 
 		pso_desc.type = GFX_PIPELINE_GRAPHICS;
 		pso_desc.graphics.shader_count = 2;
+		pso_desc.graphics.input_layout = nullptr;
 
 		Shader* shaders[] = { m_vs, m_fs };
 		pso_desc.graphics.shaders = shaders;

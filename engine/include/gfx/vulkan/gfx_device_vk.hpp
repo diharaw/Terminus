@@ -162,6 +162,7 @@ private:
 
 	// Helpers
 	Texture* create_swap_chain_texture(uint32_t w, uint32_t h, VkImage image, VkFormat format, VkSampleCountFlagBits sample_count);
+	void	 create_destroy_swap_chain_texture(Texture* texture);
 	void	 calc_image_size_and_extents(Texture* texture, uint32_t mip_level, uint32_t& w, uint32_t& h, uint32_t& d, size_t& size);
 
 private:
