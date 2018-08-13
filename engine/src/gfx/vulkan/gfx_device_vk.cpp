@@ -2298,7 +2298,7 @@ void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffe
 	
 	uint32_t clear_color_count = 0;
 
-	for (uint32_t i = 0; i < clear_color_count; i++)
+	for (uint32_t i = 0; i < framebuffer->color_attachment_count; i++)
 	{
 		if (framebuffer->color_load_ops[i] == GFX_LOAD_OP_CLEAR)
 		{
@@ -2315,7 +2315,7 @@ void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffe
 	}
 
 	render_pass_info.clearValueCount = clear_color_count;
-	render_pass_info.pClearValues = &m_clear_values[0];
+	render_pass_info.pClearValues = (clear_color_count == 0) ? nullptr : &m_clear_values[0];
 
 	cmd->current_framebuffer = framebuffer;
 
