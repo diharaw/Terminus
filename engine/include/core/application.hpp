@@ -38,7 +38,7 @@ TE_BEGIN_TERMINUS_NAMESPACE
 class Application
 {
 protected:
-	SDL_Window*	   m_sdl_window = nullptr;
+	SDL_Window * m_sdl_window = nullptr;
 	uint32_t	   m_width = 800;
 	uint32_t	   m_height = 600;
 	uint32_t	   m_window_flags = 0;
@@ -49,20 +49,22 @@ protected:
 	StringBuffer64 m_title = "Terminus Engine";
 	uint32_t	   m_flags = 0;
 	bool		   m_running = false;
-    
+
 public:
 	Application();
-    ~Application();
+	~Application();
 
 	int run(int argc, char *argv[]);
 
-    virtual bool initialize() = 0;
-	virtual void update() = 0;
-	virtual void shutdown() = 0;
+	virtual bool initialize() { return true;  }
+	virtual void update() {}
+	virtual void shutdown() {}
+	virtual void window_resized() {}
 
 	bool		   initialize_engine();
 	void		   pre_update_engine();
 	void		   post_update_engine();
+	void		   window_resized_engine();
 	void		   shutdown_engine();
     void		   hide();
     void		   show();

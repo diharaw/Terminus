@@ -252,6 +252,12 @@ public:
 		shutdown_graphics();
 	}
 
+	void window_resized() override
+	{
+		destroy_transient_resources();
+		create_transient_resources();
+	}
+
 private:
 	bool load_shaders()
 	{
@@ -368,10 +374,10 @@ private:
 
 		pso_desc.graphics.primitive = GFX_PRIMITIVE_TOPOLOGY_TRIANGLES;
 
-		TextureFormat color_fmt = GFX_FORMAT_R8G8B8A8_UNORM;
+		SwapChainDesc swap_chain_desc = global::gfx_device().swap_chain_desc();
 		LoadOp color_op = GFX_LOAD_OP_CLEAR;
 		pso_desc.graphics.render_target_count = 1;
-		pso_desc.graphics.color_attachment_formats = &color_fmt;
+		pso_desc.graphics.color_attachment_formats = &swap_chain_desc.format;
 		pso_desc.graphics.color_load_ops = &color_op;
 		pso_desc.graphics.sample_count = GFX_SAMPLE_COUNT_1;
 
@@ -412,6 +418,32 @@ private:
 		return true;
 	}
 
+	void create_transient_resources()
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			m_command_pools[i] = global::gfx_device().create_command_pool(GFX_CMD_POOL_GRAPHICS);
+			m_command_buffers[i] = global::gfx_device().create_command_buffer(m_command_pools[i]);
+			m_fence[i] = global::gfx_device().create_fence();
+		}
+
+		m_image_available_sema = global::gfx_device().create_semaphore();
+		m_render_finished_sema = global::gfx_device().create_semaphore();
+	}
+
+	void destroy_transient_resources()
+	{
+		global::gfx_device().destroy_semaphore(m_render_finished_sema);
+		global::gfx_device().destroy_semaphore(m_image_available_sema);
+
+		for (int i = 0; i < 3; i++)
+		{
+			global::gfx_device().destroy_fence(m_fence[i]);
+			TE_HEAP_DELETE(m_command_buffers[i]);
+			global::gfx_device().destroy_command_pool(m_command_pools[i]);
+		}
+	}
+
 	bool intialize_graphics()
 	{
 		if (!load_shaders())
@@ -423,15 +455,7 @@ private:
 		if (!create_pipeline_state())
 			return false;
 
-		for (int i = 0; i < 3; i++)
-		{
-			m_command_pools[i] = global::gfx_device().create_command_pool(GFX_CMD_POOL_GRAPHICS);
-			m_command_buffers[i] = global::gfx_device().create_command_buffer(m_command_pools[i]);
-			m_fence[i] = global::gfx_device().create_fence();
-		}
-
-		m_image_available_sema = global::gfx_device().create_semaphore();
-		m_render_finished_sema = global::gfx_device().create_semaphore();
+		create_transient_resources();
 	}
 
 	void render()
@@ -455,17 +479,21 @@ private:
 
 		device.cmd_begin_recording(cmd_buffer);
 
-		device.cmd_bind_framebuffer(cmd_buffer, m_fbo, &color_clear, color_clear);
+		device.cmd_set_viewport(cmd_buffer, 0, 0, m_width, m_height);
+		device.cmd_set_scissor(cmd_buffer, 0, 0, m_width, m_height);
 
 		TextureResourceBarrier tex_barrier_1 = { m_fbo->color_attachment[0], GFX_RESOURCE_STATE_RENDER_TARGET };
 		device.cmd_resource_barrier(cmd_buffer, 1, &tex_barrier_1, 0, nullptr);
 
-		device.cmd_set_viewport(cmd_buffer, 0, 0, m_width, m_height);
+		device.cmd_bind_framebuffer(cmd_buffer, m_fbo, &color_clear, color_clear);
+
 		device.cmd_bind_pipeline_state(cmd_buffer, m_pso);
 		device.cmd_draw(cmd_buffer, 3, 1, 0, 0);
 
+		device.cmd_unbind_framebuffer(cmd_buffer);
+
 		TextureResourceBarrier tex_barrier_2 = { m_fbo->color_attachment[0], GFX_RESOURCE_STATE_PRESENT };
-		device.cmd_resource_barrier(cmd_buffer, 1, &tex_barrier_1, 0, nullptr);
+		device.cmd_resource_barrier(cmd_buffer, 1, &tex_barrier_2, 0, nullptr);
 
 		device.cmd_end_recording(cmd_buffer);
 
@@ -482,15 +510,7 @@ private:
 	{
 		global::gfx_device().wait_for_idle();
 
-		global::gfx_device().destroy_semaphore(m_render_finished_sema);
-		global::gfx_device().destroy_semaphore(m_image_available_sema);
-
-		for (int i = 0; i < 3; i++)
-		{
-			global::gfx_device().destroy_fence(m_fence[i]);
-			TE_HEAP_DELETE(m_command_buffers[i]);
-			global::gfx_device().destroy_command_pool(m_command_pools[i]);
-		}
+		destroy_transient_resources();
 
 		global::gfx_device().destory_pipeline_state(m_pso);
 		global::gfx_device().destroy_pipeline_layout(m_pipeline_layout);

@@ -47,6 +47,7 @@ public:
 	void recreate_swap_chain();
 	void shutdown();
 
+	SwapChainDesc swap_chain_desc();
 	Framebuffer* accquire_next_framebuffer(SemaphoreGPU* signal_semaphore);
 
 	// Resource creation
@@ -96,6 +97,7 @@ public:
 	void cmd_set_scissor(CommandBuffer* cmd, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 	void cmd_bind_vertex_array(CommandBuffer* cmd, VertexArray* vertex_array);
 	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer, ClearValue* color_clear_values, ClearValue ds_clear_value);
+	void cmd_unbind_framebuffer(CommandBuffer* cmd);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
 	void cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrier_count, TextureResourceBarrier* texture_barriers, uint32_t buffer_barrier_count, BufferResourceBarrier* buffer_barriers);
 	void cmd_draw(CommandBuffer* cmd, uint32_t  vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance);

@@ -246,4 +246,9 @@ struct TextureResourceBarrier
 	ResourceState target_state;
 };
 
+struct SwapChainDesc
+{
+	TextureFormat format;
+};
+
 TE_END_TERMINUS_NAMESPACE

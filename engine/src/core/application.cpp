@@ -241,7 +241,9 @@ void Application::pre_update_engine()
 			{
 				if (e.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
-					global::gfx_device().recreate_swap_chain();
+					m_width = static_cast<uint32_t>(e.window.data1);
+					m_height = static_cast<uint32_t>(e.window.data2);
+					window_resized_engine();
 				}
 			}
 			// --------------------------------------------------------------------------------
@@ -285,6 +287,14 @@ void Application::pre_update_engine()
 void Application::post_update_engine()
 {
 
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void Application::window_resized_engine()
+{
+	global::gfx_device().recreate_swap_chain();
+	window_resized();
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

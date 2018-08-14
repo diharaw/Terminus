@@ -483,6 +483,7 @@ bool GfxDevice::initialize()
 
 void GfxDevice::recreate_swap_chain()
 {
+	wait_for_idle();
 	shutdown_swap_chain();
 
 	if (!create_swap_chain())
@@ -1267,6 +1268,14 @@ void GfxDevice::calc_image_size_and_extents(Texture* texture, uint32_t mip_level
 
 	size_t pixel_size = kPixelSizes[texture->format];
 	size - w * h * d * pixel_size;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+SwapChainDesc GfxDevice::swap_chain_desc()
+{
+	SwapChainDesc desc = { texture_format_from_vk(m_swap_chain_image_format) };
+	return desc;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2326,6 +2335,18 @@ void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffe
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::cmd_unbind_framebuffer(CommandBuffer* cmd)
+{
+	// If a framebuffer is already bound, it means there is already an active Render Pass. Finish it first before starting a new one.
+	if (cmd->current_framebuffer)
+	{
+		vkCmdEndRenderPass(cmd->vk_cmd_buf);
+		cmd->current_framebuffer = nullptr;
+	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state)
 {
 	assert(cmd != nullptr);
@@ -2575,6 +2596,8 @@ VkRenderPass create_render_pass(VkDevice device, uint32_t render_target_count, T
 	render_pass_info.pAttachments = attachments;
 	render_pass_info.subpassCount = 1;
 	render_pass_info.pSubpasses = &subpass;
+	render_pass_info.dependencyCount = 0;
+	render_pass_info.pDependencies = nullptr;
 
 	if (vkCreateRenderPass(device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
 	{
