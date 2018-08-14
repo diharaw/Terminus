@@ -68,15 +68,21 @@ struct Framebuffer
 	VkImageView   depth_image_view;
 	LoadOp		  depth_stencil_load_op;
 	VkRenderPass  render_pass;
+	Texture*	  color_attachment[MAX_COLOR_ATTACHMENTS];
+	Texture*	  depth_attachment;
 
 	Framebuffer()
 	{
 		framebuffer = VK_NULL_HANDLE;
 		
 		for (int i = 0; i < MAX_COLOR_ATTACHMENTS; i++)
+		{
 			color_image_views[i] = VK_NULL_HANDLE;
+			color_attachment[i] = nullptr;
+		}
 
 		depth_image_view = VK_NULL_HANDLE;
+		depth_attachment = nullptr;
 	}
 };
 

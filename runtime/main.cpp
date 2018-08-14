@@ -456,9 +456,16 @@ private:
 		device.cmd_begin_recording(cmd_buffer);
 
 		device.cmd_bind_framebuffer(cmd_buffer, m_fbo, &color_clear, color_clear);
+
+		TextureResourceBarrier tex_barrier_1 = { m_fbo->color_attachment[0], GFX_RESOURCE_STATE_RENDER_TARGET };
+		device.cmd_resource_barrier(cmd_buffer, 1, &tex_barrier_1, 0, nullptr);
+
 		device.cmd_set_viewport(cmd_buffer, 0, 0, m_width, m_height);
 		device.cmd_bind_pipeline_state(cmd_buffer, m_pso);
 		device.cmd_draw(cmd_buffer, 3, 1, 0, 0);
+
+		TextureResourceBarrier tex_barrier_2 = { m_fbo->color_attachment[0], GFX_RESOURCE_STATE_PRESENT };
+		device.cmd_resource_barrier(cmd_buffer, 1, &tex_barrier_1, 0, nullptr);
 
 		device.cmd_end_recording(cmd_buffer);
 

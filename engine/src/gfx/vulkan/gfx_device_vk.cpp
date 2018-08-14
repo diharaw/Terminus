@@ -1463,6 +1463,7 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 
 		framebuffer->color_load_ops[i] = desc.render_targets[i].load_op;
 		image_views[i] = framebuffer->color_image_views[i];
+		framebuffer->color_attachment[i] = desc.render_targets[i].texture;
 	}
 
 	if (desc.depth_stencil_target.texture)
@@ -1483,6 +1484,7 @@ Framebuffer* GfxDevice::create_framebuffer(const FramebufferCreateDesc& desc)
 
 		framebuffer->depth_stencil_load_op = desc.depth_stencil_target.load_op;
 		image_views[attachment_count - 1] = framebuffer->depth_image_view;
+		framebuffer->depth_attachment = desc.depth_stencil_target.texture;
 	}
 
 	VkFramebufferCreateInfo framebuffer_info = {};
