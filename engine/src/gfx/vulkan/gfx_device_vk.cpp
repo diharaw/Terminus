@@ -2314,7 +2314,6 @@ void GfxDevice::cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffe
 		if (framebuffer->color_load_ops[i] == GFX_LOAD_OP_CLEAR)
 		{
 			m_clear_values[i].color = { color_clear_values[i].color[0], color_clear_values[i].color[1], color_clear_values[i].color[2], color_clear_values[i].color[3] };
-			m_clear_values[i].depthStencil = { color_clear_values[i].depth, color_clear_values[i].stencil };
 			clear_color_count++;
 		}
 	}

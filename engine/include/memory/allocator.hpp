@@ -2,6 +2,7 @@
 
 #include <memory/memory_macros.hpp>
 #include <core/terminus_macros.hpp>
+#include <io/logger.hpp>
 #include <stddef.h>
 #include <stdint.h>
 #include <iostream>
@@ -11,14 +12,18 @@
 template <typename ALLOCATOR>
 void* operator new(size_t size, ALLOCATOR* a, int line, const char* file)
 {
-	std::cout << "Performing allocation of size " << size << " at line " << line << " of " << file << std::endl;
+#if defined(TE_TRACK_ALLOCATIONS)
+	TE_LOG_INFO("Performing allocation of size " + size + " at line " + line + " of " + file);
+#endif
 	return a->allocate(size, 8);
 }
 
 template <typename ALLOCATOR, typename OBJECT>
 void custom_delete(OBJECT* p, ALLOCATOR* a, int line, const char* file)
 {
-	std::cout << "Performing deallocation of size " << sizeof(OBJECT) << " at line " << line << " of " << file << std::endl;
+#if defined(TE_TRACK_ALLOCATIONS)
+	TE_LOG_INFO("Performing deallocation of size " + sizeof(OBJECT) + " at line " + line + " of " + file);
+#endif
 	p->~OBJECT();
 	a->deallocate(p);
 }
