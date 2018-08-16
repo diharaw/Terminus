@@ -35,10 +35,12 @@ struct TextureCreateDesc
 
 struct BufferCreateDesc
 {
-    void*	 data;
-    uint32_t size;
-    uint32_t usage_type;
-    uint32_t data_type;
+    void*		data;
+    uint32_t	size;
+	BufferType  type;
+    BufferUsage cpu_usage_flags;
+	BufferUsage gpu_usage_flags;
+    DataType    data_type;
 };
 
 struct InputElement

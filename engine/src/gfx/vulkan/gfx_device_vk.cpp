@@ -6,6 +6,7 @@
 #include <gfx/vulkan/gfx_types_vk.hpp>
 #include <gfx/vulkan/gfx_initializers_vk.hpp>
 #include <core/engine_core.hpp>
+#include <core/terminus_macros.hpp>
 #include <stl/string_buffer.hpp>
 #include <io/logger.hpp>
 #include <concurrency/atomic.hpp>
@@ -331,6 +332,17 @@ const VkAttachmentLoadOp kLoadOpTable[] =
 	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 	VK_ATTACHMENT_LOAD_OP_LOAD,
 	VK_ATTACHMENT_LOAD_OP_CLEAR
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+const VkBufferUsageFlags kBufferFlagsTable[] =
+{
+	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+	VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+	VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+	VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+	VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -1365,6 +1377,21 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 
 Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 {
+	VkBufferCreateInfo buffer_info = {};
+	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_info.size = desc.size;
+	buffer_info.usage = kBufferFlagsTable[desc.type];
+
+	if (desc.cpu_usage_flags == GFX_BUFFER_USAGE_WRITABLE && desc.gpu_usage_flags == GFX_BUFFER_USAGE_READABLE)
+		buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	else if (TE_HAS_BIT_FLAG(GFX_BUFFER_USAGE_WRITABLE, desc.cpu_usage_flags))
+	{
+		buffer_info.sharingMode = VK_SHARING_MODE_CONCURRENT;
+		buffer_info.queueFamilyIndexCount = 2;
+		uint32_t queue_indices[] = { m_queue_infos.graphics_queue_index, m_queue_infos.compute_queue_index };
+		buffer_info.pQueueFamilyIndices = queue_indices;
+	}
+	
 	return nullptr;
 }
 
