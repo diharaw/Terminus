@@ -1377,22 +1377,28 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 
 Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 {
+	Buffer* buffer = TE_HEAP_NEW Buffer();
+	buffer->current_state = GFX_RESOURCE_STATE_UNDEFINED;
+	buffer->index_type = desc.data_type;
+
 	VkBufferCreateInfo buffer_info = {};
 	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buffer_info.size = desc.size;
 	buffer_info.usage = kBufferFlagsTable[desc.type];
 
-	if (desc.cpu_usage_flags == GFX_BUFFER_USAGE_WRITABLE && desc.gpu_usage_flags == GFX_BUFFER_USAGE_READABLE)
-		buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	else if (TE_HAS_BIT_FLAG(GFX_BUFFER_USAGE_WRITABLE, desc.cpu_usage_flags))
-	{
-		buffer_info.sharingMode = VK_SHARING_MODE_CONCURRENT;
-		buffer_info.queueFamilyIndexCount = 2;
-		uint32_t queue_indices[] = { m_queue_infos.graphics_queue_index, m_queue_infos.compute_queue_index };
-		buffer_info.pQueueFamilyIndices = queue_indices;
-	}
+	// @TODO: Look into queue family indices
+	buffer_info.sharingMode = VK_SHARING_MODE_CONCURRENT;
+	buffer_info.queueFamilyIndexCount = 3;
+	uint32_t queue_indices[] = { m_queue_infos.graphics_queue_index, m_queue_infos.compute_queue_index, m_queue_infos.transfer_queue_index };
+	buffer_info.pQueueFamilyIndices = queue_indices;
 	
-	return nullptr;
+	if (vkCreateBuffer(m_device, &buffer_info, nullptr, &buffer->vk_buffer) != VK_SUCCESS)
+	{
+		TE_HEAP_DELETE(buffer);
+		return nullptr;
+	}
+
+	return buffer;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
