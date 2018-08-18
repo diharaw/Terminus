@@ -347,6 +347,16 @@ const VkBufferUsageFlags kBufferFlagsTable[] =
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+const VmaMemoryUsage kVmaMemoryUsageTable[] =
+{
+	VMA_MEMORY_USAGE_GPU_ONLY,
+	VMA_MEMORY_USAGE_CPU_ONLY,
+	VMA_MEMORY_USAGE_CPU_TO_GPU,
+	VMA_MEMORY_USAGE_GPU_TO_CPU
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 const size_t kPixelSizes[] =
 {
 	// @TODO: Add compressed formats
@@ -415,7 +425,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 
 // Helpers Declaration
 VkRenderPass create_render_pass(VkDevice device, uint32_t render_target_count, TextureFormat* color_attachment_formats, LoadOp* color_load_ops, VkSampleCountFlagBits sample_count, TextureFormat depth_stencil_format, LoadOp depth_stencil_load_op);
-bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
+bool allocate_buffer(VkDevice device, VmaAllocator allocator, size_t size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memory_property_flags, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkImage& image, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info);
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
 bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool* pool);
@@ -1385,18 +1395,55 @@ Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buffer_info.size = desc.size;
 	buffer_info.usage = kBufferFlagsTable[desc.type];
+	buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	buffer_info.queueFamilyIndexCount = 0;
+	buffer_info.pQueueFamilyIndices = nullptr;
 
-	// @TODO: Look into queue family indices
-	buffer_info.sharingMode = VK_SHARING_MODE_CONCURRENT;
-	buffer_info.queueFamilyIndexCount = 3;
-	uint32_t queue_indices[] = { m_queue_infos.graphics_queue_index, m_queue_infos.compute_queue_index, m_queue_infos.transfer_queue_index };
-	buffer_info.pQueueFamilyIndices = queue_indices;
-	
-	if (vkCreateBuffer(m_device, &buffer_info, nullptr, &buffer->vk_buffer) != VK_SUCCESS)
+	VkMemoryPropertyFlags memory_prop_flags = 0;
+	VkBufferUsageFlags usage_flags = kBufferFlagsTable[desc.type];
+
+	if (desc.usage_flags == GFX_RESOURCE_USAGE_CPU_ONLY)
+	{
+		memory_prop_flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+		memory_prop_flags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		usage_flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	}
+	else if (desc.usage_flags == GFX_RESOURCE_USAGE_GPU_ONLY)
+	{
+		memory_prop_flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		usage_flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	}
+	else if (desc.usage_flags == GFX_RESOURCE_USAGE_CPU_TO_GPU)
+	{
+		memory_prop_flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+		memory_prop_flags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+	}
+	else if (desc.usage_flags == GFX_RESOURCE_USAGE_GPU_TO_CPU)
+		memory_prop_flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+
+	VmaAllocationCreateFlags alloc_create_flags = 0;
+
+	if (desc.creation_flags & GFX_BUFFER_CREATION_COMMITTED)
+		alloc_create_flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+	if (desc.creation_flags & GFX_BUFFER_CREATION_PERSISTANT_MAP)
+		alloc_create_flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+	VmaAllocationInfo vma_alloc_info;
+
+	if (!allocate_buffer(m_device, m_allocator, desc.size, usage_flags, memory_prop_flags, kVmaMemoryUsageTable[desc.usage_flags], alloc_create_flags, buffer->vk_buffer, buffer->vma_allocation, vma_alloc_info))
 	{
 		TE_HEAP_DELETE(buffer);
 		return nullptr;
 	}
+
+	// Create staging buffer 
+	VkBufferCreateInfo staging_buffer_info = {};
+	staging_buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	staging_buffer_info.size = desc.size;
+	staging_buffer_info.usage = kBufferFlagsTable[desc.type];
+	staging_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	staging_buffer_info.queueFamilyIndexCount = 0;
+	staging_buffer_info.pQueueFamilyIndices = nullptr;
 
 	return buffer;
 }
@@ -2642,14 +2689,28 @@ VkRenderPass create_render_pass(VkDevice device, uint32_t render_target_count, T
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-bool allocate_buffer(VkDevice device, VmaAllocator allocator, VkBufferCreateInfo info, VmaMemoryUsage vma_usage, VmaAllocationCreateFlags vma_flags, VkBuffer& buffer, VmaAllocation& vma_allocation, VmaAllocationInfo& alloc_info)
+bool allocate_buffer(VkDevice device, 
+					 VmaAllocator allocator, 
+					 size_t size,
+					 VkBufferUsageFlags usage, 
+					 VkMemoryPropertyFlags memory_property_flags,
+					 VmaMemoryUsage vma_usage, 
+					 VmaAllocationCreateFlags vma_flags, 
+					 VkBuffer& buffer, 
+					 VmaAllocation& vma_allocation, 
+					 VmaAllocationInfo& alloc_info)
 {
+	VkBufferCreateInfo buffer_info = vk::buffer_create_info(usage, size);
+
 	VmaAllocationCreateInfo alloc_create_info = {};
 	alloc_create_info.usage = vma_usage;
 	alloc_create_info.flags = vma_flags;
-	// TODO: add HOST_COHERENT etc options
+	alloc_create_info.requiredFlags = memory_property_flags;
+	alloc_create_info.preferredFlags = 0;
+	alloc_create_info.memoryTypeBits = 0;
+	alloc_create_info.pool = VK_NULL_HANDLE;
 
-	if (vmaCreateBuffer(allocator, &info, &alloc_create_info, &buffer, &vma_allocation, &alloc_info) != VK_SUCCESS)
+	if (vmaCreateBuffer(allocator, &buffer_info, &alloc_create_info, &buffer, &vma_allocation, &alloc_info) != VK_SUCCESS)
 	{
 		buffer = VK_NULL_HANDLE;
 		vma_allocation = VK_NULL_HANDLE;

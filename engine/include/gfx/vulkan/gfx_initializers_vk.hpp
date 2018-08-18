@@ -46,6 +46,19 @@ namespace vk
 
 		return create_info;
 	}
+
+	VkBufferCreateInfo buffer_create_info(VkBufferUsageFlags usage, size_t size)
+	{
+		VkBufferCreateInfo buffer_info = {};
+		buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		buffer_info.size = size;
+		buffer_info.usage = usage;
+		buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		buffer_info.queueFamilyIndexCount = 0;
+		buffer_info.pQueueFamilyIndices = nullptr;
+
+		return buffer_info;
+	}
 }
 
 TE_END_TERMINUS_NAMESPACE
