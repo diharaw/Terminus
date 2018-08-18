@@ -35,8 +35,10 @@ struct TextureCreateDesc
 
 struct BufferCreateDesc
 {
+	// Initial Data
     void*				data;
     uint32_t			size;
+	uint32_t			offset;
 	BufferType			type;
 	ResourceUsage		usage_flags;
 	BufferCreationFlags creation_flags;

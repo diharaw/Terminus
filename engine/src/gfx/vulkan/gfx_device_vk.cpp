@@ -1390,6 +1390,9 @@ Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 	Buffer* buffer = TE_HEAP_NEW Buffer();
 	buffer->current_state = GFX_RESOURCE_STATE_UNDEFINED;
 	buffer->index_type = desc.data_type;
+	buffer->usage_flags = desc.usage_flags;
+	buffer->creation_flags = desc.creation_flags;
+	buffer->type = desc.type;
 
 	VkBufferCreateInfo buffer_info = {};
 	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1437,44 +1440,15 @@ Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 	}
 
 	buffer->vk_device_memory = vma_alloc_info.deviceMemory;
-	buffer->mapped_ptr = vma_alloc_info.pMappedData;
+
+	if (desc.creation_flags & GFX_BUFFER_CREATION_PERSISTANT_MAP)
+		buffer->mapped_ptr = vma_alloc_info.pMappedData;
+	else
+		buffer->mapped_ptr = nullptr;
 
 	// If initial data is provided, copy it over now
 	if (desc.data)
-	{
-		if (desc.usage_flags == GFX_RESOURCE_USAGE_GPU_ONLY)
-		{
-			// Create staging buffer 
-			VkBuffer staging_buffer;
-			VmaAllocation staging_buffer_alloc;
-			VmaAllocationInfo vma_staging_alloc_info;
-
-			if (!allocate_buffer(m_device, 
-								 m_allocator, 
-								 desc.size, 
-								 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-								 VMA_MEMORY_USAGE_CPU_ONLY,
-								 VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
-								 staging_buffer, 
-								 staging_buffer_alloc, 
-								 vma_staging_alloc_info))
-			{
-				TE_HEAP_DELETE(buffer);
-				return nullptr;
-			}
-
-			// Copy into mapped pointer
-			memcpy(vma_staging_alloc_info.pMappedData, desc.data, desc.size);
-
-			// TODO: Perform Buffer-To-Buffer transfer
-
-			// Destroy staging buffer
-			vmaDestroyBuffer(m_allocator, staging_buffer, staging_buffer_alloc);
-		}
-		else if (desc.usage_flags == GFX_RESOURCE_USAGE_CPU_TO_GPU || desc.usage_flags == GFX_RESOURCE_USAGE_CPU_ONLY)
-			memcpy(buffer->mapped_ptr, desc.data, desc.size);
-	}
+		update_buffer(buffer, desc.offset, desc.size, desc.data);
 
 	return buffer;
 }
@@ -2271,9 +2245,50 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::update_buffer(Buffer* buffer, size_t size, void* data)
+void GfxDevice::update_buffer(Buffer* buffer, size_t offset, size_t size, void* data)
 {
+	if (buffer->usage_flags == GFX_RESOURCE_USAGE_GPU_ONLY || buffer->usage_flags == GFX_RESOURCE_USAGE_GPU_TO_CPU)
+	{
+		BufferCreateDesc desc;
 
+		desc.data = data;
+		desc.size = size;
+		desc.usage_flags = GFX_RESOURCE_USAGE_CPU_ONLY;
+		desc.type = buffer->type;
+		desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
+
+		Buffer* staging_buffer = create_buffer(desc);
+
+		if (!staging_buffer)
+		{
+			TE_LOG_ERROR("Failed to allocate Staging Buffer");
+			return;
+		}
+
+		// TODO: Perform Buffer-To-Buffer transfer
+
+		// Destroy staging buffer
+		destroy_buffer(staging_buffer);
+	}
+	else if (buffer->usage_flags == GFX_RESOURCE_USAGE_CPU_TO_GPU || buffer->usage_flags == GFX_RESOURCE_USAGE_CPU_ONLY)
+	{
+		if (buffer->mapped_ptr) // If persistant mapped pointer is available, copy into that
+			memcpy(buffer->mapped_ptr, data, size);
+		else // Else, map buffer, copy and unmap
+		{
+			void* ptr = map_buffer(buffer, offset, size);
+
+			if (!ptr)
+			{
+				TE_LOG_ERROR("Failed to map buffer!");
+				return;
+			}
+
+			memcpy(ptr, data, size);
+
+			unmap_buffer(buffer);
+		}
+	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

@@ -21,6 +21,9 @@ struct Buffer
 	DataType index_type;
 	ResourceState  current_state;
 	void*		   mapped_ptr;
+	ResourceUsage		usage_flags;
+	BufferCreationFlags creation_flags;
+	BufferType			type;
 
 	Buffer()
 	{

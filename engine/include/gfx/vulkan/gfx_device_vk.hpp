@@ -81,7 +81,7 @@ public:
 
 	// Resource updates
 	void  update_texture(Texture* texture, uint32_t mip_slice , uint32_t array_slice, void* data);
-	void  update_buffer(Buffer* buffer, size_t size, void* data);
+	void  update_buffer(Buffer* buffer, size_t offset, size_t size, void* data);
 	void* map_buffer(Buffer* buffer, size_t offset, size_t size);
 	void  unmap_buffer(Buffer* buffer);
 
