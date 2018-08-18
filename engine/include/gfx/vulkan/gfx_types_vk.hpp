@@ -20,6 +20,7 @@ struct Buffer
 	VkBuffer vk_buffer;
 	DataType index_type;
 	ResourceState  current_state;
+	void*		   mapped_ptr;
 
 	Buffer()
 	{
@@ -27,6 +28,7 @@ struct Buffer
 		vk_device_memory = VK_NULL_HANDLE;
 		vk_buffer = VK_NULL_HANDLE;
 		current_state = GFX_RESOURCE_STATE_UNDEFINED;
+		mapped_ptr = nullptr;
 	}
 };
 

@@ -1436,14 +1436,45 @@ Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 		return nullptr;
 	}
 
-	// Create staging buffer 
-	VkBufferCreateInfo staging_buffer_info = {};
-	staging_buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	staging_buffer_info.size = desc.size;
-	staging_buffer_info.usage = kBufferFlagsTable[desc.type];
-	staging_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	staging_buffer_info.queueFamilyIndexCount = 0;
-	staging_buffer_info.pQueueFamilyIndices = nullptr;
+	buffer->vk_device_memory = vma_alloc_info.deviceMemory;
+	buffer->mapped_ptr = vma_alloc_info.pMappedData;
+
+	// If initial data is provided, copy it over now
+	if (desc.data)
+	{
+		if (desc.usage_flags == GFX_RESOURCE_USAGE_GPU_ONLY)
+		{
+			// Create staging buffer 
+			VkBuffer staging_buffer;
+			VmaAllocation staging_buffer_alloc;
+			VmaAllocationInfo vma_staging_alloc_info;
+
+			if (!allocate_buffer(m_device, 
+								 m_allocator, 
+								 desc.size, 
+								 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+								 VMA_MEMORY_USAGE_CPU_ONLY,
+								 VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+								 staging_buffer, 
+								 staging_buffer_alloc, 
+								 vma_staging_alloc_info))
+			{
+				TE_HEAP_DELETE(buffer);
+				return nullptr;
+			}
+
+			// Copy into mapped pointer
+			memcpy(vma_staging_alloc_info.pMappedData, desc.data, desc.size);
+
+			// TODO: Perform Buffer-To-Buffer transfer
+
+			// Destroy staging buffer
+			vmaDestroyBuffer(m_allocator, staging_buffer, staging_buffer_alloc);
+		}
+		else if (desc.usage_flags == GFX_RESOURCE_USAGE_CPU_TO_GPU || desc.usage_flags == GFX_RESOURCE_USAGE_CPU_ONLY)
+			memcpy(buffer->mapped_ptr, desc.data, desc.size);
+	}
 
 	return buffer;
 }
@@ -2200,14 +2231,30 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 	buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	// Create CPU Staging buffer
-	allocate_buffer(m_device, m_allocator, buffer_info, VMA_MEMORY_USAGE_CPU_ONLY, 0, staging_buffer, staging_buffer_alloc, staging_buffer_alloc_info);
+	// Create staging buffer 
+	VkBuffer staging_buffer;
+	VmaAllocation staging_buffer_alloc;
+	VmaAllocationInfo vma_staging_alloc_info;
 
-	void* ptr = nullptr;
-	vkMapMemory(m_device, staging_buffer_alloc_info.deviceMemory, 0, size, 0, &ptr);
-	memcpy(ptr, data, size);
-	vkUnmapMemory(m_device, staging_buffer_alloc_info.deviceMemory);
+	if (!allocate_buffer(m_device, 
+						 m_allocator, 
+						 size, 
+						 VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+						 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+						 VMA_MEMORY_USAGE_CPU_ONLY, 
+						 VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+						 staging_buffer, 
+						 staging_buffer_alloc, 
+						 vma_staging_alloc_info))
+	{
+		TE_LOG_ERROR("Failed to allocate staging buffer!");
+		return;
+	}
 
+	// Copy data into staging buffer
+	memcpy(vma_staging_alloc_info.pMappedData, data, size);
+
+	// Perform Buffer-To-Image transfer
 	VkBufferImageCopy buffer_copy_region = {};
 	buffer_copy_region.imageSubresource.aspectMask = texture->aspect_flags;
 	buffer_copy_region.imageSubresource.mipLevel = mip_slice;
@@ -2217,6 +2264,9 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 	buffer_copy_region.imageExtent.height = h;
 	buffer_copy_region.imageExtent.depth = d;
 	buffer_copy_region.bufferOffset = 0;
+
+	// Destroy staging buffer
+	vmaDestroyBuffer(m_allocator, staging_buffer, staging_buffer_alloc);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
