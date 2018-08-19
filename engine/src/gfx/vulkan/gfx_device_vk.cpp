@@ -430,7 +430,6 @@ bool allocate_image(VkDevice device, VmaAllocator allocator, VkImageCreateInfo i
 bool create_image_view(VkDevice device, VmaAllocator allocator, Texture* texture, uint32_t base_mip_level, uint32_t mip_level_count, uint32_t base_layer, uint32_t layer_count, VkImageView& image_view);
 bool vk_create_command_pool(VkDevice device, uint32_t queue_index, VkCommandPool* pool);
 VkShaderStageFlags find_stage_flags(ShaderStageBit bits);
-void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence);
 bool is_stencil(TextureFormat format);
 VkAccessFlags vk_access_flags(ResourceState state);
 VkImageLayout vk_image_layout(ResourceState usage);
@@ -905,14 +904,29 @@ bool GfxDevice::create_logical_device()
 		return false;
 	}
 
+	VkQueue presentation_queue = VK_NULL_HANDLE;
+	VkQueue graphics_queue = VK_NULL_HANDLE;
+	VkQueue compute_queue = VK_NULL_HANDLE;
+	VkQueue transfer_queue = VK_NULL_HANDLE;
+
 	// Get presentation queue
-	vkGetDeviceQueue(m_device, m_queue_infos.presentation_queue_index, 0, &m_presentation_queue);
+	vkGetDeviceQueue(m_device, m_queue_infos.presentation_queue_index, 0, &presentation_queue);
+
+	m_presentation_queue.index = m_queue_infos.presentation_queue_index;
+	m_presentation_queue.type = GFX_QUEUE_PRESENTATION;
+	m_presentation_queue.vk_queue = presentation_queue;
 
 	// Get graphics queue
 	if (m_queue_infos.graphics_queue_index == m_queue_infos.presentation_queue_index)
 		m_graphics_queue = m_presentation_queue;
 	else
-		vkGetDeviceQueue(m_device, m_queue_infos.graphics_queue_index, 0, &m_graphics_queue);
+	{
+		vkGetDeviceQueue(m_device, m_queue_infos.graphics_queue_index, 0, &graphics_queue);
+
+		m_graphics_queue.index = m_queue_infos.graphics_queue_index;
+		m_graphics_queue.type = GFX_QUEUE_GRAPHICS;
+		m_graphics_queue.vk_queue = graphics_queue;
+	}
 
 	// Get compute queue
 	if (m_queue_infos.compute_queue_index == m_queue_infos.presentation_queue_index)
@@ -920,7 +934,13 @@ bool GfxDevice::create_logical_device()
 	else if (m_queue_infos.compute_queue_index == m_queue_infos.graphics_queue_index)
 		m_compute_queue = m_graphics_queue;
 	else
-		vkGetDeviceQueue(m_device, m_queue_infos.compute_queue_index, 0, &m_compute_queue);
+	{
+		vkGetDeviceQueue(m_device, m_queue_infos.compute_queue_index, 0, &compute_queue);
+
+		m_compute_queue.index = m_queue_infos.compute_queue_index;
+		m_compute_queue.type = GFX_QUEUE_COMPUTE;
+		m_compute_queue.vk_queue = compute_queue;
+	}
 
 	// Get transfer queue
 	if (m_queue_infos.transfer_queue_index == m_queue_infos.presentation_queue_index)
@@ -930,7 +950,13 @@ bool GfxDevice::create_logical_device()
 	else if (m_queue_infos.transfer_queue_index == m_queue_infos.compute_queue_index)
 		m_transfer_queue = m_transfer_queue;
 	else
-		vkGetDeviceQueue(m_device, m_queue_infos.transfer_queue_index, 0, &m_transfer_queue);
+	{
+		vkGetDeviceQueue(m_device, m_queue_infos.transfer_queue_index, 0, &transfer_queue);
+
+		m_transfer_queue.index = m_queue_infos.transfer_queue_index;
+		m_transfer_queue.type = GFX_QUEUE_TRANSFER;
+		m_transfer_queue.vk_queue = transfer_queue;
+	}
 
 	return true;
 }
@@ -1311,6 +1337,27 @@ Framebuffer* GfxDevice::accquire_next_framebuffer(SemaphoreGPU* signal_semaphore
 	assert(res == VK_SUCCESS);
 
 	return m_swap_chain_framebuffers[m_framebuffer_index];
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+Queue* GfxDevice::graphics_queue()
+{
+	return &m_graphics_queue;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+Queue* GfxDevice::compute_queue()
+{
+	return &m_compute_queue;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+Queue* GfxDevice::transfer_queue()
+{
+	return &m_transfer_queue;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2195,10 +2242,6 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 
 	calc_image_size_and_extents(texture, mip_slice, w, d, h, size);
 
-	VkBuffer staging_buffer = VK_NULL_HANDLE;
-	VmaAllocation staging_buffer_alloc = VK_NULL_HANDLE;
-	VmaAllocationInfo staging_buffer_alloc_info;
-
 	VkBufferCreateInfo buffer_info = {};
 	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buffer_info.size = 0;
@@ -2570,6 +2613,23 @@ void GfxDevice::cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrie
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::cmd_copy_buffer(CommandBuffer* cmd, Buffer* src, size_t src_offset, Buffer* dst, size_t dst_offset, size_t size)
+{
+	assert(src);
+	assert(dst);
+	assert(cmd);
+
+	VkBufferCopy copy = {};
+
+	copy.srcOffset = src_offset;
+	copy.dstOffset = dst_offset;
+	copy.size = size;
+
+	vkCmdCopyBuffer(cmd->vk_cmd_buf, src->vk_buffer, dst->vk_buffer, 1, &copy);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::cmd_draw(CommandBuffer* cmd, uint32_t  vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance)
 {
 	vkCmdDraw(cmd->vk_cmd_buf, vertex_count, instance_count, first_vertex, first_instance);
@@ -2612,28 +2672,68 @@ void GfxDevice::cmd_dispatch_indirect(CommandBuffer* cmd, Buffer* buffer, size_t
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-void GfxDevice::submit_graphics(uint32_t cmd_buf_count,
-								CommandBuffer** command_buffers,
-								uint32_t wait_sema_count,
-								SemaphoreGPU** wait_semaphores,
-								uint32_t signal_sema_count,
-								SemaphoreGPU** signal_semaphores,
-								Fence* fence)
+void GfxDevice::submit(Queue* queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence)
 {
-	vk_queue_submit(m_graphics_queue, cmd_buf_count, command_buffers, wait_sema_count, wait_semaphores, signal_sema_count, signal_semaphores, fence);
-}
+	assert(queue);
 
-// -----------------------------------------------------------------------------------------------------------------------------------
+	for (uint32_t i = 0; i < cmd_buf_count; i++)
+	{
+		assert(command_buffers[i]);
+		m_submit_cmd_buf[i] = command_buffers[i]->vk_cmd_buf;
+	}
 
-void GfxDevice::submit_compute(uint32_t cmd_buf_count,
-							   CommandBuffer** command_buffers,
-							   uint32_t wait_sema_count,
-							   SemaphoreGPU** wait_semaphores,
-							   uint32_t signal_sema_count,
-							   SemaphoreGPU** signal_semaphores,
-							   Fence* fence)
-{
-	vk_queue_submit(m_compute_queue, cmd_buf_count, command_buffers, wait_sema_count, wait_semaphores, signal_sema_count, signal_semaphores, fence);
+	uint32_t wait_count = 0;
+
+	for (uint32_t i = 0; i < wait_sema_count; i++)
+	{
+		assert(wait_semaphores[i]);
+
+		if (wait_semaphores[i]->signaled)
+		{
+			m_submit_wait_semaphores[wait_count] = wait_semaphores[i]->vk_semaphore;
+			m_submit_pipeline_stage_flags[wait_count] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+			wait_count++;
+
+			wait_semaphores[i]->signaled = false;
+		}
+	}
+
+	uint32_t signal_count = 0;
+
+	for (uint32_t i = 0; i < signal_sema_count; i++)
+	{
+		assert(signal_semaphores[i]);
+
+		if (!signal_semaphores[i]->signaled)
+		{
+			m_submit_signal_semaphores[signal_count] = signal_semaphores[i]->vk_semaphore;
+			signal_count++;
+
+			signal_semaphores[i]->signaled = true;
+		}
+	}
+
+	VkSubmitInfo submit_info;
+
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = NULL;
+	submit_info.waitSemaphoreCount = wait_count;
+	submit_info.pWaitSemaphores = &m_submit_wait_semaphores[0];
+	submit_info.pWaitDstStageMask = &m_submit_pipeline_stage_flags[0];
+	submit_info.commandBufferCount = cmd_buf_count;
+	submit_info.pCommandBuffers = &m_submit_cmd_buf[0];
+	submit_info.signalSemaphoreCount = signal_count;
+	submit_info.pSignalSemaphores = &m_submit_signal_semaphores[0];
+
+	VkFence vk_fence = VK_NULL_HANDLE;
+
+	if (fence)
+	{
+		vk_fence = fence->vk_fence;
+		fence->submitted = true;
+	}
+
+	vkQueueSubmit(queue->vk_queue, 1, &submit_info, vk_fence);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2664,7 +2764,7 @@ void GfxDevice::present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores
 	present_info.pImageIndices = &m_framebuffer_index;
 	present_info.pResults = NULL;
 
-	if (vkQueuePresentKHR(m_presentation_queue, &present_info) != VK_SUCCESS)
+	if (vkQueuePresentKHR(m_presentation_queue.vk_queue, &present_info) != VK_SUCCESS)
 		TE_LOG_ERROR("Failed to present");
 }
 
@@ -2890,63 +2990,6 @@ VkShaderStageFlags find_stage_flags(ShaderStageBit bits)
 		flags |= VK_SHADER_STAGE_COMPUTE_BIT;
 
 	return flags;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-void vk_queue_submit(VkQueue queue, uint32_t cmd_buf_count, CommandBuffer** command_buffers, uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores, uint32_t signal_sema_count, SemaphoreGPU** signal_semaphores, Fence* fence)
-{
-	for (uint32_t i = 0; i < cmd_buf_count; i++)
-		m_submit_cmd_buf[i] = command_buffers[i]->vk_cmd_buf;
-
-	uint32_t wait_count = 0;
-
-	for (uint32_t i = 0; i < wait_sema_count; i++)
-	{
-		if (wait_semaphores[i]->signaled)
-		{
-			m_submit_wait_semaphores[wait_count] = wait_semaphores[i]->vk_semaphore;
-			m_submit_pipeline_stage_flags[wait_count] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-			wait_count++;
-
-			wait_semaphores[i]->signaled = false;
-		}
-	}
-
-	uint32_t signal_count = 0;
-
-	for (uint32_t i = 0; i < signal_sema_count; i++)
-	{
-		if (!signal_semaphores[i]->signaled)
-		{
-			m_submit_signal_semaphores[signal_count] = signal_semaphores[i]->vk_semaphore;
-			signal_count++;
-
-			signal_semaphores[i]->signaled = true;
-		}
-	}
-
-	VkSubmitInfo submit_info;
-
-	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submit_info.pNext = NULL;
-	submit_info.waitSemaphoreCount = wait_count;
-	submit_info.pWaitSemaphores = &m_submit_wait_semaphores[0];
-	submit_info.pWaitDstStageMask = &m_submit_pipeline_stage_flags[0];
-	submit_info.commandBufferCount = cmd_buf_count;
-	submit_info.pCommandBuffers = &m_submit_cmd_buf[0];
-	submit_info.signalSemaphoreCount = signal_count;
-	submit_info.pSignalSemaphores = &m_submit_signal_semaphores[0];
-
-	VkFence vk_fence = VK_NULL_HANDLE;
-
-	if (fence)
-	{
-		vk_fence = fence->vk_fence;
-		fence->submitted = true;
-	}
-
-	vkQueueSubmit(queue, 1, &submit_info, vk_fence);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

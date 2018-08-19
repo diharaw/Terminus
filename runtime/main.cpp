@@ -183,6 +183,7 @@ public:
 	VertexArray*    m_vao;
 	CommandBuffer*	m_command_buffers[3];
 	CommandPool*	m_command_pools[3];
+	Queue*			m_graphics_queue;
 	Fence*			m_fence[3];
 	Shader*			m_vs;
 	Shader*			m_fs;
@@ -446,6 +447,8 @@ private:
 
 	bool intialize_graphics()
 	{
+		m_graphics_queue = global::gfx_device().graphics_queue();
+
 		if (!load_shaders())
 			return false;
 
@@ -497,7 +500,7 @@ private:
 
 		device.cmd_end_recording(cmd_buffer);
 
-		device.submit_graphics(1, &cmd_buffer, 1, &m_image_available_sema, 1, &m_render_finished_sema, fence);
+		device.submit(m_graphics_queue, 1, &cmd_buffer, 1, &m_image_available_sema, 1, &m_render_finished_sema, fence);
 		device.present(1, &m_render_finished_sema);
 
 		m_frame_index++;

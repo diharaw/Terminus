@@ -48,7 +48,10 @@ public:
 	void shutdown();
 
 	SwapChainDesc swap_chain_desc();
-	Framebuffer* accquire_next_framebuffer(SemaphoreGPU* signal_semaphore);
+	Framebuffer*  accquire_next_framebuffer(SemaphoreGPU* signal_semaphore);
+	Queue*		  graphics_queue();
+	Queue*		  compute_queue();
+	Queue*		  transfer_queue();
 
 	// Resource creation
 	Texture*	    create_texture(const TextureCreateDesc& desc);
@@ -100,6 +103,7 @@ public:
 	void cmd_unbind_framebuffer(CommandBuffer* cmd);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
 	void cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrier_count, TextureResourceBarrier* texture_barriers, uint32_t buffer_barrier_count, BufferResourceBarrier* buffer_barriers);
+	void cmd_copy_buffer(CommandBuffer* cmd, Buffer* src, size_t src_offset, Buffer* dst, size_t dst_offset, size_t size);
 	void cmd_draw(CommandBuffer* cmd, uint32_t  vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance);
 	void cmd_draw_indexed(CommandBuffer* cmd, uint32_t index_count, uint32_t instance_Count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance);
 	void cmd_draw_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset, uint32_t draw_count, uint32_t stride);
@@ -108,21 +112,14 @@ public:
 	void cmd_dispatch_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset);
 	
 	// Command submission
-	void submit_graphics(uint32_t cmd_buf_count, 
-						 CommandBuffer** command_buffers, 
-						 uint32_t wait_sema_count, 
-						 SemaphoreGPU** wait_semaphores, 
-						 uint32_t signal_sema_count, 
-						 SemaphoreGPU** signal_semaphores,  
-						 Fence* fence);
-
-	void submit_compute(uint32_t cmd_buf_count,
-						CommandBuffer** command_buffers,
-						uint32_t wait_sema_count,
-						SemaphoreGPU** wait_semaphores,
-						uint32_t signal_sema_count,
-						SemaphoreGPU** signal_semaphores,
-						Fence* fence);
+	void submit(Queue* queue,  
+				uint32_t cmd_buf_count, 
+				CommandBuffer** command_buffers, 
+				uint32_t wait_sema_count, 
+				SemaphoreGPU** wait_semaphores, 
+				uint32_t signal_sema_count, 
+				SemaphoreGPU** signal_semaphores,  
+				Fence* fence);
 	
 	// Presentation
 	void present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores);
@@ -168,7 +165,7 @@ private:
 	void	 calc_image_size_and_extents(Texture* texture, uint32_t mip_level, uint32_t& w, uint32_t& h, uint32_t& d, size_t& size);
 
 private:
-	struct DeviceProperties
+	struct Properties
 	{
 		uint32_t	   vendor_id;
 		uint32_t	   driver;
@@ -176,20 +173,22 @@ private:
 		StringBuffer32 type;
 	};
 
-	struct DeviceLimits
+	struct Caps
 	{
-
+		uint32_t max_graphics_queues;
+		uint32_t max_compute_queues;
+		uint32_t max_transfer_queues;
 	};
 
-	DeviceProperties	   m_device_properties;
-	DeviceLimits		   m_device_limits;
+	Properties			   m_device_properties;
+	Caps				   m_device_caps;
 	QueueInfos			   m_queue_infos;
 	VkInstance			   m_instance;
 	VkDevice			   m_device;
-	VkQueue				   m_graphics_queue;
-	VkQueue				   m_compute_queue;
-	VkQueue				   m_transfer_queue;
-	VkQueue				   m_presentation_queue;
+	Queue				   m_graphics_queue;
+	Queue				   m_compute_queue;
+	Queue				   m_transfer_queue;
+	Queue				   m_presentation_queue;
 	VkPhysicalDevice	   m_physical_device;
 	VkSurfaceKHR		   m_surface;
 	VkSwapchainKHR		   m_swap_chain;

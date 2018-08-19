@@ -91,6 +91,19 @@ struct Framebuffer
 	}
 };
 
+struct Queue
+{
+	VkQueue			vk_queue;
+	QueueType		type;
+	uint32_t		index;
+
+	Queue()
+	{
+		vk_queue = VK_NULL_HANDLE;
+		index = -1;
+	}
+};
+
 struct CommandPool
 {
 	VkCommandPool vk_cmd_pool;
