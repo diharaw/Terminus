@@ -173,6 +173,16 @@ void test_deserialize_ms()
 	TE_HEAP_DEALLOC(buf);
 }
 
+const float kVertices[] = {
+	0.0, -0.5, 1.0, 0.0, 0.0,
+	0.5,  0.5, 0.0, 1.0, 0.0,
+	-0.5, 0.5, 0.0, 0.0, 1.0
+};
+
+const uint32_t kIndices[] = {
+	0, 1, 2
+};
+
 class Runtime : public Application
 {
 public:
@@ -190,6 +200,10 @@ public:
 	SemaphoreGPU*   m_image_available_sema;
 	SemaphoreGPU*	m_render_finished_sema;
 	Framebuffer*	m_fbo;
+	Buffer*			m_vbo;
+	Buffer*			m_ibo;
+	VertexArray*	m_vao;
+	InputLayout*	m_input_layout;
 	uint32_t		m_frame_index;
 
 	Runtime()
@@ -355,7 +369,7 @@ private:
 
 		pso_desc.type = GFX_PIPELINE_GRAPHICS;
 		pso_desc.graphics.shader_count = 2;
-		pso_desc.graphics.input_layout = nullptr;
+		pso_desc.graphics.input_layout = m_input_layout;
 
 		Shader* shaders[] = { m_vs, m_fs };
 		pso_desc.graphics.shaders = shaders;
@@ -419,6 +433,72 @@ private:
 		return true;
 	}
 
+	bool create_geometry()
+	{
+		InputLayoutCreateDesc il_desc;
+
+		il_desc.num_elements = 2;
+		il_desc.vertex_size = sizeof(float) * 5;
+
+		InputElement elements[] = {
+			{ 2, GFX_DATA_TYPE_FLOAT, false, 0, "TEXCOORD0" },
+		{ 3, GFX_DATA_TYPE_FLOAT, false, sizeof(float) * 2, "" }
+		};
+
+		il_desc.elements = elements;
+
+		m_input_layout = global::gfx_device().create_input_layout(il_desc);
+
+		BufferCreateDesc vbo_desc;
+		vbo_desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
+		vbo_desc.type = GFX_BUFFER_VERTEX;
+		vbo_desc.usage_flags = GFX_RESOURCE_USAGE_CPU_TO_GPU;
+		vbo_desc.data_type = GFX_DATA_TYPE_FLOAT;
+		vbo_desc.offset = 0;
+		vbo_desc.size = sizeof(kVertices);
+		vbo_desc.data = (void*)&kVertices[0];
+
+		m_vbo = global::gfx_device().create_buffer(vbo_desc);
+
+		if (!m_vbo)
+		{
+			TE_LOG_ERROR("Failed to create Vertex Buffer!");
+			return false;
+		}
+
+		BufferCreateDesc ibo_desc;
+		ibo_desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
+		ibo_desc.type = GFX_BUFFER_INDEX;
+		ibo_desc.usage_flags = GFX_RESOURCE_USAGE_CPU_TO_GPU;
+		ibo_desc.data_type = GFX_DATA_TYPE_UINT32;
+		ibo_desc.offset = 0;
+		ibo_desc.size = sizeof(kIndices);
+		ibo_desc.data = (void*)&kIndices[0];
+
+		m_ibo = global::gfx_device().create_buffer(ibo_desc);
+
+		if (!m_ibo)
+		{
+			TE_LOG_ERROR("Failed to create Index Buffer!");
+			return false;
+		}
+
+		VertexArrayCreateDesc vao_desc;
+		vao_desc.layout = m_input_layout;
+		vao_desc.vertex_buffer = m_vbo;
+		vao_desc.index_buffer = m_ibo;
+
+		m_vao = global::gfx_device().create_vertex_array(vao_desc);
+
+		if (!m_vao)
+		{
+			TE_LOG_ERROR("Failed to create Vertex Array!");
+			return false;
+		}
+
+		return true;
+	}
+
 	void create_transient_resources()
 	{
 		for (int i = 0; i < 3; i++)
@@ -450,6 +530,9 @@ private:
 		m_graphics_queue = global::gfx_device().graphics_queue();
 
 		if (!load_shaders())
+			return false;
+
+		if (!create_geometry())
 			return false;
 
 		if (!create_pipeline_layout())
@@ -491,6 +574,7 @@ private:
 		device.cmd_bind_framebuffer(cmd_buffer, m_fbo, &color_clear, color_clear);
 
 		device.cmd_bind_pipeline_state(cmd_buffer, m_pso);
+		device.cmd_bind_vertex_array(cmd_buffer, m_vao);
 		device.cmd_draw(cmd_buffer, 3, 1, 0, 0);
 
 		device.cmd_unbind_framebuffer(cmd_buffer);
@@ -515,6 +599,10 @@ private:
 
 		destroy_transient_resources();
 
+		global::gfx_device().destroy_vertex_array(m_vao);
+		global::gfx_device().destroy_buffer(m_ibo);
+		global::gfx_device().destroy_buffer(m_vbo);
+		global::gfx_device().destroy_input_layout(m_input_layout);
 		global::gfx_device().destory_pipeline_state(m_pso);
 		global::gfx_device().destroy_pipeline_layout(m_pipeline_layout);
 		global::gfx_device().destroy_shader(m_vs);
