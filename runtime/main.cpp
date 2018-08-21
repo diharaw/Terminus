@@ -191,6 +191,9 @@ public:
 	PipelineState*  m_pso;
 	PipelineLayout* m_pipeline_layout;
 	VertexArray*    m_vao;
+	Buffer*			m_vbo;
+	Buffer*			m_ibo;
+	InputLayout*	m_input_layout;
 	CommandBuffer*	m_command_buffers[3];
 	CommandPool*	m_command_pools[3];
 	Queue*			m_graphics_queue;
@@ -200,10 +203,6 @@ public:
 	SemaphoreGPU*   m_image_available_sema;
 	SemaphoreGPU*	m_render_finished_sema;
 	Framebuffer*	m_fbo;
-	Buffer*			m_vbo;
-	Buffer*			m_ibo;
-	VertexArray*	m_vao;
-	InputLayout*	m_input_layout;
 	uint32_t		m_frame_index;
 
 	Runtime()
@@ -575,7 +574,7 @@ private:
 
 		device.cmd_bind_pipeline_state(cmd_buffer, m_pso);
 		device.cmd_bind_vertex_array(cmd_buffer, m_vao);
-		device.cmd_draw(cmd_buffer, 3, 1, 0, 0);
+		device.cmd_draw_indexed(cmd_buffer, 3, 1, 0, 0, 0);
 
 		device.cmd_unbind_framebuffer(cmd_buffer);
 
