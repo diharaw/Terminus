@@ -468,7 +468,7 @@ private:
 		BufferCreateDesc ibo_desc;
 		ibo_desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
 		ibo_desc.type = GFX_BUFFER_INDEX;
-		ibo_desc.usage_flags = GFX_RESOURCE_USAGE_CPU_TO_GPU;
+		ibo_desc.usage_flags = GFX_RESOURCE_USAGE_GPU_ONLY;
 		ibo_desc.data_type = GFX_DATA_TYPE_UINT32;
 		ibo_desc.offset = 0;
 		ibo_desc.size = sizeof(kIndices);

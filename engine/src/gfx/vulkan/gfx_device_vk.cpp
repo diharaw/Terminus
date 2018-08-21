@@ -2791,6 +2791,8 @@ void GfxDevice::present(uint32_t wait_sema_count, SemaphoreGPU** wait_semaphores
 
 	if (vkQueuePresentKHR(m_presentation_queue.vk_queue, &present_info) != VK_SUCCESS)
 		TE_LOG_ERROR("Failed to present");
+
+	// TODO: Handle present assertion when window is minimized
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
