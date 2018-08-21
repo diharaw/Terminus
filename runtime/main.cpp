@@ -451,7 +451,7 @@ private:
 		BufferCreateDesc vbo_desc;
 		vbo_desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
 		vbo_desc.type = GFX_BUFFER_VERTEX;
-		vbo_desc.usage_flags = GFX_RESOURCE_USAGE_CPU_TO_GPU;
+		vbo_desc.usage_flags = GFX_RESOURCE_USAGE_GPU_ONLY;
 		vbo_desc.data_type = GFX_DATA_TYPE_FLOAT;
 		vbo_desc.offset = 0;
 		vbo_desc.size = sizeof(kVertices);

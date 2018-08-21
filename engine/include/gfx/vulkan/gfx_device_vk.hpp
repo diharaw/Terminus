@@ -198,6 +198,8 @@ private:
 	Vector<Framebuffer*>   m_swap_chain_framebuffers;
 	struct VmaAllocator_T* m_allocator;
 	uint32_t			   m_framebuffer_index;
+	CommandPool*		   m_transfer_cmd_pool;
+	CommandBuffer*		   m_transfer_cmd_buffer;
 
 #if defined(TE_VULKAN_DEBUG)
 	VkDebugReportCallbackEXT m_debug_callback;

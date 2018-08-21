@@ -497,6 +497,9 @@ bool GfxDevice::initialize()
 
 	vmaCreateAllocator(&allocator_info, &m_allocator);
 
+	m_transfer_cmd_pool = create_command_pool(GFX_CMD_POOL_TRANSFER);
+	m_transfer_cmd_buffer = create_command_buffer(m_transfer_cmd_pool);
+
 	return true;
 }
 
@@ -516,6 +519,9 @@ void GfxDevice::recreate_swap_chain()
 void GfxDevice::shutdown()
 {
 	vkDeviceWaitIdle(m_device);
+
+	TE_HEAP_DELETE(m_transfer_cmd_buffer);
+	destroy_command_pool(m_transfer_cmd_pool);
 
 	vmaDestroyAllocator(m_allocator);
 
@@ -2011,7 +2017,16 @@ CommandPool* GfxDevice::create_command_pool(CommandPoolType type)
 {
 	CommandPool* cmd_pool = TE_HEAP_NEW CommandPool();
 
-	if (!vk_create_command_pool(m_device, type == GFX_CMD_POOL_GRAPHICS ? m_queue_infos.graphics_queue_index : m_queue_infos.compute_queue_index, &cmd_pool->vk_cmd_pool))
+	int32_t queue_index = -1;
+
+	if (type == GFX_CMD_POOL_GRAPHICS)
+		queue_index = m_queue_infos.graphics_queue_index;
+	else if (type == GFX_CMD_POOL_COMPUTE)
+		queue_index = m_queue_infos.compute_queue_index;
+	else if (type == GFX_CMD_POOL_TRANSFER)
+		queue_index = m_queue_infos.transfer_queue_index;
+
+	if (!vk_create_command_pool(m_device, queue_index, &cmd_pool->vk_cmd_pool))
 	{
 		TE_HEAP_DELETE(cmd_pool);
 		return nullptr;
@@ -2296,6 +2311,7 @@ void GfxDevice::update_buffer(Buffer* buffer, size_t offset, size_t size, void* 
 
 		desc.data = data;
 		desc.size = size;
+		desc.offset = 0;
 		desc.usage_flags = GFX_RESOURCE_USAGE_CPU_ONLY;
 		desc.type = buffer->type;
 		desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
@@ -2308,7 +2324,16 @@ void GfxDevice::update_buffer(Buffer* buffer, size_t offset, size_t size, void* 
 			return;
 		}
 
-		// TODO: Perform Buffer-To-Buffer transfer
+		// TODO: Look into queue ownership transfer
+		reset_command_pool(m_transfer_cmd_pool);
+
+		cmd_begin_recording(m_transfer_cmd_buffer);
+		cmd_copy_buffer(m_transfer_cmd_buffer, staging_buffer, 0, buffer, offset, size);
+		cmd_end_recording(m_transfer_cmd_buffer);
+
+		submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, nullptr);
+
+		wait_for_idle();
 
 		// Destroy staging buffer
 		destroy_buffer(staging_buffer);

@@ -15,7 +15,8 @@ enum QueueType
 enum CommandPoolType
 {
 	GFX_CMD_POOL_GRAPHICS = 0,
-	GFX_CMD_POOL_COMPUTE = 1
+	GFX_CMD_POOL_COMPUTE = 1,
+	GFX_CMD_POOL_TRANSFER = 2
 };
 
 enum PipelineType
