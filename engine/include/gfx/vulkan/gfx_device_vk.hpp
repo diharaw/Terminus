@@ -104,6 +104,7 @@ public:
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
 	void cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrier_count, TextureResourceBarrier* texture_barriers, uint32_t buffer_barrier_count, BufferResourceBarrier* buffer_barriers);
 	void cmd_copy_buffer(CommandBuffer* cmd, Buffer* src, size_t src_offset, Buffer* dst, size_t dst_offset, size_t size);
+	void cmd_copy_buffer_to_texture(CommandBuffer* cmd, Buffer* src, Texture* dst, ResourceState state, BufferTextureCopyRegion region);
 	void cmd_draw(CommandBuffer* cmd, uint32_t  vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance);
 	void cmd_draw_indexed(CommandBuffer* cmd, uint32_t index_count, uint32_t instance_Count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance);
 	void cmd_draw_indirect(CommandBuffer* cmd, Buffer* buffer, size_t offset, uint32_t draw_count, uint32_t stride);

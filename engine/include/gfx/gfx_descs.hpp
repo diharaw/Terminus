@@ -18,6 +18,18 @@ struct RenderDeviceInitData
     size_t size;
 };
 
+struct BufferTextureCopyRegion
+{
+	size_t   src_offset;
+	size_t   row_pitch;
+	size_t   height;
+	int32_t  offsets[3];
+	uint32_t extents[3];
+	uint32_t mip_level;
+	uint32_t base_array_layer;
+	uint32_t layer_count;
+};
+
 struct TextureCreateDesc
 {
 	TextureFormat format;

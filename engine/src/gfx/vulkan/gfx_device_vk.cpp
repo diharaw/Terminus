@@ -2655,6 +2655,33 @@ void GfxDevice::cmd_copy_buffer(CommandBuffer* cmd, Buffer* src, size_t src_offs
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::cmd_copy_buffer_to_texture(CommandBuffer* cmd, Buffer* src, Texture* dst, ResourceState state, BufferTextureCopyRegion region)
+{
+	assert(src);
+	assert(dst);
+	assert(cmd);
+	
+	VkBufferImageCopy vk_copy;
+
+	vk_copy.bufferOffset = region.src_offset;
+	vk_copy.bufferImageHeight = region.height;
+	vk_copy.bufferRowLength = region.row_pitch;
+	vk_copy.imageSubresource.aspectMask = dst->aspect_flags;
+	vk_copy.imageSubresource.baseArrayLayer = region.base_array_layer;
+	vk_copy.imageSubresource.layerCount = region.layer_count;
+	vk_copy.imageSubresource.mipLevel = region.mip_level;
+	vk_copy.imageOffset.x = region.offsets[0];
+	vk_copy.imageOffset.y = region.offsets[1];
+	vk_copy.imageOffset.z = region.offsets[2];
+	vk_copy.imageExtent.width = region.extents[0];
+	vk_copy.imageExtent.height = region.extents[1];
+	vk_copy.imageExtent.depth = region.extents[2];
+
+	vkCmdCopyBufferToImage(cmd->vk_cmd_buf, src->vk_buffer, dst->image, vk_image_layout(state), 1, &vk_copy);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::cmd_draw(CommandBuffer* cmd, uint32_t  vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance)
 {
 	vkCmdDraw(cmd->vk_cmd_buf, vertex_count, instance_count, first_vertex, first_instance);
