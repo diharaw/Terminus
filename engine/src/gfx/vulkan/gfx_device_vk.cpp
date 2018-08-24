@@ -342,7 +342,9 @@ const VkBufferUsageFlags kBufferFlagsTable[] =
 	VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 	VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 	VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-	VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT
+	VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT,
+	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	VK_BUFFER_USAGE_TRANSFER_DST_BIT
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2257,48 +2259,54 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 
 	calc_image_size_and_extents(texture, mip_slice, w, d, h, size);
 
-	VkBufferCreateInfo buffer_info = {};
-	buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	buffer_info.size = 0;
-	buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	BufferCreateDesc desc;
 
-	// Create staging buffer 
-	VkBuffer staging_buffer;
-	VmaAllocation staging_buffer_alloc;
-	VmaAllocationInfo vma_staging_alloc_info;
+	desc.data = data;
+	desc.size = size;
+	desc.offset = 0;
+	desc.usage_flags = GFX_RESOURCE_USAGE_CPU_ONLY;
+	desc.type = GFX_BUFFER_TRANSFER_SRC;
+	desc.creation_flags = GFX_BUFFER_CREATION_COMMITTED;
 
-	if (!allocate_buffer(m_device, 
-						 m_allocator, 
-						 size, 
-						 VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-						 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
-						 VMA_MEMORY_USAGE_CPU_ONLY, 
-						 VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
-						 staging_buffer, 
-						 staging_buffer_alloc, 
-						 vma_staging_alloc_info))
+	Buffer* staging_buffer = create_buffer(desc);
+
+	if (!staging_buffer)
 	{
-		TE_LOG_ERROR("Failed to allocate staging buffer!");
+		TE_LOG_ERROR("Failed to allocate Staging Buffer");
 		return;
 	}
 
-	// Copy data into staging buffer
-	memcpy(vma_staging_alloc_info.pMappedData, data, size);
+	// TODO: Look into queue ownership transfer
+	reset_command_pool(m_transfer_cmd_pool);
 
-	// Perform Buffer-To-Image transfer
-	VkBufferImageCopy buffer_copy_region = {};
-	buffer_copy_region.imageSubresource.aspectMask = texture->aspect_flags;
-	buffer_copy_region.imageSubresource.mipLevel = mip_slice;
-	buffer_copy_region.imageSubresource.baseArrayLayer = array_slice;
-	buffer_copy_region.imageSubresource.layerCount = 1;
-	buffer_copy_region.imageExtent.width = w;
-	buffer_copy_region.imageExtent.height = h;
-	buffer_copy_region.imageExtent.depth = d;
-	buffer_copy_region.bufferOffset = 0;
+	cmd_begin_recording(m_transfer_cmd_buffer);
+
+	BufferTextureCopyRegion region;
+
+	region.src_offset = 0;
+	region.base_array_layer = array_slice;
+	region.mip_level = mip_slice;
+	region.row_pitch = w * kPixelSizes[texture->format];
+	region.height = h;
+
+	//size_t   src_offset;
+	//size_t   row_pitch;
+	//size_t   height;
+	//int32_t  offsets[3];
+	//uint32_t extents[3];
+	//uint32_t mip_level;
+	//uint32_t base_array_layer;
+	//uint32_t layer_count;
+
+	cmd_copy_buffer(m_transfer_cmd_buffer, staging_buffer, 0, buffer, offset, size);
+	cmd_end_recording(m_transfer_cmd_buffer);
+
+	submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, nullptr);
+
+	wait_for_idle();
 
 	// Destroy staging buffer
-	vmaDestroyBuffer(m_allocator, staging_buffer, staging_buffer_alloc);
+	destroy_buffer(staging_buffer);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
