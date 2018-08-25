@@ -2285,28 +2285,29 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 
 	region.src_offset = 0;
 	region.base_array_layer = array_slice;
+	region.layer_count = 1;
 	region.mip_level = mip_slice;
 	region.row_pitch = w * kPixelSizes[texture->format];
 	region.height = h;
+	region.offsets[0] = 0;
+	region.offsets[1] = 0;
+	region.offsets[2] = 0;
+	region.extents[0] = w;
+	region.extents[1] = h;
+	region.extents[2] = d;
 
-	//size_t   src_offset;
-	//size_t   row_pitch;
-	//size_t   height;
-	//int32_t  offsets[3];
-	//uint32_t extents[3];
-	//uint32_t mip_level;
-	//uint32_t base_array_layer;
-	//uint32_t layer_count;
+	cmd_copy_buffer_to_texture(m_transfer_cmd_buffer, staging_buffer, texture, GFX_RESOURCE_STATE_COMMON, region);
 
-	cmd_copy_buffer(m_transfer_cmd_buffer, staging_buffer, 0, buffer, offset, size);
 	cmd_end_recording(m_transfer_cmd_buffer);
 
-	submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, nullptr);
+	Fence* fence = create_fence();
+	submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, fence);
 
-	wait_for_idle();
+	wait_for_fences(1, &fence, INFINITY);
 
 	// Destroy staging buffer
 	destroy_buffer(staging_buffer);
+	destroy_fence(fence);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2339,12 +2340,14 @@ void GfxDevice::update_buffer(Buffer* buffer, size_t offset, size_t size, void* 
 		cmd_copy_buffer(m_transfer_cmd_buffer, staging_buffer, 0, buffer, offset, size);
 		cmd_end_recording(m_transfer_cmd_buffer);
 
-		submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, nullptr);
+		Fence* fence = create_fence();
+		submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, fence);
 
-		wait_for_idle();
+		wait_for_fences(1, &fence, INFINITY);
 
 		// Destroy staging buffer
 		destroy_buffer(staging_buffer);
+		destroy_fence(fence);
 	}
 	else if (buffer->usage_flags == GFX_RESOURCE_USAGE_CPU_TO_GPU || buffer->usage_flags == GFX_RESOURCE_USAGE_CPU_ONLY)
 	{
