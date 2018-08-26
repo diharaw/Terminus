@@ -82,7 +82,8 @@ set(TE_IO_HEADERS "${CMAKE_SOURCE_DIR}/engine/include/io/file.hpp"
                   "${CMAKE_SOURCE_DIR}/engine/include/io/archive.hpp"
                   "${CMAKE_SOURCE_DIR}/engine/include/io/os_file.hpp"
                   "${CMAKE_SOURCE_DIR}/engine/include/io/zip_file.hpp"
-                  "${CMAKE_SOURCE_DIR}/engine/include/io/type_descriptor.hpp")
+                  "${CMAKE_SOURCE_DIR}/engine/include/io/type_descriptor.hpp"
+                  "${CMAKE_SOURCE_DIR}/engine/include/io/logger.hpp")
 
 # Sources
 set(TE_IO_SOURCES "${CMAKE_SOURCE_DIR}/engine/src/io/filesystem.cpp"
@@ -95,7 +96,8 @@ set(TE_IO_SOURCES "${CMAKE_SOURCE_DIR}/engine/src/io/filesystem.cpp"
                   "${CMAKE_SOURCE_DIR}/engine/src/io/json_serializer.cpp"
                   "${CMAKE_SOURCE_DIR}/engine/src/io/file_stream.cpp"
                   "${CMAKE_SOURCE_DIR}/engine/src/io/memory_stream.cpp"
-                  "${CMAKE_SOURCE_DIR}/engine/src/io/type_descriptor.cpp")
+                  "${CMAKE_SOURCE_DIR}/engine/src/io/type_descriptor.cpp"
+                  "${CMAKE_SOURCE_DIR}/engine/src/io/logger.cpp")
 
 # -----------------------------------------------------------------------------------------------------------------------------
 # FILES - MATH

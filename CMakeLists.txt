@@ -91,3 +91,4 @@ include_directories("${TE_ENGINE_INCLUDE_PATH}"
 
 add_subdirectory("engine/src")
 add_subdirectory("runtime")
+add_subdirectory("samples")

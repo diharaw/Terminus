@@ -2303,7 +2303,7 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 	Fence* fence = create_fence();
 	submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, fence);
 
-	wait_for_fences(1, &fence, INFINITY);
+	wait_for_fences(1, &fence, UINT64_MAX);
 
 	// Destroy staging buffer
 	destroy_buffer(staging_buffer);
@@ -2343,7 +2343,7 @@ void GfxDevice::update_buffer(Buffer* buffer, size_t offset, size_t size, void* 
 		Fence* fence = create_fence();
 		submit(&m_transfer_queue, 1, &m_transfer_cmd_buffer, 0, nullptr, 0, nullptr, fence);
 
-		wait_for_fences(1, &fence, INFINITY);
+		wait_for_fences(1, &fence, UINT64_MAX);
 
 		// Destroy staging buffer
 		destroy_buffer(staging_buffer);
