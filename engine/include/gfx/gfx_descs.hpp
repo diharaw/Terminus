@@ -250,6 +250,11 @@ struct PipelineStateCreateDesc
 	ComputePipelineStateCreateDesc	compute;
 };
 
+struct DescriptorSetCreateDesc
+{
+
+};
+
 struct BufferResourceBarrier
 {
 	Buffer*		  buffer;

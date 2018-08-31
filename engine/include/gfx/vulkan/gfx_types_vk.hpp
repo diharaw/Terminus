@@ -178,6 +178,12 @@ struct PipelineLayout
 	Vector<VkDescriptorSetLayout> ds_layouts;
 };
 
+struct DescriptorSet
+{
+	VkDescriptorSet		  vk_ds;
+	VkDescriptorSetLayout vk_ds_layout;
+};
+
 TE_END_TERMINUS_NAMESPACE
 
 #endif

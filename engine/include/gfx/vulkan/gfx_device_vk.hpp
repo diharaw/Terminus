@@ -63,6 +63,7 @@ public:
 	Shader*		    create_shader_from_source(const SourceShaderCreateDesc& desc);
 	PipelineLayout* create_pipeline_layout(const PipelineLayoutCreateDesc& desc);
 	PipelineState*  create_pipeline_state(const PipelineStateCreateDesc& desc);
+	DescriptorSet*  create_descriptor_set(const DescriptorSetCreateDesc& desc);
 	CommandPool*	create_command_pool(CommandPoolType type);
 	CommandBuffer*  create_command_buffer(CommandPool* cmd_pool);
 	Fence*		    create_fence();
@@ -77,6 +78,7 @@ public:
 	void destroy_shader(Shader* shader);
 	void destroy_pipeline_layout(PipelineLayout* pipeline_layout);
 	void destory_pipeline_state(PipelineState* pipeline_state);
+	void destroy_descriptor_set(DescriptorSet* descriptor_set);
 	void destroy_command_pool(CommandPool* cmd_pool);
 	void destroy_fence(Fence* fence);
 	void destroy_semaphore(SemaphoreGPU* semaphore);
@@ -102,6 +104,7 @@ public:
 	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer, ClearValue* color_clear_values, ClearValue ds_clear_value);
 	void cmd_unbind_framebuffer(CommandBuffer* cmd);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
+	void cmd_bind_descriptor_sets(CommandBuffer* cmd, uint32_t first_index, uint32_t count, DescriptorSet** sets);
 	void cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrier_count, TextureResourceBarrier* texture_barriers, uint32_t buffer_barrier_count, BufferResourceBarrier* buffer_barriers);
 	void cmd_copy_buffer(CommandBuffer* cmd, Buffer* src, size_t src_offset, Buffer* dst, size_t dst_offset, size_t size);
 	void cmd_copy_buffer_to_texture(CommandBuffer* cmd, Buffer* src, Texture* dst, ResourceState state, BufferTextureCopyRegion region);
