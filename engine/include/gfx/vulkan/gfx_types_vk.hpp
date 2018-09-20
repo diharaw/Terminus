@@ -174,8 +174,7 @@ struct VertexArray
 
 struct PipelineLayout
 {
-	VkPipelineLayout			  vk_pipeline_layout;
-	Vector<VkDescriptorSetLayout> ds_layouts;
+	VkPipelineLayout vk_pipeline_layout;
 };
 
 struct DescriptorSet

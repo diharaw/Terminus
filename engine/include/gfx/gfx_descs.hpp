@@ -192,17 +192,17 @@ struct PipelineBlendStateCreateDesc
 	LogicOp				  logic_op;
 };
 
-struct DescriptorDesc
+struct DescriptorBindingDesc
 {
 	uint32_t	   binding;
 	DescriptorType type;
 	ShaderStageBit stages;
 };
 
-struct DescriptorSetDesc
+struct DescriptorSetLayoutDesc
 {
-	uint32_t		descriptor_count;
-	DescriptorDesc*	descriptors;
+	uint32_t				descriptor_count;
+	DescriptorBindingDesc*	descriptors;
 };
 
 struct PushConstantRange
@@ -214,10 +214,10 @@ struct PushConstantRange
 
 struct PipelineLayoutCreateDesc
 {
-	uint32_t		   descriptor_set_count;
-	DescriptorSetDesc* descriptor_sets;
-	uint32_t		   push_constant_range_count;
-	PushConstantRange* push_constant_ranges;
+	uint32_t				 descriptor_set_count;
+	DescriptorSetLayoutDesc* descriptor_sets;
+	uint32_t				 push_constant_range_count;
+	PushConstantRange*		 push_constant_ranges;
 };
 
 struct GraphicsPipelineStateCreateDesc
@@ -250,9 +250,19 @@ struct PipelineStateCreateDesc
 	ComputePipelineStateCreateDesc	compute;
 };
 
+struct DescriptorDesc
+{
+	uint32_t	   binding;
+	DescriptorType type;
+	ShaderStageBit stages;
+	Buffer*		   buffer;
+	Texture*	   texture;
+};
+
 struct DescriptorSetCreateDesc
 {
-
+	uint32_t		descriptor_count;
+	DescriptorDesc*	descriptors;
 };
 
 struct BufferResourceBarrier

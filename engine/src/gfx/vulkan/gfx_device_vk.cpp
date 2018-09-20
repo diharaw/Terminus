@@ -10,6 +10,7 @@
 #include <stl/string_buffer.hpp>
 #include <io/logger.hpp>
 #include <concurrency/atomic.hpp>
+#include <stl/murmur_hash.hpp>
 
 TE_BEGIN_TERMINUS_NAMESPACE
 
@@ -1699,42 +1700,51 @@ PipelineLayout* GfxDevice::create_pipeline_layout(const PipelineLayoutCreateDesc
 {
 	PipelineLayout* pipeline_layout = TE_HEAP_NEW PipelineLayout();
 
-	pipeline_layout->ds_layouts.reserve(desc.descriptor_set_count);
+	Vector<VkDescriptorSetLayout> ds_layouts;
+	ds_layouts.reserve(desc.descriptor_set_count);
 
 	for (uint32_t i = 0; i < desc.descriptor_set_count; i++)
 	{
-		Vector<VkDescriptorSetLayoutBinding> bindings(desc.descriptor_sets[i].descriptor_count);
+		uint64_t hash = murmur_hash_64(desc.descriptor_sets[i].descriptors, sizeof(DescriptorBindingDesc) * desc.descriptor_sets[i].descriptor_count, 0);
+		VkDescriptorSetLayout layout = VK_NULL_HANDLE;
 
-		for (uint32_t j = 0; j < desc.descriptor_sets[i].descriptor_count; j++)
+		if (!m_descriptor_set_layout_map.get(hash, layout))
 		{
-			VkDescriptorSetLayoutBinding binding_info = {};
+			Vector<VkDescriptorSetLayoutBinding> bindings(desc.descriptor_sets[i].descriptor_count);
 
-			binding_info.descriptorCount = 1;
-			binding_info.stageFlags = find_stage_flags(desc.descriptor_sets[i].descriptors[j].stages);
-			binding_info.binding = desc.descriptor_sets[i].descriptors[j].binding;
-			binding_info.descriptorType = kDescriptorTypeTable[desc.descriptor_sets[i].descriptors[j].type];
-			binding_info.pImmutableSamplers = nullptr;
+			for (uint32_t j = 0; j < desc.descriptor_sets[i].descriptor_count; j++)
+			{
+				VkDescriptorSetLayoutBinding binding_info = {};
 
-			bindings.push_back(binding_info);
+				binding_info.descriptorCount = 1;
+				binding_info.stageFlags = find_stage_flags(desc.descriptor_sets[i].descriptors[j].stages);
+				binding_info.binding = desc.descriptor_sets[i].descriptors[j].binding;
+				binding_info.descriptorType = kDescriptorTypeTable[desc.descriptor_sets[i].descriptors[j].type];
+				binding_info.pImmutableSamplers = nullptr;
+
+				bindings.push_back(binding_info);
+			}
+
+			VkDescriptorSetLayoutCreateInfo ds_layout_info = {};
+
+			ds_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			ds_layout_info.pNext = nullptr;
+			ds_layout_info.flags = 0;
+			ds_layout_info.bindingCount = bindings.size();
+			ds_layout_info.pBindings = bindings.data();
+
+			VkDescriptorSetLayout layout;
+
+			if (vkCreateDescriptorSetLayout(m_device, &ds_layout_info, nullptr, &layout) != VK_SUCCESS)
+			{
+				TE_LOG_ERROR("Failed to create descriptor set layout!");
+				return nullptr;
+			}
+
+			m_descriptor_set_layout_map.set(hash, layout);
 		}
 
-		VkDescriptorSetLayoutCreateInfo ds_layout_info = {};
-
-		ds_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		ds_layout_info.pNext = nullptr;
-		ds_layout_info.flags = 0;
-		ds_layout_info.bindingCount = bindings.size();
-		ds_layout_info.pBindings = bindings.data();
-
-		VkDescriptorSetLayout layout;
-		
-		if (vkCreateDescriptorSetLayout(m_device, &ds_layout_info, nullptr, &layout) != VK_SUCCESS)
-		{
-			TE_LOG_ERROR("Failed to create descriptor set layout!");
-			return nullptr;
-		}
-
-		pipeline_layout->ds_layouts.push_back(layout);
+		ds_layouts.push_back(layout);
 	}
 
 	Vector<VkPushConstantRange> pc_ranges(desc.push_constant_range_count);
@@ -1754,8 +1764,8 @@ PipelineLayout* GfxDevice::create_pipeline_layout(const PipelineLayoutCreateDesc
 
 	info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	info.pNext = nullptr;
-	info.setLayoutCount = pipeline_layout->ds_layouts.size();
-	info.pSetLayouts = pipeline_layout->ds_layouts.data();
+	info.setLayoutCount = ds_layouts.size();
+	info.pSetLayouts = ds_layouts.data();
 	info.pushConstantRangeCount = pc_ranges.size();
 	info.pPushConstantRanges = pc_ranges.data();
 
@@ -1763,7 +1773,7 @@ PipelineLayout* GfxDevice::create_pipeline_layout(const PipelineLayoutCreateDesc
 	{
 		TE_LOG_ERROR("Failed to create Pipeline Layout!");
 
-		for (auto ds_layout : pipeline_layout->ds_layouts)
+		for (auto ds_layout : ds_layouts)
 			vkDestroyDescriptorSetLayout(m_device, ds_layout, nullptr);
 
 		TE_HEAP_DELETE(pipeline_layout);
@@ -2015,6 +2025,62 @@ PipelineState* GfxDevice::create_pipeline_state(const PipelineStateCreateDesc& d
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+DescriptorSet* GfxDevice::create_descriptor_set(const DescriptorSetCreateDesc& desc)
+{
+	Vector<DescriptorBindingDesc> bindings;
+	bindings.resize(desc.descriptor_count);
+
+	for (uint32_t i = 0; i < desc.descriptor_count; i++)
+	{
+		bindings[i].type = desc.descriptors[i].type;
+		bindings[i].binding = desc.descriptors[i].binding;
+		bindings[i].stages = desc.descriptors[i].stages;
+	}
+
+	uint64_t hash = murmur_hash_64(&bindings[0], sizeof(DescriptorBindingDesc) * desc.descriptor_count, 0);
+	VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+
+	if (!m_descriptor_set_layout_map.get(hash, layout))
+	{
+		Vector<VkDescriptorSetLayoutBinding> bindings(desc.descriptor_count);
+
+		for (uint32_t j = 0; j < desc.descriptor_count; j++)
+		{
+			VkDescriptorSetLayoutBinding binding_info = {};
+
+			binding_info.descriptorCount = 1;
+			binding_info.stageFlags = find_stage_flags(desc.descriptors[j].stages);
+			binding_info.binding = desc.descriptors[j].binding;
+			binding_info.descriptorType = kDescriptorTypeTable[desc.descriptors[j].type];
+			binding_info.pImmutableSamplers = nullptr;
+
+			bindings.push_back(binding_info);
+		}
+
+		VkDescriptorSetLayoutCreateInfo ds_layout_info = {};
+
+		ds_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		ds_layout_info.pNext = nullptr;
+		ds_layout_info.flags = 0;
+		ds_layout_info.bindingCount = bindings.size();
+		ds_layout_info.pBindings = bindings.data();
+
+		VkDescriptorSetLayout layout;
+
+		if (vkCreateDescriptorSetLayout(m_device, &ds_layout_info, nullptr, &layout) != VK_SUCCESS)
+		{
+			TE_LOG_ERROR("Failed to create descriptor set layout!");
+			return nullptr;
+		}
+
+		m_descriptor_set_layout_map.set(hash, layout);
+	}
+	
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 CommandPool* GfxDevice::create_command_pool(CommandPoolType type)
 {
 	CommandPool* cmd_pool = TE_HEAP_NEW CommandPool();
@@ -2191,9 +2257,6 @@ void GfxDevice::destroy_pipeline_layout(PipelineLayout* pipeline_layout)
 {
 	if (pipeline_layout)
 	{
-		for (auto ds_layout : pipeline_layout->ds_layouts)
-			vkDestroyDescriptorSetLayout(m_device, ds_layout, nullptr);
-
 		vkDestroyPipelineLayout(m_device, pipeline_layout->vk_pipeline_layout, nullptr);
 		TE_HEAP_DELETE(pipeline_layout);
 	}
@@ -2208,6 +2271,13 @@ void GfxDevice::destory_pipeline_state(PipelineState* pipeline_state)
 		vkDestroyPipeline(m_device, pipeline_state->vk_pipeline, nullptr);
 		TE_HEAP_DELETE(pipeline_state);
 	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::destroy_descriptor_set(DescriptorSet* descriptor_set)
+{
+
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -2574,6 +2644,13 @@ void GfxDevice::cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipel
 {
 	assert(cmd != nullptr);
 	vkCmdBindPipeline(cmd->vk_cmd_buf, kPipelineBindPointTable[pipeline_state->type], pipeline_state->vk_pipeline);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_bind_descriptor_sets(CommandBuffer* cmd, uint32_t first_index, uint32_t count, DescriptorSet** sets)
+{
+
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
