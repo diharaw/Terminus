@@ -523,6 +523,8 @@ void GfxDevice::shutdown()
 {
 	vkDeviceWaitIdle(m_device);
 
+	vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
+
 	TE_HEAP_DELETE(m_transfer_cmd_buffer);
 	destroy_command_pool(m_transfer_cmd_pool);
 
@@ -2075,8 +2077,22 @@ DescriptorSet* GfxDevice::create_descriptor_set(const DescriptorSetCreateDesc& d
 
 		m_descriptor_set_layout_map.set(hash, layout);
 	}
-	
 
+	DescriptorSet* set = TE_HEAP_NEW DescriptorSet();
+	
+	VkDescriptorSetAllocateInfo alloc_info = {};
+	alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	alloc_info.descriptorPool = m_descriptor_pool;
+	alloc_info.descriptorSetCount = 1;
+	alloc_info.pSetLayouts = &layout;
+
+	if (vkAllocateDescriptorSets(m_device, &alloc_info, &set->vk_ds) != VK_SUCCESS) 
+	{
+		TE_LOG_ERROR("Failed to create descriptor set!");
+		return nullptr;
+	}
+
+	return set;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

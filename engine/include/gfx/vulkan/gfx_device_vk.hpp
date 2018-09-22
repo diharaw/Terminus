@@ -205,6 +205,7 @@ private:
 	uint32_t			   m_framebuffer_index;
 	CommandPool*		   m_transfer_cmd_pool;
 	CommandBuffer*		   m_transfer_cmd_buffer;
+	VkDescriptorPool	   m_descriptor_pool;
 	StaticHashMap<uint64_t, VkDescriptorSetLayout, 2048> m_descriptor_set_layout_map;
 
 #if defined(TE_VULKAN_DEBUG)

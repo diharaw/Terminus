@@ -179,8 +179,8 @@ struct PipelineLayout
 
 struct DescriptorSet
 {
-	VkDescriptorSet		  vk_ds;
-	VkDescriptorSetLayout vk_ds_layout;
+	VkDescriptorSet	vk_ds;
+	VkDescriptorPool vk_pool;
 };
 
 TE_END_TERMINUS_NAMESPACE
