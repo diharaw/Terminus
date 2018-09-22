@@ -24,9 +24,11 @@ struct Buffer
 	ResourceUsage		usage_flags;
 	BufferCreationFlags creation_flags;
 	BufferType			type;
+	size_t				size;
 
 	Buffer()
 	{
+		size = 0;
 		vma_allocation = VK_NULL_HANDLE;
 		vk_device_memory = VK_NULL_HANDLE;
 		vk_buffer = VK_NULL_HANDLE;
@@ -61,6 +63,16 @@ struct Texture
 		device_memory = VK_NULL_HANDLE;
 		vk_format = VK_FORMAT_UNDEFINED;
 		current_state = GFX_RESOURCE_STATE_UNDEFINED;
+	}
+};
+
+struct Sampler
+{
+	VkSampler vk_sampler;
+
+	Sampler()
+	{
+		vk_sampler = VK_NULL_HANDLE;
 	}
 };
 

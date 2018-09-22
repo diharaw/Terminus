@@ -17,11 +17,7 @@ namespace vk
 
 	DescriptorSetAllocator::~DescriptorSetAllocator()
 	{
-		for (const auto& pool : m_pools)
-		{
-			if (pool != VK_NULL_HANDLE)
-				vkDestroyDescriptorPool(m_device, pool, nullptr);
-		}
+		
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
@@ -39,6 +35,16 @@ namespace vk
 		}
 
 		return false;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+	void DescriptorSetAllocator::shutdown()
+	{
+		for (const auto& pool : m_pools)
+		{
+			if (pool != VK_NULL_HANDLE)
+				vkDestroyDescriptorPool(m_device, pool, nullptr);
+		}
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------

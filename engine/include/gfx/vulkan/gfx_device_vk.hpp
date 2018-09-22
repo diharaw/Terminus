@@ -4,6 +4,7 @@
 
 #include <gfx/gfx_descs.hpp>
 #include <gfx/gfx_types.hpp>
+#include <gfx/vulkan/descriptor_set_allocator.hpp>
 #include <stl/string_buffer.hpp>
 #include <stl/vector.hpp>
 #include <stl/static_hash_map.hpp>
@@ -185,28 +186,28 @@ private:
 		uint32_t max_transfer_queues;
 	};
 
-	Properties			   m_device_properties;
-	Caps				   m_device_caps;
-	QueueInfos			   m_queue_infos;
-	VkInstance			   m_instance;
-	VkDevice			   m_device;
-	Queue				   m_graphics_queue;
-	Queue				   m_compute_queue;
-	Queue				   m_transfer_queue;
-	Queue				   m_presentation_queue;
-	VkPhysicalDevice	   m_physical_device;
-	VkSurfaceKHR		   m_surface;
-	VkSwapchainKHR		   m_swap_chain;
-	VkFormat			   m_swap_chain_image_format;
-	VkExtent2D			   m_swap_chain_extent;
-	Vector<Texture*>	   m_swap_chain_textures;
-	Vector<Framebuffer*>   m_swap_chain_framebuffers;
-	struct VmaAllocator_T* m_allocator;
-	uint32_t			   m_framebuffer_index;
-	CommandPool*		   m_transfer_cmd_pool;
-	CommandBuffer*		   m_transfer_cmd_buffer;
-	VkDescriptorPool	   m_descriptor_pool;
+	Properties											 m_device_properties;
+	Caps												 m_device_caps;
+	QueueInfos											 m_queue_infos;
+	VkInstance											 m_instance;
+	VkDevice											 m_device;
+	Queue												 m_graphics_queue;
+	Queue												 m_compute_queue;
+	Queue												 m_transfer_queue;
+	Queue												 m_presentation_queue;
+	VkPhysicalDevice									 m_physical_device;
+	VkSurfaceKHR										 m_surface;
+	VkSwapchainKHR										 m_swap_chain;
+	VkFormat											 m_swap_chain_image_format;
+	VkExtent2D											 m_swap_chain_extent;
+	Vector<Texture*>									 m_swap_chain_textures;
+	Vector<Framebuffer*>								 m_swap_chain_framebuffers;
+	struct VmaAllocator_T*								 m_allocator;
+	uint32_t											 m_framebuffer_index;
+	CommandPool*										 m_transfer_cmd_pool;
+	CommandBuffer*										 m_transfer_cmd_buffer;
 	StaticHashMap<uint64_t, VkDescriptorSetLayout, 2048> m_descriptor_set_layout_map;
+	vk::DescriptorSetAllocator							 m_descriptor_set_allocator;
 
 #if defined(TE_VULKAN_DEBUG)
 	VkDebugReportCallbackEXT m_debug_callback;

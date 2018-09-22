@@ -18,6 +18,9 @@ namespace vk
 		// Create the intial Descriptor Pool.
 		bool initialize(VkDevice device);
 
+		// Destroy pools.
+		void shutdown();
+
 		// Attempt to allocate a Descriptor Set from existing pools, else create new pool.
 		DescriptorSet* alloc(VkDescriptorSetLayout layout);
 
@@ -34,6 +37,7 @@ namespace vk
 		Vector<VkDescriptorPool> m_pools;
 		VkDevice m_device;
 
+		// Descriptor type limits
 		const uint32_t kDescriptorSetCount = 2048;
 		const uint32_t kUniformBufferCount = 2048;
 		const uint32_t kStorageBufferCount = 2048;

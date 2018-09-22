@@ -11,6 +11,7 @@ struct InputLayout;
 struct PipelineLayout;
 struct Buffer;
 struct Texture;
+struct Sampler;
 
 struct RenderDeviceInitData
 {
@@ -257,6 +258,7 @@ struct DescriptorDesc
 	ShaderStageBit stages;
 	Buffer*		   buffer;
 	Texture*	   texture;
+	Sampler*	   sampler;
 };
 
 struct DescriptorSetCreateDesc

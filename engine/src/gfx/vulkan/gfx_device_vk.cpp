@@ -503,6 +503,9 @@ bool GfxDevice::initialize()
 	m_transfer_cmd_pool = create_command_pool(GFX_CMD_POOL_TRANSFER);
 	m_transfer_cmd_buffer = create_command_buffer(m_transfer_cmd_pool);
 
+	if (!m_descriptor_set_allocator.initialize(m_device))
+		return false;
+
 	return true;
 }
 
@@ -523,7 +526,7 @@ void GfxDevice::shutdown()
 {
 	vkDeviceWaitIdle(m_device);
 
-	vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
+	m_descriptor_set_allocator.shutdown();
 
 	TE_HEAP_DELETE(m_transfer_cmd_buffer);
 	destroy_command_pool(m_transfer_cmd_pool);
@@ -1446,6 +1449,7 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 Buffer* GfxDevice::create_buffer(const BufferCreateDesc& desc)
 {
 	Buffer* buffer = TE_HEAP_NEW Buffer();
+	buffer->size = desc.size;
 	buffer->current_state = GFX_RESOURCE_STATE_UNDEFINED;
 	buffer->index_type = desc.data_type;
 	buffer->usage_flags = desc.usage_flags;
@@ -2078,19 +2082,58 @@ DescriptorSet* GfxDevice::create_descriptor_set(const DescriptorSetCreateDesc& d
 		m_descriptor_set_layout_map.set(hash, layout);
 	}
 
-	DescriptorSet* set = TE_HEAP_NEW DescriptorSet();
-	
-	VkDescriptorSetAllocateInfo alloc_info = {};
-	alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	alloc_info.descriptorPool = m_descriptor_pool;
-	alloc_info.descriptorSetCount = 1;
-	alloc_info.pSetLayouts = &layout;
+	DescriptorSet* set = m_descriptor_set_allocator.alloc(layout);
 
-	if (vkAllocateDescriptorSets(m_device, &alloc_info, &set->vk_ds) != VK_SUCCESS) 
+	Vector<VkWriteDescriptorSet> write_sets;
+
+	write_sets.resize(desc.descriptor_count);
+
+	for (uint32_t i = 0; i < desc.descriptor_count; i++)
 	{
-		TE_LOG_ERROR("Failed to create descriptor set!");
-		return nullptr;
+		VkWriteDescriptorSet descriptor_write = {};
+		descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptor_write.dstSet = set->vk_ds;
+		descriptor_write.dstBinding = i;
+		descriptor_write.dstArrayElement = 0;
+		descriptor_write.descriptorType = kDescriptorTypeTable[desc.descriptors[i].type];
+		descriptor_write.descriptorCount = 1;
+
+		VkDescriptorImageInfo image_info = {};
+		VkDescriptorBufferInfo buffer_info = {};
+
+		if (desc.descriptors[i].type == GFX_DESCRIPTOR_SAMPLER)
+		{
+			image_info.sampler = desc.descriptors[i].sampler->vk_sampler;
+			descriptor_write.pImageInfo = &image_info;
+		}
+		else if (desc.descriptors[i].type == GFX_DESCRIPTOR_TEXTURE)
+		{
+			image_info.imageView = desc.descriptors[i].texture->vk_image_view;
+			image_info.imageLayout = vk_image_layout(desc.descriptors[i].texture->current_state);
+			descriptor_write.pImageInfo = &image_info;
+			descriptor_write.pBufferInfo = nullptr;
+		}
+		else if (desc.descriptors[i].type == GFX_DESCRIPTOR_UNIFORM_BUFFER ||
+			desc.descriptors[i].type == GFX_DESCRIPTOR_STORAGE_BUFFER ||
+			desc.descriptors[i].type == GFX_DESCRIPTOR_UNIFORM_BUFFER_DYNAMIC ||
+			desc.descriptors[i].type == GFX_DESCRIPTOR_STORAGE_BUFFER_DYNAMIC)
+		{
+			buffer_info.buffer = desc.descriptors[i].buffer->vk_buffer;
+			buffer_info.offset = 0;
+			buffer_info.range = desc.descriptors[i].buffer->size;
+			descriptor_write.pBufferInfo = &buffer_info;
+			descriptor_write.pImageInfo = nullptr;
+		}
+		else
+		{
+			TE_LOG_ERROR("Unknown Descriptor Type!");
+			assert(false);
+		}
+
+		write_sets.push_back(descriptor_write);
 	}
+
+	vkUpdateDescriptorSets(m_device, write_sets.size(), &write_sets[0], 0, nullptr);
 
 	return set;
 }
@@ -2293,7 +2336,7 @@ void GfxDevice::destory_pipeline_state(PipelineState* pipeline_state)
 
 void GfxDevice::destroy_descriptor_set(DescriptorSet* descriptor_set)
 {
-
+	m_descriptor_set_allocator.free(descriptor_set);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
