@@ -2085,12 +2085,12 @@ DescriptorSet* GfxDevice::create_descriptor_set(const DescriptorSetCreateDesc& d
 	DescriptorSet* set = m_descriptor_set_allocator.alloc(layout);
 
 	Vector<VkWriteDescriptorSet> write_sets;
-
 	write_sets.resize(desc.descriptor_count);
 
 	for (uint32_t i = 0; i < desc.descriptor_count; i++)
 	{
 		VkWriteDescriptorSet descriptor_write = {};
+
 		descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptor_write.dstSet = set->vk_ds;
 		descriptor_write.dstBinding = i;
@@ -2104,23 +2104,26 @@ DescriptorSet* GfxDevice::create_descriptor_set(const DescriptorSetCreateDesc& d
 		if (desc.descriptors[i].type == GFX_DESCRIPTOR_SAMPLER)
 		{
 			image_info.sampler = desc.descriptors[i].sampler->vk_sampler;
+
 			descriptor_write.pImageInfo = &image_info;
 		}
 		else if (desc.descriptors[i].type == GFX_DESCRIPTOR_TEXTURE)
 		{
 			image_info.imageView = desc.descriptors[i].texture->vk_image_view;
 			image_info.imageLayout = vk_image_layout(desc.descriptors[i].texture->current_state);
+
 			descriptor_write.pImageInfo = &image_info;
 			descriptor_write.pBufferInfo = nullptr;
 		}
 		else if (desc.descriptors[i].type == GFX_DESCRIPTOR_UNIFORM_BUFFER ||
-			desc.descriptors[i].type == GFX_DESCRIPTOR_STORAGE_BUFFER ||
-			desc.descriptors[i].type == GFX_DESCRIPTOR_UNIFORM_BUFFER_DYNAMIC ||
-			desc.descriptors[i].type == GFX_DESCRIPTOR_STORAGE_BUFFER_DYNAMIC)
+				 desc.descriptors[i].type == GFX_DESCRIPTOR_STORAGE_BUFFER ||
+				 desc.descriptors[i].type == GFX_DESCRIPTOR_UNIFORM_BUFFER_DYNAMIC ||
+				 desc.descriptors[i].type == GFX_DESCRIPTOR_STORAGE_BUFFER_DYNAMIC)
 		{
 			buffer_info.buffer = desc.descriptors[i].buffer->vk_buffer;
 			buffer_info.offset = 0;
 			buffer_info.range = desc.descriptors[i].buffer->size;
+
 			descriptor_write.pBufferInfo = &buffer_info;
 			descriptor_write.pImageInfo = nullptr;
 		}
@@ -2707,9 +2710,26 @@ void GfxDevice::cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipel
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
+void GfxDevice::cmd_bind_pipeline_layout(CommandBuffer* cmd, PipelineLayout* layout)
+{
+	assert(cmd != nullptr);
+	cmd->vk_pipeline_layout = layout->vk_pipeline_layout;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+void GfxDevice::cmd_push_constants(CommandBuffer* cmd, ShaderStageBit stages, uint32_t offset, uint32_t size, void* data)
+{
+	assert(cmd != nullptr);
+	vkCmdPushConstants(cmd->vk_cmd_buf, cmd->vk_pipeline_layout, stages, offset, size, data);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 void GfxDevice::cmd_bind_descriptor_sets(CommandBuffer* cmd, uint32_t first_index, uint32_t count, DescriptorSet** sets)
 {
-
+	assert(cmd != nullptr);
+	// TODO: Descriptor Set binding and Dynamic Offsets
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------

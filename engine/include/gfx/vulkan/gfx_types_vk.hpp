@@ -123,10 +123,11 @@ struct CommandPool
 
 struct CommandBuffer
 {
-	VkCommandBuffer vk_cmd_buf;
-	VkViewport		vk_viewport;
-	VkClearValue	vk_clear_value;
-	Framebuffer*	current_framebuffer;
+	VkCommandBuffer  vk_cmd_buf;
+	VkPipelineLayout vk_pipeline_layout;
+	VkViewport		 vk_viewport;
+	VkClearValue	 vk_clear_value;
+	Framebuffer*	 current_framebuffer;
 
 	CommandBuffer()
 	{

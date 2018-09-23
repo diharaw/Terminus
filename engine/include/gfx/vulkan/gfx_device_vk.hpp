@@ -106,6 +106,8 @@ public:
 	void cmd_bind_framebuffer(CommandBuffer* cmd, Framebuffer* framebuffer, ClearValue* color_clear_values, ClearValue ds_clear_value);
 	void cmd_unbind_framebuffer(CommandBuffer* cmd);
 	void cmd_bind_pipeline_state(CommandBuffer* cmd, PipelineState* pipeline_state);
+	void cmd_bind_pipeline_layout(CommandBuffer* cmd, PipelineLayout* layout);
+	void cmd_push_constants(CommandBuffer* cmd, ShaderStageBit stages, uint32_t offset, uint32_t size, void* data);
 	void cmd_bind_descriptor_sets(CommandBuffer* cmd, uint32_t first_index, uint32_t count, DescriptorSet** sets);
 	void cmd_resource_barrier(CommandBuffer* cmd, uint32_t texture_barrier_count, TextureResourceBarrier* texture_barriers, uint32_t buffer_barrier_count, BufferResourceBarrier* buffer_barriers);
 	void cmd_copy_buffer(CommandBuffer* cmd, Buffer* src, size_t src_offset, Buffer* dst, size_t dst_offset, size_t size);
