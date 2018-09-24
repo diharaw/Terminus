@@ -1392,15 +1392,15 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 	image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_READABLE, desc.usage))
+	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_READABLE, desc.texture_usage))
 		image_info.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
 
-	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_WRITABLE, desc.usage))
+	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_WRITABLE, desc.texture_usage))
 		image_info.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 
-	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_DRAWABLE, desc.usage))
+	if (TE_HAS_BIT_FLAG(GFX_TEXTURE_USAGE_DRAWABLE, desc.texture_usage))
 	{
-		if (desc.format == 25 || desc.format == 26 || desc.format == 27)
+		if (desc.format == GFX_FORMAT_D32_FLOAT_S8_UINT || desc.format == GFX_FORMAT_D24_FLOAT_S8_UINT || desc.format == GFX_FORMAT_D16_FLOAT)
 		{
 			image_info.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			texture->aspect_flags = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -1413,6 +1413,7 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 	}
 
 	image_info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	image_info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	image_info.samples = kSampleCountTable[desc.samples];
 	image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -1425,7 +1426,7 @@ Texture* GfxDevice::create_texture(const TextureCreateDesc& desc)
 
 	VmaAllocationInfo info;
 
-	if (!allocate_image(m_device, m_allocator, image_info, VMA_MEMORY_USAGE_GPU_ONLY, 0, texture->image, texture->allocation, info))
+	if (!allocate_image(m_device, m_allocator, image_info, kVmaMemoryUsageTable[desc.resource_usage], 0, texture->image, texture->allocation, info))
 	{
 		TE_HEAP_DELETE(texture);
 		return nullptr;
@@ -2419,7 +2420,7 @@ void GfxDevice::update_texture(Texture* texture, uint32_t mip_slice, uint32_t ar
 	region.base_array_layer = array_slice;
 	region.layer_count = 1;
 	region.mip_level = mip_slice;
-	region.row_pitch = w * kPixelSizes[texture->format];
+	region.row_pitch = w;// *kPixelSizes[texture->format];
 	region.height = h;
 	region.offsets[0] = 0;
 	region.offsets[1] = 0;

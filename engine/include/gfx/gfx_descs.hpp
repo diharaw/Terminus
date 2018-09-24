@@ -34,7 +34,8 @@ struct BufferTextureCopyRegion
 struct TextureCreateDesc
 {
 	TextureFormat format;
-	TextureUsage  usage;
+	TextureUsage  texture_usage;
+	ResourceUsage resource_usage;
 	TextureType	  type;
     uint16_t width;
     uint16_t height;
