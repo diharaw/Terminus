@@ -127,6 +127,7 @@ struct CommandBuffer
 	VkPipelineLayout vk_pipeline_layout;
 	VkViewport		 vk_viewport;
 	VkClearValue	 vk_clear_value;
+	VkPipelineBindPoint vk_bind_point;
 	Framebuffer*	 current_framebuffer;
 
 	CommandBuffer()

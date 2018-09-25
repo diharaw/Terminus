@@ -407,6 +407,7 @@ thread_local static VkClearValue		  m_clear_values[MAX_COLOR_ATTACHMENTS + 1];
 thread_local static VkFence				  m_wait_fences[32];
 thread_local static VkImageMemoryBarrier  m_image_memory_barriers[32];
 thread_local static VkBufferMemoryBarrier m_buffer_memory_barriers[32];
+thread_local static VkDescriptorSet		  m_descriptor_sets[32];
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -2730,7 +2731,12 @@ void GfxDevice::cmd_push_constants(CommandBuffer* cmd, ShaderStageBit stages, ui
 void GfxDevice::cmd_bind_descriptor_sets(CommandBuffer* cmd, uint32_t first_index, uint32_t count, DescriptorSet** sets)
 {
 	assert(cmd != nullptr);
-	// TODO: Descriptor Set binding and Dynamic Offsets
+
+	for (uint32_t i = 0; i < count; i++)
+		m_descriptor_sets[i] = sets[i]->vk_ds;
+
+	// TODO: Dynamic Offsets
+	vkCmdBindDescriptorSets(cmd->vk_cmd_buf, cmd->vk_bind_point, cmd->vk_pipeline_layout, first_index, count, &m_descriptor_sets[0], 0, nullptr);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
