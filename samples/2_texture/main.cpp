@@ -203,6 +203,8 @@ public:
 	SemaphoreGPU*   m_image_available_sema;
 	SemaphoreGPU*	m_render_finished_sema;
 	Framebuffer*	m_fbo;
+	DescriptorSet*  m_ds1;
+	DescriptorSet*  m_ds2;
 	uint32_t		m_frame_index;
 
 	Runtime()
@@ -344,18 +346,29 @@ private:
 	{
 		PipelineLayoutCreateDesc desc;
 
-		DescriptorBindingDesc bindings[] =
+		DescriptorBindingDesc ds1_bindings[] =
 		{
 			{ 0, GFX_DESCRIPTOR_TEXTURE, GFX_SHADER_STAGE_FRAGMENT_BIT }
 		};
 
-		DescriptorSetLayoutDesc ds_layout_desc = {
-			1,
-			bindings
+		DescriptorBindingDesc ds2_bindings[] =
+		{
+			{ 0, GFX_DESCRIPTOR_SAMPLER, GFX_SHADER_STAGE_FRAGMENT_BIT }
 		};
 
-		desc.descriptor_set_count = 0;
-		desc.descriptor_sets = nullptr;
+		DescriptorSetLayoutDesc ds_layout_descs[] = {
+			{
+				1,
+				ds1_bindings
+			},
+			{
+				1,
+				ds2_bindings
+			}
+		};
+
+		desc.descriptor_set_count = 2;
+		desc.descriptor_sets = ds_layout_descs;
 		desc.push_constant_range_count = 0;
 		desc.push_constant_ranges = nullptr;
 
