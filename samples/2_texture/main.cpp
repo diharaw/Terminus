@@ -344,6 +344,16 @@ private:
 	{
 		PipelineLayoutCreateDesc desc;
 
+		DescriptorBindingDesc bindings[] =
+		{
+			{ 0, GFX_DESCRIPTOR_TEXTURE, GFX_SHADER_STAGE_FRAGMENT_BIT }
+		};
+
+		DescriptorSetLayoutDesc ds_layout_desc = {
+			1,
+			bindings
+		};
+
 		desc.descriptor_set_count = 0;
 		desc.descriptor_sets = nullptr;
 		desc.push_constant_range_count = 0;
