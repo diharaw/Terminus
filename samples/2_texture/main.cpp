@@ -205,6 +205,8 @@ public:
 	Framebuffer*	m_fbo;
 	DescriptorSet*  m_ds1;
 	DescriptorSet*  m_ds2;
+	Sampler*		m_sampler;
+	Texture*		m_texture;
 	uint32_t		m_frame_index;
 
 	Runtime()
@@ -452,6 +454,33 @@ private:
 			return false;
 		}
 	
+		return true;
+	}
+
+	bool create_descriptor_sets()
+	{
+		{
+			DescriptorDesc descriptors[] =
+			{
+				{ 0, GFX_DESCRIPTOR_TEXTURE, GFX_SHADER_STAGE_FRAGMENT_BIT, nullptr, m_texture , nullptr }
+			};
+
+			DescriptorSetCreateDesc desc = { 1, descriptors };
+
+			m_ds1 = global::gfx_device().create_descriptor_set(desc);
+		}
+
+		{
+			DescriptorDesc descriptors[] =
+			{
+				{ 0, GFX_DESCRIPTOR_SAMPLER, GFX_SHADER_STAGE_FRAGMENT_BIT, nullptr, nullptr, m_sampler }
+			};
+
+			DescriptorSetCreateDesc desc = { 1, descriptors };
+
+			m_ds2 = global::gfx_device().create_descriptor_set(desc);
+		}
+
 		return true;
 	}
 
