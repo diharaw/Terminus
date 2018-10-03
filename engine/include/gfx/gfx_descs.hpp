@@ -199,6 +199,9 @@ struct DescriptorBindingDesc
 	uint32_t	   binding;
 	DescriptorType type;
 	ShaderStageBit stages;
+	// If this is a Texture descriptor we need to provide some hints as to where the sampler that will use this texture will reside in.
+	uint32_t	   sampler_set;
+	uint32_t	   sampler_binding;
 };
 
 struct DescriptorSetLayoutDesc

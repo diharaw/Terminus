@@ -454,7 +454,7 @@ bool GfxDevice::initialize()
 	// Create Vulkan instance
 	if (!create_instance())
 	{
-		TE_LOG_ERROR("Faild to create Vulkan Instance!");
+		TE_LOG_ERROR("Failed to create Vulkan Instance!");
 		return false;
 	}
 
@@ -462,7 +462,7 @@ bool GfxDevice::initialize()
 	// Setup debug callback
 	if (!setup_debug_callback())
 	{
-		TE_LOG_ERROR("Faild to create Vulkan debug callback!");
+		TE_LOG_ERROR("Failed to create Vulkan debug callback!");
 		return false;
 	}
 #endif
@@ -470,28 +470,28 @@ bool GfxDevice::initialize()
 	// Create surface
 	if (!create_surface())
 	{
-		TE_LOG_ERROR("Faild to create Vulkan surface!");
+		TE_LOG_ERROR("Failed to create Vulkan surface!");
 		return false;
 	}
 
 	// Choose physical device
 	if (!choose_physical_device())
 	{
-		TE_LOG_ERROR("Faild to choose Vulkan device!");
+		TE_LOG_ERROR("Failed to choose Vulkan device!");
 		return false;
 	}
 
 	// Create logical device
 	if (!create_logical_device())
 	{
-		TE_LOG_ERROR("Faild to create Vulkan queues!");
+		TE_LOG_ERROR("Failed to create Vulkan queues!");
 		return false;
 	}
 
 	// Create swap chain
 	if (!create_swap_chain())
 	{
-		TE_LOG_ERROR("Faild to create Vulkan swap chain!");
+		TE_LOG_ERROR("Failed to create Vulkan swap chain!");
 		return false;
 	}
 
