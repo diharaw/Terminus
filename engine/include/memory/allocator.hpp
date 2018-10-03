@@ -32,7 +32,7 @@ OBJECT* custom_new_array(size_t size, ALLOCATOR* a, int line, const char* file)
 		OBJECT* as_T;
 	};
 
-	as_void = a->allocate(sizeof(OBJECT) * size + sizeof(size_t));
+	as_void = a->allocate(sizeof(OBJECT) * size + sizeof(size_t), 8);
 
 	// store number of instances in first size_t bytes
 	*as_size_t++ = size;
@@ -57,7 +57,7 @@ void custom_delete(OBJECT* p, ALLOCATOR* a, int line, const char* file)
 }
 
 template <typename OBJECT, typename ALLOCATOR>
-void custom_delete_array(OBJECT* p, ALLOCATOR* a)
+void custom_delete_array(OBJECT* p, ALLOCATOR* a, int line, const char* file)
 {
 	union
 	{
@@ -66,10 +66,14 @@ void custom_delete_array(OBJECT* p, ALLOCATOR* a)
 	};
 
 	// user pointer points to first instance...
-	as_T = ptr;
+	as_T = p;
 
 	// ...so go back size_t bytes and grab number of instances
 	const size_t N = as_size_t[-1];
+
+#if defined(TE_TRACK_ALLOCATIONS)
+	TE_LOG_INFO("Performing array deallocation of size " + (N * sizeof(OBJECT)) + " at line " + line + " of " + file);
+#endif
 
 	// call instances' destructor in reverse order
 	for (size_t i = N; i>0; --i)

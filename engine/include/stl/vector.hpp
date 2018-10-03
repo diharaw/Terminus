@@ -17,7 +17,7 @@ public:
     
     ~Vector()
     {
-		TE_HEAP_DEALLOC(m_elements);
+		TE_HEAP_DELETE_ARRAY(m_elements);
     }
 
     void clear()
@@ -30,7 +30,7 @@ public:
     {
         size_t old_capacity = m_capacity;
         m_capacity = size;
-		T* new_data = (T*)TE_HEAP_ALLOC(m_capacity * sizeof(T));
+		T* new_data = TE_HEAP_NEW_ARRAY(T, m_capacity);
         
         if (m_elements)
         {
@@ -39,7 +39,7 @@ public:
 			for (int i = 0; i < m_size; i++)
 				new_data[i] = old_data[i];
 
-			TE_HEAP_DEALLOC(old_data);
+			TE_HEAP_DELETE_ARRAY(old_data);
         }
     
 		m_elements = new_data;
